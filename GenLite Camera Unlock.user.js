@@ -12,8 +12,8 @@
 (function() {
     class GenLiteCameraPlugin {
         init() {
-			window.genlite.registerModule(this);
-		}
+            window.genlite.registerModule(this);
+        }
 
         loginOK() {
             WorldManager.prototype.updatePlayerTile = this.updatePlayerTileAlwaysIndoor;
@@ -53,7 +53,7 @@
     let gameLoadTimer = setInterval(function() {
         try {
             if(window.genlite !== undefined) {
-				window.genliteCamera.init();
+                window.genliteCamera.init();
                 clearInterval(gameLoadTimer);
             }
         } catch (e) {
