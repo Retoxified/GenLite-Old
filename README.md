@@ -1,4 +1,4 @@
-# GenLite 0.1 - For use with TamperMonkey
+# GenLite 0.1.1 - For use with TamperMonkey
 
 Installation instructions can be found in the discord server.
 
