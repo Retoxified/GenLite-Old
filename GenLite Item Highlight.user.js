@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GenLite Item Highlight
 // @namespace    GenLite
-// @version      0.1
+// @version      0.1.1
 // @description  try to take over the world!
 // @author       TwistedFate#4053
 // @match        https://play.genfanad.com/play/
