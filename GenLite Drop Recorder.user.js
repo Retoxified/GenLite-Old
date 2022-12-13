@@ -44,7 +44,6 @@
             if (verb == "spawnObject" && payload.type == "combat" &&
                 (payload.participant1 == PLAYER.id || payload.participant2 == PLAYER.id)) {
 
-                console.log(GAME.combats[payload.id]);
                 this.monsterData.layer = payload.location.position.layer;
                 this.monsterData.x = payload.location.position.x;
                 this.monsterData.y = payload.location.position.y;
@@ -60,15 +59,12 @@
 
             /* if ranging look for projectiles */
             if (verb == "projectile" && payload.source == PLAYER.id) {
-                console.log(payload);
-                console.log(GAME.npcs[payload.target]);
                 this.curEnemy = GAME.npcs[payload.target];
                 this.monsterData.layer = PLAYER.location.layer; //pos2 layer isnt always defined so use PLAYER
                 this.monsterData.x = this.curEnemy.pos2.x;
                 this.monsterData.y = this.curEnemy.pos2.y;
                 this.monsterData.Monster_Name = this.curEnemy.info.name;
                 this.monsterData.Monster_Level = this.curEnemy.info.level;
-                console.log(this.monsterData);
             }
 
             /* for some reason npc.info doesnt contain health so grab it here and check for monster death */
@@ -94,9 +90,7 @@
                 this.enemyDead = false;
                 let drop = {};
                 this.monsterData.Drops = [];
-                console.log(this.objectSpawns);
                 for (let item in this.objectSpawns) {
-                    console.log(this.objectSpawns[item])
                     if (this.objectSpawns[item].timestamp == payload.timestamp) {
                         drop.Item_Code = this.objectSpawns[item].item.item;
                         if (this.objectSpawns[item].item.quantity === undefined) {
