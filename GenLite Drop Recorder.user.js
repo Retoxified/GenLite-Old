@@ -25,7 +25,7 @@
             };
             this.curCombat = undefined;
             this.curEnemy = { id: undefined }; //to prevent an undefined error down the line
-            this.enemyDead = false;
+            this.enemyDead = 0;
             this.objectSpawns = [];
 
             /* key for dropTable -> Monster_Name-Monster_Level */
@@ -71,14 +71,14 @@
             if (verb == "damage" && payload.id == this.curEnemy.id) {
                 this.monsterData.Monster_HP = payload.maxhp;
                 if (payload.hp <= 0) {
-                    this.enemyDead = true;
+                    this.enemyDead = payload.timestamp;
                 }
             }
 
             /* in the inverval between monster dead and object removal record spawnObject
                 NOTE: this assumes removeObject comes last which might not be true across updates
             */
-            if (verb == "spawnObject" && payload.type == "item" && this.enemyDead) {
+            if (verb == "spawnObject" && payload.type == "item" && this.enemyDead != 0) {
                 this.objectSpawns.push(payload);
             }
 
@@ -87,11 +87,10 @@
                 then send data to server and record in local dropTable
             */
             if (verb == "removeObject" && payload.id == this.curEnemy.id) {
-                this.enemyDead = false;
                 let drop = {};
                 this.monsterData.Drops = [];
                 for (let item in this.objectSpawns) {
-                    if (this.objectSpawns[item].timestamp == payload.timestamp) {
+                    if (this.objectSpawns[item].timestamp <= payload.timestamp) {
                         drop.Item_Code = this.objectSpawns[item].item.item;
                         if (this.objectSpawns[item].item.quantity === undefined) {
                             drop.Item_Quantity = 1
@@ -102,7 +101,8 @@
                     }
                 }
                 this.objectSpawns = [];
-                //this.sendDataToServer("droplogproject", this.monsterData);
+                this.enemyDead = 0;
+                this.sendDataToServer("droplogproject", this.monsterData);
                 this.localDropRecording();
             }
         }
