@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GenLite Drop Recorder
 // @namespace    GenLite
-// @version      0.1.1
+// @version      0.1.2
 // @description  try to take over the world!
 // @author       dpe#0175
 // @match        https://play.genfanad.com/play/
