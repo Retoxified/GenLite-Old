@@ -21,7 +21,14 @@
                 x: 0,
                 y: 0,
 
-                Drops: []
+                Drops: [],
+
+                vitXP: 0,
+                atkXP: 0,
+                strXP: 0,
+                defXP: 0,
+                playerCL: 0,
+                meleeTot: 0
             };
             this.curCombat = undefined;
             this.curEnemy = { id: undefined }; //to prevent an undefined error down the line
@@ -67,19 +74,44 @@
                 this.monsterData.Monster_Level = this.curEnemy.info.level;
             }
 
-            /* for some reason npc.info doesnt contain health so grab it here and check for monster death */
+            /* for some reason npc.info doesnt contain health so grab it here */
             if (verb == "damage" && payload.id == this.curEnemy.id) {
                 this.monsterData.Monster_HP = payload.maxhp;
-                if (payload.hp <= 0) {
+            }
+
+            /* record exp drops and set enemy dead on seeing vitality, 
+                this is the tightest reliable window I can find for timestamps */
+            if (verb == "xp") {
+                switch(payload.skill) {
+                case "vitality":
                     this.enemyDead = payload.timestamp;
+                    this.monsterData.vitXP = payload.xp;
+                    break;
+                case "attack":
+                    this.monsterData.atkXP = payload.xp;
+                    break;
+                case "strength":
+                    this.monsterData.strXP = payload.xp;
+                    break;
+                case "defense":
+                    this.monsterData.defXP = payload.xp;
+                    break;
                 }
             }
 
             /* in the inverval between monster dead and object removal record spawnObject
+                if the items are on sqaure one tile around the mob
                 NOTE: this assumes removeObject comes last which might not be true across updates
-            */
-            if (verb == "spawnObject" && payload.type == "item" && this.enemyDead != 0) {
-                this.objectSpawns.push(payload);
+            */ 
+            if (verb == "spawnObject" && payload.type == "item" && this.enemyDead != 0) {;
+                let itemX = payload.location.position.x;
+                let itemY = payload.location.position.y;
+                let enemyX = [this.curEnemy.pos2.x, this.curEnemy.pos2.x + 1, this.curEnemy.pos2.x -1];
+                let enemyY = [this.curEnemy.pos2.y, this.curEnemy.pos2.y + 1, this.curEnemy.pos2.y -1];
+                if (enemyX.includes(itemX) && enemyY.includes(itemY)){
+                    this.objectSpawns.push(payload);
+                    console.log(payload);
+                }
             }
 
             /* when npc is removed look for drops at same timestamp could be a false positive
@@ -93,13 +125,22 @@
                     if (this.objectSpawns[item].timestamp <= payload.timestamp) {
                         drop.Item_Code = this.objectSpawns[item].item.item;
                         if (this.objectSpawns[item].item.quantity === undefined) {
-                            drop.Item_Quantity = 1
+                            drop.Item_Quantity = 1;
                         } else {
                             drop.Item_Quantity = this.objectSpawns[item].item.quantity;
                         }
                         this.monsterData.Drops.push(structuredClone(drop));
                     }
                 }
+
+                /* if no drops are detected create a "nothing" drop and add that */
+                if(this.monsterData.Drops.length == 0){
+                    drop.Item_Code = "nothing";
+                    drop.Item_Quantity = 1; 
+                    this.monsterData.Drops.push(structuredClone(drop));
+                }          
+                this.monsterData.playerCL = PLAYER.character.combatLevel;
+                this.monsterData.meleeTot = PLAYER_INFO.skills.attack.level + PLAYER_INFO.skills.strength.level + PLAYER_INFO.skills.defense.level;
                 this.objectSpawns = [];
                 this.enemyDead = 0;
                 this.sendDataToServer("droplogproject", this.monsterData);
