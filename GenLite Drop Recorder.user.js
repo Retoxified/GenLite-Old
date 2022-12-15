@@ -50,6 +50,7 @@
             /* look for start of combat set the curEnemy and record data */
             if (verb == "spawnObject" && payload.type == "combat" &&
                 (payload.participant1 == PLAYER.id || payload.participant2 == PLAYER.id)) {
+
                 this.monsterData.layer = payload.location.position.layer;
                 this.monsterData.x = payload.location.position.x;
                 this.monsterData.y = payload.location.position.y;

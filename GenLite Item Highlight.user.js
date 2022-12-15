@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GenLite Item Highlight
 // @namespace    GenLite
-// @version      0.1.1
+// @version      0.1.2
 // @description  try to take over the world!
 // @author       TwistedFate#4053
 // @match        https://play.genfanad.com/play/
@@ -86,6 +86,12 @@
         getItemValue(item) {
             let itemDefId = item.definition.item;
             let quantity = item.definition.quantity ?? 1;
+
+            if (itemDefId.startsWith('$scrip-')) {
+                itemDefId = itemDefId.substring(7);
+                quantity *= 5;
+            }
+
             let gameValue = DATA.items[itemDefId].value ?? 1;
             return gameValue * quantity;
         }
@@ -110,11 +116,20 @@
 
         create_text_element(key, item) {
             let element = document.createElement( 'div' );
+
+            let itemDefId = item.definition.item;
+            let stackable = false;
+            if (itemDefId.startsWith('$scrip-')) {
+                itemDefId = itemDefId.substring(7);
+                stackable = true;
+            } else {
+                stackable = DATA.items[itemDefId].stackable ?? false;
+            }
+
             element.className = this.getItemColor(item);
             element.style.position = 'absolute';
             //element.style.zIndex = '99999';
             element.innerHTML = item.item_name;
-            let stackable = DATA.items[item.definition.item].stackable ?? false;
             if(stackable === true) {
                 element.innerHTML = `${item.item_name}(${item.definition.quantity})`;
             }
