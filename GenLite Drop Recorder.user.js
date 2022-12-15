@@ -93,12 +93,19 @@
                     if (this.objectSpawns[item].timestamp <= payload.timestamp) {
                         drop.Item_Code = this.objectSpawns[item].item.item;
                         if (this.objectSpawns[item].item.quantity === undefined) {
-                            drop.Item_Quantity = 1
+                            drop.Item_Quantity = 1;
                         } else {
                             drop.Item_Quantity = this.objectSpawns[item].item.quantity;
                         }
                         this.monsterData.Drops.push(structuredClone(drop));
                     }
+                }
+
+                /* if no drops are detected create a "nothing" drop and add that */
+                if(this.monsterData.Drops.length == 0){
+                    drop.Item_Code = "nothing";
+                    drop.Item_Quantity = 1;
+                    this.monsterData.Drops.push(structuredClone(drop));
                 }
                 this.objectSpawns = [];
                 this.enemyDead = 0;
