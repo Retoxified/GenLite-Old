@@ -17,8 +17,11 @@
      * @description This plugin will ask for notification permission at load time.
      */
     class GenLiteNotificationPlugin {
+        static defaultIcon = 'https://www.google.com/s2/favicons?sz=64&domain=genfanad.com';
+
         async init() {
             console.log('[GenLiteNotificationPlugin]: Loaded.');
+
 
             await this.askPermission();
         }
