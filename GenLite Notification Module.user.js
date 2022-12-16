@@ -12,8 +12,7 @@
 (async function() {
     /**
      * Example usage:
-     * const icon = 'https://www.google.com/s2/favicons?sz=64&domain=genfanad.com';
-     * await window.genliteNotification.notify('GenLite Notification', 'GenLite has loaded!', icon);
+     * await window.genliteNotification.notify('GenLite Notification', 'GenLite has loaded!');
      */
     class GenLiteNotificationPlugin {
         async init() {
@@ -32,6 +31,10 @@
         }
 
         notify(title, text, icon) {
+            if (!icon) {
+                icon = GenLiteNotificationPlugin.defaultIcon;
+            }
+
             this.hasPermission().then(function (result) {
                 if (result === true) {
                     let popup = new window.Notification(title, { body: text, icon: icon });
