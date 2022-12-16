@@ -11,8 +11,10 @@
 
 (async function() {
     /**
-     * Example usage:
+     * @example
      * await window.genliteNotification.notify('GenLite Notification', 'GenLite has loaded!');
+     *
+     * @description This plugin will ask for notification permission at load time.
      */
     class GenLiteNotificationPlugin {
         async init() {
@@ -26,6 +28,12 @@
             return this.hasPermission();
         }
 
+        /**
+         * Displays a browser notification if permissions are granted for doing so.
+         * @param title - Title of the notification
+         * @param text - Notification message text
+         * @param icon - Optional parameter, e.g a link to a picture or icon to use for this notification display
+         */
         notify(title, text, icon) {
             if (!icon) {
                 icon = GenLiteNotificationPlugin.defaultIcon;
