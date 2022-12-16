@@ -18,10 +18,6 @@
         async init() {
             console.log('[GenLiteNotificationPlugin]: Loaded.');
 
-            // setTimeout(() => {
-            //     const icon = 'https://www.google.com/s2/favicons?sz=64&domain=genfanad.com';
-            //     window.genliteNotification.notify('GenLite Notification', 'GenLite has loaded!', icon);
-            // }, 3000);
             await this.askPermission();
         }
 
