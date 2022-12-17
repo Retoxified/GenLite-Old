@@ -7,6 +7,8 @@ Join us on Discord: https://discord.gg/Jn7s7pArdg
 # Source Code & Distribution
 The main file to run as a UserScript can be found in the "dist" folder.
 
+The file "userscript-banner.txt" can be edited with new version numbers and other userscript specific metadata.
+
 # Documentation
 This project uses [JSDoc](https://jsdoc.app/)
 
