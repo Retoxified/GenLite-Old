@@ -1,14 +1,3 @@
-// ==UserScript==
-// @name         GenLite
-// @namespace    GenLite
-// @version      0.1.2
-// @description  try to take over the world!
-// @author       TwistedFate#4053, Xortrox#0001, Puls3
-// @match        https://play.genfanad.com/play/
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=genfanad.com
-// @grant        none
-// ==/UserScript==
-
 import { GenLite } from "./core/GenLite Base Module.user";
 import { GenLiteCameraPlugin } from "./plugins/GenLite Camera Unlock.user";
 import { GenliteDropRecorder } from "./plugins/GenLite Drop Recorder.user";
