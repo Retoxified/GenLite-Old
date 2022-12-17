@@ -17,6 +17,7 @@ To generate the latest documentation run:
 `npm run docs`
 
 # Node.JS - v14.16.1
+This project uses [Node.JS v14.16.1](https://nodejs.org/download/release/v14.16.1/)
 
 This project is built using [Webpack](https://webpack.js.org/)
 
