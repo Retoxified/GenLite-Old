@@ -19,7 +19,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: git fetch --all
+      - run: git checkout main
+      - run: git pull
       - run: git checkout release
+      - run: git merge main
       - run: npm run build --if-present
       - run: git add dist -f
       - run: git commit --allow-empty -m "New Release"
