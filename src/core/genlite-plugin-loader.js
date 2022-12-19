@@ -1,3 +1,5 @@
+import { ExamplePlugin } from "./help/example-plugin";
+
 export class GenLitePluginLoader {
     plugins;
 
@@ -52,9 +54,6 @@ export class GenLitePluginLoader {
     }
 
     getExampleStructure() {
-        return class ExamplePlugin {
-            static name = 'My Plugin';
-            async init() {}
-        }
+        return ExamplePlugin;
     }
 }
