@@ -1,5 +1,5 @@
 export class GenLiteItemHighlightPlugin {
-    static name = 'GenLiteItemHighlightPlugin';
+    static pluginName = 'GenLiteItemHighlightPlugin';
 
     trackedItems = {};
     item_highlight_div = null;

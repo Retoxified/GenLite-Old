@@ -1,7 +1,7 @@
 import { GenlitePluginLoader } from "./genlite-plugin-loader.class";
 
 export class GenLite {
-    static name = 'GenLite';
+    static pluginName = 'GenLite';
 
     pluginLoader;
 
