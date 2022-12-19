@@ -10,4 +10,4 @@ Puls3
 
 
 
-For questions, suggestions, problems and everything in between join us on [Discord](https://discord.gg/5h2ZUH8Z7p)
+For questions, suggestions, problems and everything in between join us on [Discord](https://discord.gg/Jn7s7pArdg)

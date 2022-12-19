@@ -5,7 +5,7 @@ GenLite installation instructions
 2. Click [here](https://github.com/Retoxified/GenLite/raw/release/dist/genlite.user.js) to install GenLite
 3. Enjoy! GenLite should automatically update whenever there is a new version. We will announce new versions on our discord server.
 
-Join us on Discord: https://discord.gg/5h2ZUH8Z7p
+Join us on Discord: https://discord.gg/Jn7s7pArdg
 
 # Source Code & Distribution
 The main file to run as a UserScript can be found in the "dist" folder.
