@@ -10,7 +10,7 @@ module.exports = {
     mode: 'production',
     entry: './src/index.js',
     output: {
-        filename: 'main.js',
+        filename: 'genlite.user.js',
         path: path.resolve(__dirname, 'dist'),
     },
     optimization: {
