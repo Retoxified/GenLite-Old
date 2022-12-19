@@ -2,7 +2,7 @@ export class GenLiteWikiDataCollection {
 
     previously_seen = [];
 
-    init() {
+    async init() {
         window.genlite.registerModule(this);
         window.genlite.installHook(Game.prototype, 'combatUpdate',  this.hook_Game_combatUpdate,  this);
     }

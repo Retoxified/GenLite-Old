@@ -28,7 +28,7 @@ export class GenliteDropRecorder {
         this.dropTable = {};
     }
 
-    init() {
+    async init() {
         window.genlite.registerModule(this);
         this.dropTable = JSON.parse(localStorage.getItem("genliteDropTable"));
         if(this.dropTable == null)

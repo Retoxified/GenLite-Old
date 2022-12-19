@@ -3,7 +3,7 @@ export class GenLiteItemHighlight {
     item_highlight_div = null;
     render = false;
 
-    init() {
+    async init() {
         window.genlite.registerModule(this);
 
         this.item_highlight_div = document.createElement( 'div' );

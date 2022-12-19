@@ -1,5 +1,5 @@
 export class GenLiteCameraPlugin {
-    init() {
+    async init() {
         window.genlite.registerModule(this);
     }
 

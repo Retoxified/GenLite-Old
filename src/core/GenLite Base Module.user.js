@@ -1,7 +1,7 @@
 export class GenLite {
     moduleList = [];
 
-    init() {
+    async init() {
         this.installHook(Camera.prototype, 'update', this.hook_Camera_update, this);
         this.installHook(Network.prototype, 'logoutOK', this.hook_Network_logoutOK, this);
         this.installHook(PhasedLoadingManager.prototype, 'start_phase',  this.hook_PhasedLoadingManager_start_phase,  this);

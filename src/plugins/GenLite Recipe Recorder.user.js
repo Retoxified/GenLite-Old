@@ -15,7 +15,7 @@ export class GenLiteRecipeRecorder {
 
     }
 
-    init() {
+    async init() {
         window.genlite.registerModule(this);
     }
 
