@@ -18,11 +18,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: git fetch --all
-      - run: git checkout main
-      - run: git pull
-      - run: git checkout release
-      - run: git merge main
+      - run: git checkout release --orphan
       - run: npm i
       - run: npm run build --if-present
       - run: git add dist -f
