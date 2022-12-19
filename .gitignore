@@ -1,2 +1,4 @@
 # JetBrains IDE folder
 .idea/
+node_modules
+dist
