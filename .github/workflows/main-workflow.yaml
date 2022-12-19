@@ -23,6 +23,7 @@ jobs:
       - run: git pull
       - run: git checkout release
       - run: git merge main
+      - run: npm i
       - run: npm run build --if-present
       - run: git add dist -f
       - run: git commit --allow-empty -m "New Release"
