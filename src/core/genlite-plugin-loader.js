@@ -30,7 +30,7 @@ export class GenLitePluginLoader {
         window[pluginClass.name] = pluginInstance;
 
         this.plugins.push(pluginInstance);
-        console.log(`[GenLitePluginLoader]: Loaded plugin ${pluginClass}`);
+        console.log(`[GenLitePluginLoader]: Loaded plugin ${pluginClass.name}`);
 
         return true;
     }
