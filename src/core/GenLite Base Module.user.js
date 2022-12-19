@@ -1,5 +1,15 @@
+import { GenLitePluginLoader } from "./genlite-plugin-loader";
+
 export class GenLite {
+    static name = 'GenLite';
+
+    pluginLoader;
+
     moduleList = [];
+
+    constructor() {
+        this.pluginLoader = new GenLitePluginLoader();
+    }
 
     async init() {
         this.installHook(Camera.prototype, 'update', this.hook_Camera_update, this);
