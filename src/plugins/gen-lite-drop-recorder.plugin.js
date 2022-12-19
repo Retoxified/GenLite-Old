@@ -1,5 +1,5 @@
-export class GenliteDropRecorder {
-    static name = 'GenliteDropRecorder';
+export class GenLiteDropRecorderPlugin {
+    static name = 'GenLiteDropRecorderPlugin';
 
     constructor() {
 
