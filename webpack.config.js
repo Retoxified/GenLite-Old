@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const fs = require('fs');
 
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 
 const METADATA = fs.readFileSync('./userscript-banner.txt', 'utf8');
 
@@ -32,15 +32,18 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
     },
     optimization: {
+        minimize: true,
         minimizer: [
-            new UglifyJsPlugin({
-                uglifyOptions: {
+            new TerserPlugin({
+                terserOptions: {
                     output: {
                         beautify: false,
                         preamble: METADATA,
+                        comments: false
                     },
                 },
-            }),
+                extractComments: true,
+            })
         ],
     },
     plugins: [
