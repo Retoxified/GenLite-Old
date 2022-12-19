@@ -9,86 +9,29 @@ import { GenLiteWikiDataCollection } from "./plugins/GenLite Wiki Datacollection
 
 (async function load() {
     const genlite = new GenLite();
-    genlite.init();
+    await genlite.init();
     window.genlite = genlite;
 
     // TODO: genlite.addPlugin();
     window.genliteCamera = new GenLiteCameraPlugin();
+    await window.genliteCamera.init();
 
-    // TODO: await window.genlite
-    let gameLoadTimer = setInterval(function() {
-        try {
-            if(window.genlite !== undefined) {
-                window.genliteCamera.init();
-                clearInterval(gameLoadTimer);
-            }
-        } catch (e) {
-        }
-    }, 1000);
-
-    // TODO: genlite.addPlugin();
     window.GenliteDropRecorder = new GenliteDropRecorder();
+    await window.GenliteDropRecorder.init();
 
-    // TODO: await window.genlite
-    let gameLoadTimer2 = setInterval(function() {
-        try {
-            if (window.genlite !== undefined) {
-                window.GenliteDropRecorder.init();
-                clearInterval(gameLoadTimer2);
-            }
-        } catch (e) {}
-    }, 1000);
-
-    // TODO: genlite.addPlugin();
     window.genliteItemHighlight = new GenLiteItemHighlight();
-
-    // TODO: await window.genlite
-    let gameLoadTimer3 = setInterval(function() {
-        try {
-            if(window.genlite !== undefined) {
-                window.genliteItemHighlight.init();
-                clearInterval(gameLoadTimer3);
-            }
-        } catch (e) {
-        }
-    }, 1000);
+    await window.genliteItemHighlight.init();
 
     window.genliteNotification = new GenLiteNotificationPlugin();
     await window.genliteNotification.init();
 
     window.genliteNPCHighlight = new GenLiteNPCHighlight();
-
-    let gameLoadTimer4 = setInterval(function() {
-        try {
-            if(window.genlite !== undefined) {
-                window.genliteNPCHighlight.init();
-                clearInterval(gameLoadTimer4);
-            }
-        } catch (e) {
-        }
-    }, 1000);
+    await window.genliteNPCHighlight.init();
 
     window.GenLiteRecipeRecorder = new GenLiteRecipeRecorder();
-
-    let gameLoadTimer5 = setInterval(function() {
-        try {
-            if (window.genlite !== undefined) {
-                window.GenLiteRecipeRecorder.init();
-                clearInterval(gameLoadTimer5);
-            }
-        } catch (e) {}
-    }, 1000);
+    await window.GenLiteRecipeRecorder.init();
 
     window.genliteWikiDataCollection = new GenLiteWikiDataCollection();
-
-    let gameLoadTimer6 = setInterval(function() {
-        try {
-            if(window.genlite !== undefined) {
-                window.genliteWikiDataCollection.init();
-                clearInterval(gameLoadTimer6);
-            }
-        } catch (e) {
-        }
-    }, 1000);
+    await window.genliteWikiDataCollection.init();
 })();
 

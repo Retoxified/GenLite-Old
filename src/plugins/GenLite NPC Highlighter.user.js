@@ -3,7 +3,7 @@ export class GenLiteNPCHighlight {
     npc_highlight_div = null;
     render = false;
 
-    init() {
+    async init() {
         window.genlite.registerModule(this);
 
         this.npc_highlight_div = document.createElement( 'div' );
