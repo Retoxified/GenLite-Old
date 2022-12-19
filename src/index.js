@@ -20,4 +20,3 @@ import { GenLiteWikiDataCollection } from "./plugins/GenLite Wiki Datacollection
     await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorder);
     await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollection);
 })();
-

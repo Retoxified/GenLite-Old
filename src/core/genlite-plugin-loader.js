@@ -40,15 +40,15 @@ export class GenLitePluginLoader {
      * @param pluginClass
      */
     verifyPluginClassStructure(pluginClass) {
-        if (!pluginClass.__proto__.init) {
+        if (!pluginClass.prototype.init) {
             throw new Error(`Plugin class ${pluginClass} does not define an init function.`);
         }
 
-        if (typeof(pluginClass.__proto__.init) !== 'function') {
+        if (typeof(pluginClass.prototype.init) !== 'function') {
             throw new Error(`Plugin class ${pluginClass}.init was not defined as a function`);
         }
 
-        if (!pluginClass.__proto__.name) {
+        if (!pluginClass.name) {
             throw new Error(`Plugin class ${pluginClass} does not define a name`);
         }
     }
