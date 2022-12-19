@@ -1,4 +1,6 @@
 export class GenLiteCameraPlugin {
+    static name = 'GenLiteCameraPlugin';
+
     async init() {
         window.genlite.registerModule(this);
     }

@@ -1,4 +1,6 @@
 export class GenliteDropRecorder {
+    static name = 'GenliteDropRecorder';
+
     constructor() {
 
         /* json format for an indvidual monster */

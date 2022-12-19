@@ -1,4 +1,5 @@
 export class GenLiteWikiDataCollection {
+    static name = 'GenLiteWikiDataCollection';
 
     previously_seen = [];
 

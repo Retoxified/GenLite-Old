@@ -1,4 +1,6 @@
 export class GenLite {
+    static name = 'GenLite';
+
     moduleList = [];
 
     async init() {

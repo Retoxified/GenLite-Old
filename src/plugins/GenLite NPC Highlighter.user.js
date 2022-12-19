@@ -1,4 +1,6 @@
 export class GenLiteNPCHighlight {
+    static name = 'GenLiteNPCHighlight';
+
     trackedNpcs = {};
     npc_highlight_div = null;
     render = false;

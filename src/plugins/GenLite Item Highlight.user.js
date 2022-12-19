@@ -1,4 +1,6 @@
 export class GenLiteItemHighlight {
+    static name = 'GenLiteItemHighlight';
+
     trackedItems = {};
     item_highlight_div = null;
     render = false;

@@ -1,4 +1,6 @@
 export class GenLiteRecipeRecorder {
+    static name = 'GenLiteRecipeRecorder';
+
     constructor() {
 
         /* stores state needed for recording crafting */
