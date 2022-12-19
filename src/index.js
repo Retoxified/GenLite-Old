@@ -12,26 +12,12 @@ import { GenLiteWikiDataCollection } from "./plugins/GenLite Wiki Datacollection
     await genlite.init();
     window.genlite = genlite;
 
-    // TODO: genlite.addPlugin();
-    window.genliteCamera = new GenLiteCameraPlugin();
-    await window.genliteCamera.init();
-
-    window.GenliteDropRecorder = new GenliteDropRecorder();
-    await window.GenliteDropRecorder.init();
-
-    window.genliteItemHighlight = new GenLiteItemHighlight();
-    await window.genliteItemHighlight.init();
-
-    window.genliteNotification = new GenLiteNotificationPlugin();
-    await window.genliteNotification.init();
-
-    window.genliteNPCHighlight = new GenLiteNPCHighlight();
-    await window.genliteNPCHighlight.init();
-
-    window.GenLiteRecipeRecorder = new GenLiteRecipeRecorder();
-    await window.GenLiteRecipeRecorder.init();
-
-    window.genliteWikiDataCollection = new GenLiteWikiDataCollection();
-    await window.genliteWikiDataCollection.init();
+    await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
+    await genlite.pluginLoader.addPlugin(GenliteDropRecorder);
+    await genlite.pluginLoader.addPlugin(GenLiteItemHighlight);
+    await genlite.pluginLoader.addPlugin(GenLiteNotificationPlugin);
+    await genlite.pluginLoader.addPlugin(GenLiteNPCHighlight);
+    await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorder);
+    await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollection);
 })();
 
