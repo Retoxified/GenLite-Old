@@ -25,4 +25,4 @@ jobs:
       - run: npm run build --if-present
       - run: git add dist -f
       - run: git commit --allow-empty -m "New Release"
-      - run: git push --set-upstream origin release
+      - run: git push origin release
