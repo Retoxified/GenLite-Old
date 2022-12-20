@@ -5,16 +5,29 @@ export class GenLiteItemHighlightPlugin {
     item_highlight_div = null;
     render = false;
 
+    isPluginEnabled: boolean = false;
+
     async init() {
         window.genlite.registerModule(this);
 
         this.item_highlight_div = document.createElement( 'div' );
         this.item_highlight_div.className = 'item-indicators-list';
         document.body.appendChild(this.item_highlight_div);
+        this.isPluginEnabled = window.genlite.settings.add("ItemHighlight.Enable", true, "Highlight Items", "checkbox", this.handlePluginEnableDisable, this);
+    }
+
+    handlePluginEnableDisable(state: boolean) {
+        // when disabling the plugin clear the current list of items
+        if(state === false) {
+            this.item_highlight_div.innerHTML = '';
+            this.trackedItems = {};
+        }
+
+        this.isPluginEnabled = state;
     }
 
     update(dt) {
-        if(this.render == false) {
+        if(this.isPluginEnabled === false || this.render == false) {
             return;
         }
 

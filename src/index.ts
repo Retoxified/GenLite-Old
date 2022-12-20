@@ -1,6 +1,7 @@
 /** Core Features */
 import { GenLite } from "./core/genlite.class";
 import { GenLiteNotificationPlugin } from "./core/plugins/genlite-notification.plugin";
+import { GenLiteSettingsPlugin } from "./core/plugins/genlite-settings.plugin";
 
 /** Official Plugins */
 import { GenLiteCameraPlugin } from "./plugins/genlite-camera.plugin";
@@ -18,12 +19,13 @@ import { GenLiteWikiDataCollectionPlugin } from "./plugins/genlite-wiki-data-col
 
     /** Core Features */
     genlite.notifications = await genlite.pluginLoader.addPlugin(GenLiteNotificationPlugin);
+    genlite.settings = await genlite.pluginLoader.addPlugin(GenLiteSettingsPlugin);
 
     /** Official Plugins */
     await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
-    await genlite.pluginLoader.addPlugin(GenliteDropRecorderPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);
+    await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
+    await genlite.pluginLoader.addPlugin(GenliteDropRecorderPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollectionPlugin);
+    await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);
 })();
