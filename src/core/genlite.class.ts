@@ -7,6 +7,9 @@ export class GenLite {
 
     moduleList = [];
 
+    /** We allow setting "any field, to anything" in order to load core features such as genlite.notifications */
+    [key: string]: any;
+
     constructor() {
         this.pluginLoader = new GenlitePluginLoader();
     }
