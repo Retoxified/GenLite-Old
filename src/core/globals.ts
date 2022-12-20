@@ -68,3 +68,6 @@ declare const Camera: {
     [key: string]: any,
 };
 
+declare const PlayerInfo: {
+    [key: string]: any,
+};

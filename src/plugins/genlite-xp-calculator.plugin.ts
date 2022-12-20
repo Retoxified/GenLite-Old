@@ -1,5 +1,7 @@
 export class GenLiteXpCalculator {
-    static name = 'GenLiteXpCalculator';
+    static pluginName = 'GenLiteXpCalculatorPlugin';
+
+    skillsList;
 
     constructor() {
 
@@ -36,7 +38,7 @@ export class GenLiteXpCalculator {
     async init() {
         window.genlite.registerModule(this);
         /* copy over the datastructure in to each field */
-        for (i in this.skillsList) {
+        for (let i in this.skillsList) {
             this.skillsList[i] = structuredClone(this.skillsList.vitality);
         }
     }
@@ -49,7 +51,7 @@ export class GenLiteXpCalculator {
         if(skill.incIndex > 9)
             skill.incIndex = 0;
         skill.avgActionXP = 0;
-        for (i in skill.last10Inc){
+        for (let i in skill.last10Inc){
             skill.avgActionXP += skill.last10Inc[i];
         }
         skill.avgActionXP /= skill.last10Inc.length;
@@ -62,7 +64,7 @@ export class GenLiteXpCalculator {
 
     /* onmouseenter fill out tooltip with additional info */
     onmouseenter(event, callback_this){
-        let div = document.getElementById("skill_status_popup");
+        let div = <HTMLElement> document.getElementById("skill_status_popup");
         let piSkill = PLAYER_INFO.skills[PLAYER_INFO.tracking_skill.id];
         let skill = callback_this.skillsList[PLAYER_INFO.tracking_skill.id];
         let xpRate = 0;
@@ -88,7 +90,8 @@ export class GenLiteXpCalculator {
     initializeUI(){
         let toolTipRoot = document.getElementsByClassName("new_ux-player-info-modal__modal__window--stats__skill__container");
         for(let i = 0; i < 18; i++){
-            toolTipRoot[i].onmouseenter = this.installEventHook(toolTipRoot[i].onmouseenter, this.onmouseenter, this);
+            let tooltip = <HTMLElement> toolTipRoot[i];
+            tooltip.onmouseenter = this.installEventHook(tooltip.onmouseenter, this.onmouseenter, this);
         }
     }
 
@@ -112,8 +115,8 @@ export class GenLiteXpCalculator {
     }
 
     resetCalculatorAll(){
-        for (i in skillsList){
-            resetCalculator(i);
+        for (let i in this.skillsList){
+            this.resetCalculator(i);
         }
     }
 }

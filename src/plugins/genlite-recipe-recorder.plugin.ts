@@ -21,9 +21,12 @@ export class GenLiteRecipeRecorderPlugin {
 
     async init() {
         window.genlite.registerModule(this);
-        this.crafting.resultsList = JSON.parse(localStorage.getItem("GenLiteRecipeRecorder"));
-        if(this.crafting.resultsList == null)
+        let dropTableString = localStorage.getItem("GenliteRecipeRecorder")
+        if(dropTableString == null) {
             this.crafting.resultsList = {};
+        } else {
+            this.crafting.resultsList = JSON.parse(dropTableString);
+        }
     }
 
     action(verb, params) {

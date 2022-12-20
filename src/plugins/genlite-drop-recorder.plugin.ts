@@ -39,9 +39,12 @@ export class GenliteDropRecorderPlugin {
 
     async init() {
         window.genlite.registerModule(this);
-        this.dropTable = JSON.parse(localStorage.getItem("genliteDropTable"));
-        if(this.dropTable == null)
+        let dropTableString = localStorage.getItem("genliteDropTable")
+        if(dropTableString == null) {
             this.dropTable = {};
+        } else {
+            this.dropTable = JSON.parse(dropTableString);
+        }
     }
 
     handle(verb, payload) {
@@ -104,8 +107,8 @@ export class GenliteDropRecorderPlugin {
         if (verb == "spawnObject" && payload.type == "item" && this.enemyDead != 0) {;
             let itemX = payload.location.position.x;
             let itemY = payload.location.position.y;
-            let enemyX = [this.curEnemy.pos2.x, this.curEnemy.pos2.x + 1, this.curEnemy.pos2.x -1];
-            let enemyY = [this.curEnemy.pos2.y, this.curEnemy.pos2.y + 1, this.curEnemy.pos2.y -1];
+            let enemyX: number[] = [this.curEnemy.pos2.x, this.curEnemy.pos2.x + 1, this.curEnemy.pos2.x -1];
+            let enemyY: number[] = [this.curEnemy.pos2.y, this.curEnemy.pos2.y + 1, this.curEnemy.pos2.y -1];
             if (enemyX.includes(itemX) && enemyY.includes(itemY)){
                 this.objectSpawns.push(payload);
             }
