@@ -4,7 +4,7 @@ import { GenLiteNotificationPlugin } from "./core/plugins/genlite-notification.p
 
 /** Official Plugins */
 import { GenLiteCameraPlugin } from "./plugins/genlite-camera.plugin";
-import { GenLiteDropRecorderPlugin } from "./plugins/gen-lite-drop-recorder.plugin";
+import { GenliteDropRecorderPlugin } from "./plugins/genlite-drop-recorder.plugin";
 import { GenLiteItemHighlightPlugin } from "./plugins/genlite-item-highlight.plugin";
 import { GenLiteNPCHighlightPlugin } from "./plugins/genlite-npc-highlight.plugin";
 import { GenLiteRecipeRecorderPlugin } from "./plugins/genlite-recipe-recorder.plugin";
@@ -21,7 +21,7 @@ import { GenLiteWikiDataCollectionPlugin } from "./plugins/genlite-wiki-data-col
 
     /** Official Plugins */
     await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteDropRecorderPlugin);
+    await genlite.pluginLoader.addPlugin(GenliteDropRecorderPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);

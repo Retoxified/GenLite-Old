@@ -1,4 +1,4 @@
-export class GenLiteDropRecorderPlugin {
+export class GenliteDropRecorderPlugin {
     static pluginName = 'GenLiteDropRecorderPlugin';
 
     monsterData;
