@@ -17,6 +17,9 @@ export class GenLite {
         this.installHook(PhasedLoadingManager.prototype, 'start_phase',  this.hook_PhasedLoadingManager_start_phase,  this);
         this.installHook(Network.prototype, 'action', this.hook_Network_action, this);
         this.installHook(Network.prototype, 'handle', this.hook_Network_handle, this);
+        this.installHook(PlayerInfo.prototype, 'updateXP', this.hook_PlayerInfo_updateXP, this);
+        this.installHook(PlayerInfo.prototype, 'updateTooltip', this.hook_PlayerInfo_updateTooltip, this);
+        this.installHook(window, 'initializeUI', this.hook_window_initializeUI, this);
     }
 
     hook_Camera_update() {
@@ -57,6 +60,30 @@ export class GenLite {
                 if(typeof this.moduleList[i].loginOK === 'function') {
                     this.moduleList[i].loginOK.apply(this.moduleList[i], arguments);
                 }
+            }
+        }
+    }
+
+    hook_PlayerInfo_updateXP() {
+        for (var i = 0; i < this.moduleList.length; i++) {
+            if(typeof this.moduleList[i].updateXP === 'function') {
+                this.moduleList[i].updateXP.apply(this.moduleList[i], arguments);
+            }
+        }
+    }
+
+    hook_PlayerInfo_updateTooltip() {
+        for (var i = 0; i < this.moduleList.length; i++) {
+            if(typeof this.moduleList[i].updateTooltip === 'function') {
+                this.moduleList[i].updateTooltip.apply(this.moduleList[i], arguments);
+            }
+        }
+    }
+
+    hook_window_initializeUI() {
+        for (var i = 0; i < this.moduleList.length; i++) {
+            if(typeof this.moduleList[i].initializeUI === 'function') {
+                this.moduleList[i].initializeUI.apply(this.moduleList[i], arguments);
             }
         }
     }
