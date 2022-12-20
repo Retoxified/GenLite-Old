@@ -1,5 +1,7 @@
-export class GenLiteRecipeRecorder {
-    static name = 'GenLiteRecipeRecorder';
+export class GenLiteRecipeRecorderPlugin {
+    static pluginName = 'GenLiteRecipeRecorderPlugin';
+
+    crafting;
 
     constructor() {
 
@@ -31,7 +33,7 @@ export class GenLiteRecipeRecorder {
                 this.crafting.recipe = params.action.recipe;
                 this.crafting.prevInventory = INVENTORY.items;
                 this.crafting.recipeName = params.action.recipe;
-                for (i in params.action.params) // if params is set here then record a complex recipe name
+                for (let i in params.action.params) // if params is set here then record a complex recipe name
                     this.crafting.recipeName = this.crafting.recipeName.concat("__", i, params.action.params[i]);
                 if (this.crafting.resultsList[this.crafting.recipeName] === undefined)
                     this.crafting.resultsList[this.crafting.recipeName] = {
@@ -55,7 +57,7 @@ export class GenLiteRecipeRecorder {
             */
             if (verb == 'inventory') {
                 if (this.crafting.prevVerb == 'inventory') {
-                    for (i in this.crafting.prevInventory) {
+                    for (let i in this.crafting.prevInventory) {
                         /* add up the quantities of the inventory */
                         if (itemList[this.crafting.prevInventory[i].item] === undefined)
                             itemList[this.crafting.prevInventory[i].item] = 0;
@@ -66,7 +68,7 @@ export class GenLiteRecipeRecorder {
                         }
                     }
                     /* subtract the new inventory */
-                    for (i in payload) {
+                    for (let i in payload) {
                         if (itemList[payload[i].item] === undefined)
                             itemList[payload[i].item] = 0;
                         if (payload[i].quantity === undefined) {
@@ -78,7 +80,7 @@ export class GenLiteRecipeRecorder {
                     /* negative values are outputs
                         positive are inputs
                     */
-                    for (i in itemList) {
+                    for (let i in itemList) {
                         if (itemList[i] < 0) {
                             if (this.crafting.resultsList[this.crafting.recipeName].output[i] === undefined)
                                 this.crafting.resultsList[this.crafting.recipeName].output[i] = 0;

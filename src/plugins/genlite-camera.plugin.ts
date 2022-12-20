@@ -1,5 +1,5 @@
 export class GenLiteCameraPlugin {
-    static name = 'GenLiteCameraPlugin';
+    static pluginName = 'GenLiteCameraPlugin';
 
     async init() {
         window.genlite.registerModule(this);
@@ -18,21 +18,23 @@ export class GenLiteCameraPlugin {
     }
 
     updatePlayerTileAlwaysIndoor() {
-        let tile = this.loadedSegments[this.segmentKey].getTile(this.segment.lx, this.segment.ly)
+        const self = (this as any);
+
+        let tile = self.loadedSegments[self.segmentKey].getTile(self.segment.lx, self.segment.ly)
         if (!tile)
-            throw `Invalid location: ${this.segmentKey} ${this.segment.lx}, ${this.segment.ly}`
-            this.indoors = true;
-        for (let i in this.loadedSegments) {
-            this.loadedSegments[i].setIndoorStatus(this.indoors);
+            throw `Invalid location: ${self.segmentKey} ${self.segment.lx}, ${self.segment.ly}`
+            self.indoors = true;
+        for (let i in self.loadedSegments) {
+            self.loadedSegments[i].setIndoorStatus(self.indoors);
         }
         if (tile.pvp) {
             let pvp = document.getElementById('pvp_indicator');
             pvp.style.display = 'block';
             pvp.innerText = "PvP Level: YES";
-            this.pvp_zone = true;
+            self.pvp_zone = true;
         } else {
             document.getElementById('pvp_indicator').style.display = 'none';
-            this.pvp_zone = false;
+            self.pvp_zone = false;
         }
         MUSIC_PLAYER.setNextTrack(tile.music);
     }

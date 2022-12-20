@@ -1,5 +1,12 @@
-export class GenliteDropRecorder {
-    static name = 'GenliteDropRecorder';
+export class GenliteDropRecorderPlugin {
+    static pluginName = 'GenLiteDropRecorderPlugin';
+
+    monsterData;
+    curCombat;
+    curEnemy;
+    enemyDead;
+    objectSpawns;
+    dropTable;
 
     constructor() {
 
@@ -109,7 +116,7 @@ export class GenliteDropRecorder {
             then send data to server and record in local dropTable
         */
         if (verb == "removeObject" && payload.id == this.curEnemy.id) {
-            let drop = {};
+            let drop: any = {};
             this.monsterData.Drops = [];
             for (let item in this.objectSpawns) {
                 if (this.objectSpawns[item].timestamp <= payload.timestamp) {

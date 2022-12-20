@@ -1,14 +1,17 @@
-import { GenLitePluginLoader } from "./genlite-plugin-loader";
+import { GenlitePluginLoader } from "./genlite-plugin-loader.class";
 
 export class GenLite {
-    static name = 'GenLite';
+    static pluginName = 'GenLite';
 
     pluginLoader;
 
     moduleList = [];
 
+    /** We allow setting "any field, to anything" in order to load core features such as genlite.notifications */
+    [key: string]: any;
+
     constructor() {
-        this.pluginLoader = new GenLitePluginLoader();
+        this.pluginLoader = new GenlitePluginLoader();
     }
 
     async init() {

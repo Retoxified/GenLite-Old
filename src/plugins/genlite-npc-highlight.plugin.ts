@@ -1,5 +1,5 @@
-export class GenLiteNPCHighlight {
-    static name = 'GenLiteNPCHighlight';
+export class GenLiteNPCHighlightPlugin {
+    static pluginName = 'GenLiteNPCHighlightPlugin';
 
     trackedNpcs = {};
     npc_highlight_div = null;
