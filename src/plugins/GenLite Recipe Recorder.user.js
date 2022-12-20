@@ -106,4 +106,8 @@ export class GenLiteRecipeRecorder {
             this.crafting.prevVerb = verb;
         }
     }
+
+    resetResultsList(){
+        this.crafting.resultsList = {};
+    }
 }
