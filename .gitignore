@@ -2,6 +2,3 @@
 .idea/
 node_modules
 dist
-GenliteHitRecorder.user.js
-package-lock.json
-junk/
