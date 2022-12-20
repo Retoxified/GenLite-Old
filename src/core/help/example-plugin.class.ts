@@ -1,4 +1,4 @@
 export class ExamplePlugin {
-    static name = 'My Plugin';
+    static pluginName = 'My Plugin';
     async init() {}
 }

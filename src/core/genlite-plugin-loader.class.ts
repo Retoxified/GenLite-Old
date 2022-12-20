@@ -27,10 +27,10 @@ export class GenlitePluginLoader {
         const pluginInstance = new pluginClass();
         await pluginInstance.init();
 
-        window[pluginClass.name] = pluginInstance;
+        window[pluginClass.pluginName] = pluginInstance;
 
         this.plugins.push(pluginInstance);
-        console.log(`[GenLitePluginLoader]: Loaded plugin ${pluginClass.name}`);
+        console.log(`[GenLitePluginLoader]: Loaded plugin ${pluginClass.pluginName}`);
 
         return true;
     }
@@ -48,8 +48,8 @@ export class GenlitePluginLoader {
             throw new Error(`Plugin class ${pluginClass}.init was not defined as a function`);
         }
 
-        if (!pluginClass.name) {
-            throw new Error(`Plugin class ${pluginClass} does not define a name`);
+        if (!pluginClass.pluginName) {
+            throw new Error(`Plugin class ${pluginClass} does not define a pluginName`);
         }
     }
 

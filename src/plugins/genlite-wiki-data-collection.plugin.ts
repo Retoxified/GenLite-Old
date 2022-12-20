@@ -1,5 +1,5 @@
 export class GenLiteWikiDataCollectionPlugin {
-    static name = 'GenLiteWikiDataCollectionPlugin';
+    static pluginName = 'GenLiteWikiDataCollectionPlugin';
 
     previously_seen = [];
 

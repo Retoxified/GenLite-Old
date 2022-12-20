@@ -1,5 +1,5 @@
 export class GenLiteNotificationPlugin {
-    static name = 'GenLiteNotificationPlugin';
+    static pluginName = 'GenLiteNotificationPlugin';
 
     static defaultIcon = 'https://www.google.com/s2/favicons?sz=64&domain=genfanad.com';
 
