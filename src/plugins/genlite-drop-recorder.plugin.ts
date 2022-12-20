@@ -8,6 +8,9 @@ export class GenliteDropRecorderPlugin {
     objectSpawns;
     dropTable;
 
+    isPluginEnabled: boolean = false;
+    submitItemsToServer: boolean = false;
+
     constructor() {
 
         /* json format for an indvidual monster */
@@ -45,9 +48,33 @@ export class GenliteDropRecorderPlugin {
         } else {
             this.dropTable = JSON.parse(dropTableString);
         }
+        this.isPluginEnabled = window.genlite.settings.add("DropRecorder.Enable", true, "Drop Recorder", "checkbox", this.handlePluginEnableDisable, this);
+        this.submitItemsToServer = window.genlite.settings.add(
+            "DropRecorder.SubmitToServer", // Key
+            false,                         // Default
+            "Send Drops to Server(REMOTE SERVER)", // Name in UI
+            "checkbox", // Type
+            this.handleSubmitToServer, // handler function
+            this,  // context for handler
+            "Warning!\n"+ // Warning
+            "Turning this setting on will send monster drop data along with your IP\u00A0address to an external server.\n\n" +
+            "Are you sure you want to enable this setting?"
+        );
+    }
+
+    handlePluginEnableDisable(state: boolean) {
+        this.isPluginEnabled = state;
+    }
+
+    handleSubmitToServer(state: boolean) {
+        this.submitItemsToServer = state;
     }
 
     handle(verb, payload) {
+        if(this.isPluginEnabled === false) {
+            return;
+        }
+
         /* look for start of combat set the curEnemy and record data */
         if (verb == "spawnObject" && payload.type == "combat" &&
             (payload.participant1 == PLAYER.id || payload.participant2 == PLAYER.id)) {
@@ -143,7 +170,9 @@ export class GenliteDropRecorderPlugin {
             this.monsterData.meleeTot = PLAYER_INFO.skills.attack.level + PLAYER_INFO.skills.strength.level + PLAYER_INFO.skills.defense.level;
             this.objectSpawns = [];
             this.enemyDead = 0;
-            this.sendDataToServer("droplogproject", this.monsterData);
+            if(this.submitItemsToServer === true) {
+                window.genlite.sendDataToServer("droplogproject", this.monsterData);
+            }
             this.localDropRecording();
         }
     }
@@ -172,12 +201,5 @@ export class GenliteDropRecorderPlugin {
             this.dropTable[dropKey].drops[drop.Item_Code] += drop.Item_Quantity;
             localStorage.setItem("genliteDropTable", JSON.stringify(this.dropTable));
         }
-    }
-
-    sendDataToServer(url, data) {
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.open("POST", `https://nextgensoftware.nl/${url}.php`);
-        xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xmlhttp.send(JSON.stringify(data));
     }
 }

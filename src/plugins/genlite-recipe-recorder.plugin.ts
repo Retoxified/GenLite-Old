@@ -3,6 +3,8 @@ export class GenLiteRecipeRecorderPlugin {
 
     crafting;
 
+    isPluginEnabled: boolean = false;
+
     constructor() {
 
         /* stores state needed for recording crafting */
@@ -27,9 +29,18 @@ export class GenLiteRecipeRecorderPlugin {
         } else {
             this.crafting.resultsList = JSON.parse(dropTableString);
         }
+        this.isPluginEnabled = window.genlite.settings.add("RecipeRecorder.Enable", true, "Record Recipes", "checkbox", this.handlePluginEnableDisable, this);
+    }
+
+    handlePluginEnableDisable(state: boolean) {
+        this.isPluginEnabled = state;
     }
 
     action(verb, params) {
+        if(this.isPluginEnabled === false) {
+            return;
+        }
+
         if (params.hasOwnProperty('action')) {
             if (params.action.hasOwnProperty('recipe')) {
                 this.crafting.isCrafting = true;
@@ -48,6 +59,10 @@ export class GenLiteRecipeRecorderPlugin {
     }
 
     handle(verb, payload) {
+        if(this.isPluginEnabled === false) {
+            return;
+        }
+
         let itemList = {};
         /* filters NETWORK messages from other players
             some messages have no ID set those are always unique to the player

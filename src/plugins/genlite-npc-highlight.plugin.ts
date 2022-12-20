@@ -5,16 +5,30 @@ export class GenLiteNPCHighlightPlugin {
     npc_highlight_div = null;
     render = false;
 
+    isPluginEnabled: boolean = false;
+
     async init() {
         window.genlite.registerModule(this);
 
         this.npc_highlight_div = document.createElement( 'div' );
         this.npc_highlight_div.className = 'npc-indicators-list';
         document.body.appendChild(this.npc_highlight_div);
+
+        this.isPluginEnabled = window.genlite.settings.add("NpcHighlight.Enable", true, "Highlight NPCs", "checkbox", this.handlePluginEnableDisable, this);
+    }
+
+    handlePluginEnableDisable(state: boolean) {
+        // when disabling the plugin clear the current list of npcs
+        if(state === false) {
+            this.npc_highlight_div.innerHTML = '';
+            this.trackedNpcs = {};
+        }
+
+        this.isPluginEnabled = state;
     }
 
     update(dt) {
-        if(this.render == false) {
+        if(this.isPluginEnabled === false || this.render === false) {
             return;
         }
 
