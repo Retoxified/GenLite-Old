@@ -5,16 +5,15 @@ export class GenLiteWikiDataCollectionPlugin {
 
     async init() {
         window.genlite.registerModule(this);
-        window.genlite.installHook(Game.prototype, 'combatUpdate',  this.hook_Game_combatUpdate,  this);
     }
 
-    hook_Game_combatUpdate(update) {
+    combatUpdate(update) {
         let object = GAME.objectById(update.id);
 
         if (!object || !object.object || object.object.constructor.name !== "MonsterCharacter")
             return;
 
-        if(this.previously_seen.find(x => x.Name === object.info.name && x.Level === object.info.level && x.MaxHP === object.object.maxhp ) === undefined)
+        if(this.previously_seen.find(x => x.Name === object.info.name && x.Level === object.info.level && x.MaxHP === update.maxhp ) === undefined)
         {
             let monsterdata = {
                 "Monster_Name": object.info.name,

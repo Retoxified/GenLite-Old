@@ -20,6 +20,7 @@ export class GenLite {
         this.installHook(PhasedLoadingManager.prototype, 'start_phase',  this.hook_PhasedLoadingManager_start_phase,  this);
         this.installHook(Network.prototype, 'action', this.hook_Network_action, this);
         this.installHook(Network.prototype, 'handle', this.hook_Network_handle, this);
+        this.installHook(Game.prototype, 'combatUpdate',  this.hook_Game_combatUpdate,  this);
     }
 
     hook_Camera_update() {
@@ -60,6 +61,14 @@ export class GenLite {
                 if(typeof this.moduleList[i].loginOK === 'function') {
                     this.moduleList[i].loginOK.apply(this.moduleList[i], arguments);
                 }
+            }
+        }
+    }
+
+    hook_Game_combatUpdate() {
+        for (var i = 0; i < this.moduleList.length; i++) {
+            if(typeof this.moduleList[i].combatUpdate === 'function') {
+                this.moduleList[i].combatUpdate.apply(this.moduleList[i], arguments);
             }
         }
     }
