@@ -1,6 +1,9 @@
-# GenLite 0.1.2 - For GenFanad
+# GenLite 0.1.3 - For GenFanad
 
-Installation instructions can be found in the discord server.
+GenLite installation instructions
+1. Install [TamperMonkey(Chrome/Edge/Opera)](https://www.tampermonkey.net/) or [GreaseMonkey(Firefox)](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) on your browser of choice.
+2. Click [here](https://github.com/Retoxified/GenLite/raw/release/dist/genlite.user.js) to install GenLite
+3. Enjoy! GenLite should automatically update whenever there is a new version. We will announce new versions on our discord server.
 
 Join us on Discord: https://discord.gg/Jn7s7pArdg
 
@@ -16,8 +19,8 @@ To generate the latest documentation run:
 
 `npm run docs`
 
-# Node.JS - v14.16.1
-This project uses [Node.JS v14.16.1](https://nodejs.org/download/release/v14.16.1/)
+# Node.JS - v18.12.1
+This project uses [Node.JS v18.12.1](https://nodejs.org/download/release/v18.12.1/)
 
 This project is built using [Webpack](https://webpack.js.org/)
 

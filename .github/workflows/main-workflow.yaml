@@ -11,16 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: [18.x]
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/push@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: git checkout release
+      - run: git checkout --orphan release
+      - run: npm i
       - run: npm run build --if-present
       - run: git add dist -f
+      - run: git config user.email "noreply@github.com"
+      - run: git config user.name "GitHub Workflow"
       - run: git commit --allow-empty -m "New Release"
-      - run: git push release
+      - run: git push origin release -f
