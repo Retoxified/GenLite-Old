@@ -19,6 +19,9 @@ export class GenLiteRecipeRecorder {
 
     async init() {
         window.genlite.registerModule(this);
+        this.crafting.resultsList = JSON.parse(localStorage.getItem("GenLiteRecipeRecorder"));
+        if(this.crafting.resultsList == null)
+            this.crafting.resultsList = {};
     }
 
     action(verb, params) {
@@ -87,6 +90,7 @@ export class GenLiteRecipeRecorder {
                         }
                     }
                     this.crafting.prevInventory = structuredClone(payload);
+                    localStorage.setItem("GenLiteRecipeRecorder", JSON.stringify(this.crafting.resultsList));
                 }
                 /* determines if crafting is done by looking for the stop animation
                     that comes only after the crafting animation

@@ -80,7 +80,8 @@ export class GenLiteXpCalculator {
 
     /* if tooltip is update just run onmouseenter() again */
     updateTooltip(){
-        this.onmouseenter(null, this);
+        if(PLAYER_INFO.tracking)
+            this.onmouseenter(null, this);
     }
 
     /* we need the UI to be initalized before hooking */

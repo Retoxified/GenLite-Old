@@ -101,7 +101,6 @@ export class GenliteDropRecorder {
             let enemyY = [this.curEnemy.pos2.y, this.curEnemy.pos2.y + 1, this.curEnemy.pos2.y -1];
             if (enemyX.includes(itemX) && enemyY.includes(itemY)){
                 this.objectSpawns.push(payload);
-                console.log(payload);
             }
         }
 
