@@ -28,11 +28,12 @@ export class GenLite {
         this.installHook(PlayerInfo.prototype, 'updateXP', this.hook_PlayerInfo_updateXP, this);
         this.installHook(PlayerInfo.prototype, 'updateTooltip', this.hook_PlayerInfo_updateTooltip, this);
         this.installHook(window, 'initializeUI', this.hook_window_initializeUI, this);
+        this.installHook(Game.prototype, 'combatUpdate',  this.hook_Game_combatUpdate,  this);
     }
 
     hook_Camera_update() {
         for (var i = 0; i < this.moduleList.length; i++) {
-            if(typeof this.moduleList[i].update === 'function') {
+            if(typeof this.moduleList[i].update === 'function' && this.moduleList[i].isPluginEnabled) {
                 this.moduleList[i].update.apply(this.moduleList[i], arguments);
             }
         }
@@ -92,6 +93,13 @@ export class GenLite {
         for (var i = 0; i < this.moduleList.length; i++) {
             if(typeof this.moduleList[i].initializeUI === 'function') {
                 this.moduleList[i].initializeUI.apply(this.moduleList[i], arguments);
+            }
+        }
+    }
+    hook_Game_combatUpdate() {
+        for (var i = 0; i < this.moduleList.length; i++) {
+            if(typeof this.moduleList[i].combatUpdate === 'function') {
+                this.moduleList[i].combatUpdate.apply(this.moduleList[i], arguments);
             }
         }
     }
