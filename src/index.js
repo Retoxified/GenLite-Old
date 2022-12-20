@@ -6,6 +6,8 @@ import { GenLiteNotificationPlugin } from "./plugins/GenLite Notification Module
 import { GenLiteNPCHighlight } from "./plugins/GenLite NPC Highlighter.user";
 import { GenLiteRecipeRecorder } from "./plugins/GenLite Recipe Recorder.user";
 import { GenLiteWikiDataCollection } from "./plugins/GenLite Wiki Datacollection.user";
+import { GenLiteXpCalculator } from "./plugins/GenLite Xp Calculator.user";
+
 
 (async function load() {
     const genlite = new GenLite();
@@ -19,4 +21,5 @@ import { GenLiteWikiDataCollection } from "./plugins/GenLite Wiki Datacollection
     await genlite.pluginLoader.addPlugin(GenLiteNPCHighlight);
     await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorder);
     await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollection);
+    await genlite.pluginLoader.addPlugin(GenLiteXpCalculator);
 })();
