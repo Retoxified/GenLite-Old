@@ -3,12 +3,34 @@ export class GenLiteWikiDataCollectionPlugin {
 
     previously_seen = [];
 
+    isPluginEnabled: boolean = false;
+
     async init() {
         window.genlite.registerModule(this);
         window.genlite.installHook(Game.prototype, 'combatUpdate',  this.hook_Game_combatUpdate,  this);
+
+        this.isPluginEnabled = window.genlite.settings.add(
+            "WikiDataColl.Enable",
+            false,
+            "Wiki Data collection(REMOTE SERVER)",
+            "checkbox",
+            this.handlePluginEnableDisable,
+            this,
+            "Warning!\n"+ // Warning
+            "Turning this setting on will send various pieces of data that benefit the wiki along with your IP\u00A0address to an external server.\n\n" +
+            "Are you sure you want to enable this setting?"
+        );
+    }
+
+    handlePluginEnableDisable(state: boolean) {
+        this.isPluginEnabled = state;
     }
 
     hook_Game_combatUpdate(update) {
+        if(this.isPluginEnabled === false) {
+            return;
+        }
+
         let object = GAME.objectById(update.id);
 
         if (!object || !object.object || object.object.constructor.name !== "MonsterCharacter")
@@ -24,14 +46,7 @@ export class GenLiteWikiDataCollectionPlugin {
 
             this.previously_seen.push(monsterdata);
 
-            this.sendDataToServer("monsterdata", monsterdata);
+            window.genlite.sendDataToServer("monsterdata", monsterdata);
         }
-    }
-
-    sendDataToServer(url, data) {
-        var xmlhttp = new XMLHttpRequest();
-            xmlhttp.open("POST", `https://nextgensoftware.nl/${url}.php`);
-            xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xmlhttp.send(JSON.stringify(data));
     }
 }

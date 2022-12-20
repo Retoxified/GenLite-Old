@@ -1,4 +1,6 @@
 import { GenlitePluginLoader } from "./genlite-plugin-loader.class";
+import { GenLiteNotificationPlugin } from "./plugins/genlite-notification.plugin";
+import { GenLiteSettingsPlugin } from "./plugins/genlite-settings.plugin";
 
 export class GenLite {
     static pluginName = 'GenLite';
@@ -6,6 +8,9 @@ export class GenLite {
     pluginLoader;
 
     moduleList = [];
+
+    notifications: GenLiteNotificationPlugin;
+    settings: GenLiteSettingsPlugin;
 
     /** We allow setting "any field, to anything" in order to load core features such as genlite.notifications */
     [key: string]: any;
@@ -88,5 +93,12 @@ export class GenLite {
                 return returnValue;
             };
         }(object[functionName]));
+    }
+
+    sendDataToServer(url, data) {
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("POST", `https://nextgensoftware.nl/${url}.php`);
+        xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xmlhttp.send(JSON.stringify(data));
     }
 }
