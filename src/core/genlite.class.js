@@ -1,4 +1,4 @@
-import { GenLitePluginLoader } from "./genlite-plugin-loader";
+import { GenlitePluginLoader } from "./genlite-plugin-loader.class";
 
 export class GenLite {
     static name = 'GenLite';
@@ -8,7 +8,7 @@ export class GenLite {
     moduleList = [];
 
     constructor() {
-        this.pluginLoader = new GenLitePluginLoader();
+        this.pluginLoader = new GenlitePluginLoader();
     }
 
     async init() {

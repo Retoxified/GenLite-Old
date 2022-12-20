@@ -1,11 +1,11 @@
-import { GenLite } from "./core/GenLite Base Module.user";
-import { GenLiteCameraPlugin } from "./plugins/GenLite Camera Unlock.user";
-import { GenliteDropRecorder } from "./plugins/GenLite Drop Recorder.user";
-import { GenLiteItemHighlight } from "./plugins/GenLite Item Highlight.user";
-import { GenLiteNotificationPlugin } from "./plugins/GenLite Notification Module.user";
-import { GenLiteNPCHighlight } from "./plugins/GenLite NPC Highlighter.user";
-import { GenLiteRecipeRecorder } from "./plugins/GenLite Recipe Recorder.user";
-import { GenLiteWikiDataCollection } from "./plugins/GenLite Wiki Datacollection.user";
+import { GenLite } from "./core/genlite.class";
+import { GenLiteCameraPlugin } from "./plugins/genlite-camera.plugin";
+import { GenLiteDropRecorderPlugin } from "./plugins/gen-lite-drop-recorder.plugin";
+import { GenLiteItemHighlightPlugin } from "./plugins/genlite-item-highlight.plugin";
+import { GenLiteNotificationPlugin } from "./plugins/genlite-notification.plugin";
+import { GenLiteNPCHighlightPlugin } from "./plugins/genlite-npc-highlight.plugin";
+import { GenLiteRecipeRecorderPlugin } from "./plugins/genlite-recipe-recorder.plugin";
+import { GenLiteWikiDataCollectionPlugin } from "./plugins/genlite-wiki-data-collection.plugin";
 
 (async function load() {
     const genlite = new GenLite();
@@ -13,10 +13,10 @@ import { GenLiteWikiDataCollection } from "./plugins/GenLite Wiki Datacollection
     window.genlite = genlite;
 
     await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
-    await genlite.pluginLoader.addPlugin(GenliteDropRecorder);
-    await genlite.pluginLoader.addPlugin(GenLiteItemHighlight);
+    await genlite.pluginLoader.addPlugin(GenLiteDropRecorderPlugin);
+    await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteNotificationPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteNPCHighlight);
-    await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorder);
-    await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollection);
+    await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
+    await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);
+    await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollectionPlugin);
 })();

@@ -1,5 +1,5 @@
-export class GenLiteRecipeRecorder {
-    static name = 'GenLiteRecipeRecorder';
+export class GenLiteRecipeRecorderPlugin {
+    static name = 'GenLiteRecipeRecorderPlugin';
 
     constructor() {
 
