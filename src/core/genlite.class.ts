@@ -33,7 +33,7 @@ export class GenLite {
 
     hook_Camera_update() {
         for (var i = 0; i < this.moduleList.length; i++) {
-            if(typeof this.moduleList[i].update === 'function' && this.moduleList[i].isPluginEnabled) {
+            if(typeof this.moduleList[i].update === 'function') {
                 this.moduleList[i].update.apply(this.moduleList[i], arguments);
             }
         }
