@@ -79,9 +79,11 @@ export class GenliteHitRecorder {
         }
 
         if (verb == "combatUI"){
+            if( PLAYER_INFO !== undefined){
             this.statsList.attack = PLAYER_INFO.skills.attack.level;
             this.statsList.strength = PLAYER_INFO.skills.strength.level;
             this.statsList.ranged = PLAYER_INFO.skills.ranged.level;
+            }
             this.statsList.aim = payload.equipment.stats.aim ?? payload.equipment.stats.ranged_aim;
             this.statsList.power = payload.equipment.stats.power ?? payload.equipment.stats.ranged_power;
             switch (payload.stance){
@@ -102,6 +104,15 @@ export class GenliteHitRecorder {
                     this.statsList.ranged += 2;
             }
         }
+    }
+
+    initializeUI(){
+        if(!this.isPluginEnabled){
+            return;
+        }
+        this.statsList.attack = PLAYER_INFO.skills.attack.level;
+        this.statsList.strength = PLAYER_INFO.skills.strength.level;
+        this.statsList.ranged = PLAYER_INFO.skills.ranged.level;
     }
 
 }
