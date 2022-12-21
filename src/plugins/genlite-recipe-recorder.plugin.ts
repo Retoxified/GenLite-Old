@@ -23,6 +23,12 @@ export class GenLiteRecipeRecorderPlugin {
 
     async init() {
         window.genlite.registerModule(this);
+        let dropTableString = localStorage.getItem("GenliteRecipeRecorder")
+        if(dropTableString == null) {
+            this.crafting.resultsList = {};
+        } else {
+            this.crafting.resultsList = JSON.parse(dropTableString);
+        }
         this.isPluginEnabled = window.genlite.settings.add("RecipeRecorder.Enable", true, "Record Recipes", "checkbox", this.handlePluginEnableDisable, this);
     }
 
@@ -104,6 +110,7 @@ export class GenLiteRecipeRecorderPlugin {
                         }
                     }
                     this.crafting.prevInventory = structuredClone(payload);
+                    localStorage.setItem("GenLiteRecipeRecorder", JSON.stringify(this.crafting.resultsList));
                 }
                 /* determines if crafting is done by looking for the stop animation
                     that comes only after the crafting animation
@@ -118,5 +125,9 @@ export class GenLiteRecipeRecorderPlugin {
             }
             this.crafting.prevVerb = verb;
         }
+    }
+
+    resetResultsList(){
+        this.crafting.resultsList = {};
     }
 }

@@ -10,6 +10,9 @@ import { GenLiteItemHighlightPlugin } from "./plugins/genlite-item-highlight.plu
 import { GenLiteNPCHighlightPlugin } from "./plugins/genlite-npc-highlight.plugin";
 import { GenLiteRecipeRecorderPlugin } from "./plugins/genlite-recipe-recorder.plugin";
 import { GenLiteWikiDataCollectionPlugin } from "./plugins/genlite-wiki-data-collection.plugin";
+import { GenLiteXpCalculator } from "./plugins/genlite-xp-calculator.plugin";
+
+
 
 
 (async function load() {
@@ -27,5 +30,6 @@ import { GenLiteWikiDataCollectionPlugin } from "./plugins/genlite-wiki-data-col
     await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
     await genlite.pluginLoader.addPlugin(GenliteDropRecorderPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollectionPlugin);
+    await genlite.pluginLoader.addPlugin(GenLiteXpCalculator);
     await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);
 })();
