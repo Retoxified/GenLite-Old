@@ -131,7 +131,14 @@ export class GenliteDropRecorderPlugin {
             if the items are on sqaure one tile around the mob
             NOTE: this assumes removeObject comes last which might not be true across updates
         */
-        if (verb == "spawnObject" && payload.type == "item" && this.enemyDead != 0) {;
+        if (verb == "spawnObject" && payload.type == "item" && this.enemyDead != 0) {
+            if (this.curEnemy.pos2 === undefined) {
+                // debug block for uncommon bug that I need more info on
+                console.log(this);
+                alert("Uncommon bug found please report to @dpe0175 on discord (copypaste the console thanks), sorry guys this is a weird one.");
+                this.enemyDead = 0;
+                return;
+            }
             let itemX = payload.location.position.x;
             let itemY = payload.location.position.y;
             let enemyX: number[] = [this.curEnemy.pos2.x, this.curEnemy.pos2.x + 1, this.curEnemy.pos2.x -1];

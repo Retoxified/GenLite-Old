@@ -81,6 +81,9 @@ export class GenLiteNPCHighlightPlugin {
     }
 
     combatUpdate(update) {
+        if(this.isPluginEnabled === false) {
+            return;
+        }
         let object = GAME.objectById(update.id);
         if (!object || !object.object || object.object.constructor.name !== "MonsterCharacter")
             return;
