@@ -8,6 +8,7 @@ export class GenLiteItemHighlightPlugin {
 
     isAltDown: boolean = false;
     originalItemIntersects: Function
+    styleRuleIndex: number = -1
 
     isPluginEnabled: boolean = false;
 
@@ -25,6 +26,10 @@ export class GenLiteItemHighlightPlugin {
         this.item_highlight_div.className = 'item-indicators-list';
         document.body.appendChild(this.item_highlight_div);
         this.isPluginEnabled = window.genlite.settings.add("ItemHighlight.Enable", true, "Highlight Items", "checkbox", this.handlePluginEnableDisable, this);
+        let storedPriorityColor = window.genlite.settings.add("ItemHighlight.PriorityColor", "#ffa500", "Priority Item Color", "color", this.handleColorChange, this);
+
+        let sheet = document.styleSheets[0];
+        this.styleRuleIndex = sheet.insertRule(`.genlite-priority-item { color: ${storedPriorityColor}; }`, sheet.cssRules.length);
 
         window.addEventListener('keydown', (event) => {
             if (event.key !== "Alt")
@@ -73,6 +78,12 @@ export class GenLiteItemHighlightPlugin {
         }
 
         this.isPluginEnabled = state;
+    }
+
+    handleColorChange(value: string) {
+        let sheet = document.styleSheets[0] as any;
+
+        sheet.cssRules[this.styleRuleIndex].style.color = value;
     }
 
     update(dt) {
@@ -157,7 +168,7 @@ export class GenLiteItemHighlightPlugin {
         if(itemPriority == -1) {
             return "spell-locked";
         } else if(itemPriority == 1) {
-            return "enemy";
+            return "genlite-priority-item";
         }
 
         let itemValue = this.getItemValue(item);
