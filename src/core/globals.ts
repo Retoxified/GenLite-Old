@@ -71,3 +71,15 @@ declare const Camera: {
 declare const PlayerInfo: {
     [key: string]: any,
 };
+
+declare const CHAT: {
+    [key: string]: any,
+}
+
+declare const NETWORK: {
+    [key: string]: any,
+}
+
+declare const WorldItem: {
+    [key: string]: any,
+}

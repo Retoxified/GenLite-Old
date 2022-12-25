@@ -10,7 +10,6 @@ export class GenliteHitRecorder {
     maxNonZero;
 
     isPluginEnabled: boolean = false;
-    submitItemsToServer: boolean = false;
 
     constructor() {
         this.curEnemy = null;
