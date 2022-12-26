@@ -10,7 +10,6 @@ export class GenliteHitRecorder {
     maxNonZero;
 
     isPluginEnabled: boolean = false;
-    submitItemsToServer: boolean = false;
 
     constructor() {
         this.curEnemy = null;
@@ -58,7 +57,7 @@ export class GenliteHitRecorder {
         }
 
         /* for some reason npc.info doesnt contain health so grab it here and check for monster death */
-        if (verb == "damage" && payload.id == this.curEnemy.id) {
+        if (verb == "damage" && this.curEnemy != undefined && payload.id == this.curEnemy.id) {
             if(payload.amount == 0) {
                 if(this.consecutiveNonZero > this.maxNonZero) {
                     this.maxNonZero = this.consecutiveNonZero;

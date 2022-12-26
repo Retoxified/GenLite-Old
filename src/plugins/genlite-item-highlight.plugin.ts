@@ -2,18 +2,69 @@ export class GenLiteItemHighlightPlugin {
     static pluginName = 'GenLiteItemHighlightPlugin';
 
     trackedItems = {};
+    itemData = {};
     item_highlight_div = null;
     render = false;
+
+    isAltDown: boolean = false;
+    originalItemIntersects: Function
+    styleRuleIndex: number = -1
 
     isPluginEnabled: boolean = false;
 
     async init() {
         window.genlite.registerModule(this);
 
+        this.originalItemIntersects = WorldItem.prototype.intersects;
+
+        let storedItemData = localStorage.getItem("genliteItemData")
+        if(storedItemData !== null) {
+            this.itemData = JSON.parse(storedItemData);
+        }
+
         this.item_highlight_div = document.createElement( 'div' );
         this.item_highlight_div.className = 'item-indicators-list';
         document.body.appendChild(this.item_highlight_div);
         this.isPluginEnabled = window.genlite.settings.add("ItemHighlight.Enable", true, "Highlight Items", "checkbox", this.handlePluginEnableDisable, this);
+        let storedPriorityColor = window.genlite.settings.add("ItemHighlight.PriorityColor", "#ffa500", "Priority Item Color", "color", this.handleColorChange, this);
+
+        let sheet = document.styleSheets[0];
+        this.styleRuleIndex = sheet.insertRule(`.genlite-priority-item { color: ${storedPriorityColor}; }`, sheet.cssRules.length);
+
+        window.addEventListener('keydown', (event) => {
+            if (event.key !== "Alt")
+                return;
+
+            event.preventDefault();
+            if (!event.repeat) {
+                const hiddenElements = document.querySelectorAll('.genlite-item-setting') as NodeListOf<HTMLElement>;
+
+                hiddenElements.forEach((element) => {
+                    element.style.display = 'inline-block';
+                });
+
+                this.isAltDown = true;
+            }
+        });
+
+        window.addEventListener('keyup', (event) => {
+            if (event.key !== "Alt")
+                return;
+
+            event.preventDefault();
+
+            const hiddenElements = document.querySelectorAll('.genlite-item-setting') as NodeListOf<HTMLElement>;
+
+            hiddenElements.forEach((element) => {
+                element.style.display = 'none';
+            });
+
+            this.isAltDown = false;
+        });
+
+        if(this.isPluginEnabled === true){
+            WorldItem.prototype.intersects = this.worlditem_intersects_priority;
+        }
     }
 
     handlePluginEnableDisable(state: boolean) {
@@ -21,9 +72,18 @@ export class GenLiteItemHighlightPlugin {
         if(state === false) {
             this.item_highlight_div.innerHTML = '';
             this.trackedItems = {};
+            WorldItem.prototype.intersects = this.originalItemIntersects
+        } else {
+            WorldItem.prototype.intersects = this.worlditem_intersects_priority;
         }
 
         this.isPluginEnabled = state;
+    }
+
+    handleColorChange(value: string) {
+        let sheet = document.styleSheets[0] as any;
+
+        sheet.cssRules[this.styleRuleIndex].style.color = value;
     }
 
     update(dt) {
@@ -46,6 +106,10 @@ export class GenLiteItemHighlightPlugin {
 
         for(let key in this.trackedItems) {
             if(GAME.items[key] !== undefined) {
+                if(this.get_item_data(GAME.items[key].definition.item) == -1 && !this.isAltDown) {
+                    this.trackedItems[key].style.visibility = 'hidden';
+                    continue;
+                }
                 let posKey = GAME.items[key].pos2.x+','+GAME.items[key].pos2.y;
                 if(stack_counter[posKey] === undefined) {
                     stack_counter[posKey] = 0;
@@ -100,6 +164,13 @@ export class GenLiteItemHighlightPlugin {
     }
 
     getItemColor(item) {
+        let itemPriority = this.get_item_data(item.definition.item)
+        if(itemPriority == -1) {
+            return "spell-locked";
+        } else if(itemPriority == 1) {
+            return "genlite-priority-item";
+        }
+
         let itemValue = this.getItemValue(item);
 
         if(itemValue >= 10000) {
@@ -132,16 +203,82 @@ export class GenLiteItemHighlightPlugin {
         element.className = this.getItemColor(item);
         element.style.position = 'absolute';
         //element.style.zIndex = '99999';
-        element.innerHTML = item.item_name;
+        let item_name = item.item_name;
         if(stackable === true) {
-            element.innerHTML = `${item.item_name}(${item.definition.quantity})`;
+            item_name = `${item.item_name}(${item.definition.quantity})`;
         }
+        element.innerHTML = `<span style="display: inline-block;">${item_name}</span>
+                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.hide_item('${itemDefId}');void(0);"> &#8863;</div>
+                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.important_item('${itemDefId}');void(0);"> &#8862;</div>`;
         element.style.transform = 'translateX(-50%)';
+        element.style.pointerEvents = "none";
         element.style.textShadow = '-1px -1px 0 #000,0   -1px 0 #000, 1px -1px 0 #000, 1px  0   0 #000, 1px  1px 0 #000, 0    1px 0 #000, -1px  1px 0 #000, -1px  0   0 #000';
-        element.style.pointerEvents = 'none';
 
         this.item_highlight_div.appendChild(element);
 
         return element;
+    }
+
+    hide_item(item_key) {
+        if(!this.itemData.hasOwnProperty(item_key))
+            this.itemData[item_key] = 0;
+
+        if(this.itemData[item_key] != -1)
+            this.itemData[item_key] = -1;
+        else
+            this.itemData[item_key] = 0;
+
+        this.save_item_list();
+    }
+
+    important_item(item_key) {
+        if(!this.itemData.hasOwnProperty(item_key))
+            this.itemData[item_key] = 0;
+
+        if(this.itemData[item_key] != 1)
+            this.itemData[item_key] = 1;
+        else
+            this.itemData[item_key] = 0;
+
+        this.save_item_list();
+    }
+
+    worlditem_intersects_priority(ray, list) {
+        const self = (this as any);
+
+        let i = ray.intersectObject(self.sprite);
+        if (!i || i.length == 0)
+            return;
+        list.push({
+            color: 'green',
+            distance: i.distance,
+            priority: -1,
+            object: self,
+            text: "Examine",
+            action: ()=>CHAT.addGameMessage(self.item_examine)
+        });
+        list.push({
+            color: 'red',
+            distance: i.distance,
+            priority: 1 + window[GenLiteItemHighlightPlugin.pluginName].get_item_data(self.definition.item) * 50,
+            object: self,
+            text: "Take",
+            action: ()=>NETWORK.action('take', {
+                item: self.id
+            })
+        });
+    }
+    get_item_data(item_key) {
+        if(!this.itemData.hasOwnProperty(item_key))
+            return 0;
+
+        return this.itemData[item_key];
+    }
+
+    save_item_list() {
+        this.item_highlight_div.innerHTML = '';
+        this.trackedItems = {};
+
+        localStorage.setItem("genliteItemData", JSON.stringify(this.itemData));
     }
 }

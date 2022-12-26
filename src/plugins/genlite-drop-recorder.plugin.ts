@@ -127,8 +127,8 @@ export class GenliteDropRecorderPlugin {
             }
         }
 
-        /* in the inverval between monster dead and object removal record spawnObject
-            if the items are on sqaure one tile around the mob
+        /* in the interval between monster death and object removal record spawnObject
+            if the items are on a square one tile around the mob
             NOTE: this assumes removeObject comes last which might not be true across updates
         */
         if (verb == "spawnObject" && payload.type == "item" && this.enemyDead != 0) {

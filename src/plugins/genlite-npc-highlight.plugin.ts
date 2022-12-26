@@ -99,7 +99,8 @@ export class GenLiteNPCHighlightPlugin {
             let npcid = npcsToMod[key];
             this.trackedNpcs[npcid].innerHTML += ` HP: ${this.npcHealthList[hpKey]}`;
         }
-        this.trackedNpcs[object.id].innerHTML = `<div>${object.htmlName}</div><div>HP: ${update.hp}/${update.maxhp}</div>`;
+        if(this.trackedNpcs.hasOwnProperty(object.id))
+            this.trackedNpcs[object.id].innerHTML = `<div>${object.htmlName}</div><div>HP: ${update.hp}/${update.maxhp}</div>`;
     }
 
 
