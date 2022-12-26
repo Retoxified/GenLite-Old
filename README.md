@@ -1,4 +1,4 @@
-# GenLite 0.1.8 - For GenFanad
+# GenLite 0.1.9 - For GenFanad
 
 GenLite installation instructions
 1. Install [TamperMonkey(Chrome/Edge/Opera)](https://www.tampermonkey.net/) or [GreaseMonkey(Firefox)](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) on your browser of choice.

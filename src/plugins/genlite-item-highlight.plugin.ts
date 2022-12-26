@@ -207,10 +207,11 @@ export class GenLiteItemHighlightPlugin {
         if(stackable === true) {
             item_name = `${item.item_name}(${item.definition.quantity})`;
         }
-        element.innerHTML = `<span style="pointer-events: none; display: inline-block;">${item_name}</span>
-                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.hide_item('${itemDefId}');void(0);"> &#8863;</div>
-                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.important_item('${itemDefId}');void(0);"> &#8862;</div>`;
+        element.innerHTML = `<span style="display: inline-block;">${item_name}</span>
+                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.hide_item('${itemDefId}');void(0);"> &#8863;</div>
+                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.important_item('${itemDefId}');void(0);"> &#8862;</div>`;
         element.style.transform = 'translateX(-50%)';
+        element.style.pointerEvents = "none";
         element.style.textShadow = '-1px -1px 0 #000,0   -1px 0 #000, 1px -1px 0 #000, 1px  0   0 #000, 1px  1px 0 #000, 0    1px 0 #000, -1px  1px 0 #000, -1px  0   0 #000';
 
         this.item_highlight_div.appendChild(element);
