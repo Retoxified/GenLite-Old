@@ -31,40 +31,38 @@ export class GenLiteItemHighlightPlugin {
         let sheet = document.styleSheets[0];
         this.styleRuleIndex = sheet.insertRule(`.genlite-priority-item { color: ${storedPriorityColor}; }`, sheet.cssRules.length);
 
-        window.addEventListener('keydown', (event) => {
-            if (event.key !== "Alt")
-                return;
-
-            event.preventDefault();
-            if (!event.repeat) {
-                const hiddenElements = document.querySelectorAll('.genlite-item-setting') as NodeListOf<HTMLElement>;
-
-                hiddenElements.forEach((element) => {
-                    element.style.display = 'inline-block';
-                });
-
-                this.isAltDown = true;
-            }
-        });
-
-        window.addEventListener('keyup', (event) => {
-            if (event.key !== "Alt")
-                return;
-
-            event.preventDefault();
-
-            const hiddenElements = document.querySelectorAll('.genlite-item-setting') as NodeListOf<HTMLElement>;
-
-            hiddenElements.forEach((element) => {
-                element.style.display = 'none';
-            });
-
-            this.isAltDown = false;
-        });
+        window.addEventListener('keydown', this.keyDownHandler.bind(this));
+        window.addEventListener('keyup', this.keyUpHandler.bind(this));
+        window.addEventListener("blur", this.blurHandler.bind(this))
 
         if(this.isPluginEnabled === true){
             WorldItem.prototype.intersects = this.worlditem_intersects_priority;
         }
+    }
+
+    keyDownHandler(event) {
+        if (event.key !== "Alt")
+            return;
+
+        event.preventDefault();
+        if (!event.repeat) {
+            this.isAltDown = true;
+            this.setDisplayState("inline-block");
+        }
+    }
+    keyUpHandler(event) {
+        if (event.key !== "Alt")
+            return;
+
+        event.preventDefault();
+
+        this.isAltDown = false;
+        this.setDisplayState("none");
+    }
+
+    blurHandler() {
+        this.isAltDown = false;
+        this.setDisplayState("none");
     }
 
     handlePluginEnableDisable(state: boolean) {
@@ -280,5 +278,13 @@ export class GenLiteItemHighlightPlugin {
         this.trackedItems = {};
 
         localStorage.setItem("genliteItemData", JSON.stringify(this.itemData));
+    }
+
+    setDisplayState(state) {
+        const hiddenElements = document.querySelectorAll('.genlite-item-setting') as NodeListOf<HTMLElement>;
+
+        hiddenElements.forEach((element) => {
+            element.style.display = state;
+        });
     }
 }

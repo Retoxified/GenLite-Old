@@ -85,7 +85,7 @@ export class GenLiteNPCHighlightPlugin {
             return;
         }
         let object = GAME.objectById(update.id);
-        if (!object || !object.object || object.object.constructor.name !== "MonsterCharacter")
+        if (!object || !object.object || (object.object.constructor.name !== "MonsterCharacter" && object.object.constructor.name !== "HumanCharacter"))
             return;
         let hpKey = `${object.info.name}-${object.info.level}`;
 
