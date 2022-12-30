@@ -34,6 +34,9 @@ export class GenLiteLocationsPlugin {
     }
     private handlePluginEnableDisable(state: boolean) {
         this.isPluginEnabled = state;
+        this.checkIsPluginEnabled()
+    }
+    checkIsPluginEnabled() {
         if(this.isPluginEnabled) {
             this.enableLocationLabels()
             this.enableMapButton()
@@ -153,23 +156,6 @@ export class GenLiteLocationsPlugin {
             visibility: hidden;          
         `
         document.body.appendChild( this.mapButton )
-
-        /*
-        this.mapIframe = document.createElement("iframe")
-        this.mapIframe.className = "map-iframe" //TODO perhaps use IDs instead of classes
-        this.mapIframe.style.cssText = `
-            position: absolute;
-            top: 50vh;
-            left: 50vw;
-            transform: translate(-50%, -50%);
-            width: 700px;
-            height: 700px;
-            display: none;
-            visibility: hidden;
-        `
-        document.body.appendChild( this.mapIframe  )
-
-         */
     }
     openMap() {
         let layer = PLAYER.location.layer.includes("world") ?
@@ -245,13 +231,12 @@ export class GenLiteLocationsPlugin {
         let currentPosition:number[] = [ PLAYER.character.pos2.x, PLAYER.character.pos2.y ]
         this.startLocationCheck( currentPosition, this.lastPosition )
     }
+
     loginOK() {
-        this.enableLocationLabels()
-        this.enableMapButton()
+        this.checkIsPluginEnabled()
     }
     logoutOK() {
-        this.disableLocationLabels()
-        this.disableMapButton()
+        this.checkIsPluginEnabled()
     }
     private enableMapButton() {
         this.mapButton.addEventListener("click", this.openMap )
