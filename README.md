@@ -1,7 +1,7 @@
 # GenLite 0.1.10 - For GenFanad
 
 GenLite installation instructions
-1. Install [TamperMonkey(Chrome/Edge/Opera)](https://www.tampermonkey.net/) or [GreaseMonkey(Firefox)](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) on your browser of choice.
+1. Install [TamperMonkey(All Browsers)](https://www.tampermonkey.net/) in your browser of choice.
 2. Click [here](https://github.com/Retoxified/GenLite/raw/release/dist/genlite.user.js) to install GenLite
 3. Enjoy! GenLite should automatically update whenever there is a new version. We will announce new versions in our discord server.
 
