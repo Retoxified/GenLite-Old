@@ -36,15 +36,6 @@ export class GenLiteLocationsPlugin {
         this.isPluginEnabled = state;
         this.checkIsPluginEnabled()
     }
-    checkIsPluginEnabled() {
-        if(this.isPluginEnabled) {
-            this.enableLocationLabels()
-            this.enableMapButton()
-        } else {
-            this.disableLocationLabels()
-            this.disableMapButton()
-        }
-    }
     private setupLocations() {
         this.lastPosition = [0,0]
         this.currentLocation = [[0,0]]
@@ -156,6 +147,23 @@ export class GenLiteLocationsPlugin {
             visibility: hidden;          
         `
         document.body.appendChild( this.mapButton )
+
+        /*
+        this.mapIframe = document.createElement("iframe")
+        this.mapIframe.className = "map-iframe" //TODO perhaps use IDs instead of classes
+        this.mapIframe.style.cssText = `
+            position: absolute;
+            top: 50vh;
+            left: 50vw;
+            transform: translate(-50%, -50%);
+            width: 700px;
+            height: 700px;
+            display: none;
+            visibility: hidden;
+        `
+        document.body.appendChild( this.mapIframe  )
+
+         */
     }
     openMap() {
         let layer = PLAYER.location.layer.includes("world") ?
@@ -231,12 +239,24 @@ export class GenLiteLocationsPlugin {
         let currentPosition:number[] = [ PLAYER.character.pos2.x, PLAYER.character.pos2.y ]
         this.startLocationCheck( currentPosition, this.lastPosition )
     }
-
+    checkIsPluginEnabled() {
+        if(this.isPluginEnabled) {
+            this.enableLocationLabels()
+            this.enableMapButton()
+        } else {
+            this.disableLocationLabels()
+            this.disableMapButton()
+        }
+    }
     loginOK() {
-        this.checkIsPluginEnabled()
+        if(!this.isPluginEnabled) return;
+        this.enableLocationLabels()
+        this.enableMapButton()
     }
     logoutOK() {
-        this.checkIsPluginEnabled()
+        if(!this.isPluginEnabled) return;
+        this.disableLocationLabels()
+        this.disableMapButton()
     }
     private enableMapButton() {
         this.mapButton.addEventListener("click", this.openMap )
