@@ -85,8 +85,9 @@ export class GenLiteNPCHighlightPlugin {
             return;
         }
         let object = GAME.objectById(update.id);
-        if (!object || !object.object || (object.object.constructor.name !== "MonsterCharacter" && object.object.constructor.name !== "HumanCharacter"))
+        if(update.id == PLAYER.id || GAME.players[update.id] !== undefined)
             return;
+
         let hpKey = `${object.info.name}-${object.info.level}`;
 
         let npcsToMod;
