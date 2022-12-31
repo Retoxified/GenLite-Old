@@ -4,7 +4,9 @@
     "build": "npx webpack",
     "docs": "jsdoc -r ./src/"
   },
-  "dependencies": {},
+  "dependencies": {
+    "robust-point-in-polygon": "^1.0.3"
+  },
   "devDependencies": {
     "jsdoc": "^4.0.0",
     "source-map-loader": "^4.0.1",
