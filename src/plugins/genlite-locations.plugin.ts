@@ -131,6 +131,7 @@ export class GenLiteLocationsPlugin {
             transform: translate(-50%, -50%);
             display: none;
             visibility: hidden;
+            pointer-events: none;
         `
         document.body.appendChild(this.locationLabel)
     }
@@ -172,6 +173,8 @@ export class GenLiteLocationsPlugin {
 
         this.popupMap = window.open(`https://genfamap.com/?location=true${ layer }#${PLAYER.character.pos2.x}_${PLAYER.character.pos2.y}_0.67`, "genfanad-map", 'width=800,height=600')
         //TODO switch to using iframe instead
+        // may also consider storing map data
+        // in the modified client/js bundle
     }
     closeMap() {
         //TODO
