@@ -13,7 +13,7 @@ import { GenLiteWikiDataCollectionPlugin } from "./plugins/genlite-wiki-data-col
 import { GenLiteXpCalculator } from "./plugins/genlite-xp-calculator.plugin";
 import { GenliteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
 import { GenliteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
-
+import {GenLiteLocationsPlugin} from "./plugins/genlite-locations.plugin";
 
 
 
@@ -37,4 +37,5 @@ import { GenliteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
     await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);
     await genlite.pluginLoader.addPlugin(GenliteHitRecorder);
     await genlite.pluginLoader.addPlugin(GenliteMenuScaler);
+    await genlite.pluginLoader.addPlugin(GenLiteLocationsPlugin);
 })();

@@ -31,7 +31,10 @@ export class GenLiteWikiDataCollectionPlugin {
         }
         let object = GAME.objectById(update.id);
 
-        if (!object || !object.object || object.object.constructor.name !== "MonsterCharacter")
+        if(update.id == PLAYER.id || GAME.players[update.id] !== undefined)
+            return;
+
+        if (!object || !object.object)
             return;
 
         if(this.previously_seen.find(x => x.Name === object.info.name && x.Level === object.info.level && x.MaxHP === update.maxhp ) === undefined)
