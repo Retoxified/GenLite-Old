@@ -12,6 +12,7 @@ import { GenLiteRecipeRecorderPlugin } from "./plugins/genlite-recipe-recorder.p
 import { GenLiteWikiDataCollectionPlugin } from "./plugins/genlite-wiki-data-collection.plugin";
 import { GenLiteXpCalculator } from "./plugins/genlite-xp-calculator.plugin";
 import { GenliteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
+import {GenLiteLocationsPlugin} from "./plugins/genlite-locations.plugin";
 
 
 
@@ -34,4 +35,5 @@ import { GenliteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
     await genlite.pluginLoader.addPlugin(GenLiteXpCalculator);
     await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);
     await genlite.pluginLoader.addPlugin(GenliteHitRecorder);
+    await genlite.pluginLoader.addPlugin(GenLiteLocationsPlugin);
 })();
