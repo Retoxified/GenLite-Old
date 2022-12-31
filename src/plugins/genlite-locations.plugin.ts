@@ -241,9 +241,13 @@ export class GenLiteLocationsPlugin {
         }
         this.lastPosition = currentPosition
     }
-    animationDetector( animation ) {
+
+    private locationCheck() {
         let currentPosition:number[] = [ PLAYER.character.pos2.x, PLAYER.character.pos2.y ]
         this.startLocationCheck( currentPosition, this.lastPosition )
+    }
+    animationDetector( animation ) {
+        this.locationCheck()
     }
     checkIsPluginEnabled() {
         if(this.isPluginEnabled) {
@@ -258,6 +262,7 @@ export class GenLiteLocationsPlugin {
         if(!this.isPluginEnabled) return;
         this.enableLocationLabels()
         this.enableMapButton()
+        this.locationCheck()
     }
     logoutOK() {
         if(!this.isPluginEnabled) return;
