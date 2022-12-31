@@ -49,10 +49,14 @@ export class GenLiteLocationsPlugin {
                 }
             },
             "Cent": {
-                polygon: [],
+                polygon: [[54,64],[85,58],[126,56],[125,128],[28,127],[-18,101],[-18,91],[-1,64],[54,64]],
                 subLocations: {
                     "Cent Anvil": [[98,89],[100,89],[100,92],[98,92],[98,89]],
-                    "Wolfgang's Sheepfold": [[100,59],[112,59],[112,70],[109,73],[101,73],[101,65],[100,64],[100,59]]
+                    "Wolfgang's Sheepfold": [[100,59],[112,59],[112,70],[109,73],[101,73],[101,65],[100,64],[100,59]],
+                    "Jax Butchery": [[111,96],[115,96],[115,98],[111,98]],//TODO decide how to better handle overlaps; either do not ever overlap polygons or just allow sort to select first found and index that the same each time
+                    "Kordan's Armoury": [[109,92],[111,92],[111,96],[109,96]],// ^
+                    "Fern's General Store": [[97,93],[100,93],[100,95],[99,96],[97,96],[97,99],[95,99],[95,96],[97,94]],
+                    "Tutorial": [[91,104],[97,104],[98,105],[99,105],[100,104],[103,104],[103,101],[120,101],[120,102],[121,103],[120,110],[120,111],[119,112],[120,113],[120,119],[118,121],[118,123],[116,125],[111,125],[110,124],[109,124],[109,122],[99,122],[96,119],[92,119],[92,113],[91,112],[91,104]]
                 }
             },
             "Zamok": {
@@ -94,10 +98,6 @@ export class GenLiteLocationsPlugin {
             "Emerald City": {
                 polygon: [[-55,382],[-8,382],[-8,336],[-55,336],[-55,382]]
             },
-            "Tutorial":{
-                //TODO
-                //polygon: [[91,104],[91,112],[92,113],[92,117],[]]
-            },
             "Dark Forest": {
                 polygon: [[-185,332],[-186,340],[-190,347],[-189,367],[-179,370],[-171,380],[-149,380],[-130,377],[-129,370],[-97,382],[-100,354],[-121,337],[-162,316],[-185,332]]
             },
@@ -115,6 +115,9 @@ export class GenLiteLocationsPlugin {
                 subLocations: {
                     "Reka Baby Fire Elementals": [[-2, -59], [-2, -57], [3, -57], [6, -54], [9, -54], [9, -52], [11, -50], [14, -50], [14, -61], [6, -61], [4, -59], [-2, -59]]
                 }
+            },
+            "Tutorial Dungeon": {
+                polygon: [[77,73],[130,73],[130,124],[82,125],[77,73]],
             }
         }
     }
@@ -171,7 +174,7 @@ export class GenLiteLocationsPlugin {
             PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
         //bleh this logic needs to be expanded on to work with heights as well as layer... just plopping it here for now might break though
 
-        this.popupMap = window.open(`https://genfamap.com/?location=true${ layer }#${PLAYER.character.pos2.x}_${PLAYER.character.pos2.y}_0.67`, "genfanad-map", 'width=800,height=600')
+        this.popupMap = window.open(`https://genfamap.com/${ layer }?location=true#${PLAYER.character.pos2.x}_${PLAYER.character.pos2.y}_0.67`, "genfanad-map", 'width=800,height=600')
         //TODO switch to using iframe instead
         // may also consider storing map data
         // in the modified client/js bundle
