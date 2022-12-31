@@ -18,6 +18,7 @@ export class GenLiteLocationsPlugin {
     }
     mainLocations: object //!!!
     dungeonLocations: object //!!!
+    regionLocations: object//!!! any and objects need typescript type!
     isPluginEnabled: boolean
     locationLabel: HTMLElement
     mapIframe: HTMLIFrameElement //TODO
@@ -120,6 +121,12 @@ export class GenLiteLocationsPlugin {
                 polygon: [[77,73],[130,73],[130,124],[82,125],[77,73]],
             }
         }
+        this.regionLocations = {
+            "Reka Valley":[[-128,-128],[209,-128],[211,6],[197,21],[190,65],[198,95],[187,129],[201,155],[196,194],[178,228],[157,237],[156,255],[-61,274],[-116,217],[-92,148],[-17,109],[-3,-2],[-58,-12],[-71,-26],[-74,-54],[-128,-58],[-128,-128]]
+        }
+    }
+    private checkRegionLocation() {
+
     }
     private setupLocationLabel() {
         this.locationLabel = document.createElement("div")
@@ -200,6 +207,20 @@ export class GenLiteLocationsPlugin {
                 return true
             }
         }
+    }/////////
+    private checkRegionLocations( regionLocations:object , currentPosition:number[] ): boolean  {
+        //hmmmm ^^^^ This is duplicate of above; but also not sure if regions should be complex polygons perhaps only squares/cubes
+        for (const regionLocation in regionLocations) {
+            if( this.classifyPoint(regionLocations[regionLocation], currentPosition) != 1) {
+                this.setLocationLabel( regionLocation )
+                this.currentLocation = regionLocations[regionLocation]
+                this.currentLocationLabel = regionLocation
+                this.currentSubLocation = regionLocations[regionLocation]
+                //TODO fix the nonsense going on here ^^ Decide the best way to store the current label and location as well as sub location
+                return true
+            }
+        }
+
     }
     private checkLocations( locationsToCheck:object , currentPosition:number[] ): boolean  {
         for (const location in locationsToCheck) {
@@ -216,12 +237,12 @@ export class GenLiteLocationsPlugin {
                 return true
             }
         }
-        return false
+        return this.checkRegionLocations( this.regionLocations, currentPosition )
     }
-    classifyPointOrPolygon( pointOrPolygon, position ) {
+    private classifyPointOrPolygon( pointOrPolygon, position ) {
         return this.classifyPoint( (pointOrPolygon.polygon !== undefined) ? pointOrPolygon.polygon : pointOrPolygon, position )
     }
-    startLocationCheck(currentPosition, lastPosition ) {
+    private startLocationCheck(currentPosition, lastPosition ) {
         if( currentPosition != lastPosition ) {
 
             //TODO re-add check previous location here and skip the switch if still in region.
