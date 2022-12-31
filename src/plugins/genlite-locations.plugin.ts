@@ -13,29 +13,44 @@ export class GenLiteLocationsPlugin {
     async init() {
         window.genlite.registerModule(this)
         this.isPluginEnabled = window.genlite.settings.add("LocationLabels.Enable", true, "Location Labels", "checkbox", this.handlePluginEnableDisable, this)
+        this.showCoordinates = window.genlite.settings.add("LocationLabelCoordinates.Enable", true, "Coordinates", "checkbox", this.handleShowCoordinatesDisable, this)
         //window.genlite.installHook(WorldManager.prototype, 'playerMove',  this.hook_PlayerMove, this);
         // May use this instead of animation override however this function runs much more often than needed
     }
+    isPluginEnabled: boolean
+    showCoordinates: boolean
     mainLocations: object //!!!
     dungeonLocations: object //!!!
     regionLocations: object//!!! any and objects need typescript type!
-    isPluginEnabled: boolean
     locationLabel: HTMLElement
     mapIframe: HTMLIFrameElement //TODO
     mapButton: HTMLButtonElement
+    popupMap: any //!!!
     currentLocationLabel: string
     currentLocation: any//!!!
     currentSubLocation: string
     lastPosition: number[]
-    popupMap: any //!!!
     constructor() {
         this.setupLocations()
         this.setupLocationLabel()
         this.setupMap()
     }
+    private checkIsPluginEnabled() {
+        if(this.isPluginEnabled) {
+            this.enableLocationLabels()
+            this.enableMapButton()
+        } else {
+            this.disableLocationLabels()
+            this.disableMapButton()
+        }
+    }
     private handlePluginEnableDisable(state: boolean) {
         this.isPluginEnabled = state;
         this.checkIsPluginEnabled()
+    }
+    private handleShowCoordinatesDisable(state: boolean) {
+        this.showCoordinates = state;
+        this.locationCheck()
     }
     private setupLocations() {
         this.lastPosition = [0,0]
@@ -125,9 +140,6 @@ export class GenLiteLocationsPlugin {
             "Reka Valley":[[-128,-128],[209,-128],[211,6],[197,21],[190,65],[198,95],[187,129],[201,155],[196,194],[178,228],[157,237],[156,255],[-61,274],[-116,217],[-92,148],[-17,109],[-3,-2],[-58,-12],[-71,-26],[-74,-54],[-128,-58],[-128,-128]]
         }
     }
-    private checkRegionLocation() {
-
-    }
     private setupLocationLabel() {
         this.locationLabel = document.createElement("div")
         this.locationLabel.className = "location_label"
@@ -189,12 +201,15 @@ export class GenLiteLocationsPlugin {
     closeMap() {
         //TODO
     }
-    private setLocationLabelUnknown() {
-        this.locationLabel.innerText = `(${GAME.world.x},${GAME.world.y})`
-
+    private setLocationLabelUnknown(): void {
+        this.showCoordinates ?
+            this.locationLabel.innerText = `(${GAME.world.x},${GAME.world.y})` :
+            this.locationLabel.innerText = ``
     }
-    private setLocationLabel( value: string ) {
-        this.locationLabel.innerText = `${value} (${GAME.world.x},${GAME.world.y})`
+    private setLocationLabel( value: string ): void {
+        this.showCoordinates ?
+            this.locationLabel.innerText = `${value} (${GAME.world.x},${GAME.world.y})` :
+            this.locationLabel.innerText = `${value}`
     }
     private checkSubLocation( subLocations:object , currentPosition:number[] ): boolean {
         for (const subLocation in subLocations) {
@@ -239,10 +254,10 @@ export class GenLiteLocationsPlugin {
         }
         return this.checkRegionLocations( this.regionLocations, currentPosition )
     }
-    private classifyPointOrPolygon( pointOrPolygon, position ) {
+    private classifyPointOrPolygon( pointOrPolygon:any, position:number[] ): number { //-1, 0, 1
         return this.classifyPoint( (pointOrPolygon.polygon !== undefined) ? pointOrPolygon.polygon : pointOrPolygon, position )
     }
-    private startLocationCheck(currentPosition, lastPosition ) {
+    private startLocationCheck( currentPosition:number[], lastPosition:number[] ): void {
         if( currentPosition != lastPosition ) {
 
             //TODO re-add check previous location here and skip the switch if still in region.
@@ -251,12 +266,18 @@ export class GenLiteLocationsPlugin {
                 case "dungeon":
                     found = this.checkLocations( this.dungeonLocations , currentPosition )
                     break;
+                case "fae":
+                    this.setLocationLabel( "Fae" )//
+                    break;
+                case "world1":
+                case "world2":
+                case "world3":
                 default:
                     found = this.checkLocations( this.mainLocations, currentPosition )
                     break;
 
             }
-            if(!found) {
+            if( !found ) {
                 this.setLocationLabelUnknown()
             }
         }
@@ -269,15 +290,6 @@ export class GenLiteLocationsPlugin {
     }
     animationDetector( animation ) {
         this.locationCheck()
-    }
-    checkIsPluginEnabled() {
-        if(this.isPluginEnabled) {
-            this.enableLocationLabels()
-            this.enableMapButton()
-        } else {
-            this.disableLocationLabels()
-            this.disableMapButton()
-        }
     }
     loginOK() {
         if(!this.isPluginEnabled) return;
