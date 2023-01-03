@@ -30,27 +30,10 @@ export class GenLiteLocationsPlugin {
     currentLocation: any//!!!
     currentSubLocation: string
     lastPosition: number[]
+    mapCompassLink:HTMLDivElement
     constructor() {
         this.setupLocations()
         this.setupLocationLabel()
-        this.setupMap()
-    }
-    private checkIsPluginEnabled() {
-        if(this.isPluginEnabled) {
-            this.enableLocationLabels()
-            this.enableMapButton()
-        } else {
-            this.disableLocationLabels()
-            this.disableMapButton()
-        }
-    }
-    private handlePluginEnableDisable(state: boolean) {
-        this.isPluginEnabled = state;
-        this.checkIsPluginEnabled()
-    }
-    private handleShowCoordinatesDisable(state: boolean) {
-        this.showCoordinates = state;
-        this.locationCheck()
     }
     private setupLocations() {
         this.lastPosition = [0,0]
@@ -87,9 +70,6 @@ export class GenLiteLocationsPlugin {
                     "Zamok Mine": [[82,15],[81,12],[75,12],[72,14],[77,21],[82,15]],
                     "Zamok Castle": [[42,15],[49,15],[52,13],[56,16],[62,16],[68,11],[75,22],[75,56],[68,57],[63,54],[54,60],[47,56],[42,55],[42,15]]
                 }
-            },
-            "Reka Valley": {
-                polygon: []
             },
             "Coyn": {
                 polygon: [[200,150],[270,160],[289,242],[174,235]]
@@ -157,37 +137,24 @@ export class GenLiteLocationsPlugin {
         `
         document.body.appendChild(this.locationLabel)
     }
-
-    private setupMap() {
-        this.mapButton = document.createElement("button")
-        this.mapButton.className = "map-button"
-        this.mapButton.innerText = "Open Map"
-        this.mapButton.style.cssText = `
-            position: absolute;
-            bottom: 1px;
-            right: 0;  
-            display: none;
-            visibility: hidden;          
-        `
-        document.body.appendChild( this.mapButton )
-
-        /*
-        this.mapIframe = document.createElement("iframe")
-        this.mapIframe.className = "map-iframe" //TODO perhaps use IDs instead of classes
-        this.mapIframe.style.cssText = `
-            position: absolute;
-            top: 50vh;
-            left: 50vw;
-            transform: translate(-50%, -50%);
-            width: 700px;
-            height: 700px;
-            display: none;
-            visibility: hidden;
-        `
-        document.body.appendChild( this.mapIframe  )
-
-         */
+    private checkIsPluginEnabled() {
+        if(this.isPluginEnabled) {
+            this.enableLocationLabels()
+            this.enableMapButton()
+        } else {
+            this.disableLocationLabels()
+            this.disableMapButton()
+        }
     }
+    private handlePluginEnableDisable(state: boolean) {
+        this.isPluginEnabled = state;
+        this.checkIsPluginEnabled()
+    }
+    private handleShowCoordinatesDisable(state: boolean) {
+        this.showCoordinates = state;
+        this.locationCheck()
+    }
+
     openMap() {
         let layer = PLAYER.location.layer.includes("world") ?
             PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
@@ -303,24 +270,12 @@ export class GenLiteLocationsPlugin {
         this.disableMapButton()
     }
     private enableMapButton() {
-        this.mapButton.addEventListener("click", this.openMap )
-        this.mapButton.style.cssText = `
-            position: absolute;
-            bottom: 1px;
-            right: 0;  
-            font-size: .75em;
-            background-color: brown;
-            color: yellow;
-            display: block;
-            visibility: visible;          
-        `
+        let minimapCompass = document.getElementById("new_ux-minimap-compass")
+        minimapCompass.addEventListener("click", this.openMap )
     }
     private disableMapButton() {
-        this.mapButton.removeEventListener( "click", this.openMap )
-        this.mapButton.style.cssText = `
-            display: none;
-            visibility: hidden;
-        `
+        let minimapCompass = document.getElementById("new_ux-minimap-compass")
+        minimapCompass.removeEventListener( "click", this.openMap )
     }
     private disableLocationLabels() {
         this.locationLabel.style.display = "none"
