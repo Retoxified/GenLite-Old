@@ -71,7 +71,7 @@ export class GenliteDropRecorderPlugin {
     }
 
     handle(verb, payload) {
-        if(this.isPluginEnabled === false) {
+        if(this.isPluginEnabled === false || NETWORK.loggedIn === false) {
             return;
         }
 
@@ -133,10 +133,6 @@ export class GenliteDropRecorderPlugin {
         */
         if (verb == "spawnObject" && payload.type == "item" && this.enemyDead != 0) {
             if (this.curEnemy.pos2 === undefined) {
-                // debug block for uncommon bug that I need more info on
-                console.log(this);
-                alert("Uncommon bug found please report to @dpe0175 on discord (copypaste the console thanks), sorry guys this is a weird one.");
-                this.enemyDead = 0;
                 return;
             }
             let itemX = payload.location.position.x;
@@ -182,6 +178,28 @@ export class GenliteDropRecorderPlugin {
             }
             this.localDropRecording();
         }
+    }
+    /* on login scan for combats as some times you can spawn in to a combat
+    */
+    loginOK(){
+        for (let i in GAME.combats){
+            let combat = GAME.combats[i];
+            if (combat.left.id == PLAYER.id){
+                this.curCombat = combat;
+                this.curEnemy = combat.right;
+            } else if (combat.right.id == PLAYER.id) {
+                this.curCombat = combat;
+                this.curEnemy = combat.left;
+            }
+            break;
+        }
+        if (this.curCombat === undefined)
+            return;
+        this.monsterData.layer = this.monsterData.layer = PLAYER.location.layer
+        this.monsterData.x = this.curEnemy.pos2.x;
+        this.monsterData.y = this.curEnemy.pos2.y;
+        this.monsterData.Monster_Name = this.curEnemy.info.name;
+        this.monsterData.Monster_Level = this.curEnemy.info.level;
     }
 
     /* record and aggregate drops in local storage */

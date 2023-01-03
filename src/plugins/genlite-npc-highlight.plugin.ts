@@ -85,7 +85,7 @@ export class GenLiteNPCHighlightPlugin {
             return;
         }
         let object = GAME.objectById(update.id);
-        if(update.id == PLAYER.id || GAME.players[update.id] !== undefined)
+        if(update.id == PLAYER.id || GAME.players[update.id] !== undefined || object === undefined)
             return;
 
         let hpKey = `${object.info.name}-${object.info.level}`;
