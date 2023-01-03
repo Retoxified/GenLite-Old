@@ -23,17 +23,17 @@ export class GenLiteLocationsPlugin {
     dungeonLocations: object //!!!
     regionLocations: object//!!! any and objects need typescript type!
     locationLabel: HTMLElement
-    mapIframe: HTMLIFrameElement //TODO
-    mapButton: HTMLButtonElement
+    mapIframe: HTMLIFrameElement
     popupMap: any //!!!
     currentLocationLabel: string
     currentLocation: any//!!!
     currentSubLocation: string
     lastPosition: number[]
-    mapCompassLink:HTMLDivElement
+    mapOpen:boolean
     constructor() {
         this.setupLocations()
         this.setupLocationLabel()
+        this.setupMapIframe()
     }
     private setupLocations() {
         this.lastPosition = [0,0]
@@ -117,7 +117,9 @@ export class GenLiteLocationsPlugin {
             }
         }
         this.regionLocations = {
-            "Reka Valley":[[-128,-128],[209,-128],[211,6],[197,21],[190,65],[198,95],[187,129],[201,155],[196,194],[178,228],[157,237],[156,255],[-61,274],[-116,217],[-92,148],[-17,109],[-3,-2],[-58,-12],[-71,-26],[-74,-54],[-128,-58],[-128,-128]]
+            "Reka Valley":[[-128,-128],[209,-128],[211,6],[197,21],[190,65],[198,95],[187,129],[201,155],[196,194],[178,228],[157,237],[156,255],[-61,274],[-116,217],[-92,148],[-17,109],[-3,-2],[-58,-12],[-71,-26],[-74,-54],[-128,-58],[-128,-128]],
+            "":[[]]
+
         }
     }
     private setupLocationLabel() {
@@ -136,6 +138,76 @@ export class GenLiteLocationsPlugin {
             pointer-events: none;
         `
         document.body.appendChild(this.locationLabel)
+    }
+    private hoverMap() {
+        let layer = PLAYER.location.layer.includes("world") ?
+            PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
+        //bleh this logic needs to be expanded on to work with heights as well as layer... just plopping it here for now might break though
+
+        this.mapIframe.src = `https://genfamap.com/${ layer }?location=true#${PLAYER.character.pos2.x}_${PLAYER.character.pos2.y}_0.67`
+        this.mapIframe.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: block;
+            visibility: visible;
+            opacity: .5;
+            width: 50vw;
+            min-height: 75vh;
+        `
+        this.mapIframe.style.zIndex = "1"
+    }
+    private hideMap() {
+        this.mapOpen = false
+        this.mapIframe.style.cssText = `
+            display: none;
+            visibility: hidden;
+            opacity: 0.0;
+        `
+    }
+    private showMap() {
+        this.mapOpen = true
+        let layer = PLAYER.location.layer.includes("world") ?
+            PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
+        //bleh this logic needs to be expanded on to work with heights as well as layer... just plopping it here for now might break though
+
+       this.mapIframe.src = `https://genfamap.com/${ layer }?location=true#${PLAYER.character.pos2.x}_${PLAYER.character.pos2.y}_0.67`
+        this.mapIframe.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: block;
+            visibility: visible;
+            opacity: 1;
+            width: 50vw;
+            min-height: 75vh;
+        `
+        this.mapIframe.style.zIndex = "1"
+    }
+    private setupMapIframe() {
+        this.mapIframe = document.createElement("iframe")
+        this.mapIframe.style.cssText = `
+            display: none;
+            visibility: hidden;
+            width: 50vw;
+            min-height: 75vh;
+  
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+             opacity: 0.5;
+        `
+        this.mapIframe.style.zIndex = "1"
+        this.mapIframe.src = "https://genfamap.com/?location=true#0_0_0.67"
+        /*
+
+        display: none;
+            visibility: hidden;
+         */
+        document.body.appendChild( this.mapIframe )
     }
     private checkIsPluginEnabled() {
         if(this.isPluginEnabled) {
@@ -254,6 +326,10 @@ export class GenLiteLocationsPlugin {
     private locationCheck() {
         let currentPosition:number[] = [ PLAYER.character.pos2.x, PLAYER.character.pos2.y ]
         this.startLocationCheck( currentPosition, this.lastPosition )
+
+        let layer = PLAYER.location.layer.includes("world") ?
+            PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
+        this.mapIframe.src = `https://genfamap.com/${ layer }?location=true#${PLAYER.character.pos2.x}_${PLAYER.character.pos2.y}_0.67`
     }
     animationDetector( animation ) {
         this.locationCheck()
@@ -268,14 +344,37 @@ export class GenLiteLocationsPlugin {
         if(!this.isPluginEnabled) return;
         this.disableLocationLabels()
         this.disableMapButton()
+        this.mapOpen = false
+        this.hideMap()
     }
     private enableMapButton() {
         let minimapCompass = document.getElementById("new_ux-minimap-compass")
-        minimapCompass.addEventListener("click", this.openMap )
+        minimapCompass.addEventListener("click", () => {
+            if(this.mapOpen)
+                this.hideMap()
+            else
+                this.showMap()
+        } )
+        minimapCompass.addEventListener( "mouseover", () => this.hoverMap() )
+        minimapCompass.addEventListener( "mouseout", () => {
+            if(!this.mapOpen)
+                this.hideMap()
+        } )
+
     }
     private disableMapButton() {
         let minimapCompass = document.getElementById("new_ux-minimap-compass")
-        minimapCompass.removeEventListener( "click", this.openMap )
+        minimapCompass.removeEventListener( "click", () => {
+            if(this.mapOpen)
+                this.hideMap()
+            else
+                this.showMap()
+        } )
+        minimapCompass.removeEventListener( "mouseover", () => this.hoverMap() )
+        minimapCompass.removeEventListener( "mouseout", () => {
+            if(!this.mapOpen)
+                this.hideMap()
+        } )
     }
     private disableLocationLabels() {
         this.locationLabel.style.display = "none"
