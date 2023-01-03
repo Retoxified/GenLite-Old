@@ -110,7 +110,7 @@ export class GenLiteRecipeRecorderPlugin {
                         }
                     }
                     this.crafting.prevInventory = structuredClone(payload);
-                    localStorage.setItem("GenLiteRecipeRecorder", JSON.stringify(this.crafting.resultsList));
+                    localStorage.setItem("GenliteRecipeRecorder", JSON.stringify(this.crafting.resultsList));
                 }
                 /* determines if crafting is done by looking for the stop animation
                     that comes only after the crafting animation

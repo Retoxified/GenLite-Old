@@ -27,6 +27,7 @@ export class GenLite {
         this.installHook(Network.prototype, 'handle', this.hook_Network_handle, this);
         this.installHook(PlayerInfo.prototype, 'updateXP', this.hook_PlayerInfo_updateXP, this);
         this.installHook(PlayerInfo.prototype, 'updateTooltip', this.hook_PlayerInfo_updateTooltip, this);
+        this.installHook(PlayerInfo.prototype, 'updateSkills', this.hook_PlayerInfo_updateSkills, this);
         this.installHook(window, 'initializeUI', this.hook_window_initializeUI, this);
         this.installHook(Game.prototype, 'combatUpdate',  this.hook_Game_combatUpdate,  this);
     }
@@ -88,6 +89,15 @@ export class GenLite {
             }
         }
     }
+
+    hook_PlayerInfo_updateSkills() {
+        for (var i = 0; i < this.moduleList.length; i++) {
+            if(typeof this.moduleList[i].updateSkills === 'function') {
+                this.moduleList[i].updateSkills.apply(this.moduleList[i], arguments);
+            }
+        }
+    }
+
 
     hook_window_initializeUI() {
         for (var i = 0; i < this.moduleList.length; i++) {

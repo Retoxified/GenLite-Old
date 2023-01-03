@@ -1,7 +1,7 @@
 /** Browser globals */
 declare interface Window {
     [key: string]: any,
-}
+};
 
 /** Library globals */
 declare const THREE: {
@@ -74,12 +74,12 @@ declare const PlayerInfo: {
 
 declare const CHAT: {
     [key: string]: any,
-}
+};
 
 declare const NETWORK: {
     [key: string]: any,
-}
+};
 
 declare const WorldItem: {
     [key: string]: any,
-}
+};
