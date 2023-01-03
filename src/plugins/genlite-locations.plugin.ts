@@ -13,28 +13,28 @@ export class GenLiteLocationsPlugin {
     async init() {
         window.genlite.registerModule(this)
         this.isPluginEnabled = window.genlite.settings.add("LocationLabels.Enable", true, "Location Labels", "checkbox", this.handlePluginEnableDisable, this)
+        this.showCoordinates = window.genlite.settings.add("LocationLabelCoordinates.Enable", true, "Coordinates", "checkbox", this.handleShowCoordinatesDisable, this)
         //window.genlite.installHook(WorldManager.prototype, 'playerMove',  this.hook_PlayerMove, this);
         // May use this instead of animation override however this function runs much more often than needed
     }
+    isPluginEnabled: boolean
+    showCoordinates: boolean
     mainLocations: object //!!!
     dungeonLocations: object //!!!
-    isPluginEnabled: boolean
+    regionLocations: object//!!! any and objects need typescript type!
     locationLabel: HTMLElement
-    mapIframe: HTMLIFrameElement //TODO
-    mapButton: HTMLButtonElement
+    mapIframe: HTMLIFrameElement
+    popupMap: any //!!!
     currentLocationLabel: string
     currentLocation: any//!!!
     currentSubLocation: string
     lastPosition: number[]
-    popupMap: any //!!!
+    mapOpen: boolean
+    mapZoom: number
     constructor() {
         this.setupLocations()
         this.setupLocationLabel()
-        this.setupMap()
-    }
-    private handlePluginEnableDisable(state: boolean) {
-        this.isPluginEnabled = state;
-        this.checkIsPluginEnabled()
+        this.setupMapIframe()
     }
     private setupLocations() {
         this.lastPosition = [0,0]
@@ -49,10 +49,14 @@ export class GenLiteLocationsPlugin {
                 }
             },
             "Cent": {
-                polygon: [],
+                polygon: [[54,64],[85,58],[126,56],[125,128],[28,127],[-18,101],[-18,91],[-1,64],[54,64]],
                 subLocations: {
                     "Cent Anvil": [[98,89],[100,89],[100,92],[98,92],[98,89]],
-                    "Wolfgang's Sheepfold": [[100,59],[112,59],[112,70],[109,73],[101,73],[101,65],[100,64],[100,59]]
+                    "Wolfgang's Sheepfold": [[100,59],[112,59],[112,70],[109,73],[101,73],[101,65],[100,64],[100,59]],
+                    "Jax Butchery": [[111,96],[115,96],[115,98],[111,98]],//TODO decide how to better handle overlaps; either do not ever overlap polygons or just allow sort to select first found and index that the same each time
+                    "Kordan's Armoury": [[109,92],[111,92],[111,96],[109,96]],// ^
+                    "Fern's General Store": [[97,93],[100,93],[100,95],[99,96],[97,96],[97,99],[95,99],[95,96],[97,94]],
+                    "Tutorial": [[91,104],[97,104],[98,105],[99,105],[100,104],[103,104],[103,101],[120,101],[120,102],[121,103],[120,110],[120,111],[119,112],[120,113],[120,119],[118,121],[118,123],[116,125],[111,125],[110,124],[109,124],[109,122],[99,122],[96,119],[92,119],[92,113],[91,112],[91,104]]
                 }
             },
             "Zamok": {
@@ -67,9 +71,6 @@ export class GenLiteLocationsPlugin {
                     "Zamok Mine": [[82,15],[81,12],[75,12],[72,14],[77,21],[82,15]],
                     "Zamok Castle": [[42,15],[49,15],[52,13],[56,16],[62,16],[68,11],[75,22],[75,56],[68,57],[63,54],[54,60],[47,56],[42,55],[42,15]]
                 }
-            },
-            "Reka Valley": {
-                polygon: []
             },
             "Coyn": {
                 polygon: [[200,150],[270,160],[289,242],[174,235]]
@@ -94,10 +95,6 @@ export class GenLiteLocationsPlugin {
             "Emerald City": {
                 polygon: [[-55,382],[-8,382],[-8,336],[-55,336],[-55,382]]
             },
-            "Tutorial":{
-                //TODO
-                //polygon: [[91,104],[91,112],[92,113],[92,117],[]]
-            },
             "Dark Forest": {
                 polygon: [[-185,332],[-186,340],[-190,347],[-189,367],[-179,370],[-171,380],[-149,380],[-130,377],[-129,370],[-97,382],[-100,354],[-121,337],[-162,316],[-185,332]]
             },
@@ -115,7 +112,15 @@ export class GenLiteLocationsPlugin {
                 subLocations: {
                     "Reka Baby Fire Elementals": [[-2, -59], [-2, -57], [3, -57], [6, -54], [9, -54], [9, -52], [11, -50], [14, -50], [14, -61], [6, -61], [4, -59], [-2, -59]]
                 }
+            },
+            "Tutorial Dungeon": {
+                polygon: [[77,73],[130,73],[130,124],[82,125],[77,73]],
             }
+        }
+        this.regionLocations = {
+            "Reka Valley":[[-128,-128],[209,-128],[211,6],[197,21],[190,65],[198,95],[187,129],[201,155],[196,194],[178,228],[157,237],[156,255],[-61,274],[-116,217],[-92,148],[-17,109],[-3,-2],[-58,-12],[-71,-26],[-74,-54],[-128,-58],[-128,-128]],
+            "":[[]]
+
         }
     }
     private setupLocationLabel() {
@@ -131,57 +136,121 @@ export class GenLiteLocationsPlugin {
             transform: translate(-50%, -50%);
             display: none;
             visibility: hidden;
+            pointer-events: none;
         `
         document.body.appendChild(this.locationLabel)
     }
+    private updateMapIframeSrc() {
+        let layer = PLAYER.location.layer.includes("world") ?
+            PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
+        //let zoom =  this.mapIframe.src.substring(this.mapIframe.src.lastIndexOf("_"),this.mapIframe.src.length-1)
 
-    private setupMap() {
-        this.mapButton = document.createElement("button")
-        this.mapButton.className = "map-button"
-        this.mapButton.innerText = "Open Map"
-        this.mapButton.style.cssText = `
-            position: absolute;
-            bottom: 1px;
-            right: 0;  
-            display: none;
-            visibility: hidden;          
-        `
-        document.body.appendChild( this.mapButton )
-
-        /*
-        this.mapIframe = document.createElement("iframe")
-        this.mapIframe.className = "map-iframe" //TODO perhaps use IDs instead of classes
+        this.mapIframe.src = `https://genfamap.com/${ layer }?location=true#${ PLAYER.character.pos2.x+.5 }_${ PLAYER.character.pos2.y-.5 }_${ this.mapZoom }`
+    }
+    private hoverMap() {
+        this.updateMapIframeSrc()
         this.mapIframe.style.cssText = `
             position: absolute;
-            top: 50vh;
-            left: 50vw;
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            width: 700px;
-            height: 700px;
+            display: block;
+            visibility: visible;
+            opacity: .5;
+            width: 50vw;
+            min-height: 75vh;
+            
+            pointer-events: none;
+        `
+        this.mapIframe.style.zIndex = "1"
+    }
+    private hideMap() {
+        this.mapOpen = false
+        this.mapIframe.style.cssText = `
             display: none;
             visibility: hidden;
+            opacity: 0.0;
         `
-        document.body.appendChild( this.mapIframe  )
-
-         */
     }
+    private showMap() {
+        this.mapOpen = true
+
+        this.updateMapIframeSrc()
+
+        this.mapIframe.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: block;
+            visibility: visible;
+            opacity: 1;
+            width: 50vw;
+            min-height: 75vh;
+            
+            pointer-events: auto;
+        `
+        this.mapIframe.style.zIndex = "1"
+    }
+    private setupMapIframe() {
+        this.mapZoom = 0.55
+        this.mapIframe = document.createElement("iframe")
+        this.mapIframe.style.cssText = `
+            display: none;
+            visibility: hidden;
+            width: 50vw;
+            min-height: 75vh;
+  
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+             opacity: 0.5;
+        `
+        this.mapIframe.style.zIndex = "1"
+        this.mapIframe.src = `https://genfamap.com/?location=true#0_0_${ this.mapZoom }`
+        document.body.appendChild( this.mapIframe )
+    }
+    private checkIsPluginEnabled() {
+        if(this.isPluginEnabled) {
+            this.enableLocationLabels()
+            this.enableMapIframe()
+        } else {
+            this.disableLocationLabels()
+            this.disableMapIframe()
+        }
+    }
+    private handlePluginEnableDisable(state: boolean) {
+        this.isPluginEnabled = state;
+        this.checkIsPluginEnabled()
+    }
+    private handleShowCoordinatesDisable(state: boolean) {
+        this.showCoordinates = state;
+        this.locationCheck()
+    }
+
     openMap() {
         let layer = PLAYER.location.layer.includes("world") ?
             PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
         //bleh this logic needs to be expanded on to work with heights as well as layer... just plopping it here for now might break though
 
-        this.popupMap = window.open(`https://genfamap.com/?location=true${ layer }#${PLAYER.character.pos2.x}_${PLAYER.character.pos2.y}_0.67`, "genfanad-map", 'width=800,height=600')
+        this.popupMap = window.open(`https://genfamap.com/${ layer }?location=true#${PLAYER.character.pos2.x}_${PLAYER.character.pos2.y}_0.67`, "genfanad-map", 'width=800,height=600')
         //TODO switch to using iframe instead
+        // may also consider storing map data
+        // in the modified client/js bundle
     }
     closeMap() {
         //TODO
     }
-    private setLocationLabelUnknown() {
-        this.locationLabel.innerText = `(${GAME.world.x},${GAME.world.y})`
-
+    private setLocationLabelUnknown(): void {
+        this.showCoordinates ?
+            this.locationLabel.innerText = `(${GAME.world.x},${GAME.world.y})` :
+            this.locationLabel.innerText = ``
     }
-    private setLocationLabel( value: string ) {
-        this.locationLabel.innerText = `${value} (${GAME.world.x},${GAME.world.y})`
+    private setLocationLabel( value: string ): void {
+        this.showCoordinates ?
+            this.locationLabel.innerText = `${value} (${GAME.world.x},${GAME.world.y})` :
+            this.locationLabel.innerText = `${value}`
     }
     private checkSubLocation( subLocations:object , currentPosition:number[] ): boolean {
         for (const subLocation in subLocations) {
@@ -194,6 +263,20 @@ export class GenLiteLocationsPlugin {
                 return true
             }
         }
+    }/////////
+    private checkRegionLocations( regionLocations:object , currentPosition:number[] ): boolean  {
+        //hmmmm ^^^^ This is duplicate of above; but also not sure if regions should be complex polygons perhaps only squares/cubes
+        for (const regionLocation in regionLocations) {
+            if( this.classifyPoint(regionLocations[regionLocation], currentPosition) != 1) {
+                this.setLocationLabel( regionLocation )
+                this.currentLocation = regionLocations[regionLocation]
+                this.currentLocationLabel = regionLocation
+                this.currentSubLocation = regionLocations[regionLocation]
+                //TODO fix the nonsense going on here ^^ Decide the best way to store the current label and location as well as sub location
+                return true
+            }
+        }
+
     }
     private checkLocations( locationsToCheck:object , currentPosition:number[] ): boolean  {
         for (const location in locationsToCheck) {
@@ -210,12 +293,12 @@ export class GenLiteLocationsPlugin {
                 return true
             }
         }
-        return false
+        return this.checkRegionLocations( this.regionLocations, currentPosition )
     }
-    classifyPointOrPolygon( pointOrPolygon, position ) {
+    private classifyPointOrPolygon( pointOrPolygon:any, position:number[] ): number { //-1, 0, 1
         return this.classifyPoint( (pointOrPolygon.polygon !== undefined) ? pointOrPolygon.polygon : pointOrPolygon, position )
     }
-    startLocationCheck(currentPosition, lastPosition ) {
+    private startLocationCheck( currentPosition:number[], lastPosition:number[] ): void {
         if( currentPosition != lastPosition ) {
 
             //TODO re-add check previous location here and skip the switch if still in region.
@@ -224,59 +307,74 @@ export class GenLiteLocationsPlugin {
                 case "dungeon":
                     found = this.checkLocations( this.dungeonLocations , currentPosition )
                     break;
+                case "fae":
+                    this.setLocationLabel( "Fae" )//
+                    break;
+                case "world1":
+                case "world2":
+                case "world3":
                 default:
                     found = this.checkLocations( this.mainLocations, currentPosition )
                     break;
 
             }
-            if(!found) {
+            if( !found ) {
                 this.setLocationLabelUnknown()
             }
         }
         this.lastPosition = currentPosition
     }
-    animationDetector( animation ) {
+
+    private locationCheck() {
         let currentPosition:number[] = [ PLAYER.character.pos2.x, PLAYER.character.pos2.y ]
         this.startLocationCheck( currentPosition, this.lastPosition )
+
+        this.updateMapIframeSrc()
     }
-    checkIsPluginEnabled() {
-        if(this.isPluginEnabled) {
-            this.enableLocationLabels()
-            this.enableMapButton()
-        } else {
-            this.disableLocationLabels()
-            this.disableMapButton()
-        }
+    animationDetector( animation ) {
+        this.locationCheck()
     }
     loginOK() {
         if(!this.isPluginEnabled) return;
         this.enableLocationLabels()
-        this.enableMapButton()
+        this.enableMapIframe()
+        this.locationCheck()
     }
     logoutOK() {
         if(!this.isPluginEnabled) return;
         this.disableLocationLabels()
-        this.disableMapButton()
+        this.disableMapIframe()
     }
-    private enableMapButton() {
-        this.mapButton.addEventListener("click", this.openMap )
-        this.mapButton.style.cssText = `
-            position: absolute;
-            bottom: 1px;
-            right: 0;  
-            font-size: .75em;
-            background-color: brown;
-            color: yellow;
-            display: block;
-            visibility: visible;          
-        `
+
+    private minimapCompassClick = () => {
+        console.log(this.mapOpen)
+        if(this.mapOpen)
+            this.hideMap()
+        else
+            this.showMap()
     }
-    private disableMapButton() {
-        this.mapButton.removeEventListener( "click", this.openMap )
-        this.mapButton.style.cssText = `
-            display: none;
-            visibility: hidden;
-        `
+    private minimapCompassMouseOver = () => {
+        this.hoverMap()
+    }
+    private minimapCompassMouseOut = () => {
+        if(!this.mapOpen)
+            this.hideMap()
+    }
+    private enableMapIframe() {
+        this.hideMap()
+
+        let minimapCompass = document.getElementById("new_ux-minimap-compass")
+        minimapCompass.addEventListener( "click", this.minimapCompassClick )
+        minimapCompass.addEventListener( "mouseover", this.minimapCompassMouseOver )
+        minimapCompass.addEventListener( "mouseout", this.minimapCompassMouseOut )
+    }
+    private disableMapIframe() {
+        this.hideMap()
+
+        let minimapCompass = document.getElementById("new_ux-minimap-compass")
+        minimapCompass.removeEventListener( "click", this.minimapCompassClick )
+        minimapCompass.removeEventListener( "mouseover", this.minimapCompassMouseOver )
+        minimapCompass.removeEventListener( "mouseout", this.minimapCompassMouseOut )
     }
     private disableLocationLabels() {
         this.locationLabel.style.display = "none"
