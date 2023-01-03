@@ -26,7 +26,7 @@ export class GenLiteSettingsPlugin {
         settingsModal.appendChild(this.container);
     }
 
-    public add(key: string, defaultValue: any, label: string, inputType: string, callback: (value: any) => void, context: any, confirmationMessage: string = undefined): any {
+    public add(key: string, defaultValue: any, label: string, inputType: string, callback: (value: any) => void, context: any, confirmationMessage: string = undefined, attributeList = undefined): any {
         // Set the default value for the setting if it has not been set already
         if (!(key in this.settings)) {
 
@@ -47,6 +47,10 @@ export class GenLiteSettingsPlugin {
         // Create an input element for the setting
         const input = document.createElement('input');
         input.type = inputType;
+        for (let i in attributeList){
+            let attr = attributeList[i]
+            input.setAttribute(attr[0], attr[1]);
+        }
         if(inputType === "checkbox") {
             input.checked = this.settings[key];
         } else {
