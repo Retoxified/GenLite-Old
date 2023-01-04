@@ -1,42 +1,35 @@
 /*
- GenliteLocationsPlugin
- Description: The goal of this plugin is to have labels for all locations in the map.
- Known Issues: Some code is redundant, and iv written out a few known to-do's sporatically through the code;
-  it is not currently optimal but should be usable for now. Some polygons when made from clicking on genfamap
-  and generating the array in the browser have not worked 100% correctly either. Not sure if this is the polygon
-  library messing up or if the points are invalid. When Manually inputing the points this issue does not appear
-  to happen.
+ GenLiteLocationsPlugin
+ Description: Location Labels, Coordinates, and Detailed Map
+ Known Issues:
  */
+
 export class GenLiteLocationsPlugin {
     static pluginName = 'GenLiteLocationsPlugin'
-    private classifyPoint = require("robust-point-in-polygon") //Not a fan of where this is...
-    async init() {
-        window.genlite.registerModule(this)
-        this.isPluginEnabled = window.genlite.settings.add("LocationLabels.Enable", true, "Location Labels", "checkbox", this.handlePluginEnableDisable, this)
-        this.showCoordinates = window.genlite.settings.add("LocationLabelCoordinates.Enable", true, "Coordinates", "checkbox", this.handleShowCoordinatesDisable, this)
-        //window.genlite.installHook(WorldManager.prototype, 'playerMove',  this.hook_PlayerMove, this);
-        // May use this instead of animation override however this function runs much more often than needed
-    }
-    isPluginEnabled: boolean
-    showCoordinates: boolean
-    mainLocations: object //!!!
-    dungeonLocations: object //!!!
-    regionLocations: object//!!! any and objects need typescript type!
-    locationLabel: HTMLElement
-    mapIframe: HTMLIFrameElement
-    popupMap: any //!!!
-    currentLocationLabel: string
-    currentLocation: any//!!!
-    currentSubLocation: string
-    lastPosition: number[]
-    mapOpen: boolean
-    mapZoom: number
+    private classifyPoint = require("robust-point-in-polygon")
+    private stylesheetAdded: boolean
+    private locationLabels: boolean
+    private showCoordinates: boolean
+    private compassMap: boolean
+    private mainLocations: object //!!!
+    private dungeonLocations: object //!!!
+    private regionLocations: object//!!! any and objects need typescript type!
+    private locationLabel: HTMLElement
+    private mapIframe: HTMLIFrameElement
+    private popupMap: any //!!!
+    private currentLocationLabel: string
+    private currentLocation: any//!!!
+    private currentSubLocation: string
+    private lastPosition: number[]
+    private mapFocus: boolean
+    private mapZoom: number
+    private mapTranslucent: boolean
     constructor() {
         this.setupLocations()
-        this.setupLocationLabel()
-        this.setupMapIframe()
+        this.setupUILocationLabel()
+        this.setupUIMapIframe()
     }
-    private setupLocations() {
+    private setupLocations(): void {
         this.lastPosition = [0,0]
         this.currentLocation = [[0,0]]
         this.currentLocationLabel = ""
@@ -123,124 +116,101 @@ export class GenLiteLocationsPlugin {
 
         }
     }
-    private setupLocationLabel() {
+    private setupUILocationLabel(): void {
         this.locationLabel = document.createElement("div")
-        this.locationLabel.className = "location_label"
+        this.locationLabel.classList.add( "location-label" )
         this.locationLabel.innerText = ""
-        this.locationLabel.style.cssText = `
-            font-size: 2em;
-            color: yellow;
-            position: absolute;
-            left: 50vw;
-            top: 1em;
-            transform: translate(-50%, -50%);
-            display: none;
-            visibility: hidden;
-            pointer-events: none;
-        `
         document.body.appendChild(this.locationLabel)
     }
-    private updateMapIframeSrc() {
-        let layer = PLAYER.location.layer.includes("world") ?
-            PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
-        //let zoom =  this.mapIframe.src.substring(this.mapIframe.src.lastIndexOf("_"),this.mapIframe.src.length-1)
-
-        this.mapIframe.src = `https://genfamap.com/${ layer }?location=true#${ PLAYER.character.pos2.x+.5 }_${ PLAYER.character.pos2.y-.5 }_${ this.mapZoom }`
-    }
-    private hoverMap() {
-        this.updateMapIframeSrc()
-        this.mapIframe.style.cssText = `
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: block;
-            visibility: visible;
-            opacity: .5;
-            width: 50vw;
-            min-height: 75vh;
-            
-            pointer-events: none;
-        `
-        this.mapIframe.style.zIndex = "1"
-    }
-    private hideMap() {
-        this.mapOpen = false
-        this.mapIframe.style.cssText = `
-            display: none;
-            visibility: hidden;
-            opacity: 0.0;
-        `
-    }
-    private showMap() {
-        this.mapOpen = true
-
-        this.updateMapIframeSrc()
-
-        this.mapIframe.style.cssText = `
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: block;
-            visibility: visible;
-            opacity: 1;
-            width: 50vw;
-            min-height: 75vh;
-            
-            pointer-events: auto;
-        `
-        this.mapIframe.style.zIndex = "1"
-    }
-    private setupMapIframe() {
+    private setupUIMapIframe(): void {
         this.mapZoom = 0.55
         this.mapIframe = document.createElement("iframe")
-        this.mapIframe.style.cssText = `
-            display: none;
-            visibility: hidden;
-            width: 50vw;
-            min-height: 75vh;
-  
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-             opacity: 0.5;
-        `
-        this.mapIframe.style.zIndex = "1"
+        this.mapIframe.classList.add("map-iframe","map-iframe-hidden")
+
         this.mapIframe.src = `https://genfamap.com/?location=true#0_0_${ this.mapZoom }`
         document.body.appendChild( this.mapIframe )
     }
-    private checkIsPluginEnabled() {
-        if(this.isPluginEnabled) {
+    async init() {
+        window.genlite.registerModule(this)
+
+        this.locationLabels = window.genlite.settings.add("LocationLabels.Enable", true, "Location Labels", "checkbox", this.handleLocationLabelsEnableDisable, this)
+        this.showCoordinates = window.genlite.settings.add("Coordinates.Enable", true, "Coordinates", "checkbox", this.handleShowCoordinatesDisable, this)
+        this.compassMap = window.genlite.settings.add("CompassMap.Enable", true, "Compass Map", "checkbox", this.handleCompassMapEnableDisable, this)
+    }
+    private handleLocationLabelsEnableDisable(state: boolean): void  {
+        this.locationLabels = state
+        this.checkLocationLabels()
+    }
+    private checkLocationLabels(): void {
+        if( this.locationLabels ) {
             this.enableLocationLabels()
             this.enableMapIframe()
-        } else {
+        } else if ( !this.locationLabels ) {
             this.disableLocationLabels()
             this.disableMapIframe()
         }
     }
-    private handlePluginEnableDisable(state: boolean) {
-        this.isPluginEnabled = state;
-        this.checkIsPluginEnabled()
+    private handleShowCoordinatesDisable(state: boolean): void  {
+        this.showCoordinates = state
+        this.checkShowCoordinates()
+
     }
-    private handleShowCoordinatesDisable(state: boolean) {
-        this.showCoordinates = state;
+    private checkShowCoordinates(): void {
+        if( this.showCoordinates ) {
+            this.locationCheck()
+        } else if ( !this.showCoordinates ) {
+
+        }
+    }
+    private handleCompassMapEnableDisable(state: boolean): void  {
+        this.compassMap = state
         this.locationCheck()
     }
+    private updateMapIframeSrc(): void  {
+        let layer = PLAYER.location.layer.includes("world") ?
+            PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
+        //Zoom Logic Goes here?
 
+        this.mapIframe.src = `https://genfamap.com/${ layer }?location=true#${ PLAYER.character.pos2.x+.5 }_${ PLAYER.character.pos2.y-.5 }_${ this.mapZoom }`
+    }
+    private toggleTranslucentMap(): void  {
+        this.mapTranslucent = !this.mapTranslucent
+
+        if( this.mapTranslucent ) {
+            this.mapIframe.classList.add("map-iframe-translucent")
+            this.mapIframe.classList.remove("map-iframe-hidden")
+            this.mapIframe.classList.remove("map-iframe-focus")
+        } else if ( !this.mapTranslucent ) {
+            this.mapIframe.classList.add("map-iframe-hidden")
+            this.mapIframe.classList.remove("map-iframe-translucent")
+            this.mapIframe.classList.remove("map-iframe-focus")
+            this.mapFocus = false
+        }
+        this.updateMapIframeSrc()
+    }
+    private hideMap(): void  {
+        this.mapFocus = false
+        this.mapTranslucent = false
+
+        this.mapIframe.classList.add("map-iframe-hidden")
+        this.mapIframe.classList.remove("map-iframe-focus")
+        this.mapIframe.classList.remove("map-iframe-translucent")
+    }
+    private focusMap(): void  {
+        this.mapFocus = true
+        this.mapTranslucent = false
+
+        this.updateMapIframeSrc()
+
+        this.mapIframe.classList.add("map-iframe-focus")
+        this.mapIframe.classList.remove("iframe-map-hidden")
+        this.mapIframe.classList.remove("map-iframe-translucent")
+    }
     openMap() {
         let layer = PLAYER.location.layer.includes("world") ?
             PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
-        //bleh this logic needs to be expanded on to work with heights as well as layer... just plopping it here for now might break though
 
         this.popupMap = window.open(`https://genfamap.com/${ layer }?location=true#${PLAYER.character.pos2.x}_${PLAYER.character.pos2.y}_0.67`, "genfanad-map", 'width=800,height=600')
-        //TODO switch to using iframe instead
-        // may also consider storing map data
-        // in the modified client/js bundle
-    }
-    closeMap() {
-        //TODO
     }
     private setLocationLabelUnknown(): void {
         this.showCoordinates ?
@@ -303,7 +273,7 @@ export class GenLiteLocationsPlugin {
 
             //TODO re-add check previous location here and skip the switch if still in region.
             let found: boolean
-            switch ( PLAYER.location.layer ) { //TODO possible remove the switch or combine with the height property in some way to handle all levels/floors etc...
+            switch ( PLAYER.location.layer ) {
                 case "dungeon":
                     found = this.checkLocations( this.dungeonLocations , currentPosition )
                     break;
@@ -334,31 +304,101 @@ export class GenLiteLocationsPlugin {
     animationDetector( animation ) {
         this.locationCheck()
     }
+    private addGlobalStylesheet( css ) {
+        let head, style
+
+        head = document.head || document.getElementsByTagName('head')[0]
+
+        style = document.createElement('style')
+        style.type = 'text/css'
+        //style.innerHTML = css.replace(/;/g, ' ! important;')
+
+        head.appendChild( style )
+
+        if ( style.styleSheet ) {
+            style.styleSheet.cssText = css // This is required for IE8 and below.
+        } else {
+            style.appendChild(document.createTextNode(css))
+        }
+    }
+    private addStylesheet() {
+        this.addGlobalStylesheet(`
+            .location-label { 
+                font-size: 2em;
+                color: yellow;
+                position: absolute;
+                left: 50vw;
+                top: 1em;
+                transform: translate(-50%, -50%);
+                display: none;
+                visibility: hidden;
+                pointer-events: none;
+            }
+            .map-iframe {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 50vw;
+                min-height: 75vh;
+                pointer-events: auto;
+                z-index: 1;
+            }
+            .map-iframe-translucent {
+                display: block;
+                visibility: visible;
+                opacity: 0.5;
+                pointer-events: none;
+            }
+            .map-iframe-hidden {
+                display: none;
+                visibility: hidden;
+                opacity: 0.0;
+                pointer-events: none;
+            }
+            .map-iframe-focus {
+                display: block;
+                visibility: visible;
+                opacity: 1.0;
+                pointer-events: auto;
+            }
+            .map-compass-outline {
+                border-radius: 50%;
+                border: 2px solid #DAA520;
+            }
+        `)
+
+        //let sheet = document.styleSheets[0]
+        //this.styleRuleIndex = sheet.insertRule("", sheet.cssRules.length)
+        this.stylesheetAdded = true
+    }
     loginOK() {
-        if(!this.isPluginEnabled) return;
+        if(!this.locationLabels) return;
+
+        if(!this.stylesheetAdded) {
+            this.addStylesheet( ) //Would do in init but not working properly when used there...
+        }
         this.enableLocationLabels()
         this.enableMapIframe()
         this.locationCheck()
     }
     logoutOK() {
-        if(!this.isPluginEnabled) return;
+        if(!this.locationLabels) return;
         this.disableLocationLabels()
         this.disableMapIframe()
     }
 
     private minimapCompassClick = () => {
-        console.log(this.mapOpen)
-        if(this.mapOpen)
+        if( this.mapFocus ) {
             this.hideMap()
-        else
-            this.showMap()
+        } else if ( !this.mapFocus ) {
+            this.focusMap()
+        }
     }
-    private minimapCompassMouseOver = () => {
-        this.hoverMap()
-    }
-    private minimapCompassMouseOut = () => {
-        if(!this.mapOpen)
-            this.hideMap()
+
+    private minimapCompassRightClick = ( event ) => {
+        event.preventDefault()
+        this.toggleTranslucentMap()
     }
     private enableMapIframe() {
         this.hideMap()
@@ -367,6 +407,7 @@ export class GenLiteLocationsPlugin {
         minimapCompass.addEventListener( "click", this.minimapCompassClick )
         minimapCompass.addEventListener( "mouseover", this.minimapCompassMouseOver )
         minimapCompass.addEventListener( "mouseout", this.minimapCompassMouseOut )
+        minimapCompass.addEventListener('contextmenu', this.minimapCompassRightClick )
     }
     private disableMapIframe() {
         this.hideMap()
@@ -375,6 +416,15 @@ export class GenLiteLocationsPlugin {
         minimapCompass.removeEventListener( "click", this.minimapCompassClick )
         minimapCompass.removeEventListener( "mouseover", this.minimapCompassMouseOver )
         minimapCompass.removeEventListener( "mouseout", this.minimapCompassMouseOut )
+        minimapCompass.removeEventListener( "contextmenu", this.minimapCompassRightClick )
+    }
+    private minimapCompassMouseOver = () => {
+        let minimapCompass = document.getElementById("new_ux-minimap-compass")
+        minimapCompass.classList.add("map-compass-outline")
+    }
+    private minimapCompassMouseOut = () => {
+        let minimapCompass = document.getElementById("new_ux-minimap-compass")
+        minimapCompass.classList.remove("map-compass-outline")
     }
     private disableLocationLabels() {
         this.locationLabel.style.display = "none"
