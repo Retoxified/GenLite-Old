@@ -13,8 +13,7 @@ export class GenLiteXpCalculator {
 
         this.skillsList = {
             vitality: {
-                last10Inc: [],
-                incIndex: 0,
+                numActions: 0,
                 avgActionXP: 0,
                 actionsToNext: 0,
                 tsStart: 0,
@@ -37,7 +36,13 @@ export class GenLiteXpCalculator {
             mining: {},
             botany: {},
             butchery: {},
-            total: {}
+            total: {
+                numActions: 0,
+                avgActionXP: 0,
+                tsStart: 0,
+                startXP: 0,
+                gainedXP: 0
+            }
         }
         this.tracking_skill = "";
         this.isHookInstalled = false;
@@ -45,52 +50,38 @@ export class GenLiteXpCalculator {
 
     async init() {
         window.genlite.registerModule(this);
-        /* copy over the datastructure in to each field */
-        for (let i in this.skillsList) {
-            this.skillsList[i] = structuredClone(this.skillsList.vitality);
-        }
-        this.skillsList.total.gainedXP = 0;
+        this.resetCalculatorAll();
         this.isPluginEnabled = window.genlite.settings.add("XPCalculator.Enable", true, "XP Calculator", "checkbox", this.handlePluginEnableDisable, this);
-
     }
 
     handlePluginEnableDisable(state: boolean) {
         this.isPluginEnabled = state;
+        this.resetCalculatorAll();
         /* if toggle on mid way through we have to run the init code */
         if (state) {
-            for (let i in this.skillsList) {
-                this.skillsList[i] = structuredClone(this.skillsList.vitality);
-            }
-            this.skillsList.total.gainedXP = 0;
             this.initializeUI();
             this.updateSkills();
-        } else { // if toggle off reset values
-            this.skillsList.total.startXP = 0;
-            this.skillsList.total.gainedXP = 0;
-            this.resetCalculatorAll(null);        
         }
     }
 
     /* we need the UI to be initalized before hooking */
     initializeUI() {
-        if (!this.isPluginEnabled) {
+        if (!this.isPluginEnabled || this.isHookInstalled) {
             return;
         }
         let toolTipRoot = document.getElementsByClassName("new_ux-player-info-modal__modal__window--stats__skill__container");
         let totLevelRoot = <HTMLElement>document.getElementsByClassName("new_ux-player-info-modal__modal__window--stats__section__list__row")[1];
-        if (!this.isHookInstalled) { //if the hook was alread installed dont do it again
-            for (let i = 0; i < 18; i++) {
-                let tooltip = <HTMLElement>toolTipRoot[i];
-                tooltip.onmouseenter = this.installEventHook(tooltip.onmouseenter, this.onmouseenter, this);
-                tooltip.onmousedown = this.installEventHook(tooltip.onmousedown, this.onmousedown, this)
-            }
-            this.isHookInstalled = true
+        for (let i = 0; i < 18; i++) {
+            let tooltip = <HTMLElement>toolTipRoot[i];
+            tooltip.onmouseenter = this.installEventHook(tooltip.onmouseenter, this.onmouseenter, this);
+            tooltip.onmousedown = this.installEventHook(tooltip.onmousedown, this.onmousedown, this)
         }
         // set up the tool tip for total levels
         totLevelRoot.onmouseenter = (event) => (this.totalLevelCalc(event, this));
         totLevelRoot.onmousedown = (event) => (this.onmousedown(event, this));
         totLevelRoot.onmousemove = (<HTMLElement>toolTipRoot[0]).onmousemove;
         totLevelRoot.onmouseleave = (<HTMLElement>toolTipRoot[0]).onmouseleave;
+        this.isHookInstalled = true
     }
 
     /* when an xp update comes calculate skillsList fields */
@@ -102,23 +93,19 @@ export class GenLiteXpCalculator {
         [xp.skill, "total"].forEach(element => {
 
             let skill = this.skillsList[element];
-            skill.last10Inc[skill.incIndex] = xp.xp;
-            skill.incIndex++;
-            if (skill.incIndex > 9)
-                skill.incIndex = 0;
-            skill.avgActionXP = 0;
-            for (let i in skill.last10Inc) {
-                skill.avgActionXP += skill.last10Inc[i];
-            }
-            skill.avgActionXP /= skill.last10Inc.length;
+            let avg = skill.avgActionXP;
+            avg *= skill.numActions;
+            avg += xp.xp;
+            skill.numActions++;
+            skill.avgActionXP = avg / skill.numActions;
             if (element == "total")
                 skill.gainedXP += xp.xp;
             if (element != "total")
                 skill.actionsToNext = Math.ceil(PLAYER_INFO.skills[element].tnl / skill.avgActionXP);
             if (skill.tsStart == 0) {
                 skill.tsStart = Date.now();
-            if (element != "total")
-                skill.startXP = PLAYER_INFO.skills[element].xp - xp.xp;
+                if (element != "total")
+                    skill.startXP = PLAYER_INFO.skills[element].xp - xp.xp;
             }
         });
     }
@@ -156,7 +143,7 @@ export class GenLiteXpCalculator {
             callback_this.resetCalculatorAll(event);
         } else if (event.shiftKey) {
             let skill = callback_this.tracking_skill;
-            callback_this.resetCalculator(event, skill);
+            callback_this.resetCalculator(skill, event);
         }
     }
 
@@ -173,10 +160,12 @@ export class GenLiteXpCalculator {
     }
 
     /* calculates tot exp on login */
-    updateSkills(){
+    updateSkills() {
         if (!this.isPluginEnabled) {
             return;
         }
+        if (this.skillsList.total.startXP != 0) //updateSkills sometimes runs additional times, I dont know why
+            return;
         for (let i in this.skillsList) {
             if (i == "total")
                 continue;
@@ -197,13 +186,12 @@ export class GenLiteXpCalculator {
         may be called as an event callback or independantly
     */
     totalLevelCalc(event, callback_this) {
-        if (event === null || !callback_this.isPluginEnabled)
+        if (!callback_this.isPluginEnabled)
             return;
         PLAYER_INFO.tracking = true;
         callback_this.tracking_skill = "total"
         let total = callback_this.skillsList.total;
         let div = document.getElementById("skill_status_popup");
-        let name = "total"
         let xp = (total.startXP + total.gainedXP) / 10;
         let xpRate = 0;
         let timeDiff = Date.now() - total.tsStart;
@@ -211,7 +199,7 @@ export class GenLiteXpCalculator {
             xpRate = Math.round(total.gainedXP / (timeDiff / 3600000) * 10) / 100;
         }
         div.innerHTML = `
-        <div>${name}</div>
+        <div>Total</div>
         <div>Current XP: ${xp.toLocaleString("en-US")}</div>
         <div>Gained XP: ${(total.gainedXP / 10).toLocaleString("en-US")}</div>
         <div>XP per Action: ${Math.round(total.avgActionXP * 10) / 100}</div>
@@ -220,22 +208,20 @@ export class GenLiteXpCalculator {
         if (event) { //if its an event update he poistion of the tooltip
             div.style.left = event.clientX + 15 + "px";
             div.style.top = event.clientY + 15 + "px";
+            div.style.display = 'block';
         }
-        div.style.display = 'block';
-
     }
 
     /* resets calculator without requiring a reload */
-    resetCalculator(event, skill) {
+    resetCalculator(skill, event = null) {
         let temp = {
-            last10Inc: [],
-            incIndex: 0,
+            numActions: 0,
             avgActionXP: 0,
             actionsToNext: 0,
             tsStart: 0,
             startXP: 0
         }
-        if (skill == "total"){
+        if (skill == "total") {
             let xp = this.skillsList.total.startXP + this.skillsList.total.gainedXP;
             this.skillsList.total = temp;
             this.skillsList.total.startXP = xp;
@@ -243,20 +229,14 @@ export class GenLiteXpCalculator {
             this.totalLevelCalc(event, this);
             return;
         }
-        this.skillsList[skill] = {
-            last10Inc: [],
-            incIndex: 0,
-            avgActionXP: 0,
-            actionsToNext: 0,
-            tsStart: 0,
-            startXP: 0
-        }
-        PLAYER_INFO.updateTooltip();
+        this.skillsList[skill] = temp;
+        if (this.isHookInstalled)
+            PLAYER_INFO.updateTooltip();
     }
 
-    resetCalculatorAll(event) {
+    resetCalculatorAll(event = null) {
         for (let i in this.skillsList) {
-            this.resetCalculator(event, i);
+            this.resetCalculator(i, event);
         }
     }
 }
