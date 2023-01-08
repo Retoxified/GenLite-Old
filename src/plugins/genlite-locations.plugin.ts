@@ -135,7 +135,6 @@ export class GenLiteLocationsPlugin {
     }
     private handleCompassMapTranslucentSlider( value ) {
         this.translucentScale = value
-        console.log(this.translucentScale)
         this.addGlobalStylesheet(`
             .map-iframe-translucent {
                     display: block;
@@ -144,7 +143,6 @@ export class GenLiteLocationsPlugin {
                     pointer-events: none;
             }
         `)
-        console.log("HERE")
 
     }
     private handleLocationLabelsEnableDisable(state: boolean): void  {
