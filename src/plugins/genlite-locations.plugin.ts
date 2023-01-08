@@ -46,8 +46,8 @@ export class GenLiteLocationsPlugin {
                 subLocations: {
                     "Cent Anvil": [[98,89],[100,89],[100,92],[98,92],[98,89]],
                     "Wolfgang's Sheepfold": [[100,59],[112,59],[112,70],[109,73],[101,73],[101,65],[100,64],[100,59]],
-                    "Jax Butchery": [[111,96],[115,96],[115,98],[111,98]],//TODO decide how to better handle overlaps; either do not ever overlap polygons or just allow sort to select first found and index that the same each time
-                    "Kordan's Armoury": [[109,92],[111,92],[111,96],[109,96]],// ^
+                    "Jax Butchery": [[111,96],[115,96],[115,98],[111,98]],
+                    "Kordan's Armoury": [[109,92],[111,92],[111,96],[109,96]],
                     "Fern's General Store": [[97,93],[100,93],[100,95],[99,96],[97,96],[97,99],[95,99],[95,96],[97,94]],
                     "Tutorial": [[91,104],[97,104],[98,105],[99,105],[100,104],[103,104],[103,101],[120,101],[120,102],[121,103],[120,110],[120,111],[119,112],[120,113],[120,119],[118,121],[118,123],[116,125],[111,125],[110,124],[109,124],[109,122],[99,122],[96,119],[92,119],[92,113],[91,112],[91,104]]
                 }
@@ -83,7 +83,7 @@ export class GenLiteLocationsPlugin {
             "Plenty": {
                 //Currently some points are in the river, may need to change if/when boating because a skill
                 polygon: [[137,169],[141,165],[165,165],[173,173],[173,175],[177,179],[179,179],[188,188],[198,188],[192,196],[180,199],[177,209],[173,209],[173,213],[178,213],[178,223],[160,223],[147,221],[147,218],[146,217],[146,214],[147,213],[147,209],[143,205],[139,205],[137,203],[132,203],[131,204],[122,204],[120,202],[120,196],[119,195],[119,189],[122,186],[122,181],[124,179],[134,179],[137,176],[137,169]],
-                //subLocations: {} //TODO
+                //subLocations: {}
             },
             "Emerald City": {
                 polygon: [[-55,382],[-8,382],[-8,336],[-55,336],[-55,382]]
@@ -111,7 +111,7 @@ export class GenLiteLocationsPlugin {
             }
         }
         this.regionLocations = {
-            "Reka Valley":[[-128,-128],[209,-128],[211,6],[197,21],[190,65],[198,95],[187,129],[201,155],[196,194],[178,228],[157,237],[156,255],[-61,274],[-116,217],[-92,148],[-17,109],[-3,-2],[-58,-12],[-71,-26],[-74,-54],[-128,-58],[-128,-128]],
+            "Reka Valley": [[-128,-128],[227,-128],[240,-55],[240,-51],[235,-46],[235,-38],[240,-33],[228,-21],[227,17],[235,34],[237,50],[244,57],[246,86],[248,109],[251,113],[251,130],[253,132],[253,144],[258,149],[258,151],[268,161],[272,161],[280,169],[280,178],[290,201],[291,224],[338,255],[-75,255],[-90,244],[-98,244],[-106,236],[-114,237],[-121,227],[-121,208],[-108,195],[-108,185],[-97,174],[-97,154],[-102,149],[-76,145],[-60,127],[-48,123],[-38,116],[-22,118],[-17,109],[-6,40],[-7,0],[-60,-10],[-73,-34],[-76,-55],[-127,-59],[-128,-128]],
             "":[[]]
 
         }
@@ -136,6 +136,7 @@ export class GenLiteLocationsPlugin {
         this.locationLabels = window.genlite.settings.add("LocationLabels.Enable", true, "Location Labels", "checkbox", this.handleLocationLabelsEnableDisable, this)
         this.showCoordinates = window.genlite.settings.add("Coordinates.Enable", true, "Coordinates", "checkbox", this.handleShowCoordinatesDisable, this)
         this.compassMap = window.genlite.settings.add("CompassMap.Enable", true, "Compass Map", "checkbox", this.handleCompassMapEnableDisable, this)
+        //
     }
     private handleLocationLabelsEnableDisable(state: boolean): void  {
         this.locationLabels = state
