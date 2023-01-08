@@ -24,6 +24,7 @@ export class GenLiteLocationsPlugin {
     private mapFocus: boolean
     private mapZoom: number
     private mapTranslucent: boolean
+    private translucentScale: number
     constructor() {
         this.setupLocations()
         this.setupUILocationLabel()
@@ -128,7 +129,23 @@ export class GenLiteLocationsPlugin {
         this.locationLabels = window.genlite.settings.add("LocationLabels.Enable", true, "Location Labels", "checkbox", this.handleLocationLabelsEnableDisable, this)
         this.showCoordinates = window.genlite.settings.add("Coordinates.Enable", true, "Coordinates", "checkbox", this.handleShowCoordinatesDisable, this)
         this.compassMap = window.genlite.settings.add("CompassMap.Enable", true, "Compass Map", "checkbox", this.handleCompassMapEnableDisable, this)
+        window.genlite.settings.add("CompassMapTranslucentScale", true, "Compass Map Translucent Scale", "range", this.handleCompassMapTranslucentSlider, this, undefined,
+            [['min', '0.01'], ['max', '1'], ['step', '0.01'], ['value', '0.5']]);
         //
+    }
+    private handleCompassMapTranslucentSlider( value ) {
+        this.translucentScale = value
+        console.log(this.translucentScale)
+        this.addGlobalStylesheet(`
+            .map-iframe-translucent {
+                    display: block;
+                    visibility: visible;
+                    opacity: ${this.translucentScale};
+                    pointer-events: none;
+            }
+        `)
+        console.log("HERE")
+
     }
     private handleLocationLabelsEnableDisable(state: boolean): void  {
         this.locationLabels = state
@@ -152,11 +169,16 @@ export class GenLiteLocationsPlugin {
         if( this.showCoordinates ) {
             this.locationCheck()
         } else if ( !this.showCoordinates ) {
-
+            this.locationCheck()
         }
     }
     private handleCompassMapEnableDisable(state: boolean): void  {
         this.compassMap = state
+        if( this.compassMap ) {
+            this.enableMapIframe()
+        } else if ( !this.compassMap ) {
+            this.disableMapIframe()
+        }
         this.locationCheck()
     }
     private updateMapIframeSrc(): void  {
@@ -340,7 +362,7 @@ export class GenLiteLocationsPlugin {
             .map-iframe-translucent {
                 display: block;
                 visibility: visible;
-                opacity: 0.5;
+                opacity: ${this.translucentScale};
                 pointer-events: none;
             }
             .map-iframe-hidden {
