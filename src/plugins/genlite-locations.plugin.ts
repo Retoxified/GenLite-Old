@@ -386,7 +386,8 @@ export class GenLiteLocationsPlugin {
         this.stylesheetAdded = true
     }
     loginOK() {
-        if(!this.locationLabels) return;
+        if(!this.locationLabels)
+            return //TODO add a DISABLE ALL option... this isnt setup correctly right now
 
         if(!this.stylesheetAdded) {
             this.addStylesheet( ) //Would do in init but not working properly when used there...
