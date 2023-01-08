@@ -15,6 +15,7 @@ export class GenliteHitRecorder {
     dpsOverlay: HTMLElement;
     dpsOverlayContainer: HTMLElement;
     dpsUiUpdateInterval;
+    isUIinit: boolean;
 
     isPluginEnabled: boolean = false;
 
@@ -51,6 +52,7 @@ export class GenliteHitRecorder {
             totDam: 0
         };
 
+        this.isUIinit = false;
         this.dpsOverlayContainer = <HTMLElement>document.createElement("div");
         this.dpsOverlay = <HTMLElement>document.createElement("div");
     }
@@ -64,8 +66,8 @@ export class GenliteHitRecorder {
     /* toggles plugin stat and either inits or shuts down plugin if needed */
     handlePluginEnableDisable(state: boolean) {
         this.isPluginEnabled = state;
-        if(state) {
-            if (this.dpsOverlay.innerHTML == "")
+        if (state) {
+            if (!this.isUIinit)
                 this.initDpsElements();
             if (this.dpsUiUpdateInterval === undefined)
                 this.dpsUiUpdateInterval = setInterval(() => { this.updateDpsUI() }, 100);
@@ -86,17 +88,21 @@ export class GenliteHitRecorder {
         /* look for start of combat set the curEnemy and record data */
         if (verb == "spawnObject" && payload.type == "combat" &&
             (payload.participant1 == PLAYER.id || payload.participant2 == PLAYER.id)) {
-
+            let enemy;
             if (GAME.combats[payload.id].left.id != PLAYER.id) {
-                this.curEnemy = GAME.combats[payload.id].left;
+                enemy = GAME.combats[payload.id].left;
             } else {
-                this.curEnemy = GAME.combats[payload.id].right;
+                enemy = GAME.combats[payload.id].right;
             }
-            this.curDpsAcc.timeStart = Date.now();
-            this.curDpsAcc.totDam = 0;
-            this.curDpsAcc.doUpdate = 1;
-            if (this.cumDpsAcc.timeStart == 0)
-                this.cumDpsAcc.timeStart = this.curDpsAcc.timeStart;
+            let enemyid = this.curEnemy ? this.curEnemy.id : 0;
+            if (enemyid != enemy.id) { //if new enemy reset otherwise keep the same dps tracker
+                this.curDpsAcc.timeStart = Date.now();
+                this.curDpsAcc.totDam = 0;
+                this.curDpsAcc.doUpdate = 1;
+                if (this.cumDpsAcc.timeStart == 0)
+                    this.cumDpsAcc.timeStart = this.curDpsAcc.timeStart;
+            }
+            this.curEnemy = enemy;
         }
 
         if (verb == "projectile" && payload.source == PLAYER.id) {
@@ -110,12 +116,15 @@ export class GenliteHitRecorder {
                     this.cumDpsAcc.timeStart = this.curDpsAcc.timeStart;
             }
             this.curEnemy = GAME.npcs[payload.target];
+            this.recordDamage(this.playerHitInfo, payload.damage);
+            this.curDpsAcc.totDam += payload.damage;
+            this.cumDpsAcc.totDam += payload.damage;
         }
 
-        if (verb == "damage" && this.curEnemy != undefined && payload.id == this.curEnemy.id) {
+        if (verb == "damage" && this.curEnemy != undefined && payload.id == this.curEnemy.id && payload.style == "melee") {
             this.recordDamage(this.playerHitInfo, payload.amount);
             this.curDpsAcc.totDam += payload.amount;
-            if(this.cumDpsAcc.timeStart != 0) //in case user resets dps mid combat for whatever reason
+            if (this.cumDpsAcc.timeStart != 0) //in case user resets dps mid combat for whatever reason
                 this.cumDpsAcc.totDam += payload.amount;
         } else if (verb == "damage" && this.curEnemy != undefined && payload.id == PLAYER.id) {
             this.recordDamage(this.enemyHitInfo, payload.amount);
@@ -163,7 +172,6 @@ export class GenliteHitRecorder {
         this.statsList.ranged = PLAYER_INFO.skills.ranged.level;
 
         this.initDpsElements();
-
     }
 
     recordDamage(hitInfo, damage) {
@@ -213,7 +221,7 @@ export class GenliteHitRecorder {
         style.justifyContent = "space-evenly";
         style.borderRadius = "20px"
         style.visibility = "hidden";
-        this.dpsOverlay.onclick = (event) => {this.resetCumDps(event)};
+        this.dpsOverlay.onclick = (event) => { this.resetCumDps(event) };
 
         //setup the divs for cur and cum dps
         for (let i = 0; i < 2; i++) {
@@ -258,11 +266,12 @@ export class GenliteHitRecorder {
         let playerhud = document.getElementById("new_ux-player-hud-anchor");
         playerhud.appendChild(this.dpsOverlayContainer);
         this.dpsUiUpdateInterval = setInterval(() => { this.updateDpsUI() }, 100);
+        this.isUIinit = true;
     }
 
     toggleDpsOverlay() {
         if (this.dpsOverlay.style.visibility == "hidden") {
-            this.dpsOverlay.style.visibility = "visible";   
+            this.dpsOverlay.style.visibility = "visible";
         } else {
             this.dpsOverlay.style.visibility = "hidden";
         }
@@ -274,10 +283,14 @@ export class GenliteHitRecorder {
         let curTime = Date.now();
         let curDps = Math.round((this.curDpsAcc.totDam / ((curTime - this.curDpsAcc.timeStart) / 1000)) * 100) / 100;
         let cumDps = Math.round((this.cumDpsAcc.totDam / ((curTime - this.cumDpsAcc.timeStart) / 1000)) * 100) / 100;
-        if (this.curDpsAcc.doUpdate == 1 || this.curDpsAcc.doUpdate == -1) {
-            this.curDpsAcc.doUpdate == -1 ? this.curDpsAcc.doUpdate = 0 : null;
-            curDpsUi.children[0].innerHTML = "Current DPS:";
-            curDpsUi.children[1].innerHTML = curDps.toLocaleString("en-US");
+        //my favourite programing structure
+        switch (this.curDpsAcc.doUpdate) {
+            case -1:
+                this.curDpsAcc.doUpdate = 0
+            case 1:
+                curDpsUi.children[0].innerHTML = "Current DPS:";
+                curDpsUi.children[1].innerHTML = curDps.toLocaleString("en-US");
+                break;
         }
         cumDpsUi.children[0].innerHTML = "Cumulative DPS:";
         cumDpsUi.children[1].innerHTML = cumDps.toLocaleString("en-US");
