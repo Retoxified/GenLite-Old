@@ -129,6 +129,9 @@ export class GenLiteLocationsPlugin {
         this.locationLabels = window.genlite.settings.add("LocationLabels.Enable", true, "Location Labels", "checkbox", this.handleLocationLabelsEnableDisable, this)
         this.showCoordinates = window.genlite.settings.add("Coordinates.Enable", true, "Coordinates", "checkbox", this.handleShowCoordinatesDisable, this)
         this.compassMap = window.genlite.settings.add("CompassMap.Enable", true, "Compass Map", "checkbox", this.handleCompassMapEnableDisable, this)
+
+        //Decide how to handle initial setting grab as right now only returns true/false
+        this.translucentScale = 0.5
         window.genlite.settings.add("CompassMapTranslucentScale", true, "Compass Map Translucent Scale", "range", this.handleCompassMapTranslucentSlider, this, undefined,
             [['min', '0.01'], ['max', '1'], ['step', '0.01'], ['value', '0.5']]);
         //
