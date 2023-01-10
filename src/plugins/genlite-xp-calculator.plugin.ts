@@ -1,52 +1,45 @@
 export class GenLiteXpCalculator {
     static pluginName = 'GenLiteXpCalculatorPlugin';
 
-    skillsList;
+    skillsList = {
+        vitality: {
+            numActions: 0,
+            avgActionXP: 0,
+            actionsToNext: 0,
+            tsStart: 0,
+            startXP: 0
+        },
+        attack: {},
+        strength: {},
+        defense: {},
+        ranged: {},
+        sorcery: {},
+        cooking: {},
+        forging: {},
+        artistry: {},
+        tailoring: {},
+        whittling: {},
+        evocation: {},
+        survival: {},
+        piety: {},
+        logging: {},
+        mining: {},
+        botany: {},
+        butchery: {},
+        total: {
+            numActions: 0,
+            avgActionXP: 0,
+            tsStart: 0,
+            startXP: 0,
+            gainedXP: 0
+        }
+    };
     totalXP;
     tracking;
-    tracking_skill;
-    isHookInstalled;
+    tracking_skill = "";
+    isHookInstalled = false;
 
     isPluginEnabled: boolean = false;
-
-    constructor() {
-
-        this.skillsList = {
-            vitality: {
-                numActions: 0,
-                avgActionXP: 0,
-                actionsToNext: 0,
-                tsStart: 0,
-                startXP: 0
-            },
-            attack: {},
-            strength: {},
-            defense: {},
-            ranged: {},
-            sorcery: {},
-            cooking: {},
-            forging: {},
-            artistry: {},
-            tailoring: {},
-            whittling: {},
-            evocation: {},
-            survival: {},
-            piety: {},
-            logging: {},
-            mining: {},
-            botany: {},
-            butchery: {},
-            total: {
-                numActions: 0,
-                avgActionXP: 0,
-                tsStart: 0,
-                startXP: 0,
-                gainedXP: 0
-            }
-        }
-        this.tracking_skill = "";
-        this.isHookInstalled = false;
-    }
 
     async init() {
         window.genlite.registerModule(this);
@@ -219,9 +212,11 @@ export class GenLiteXpCalculator {
             avgActionXP: 0,
             actionsToNext: 0,
             tsStart: 0,
-            startXP: 0
+            startXP: 0,
+            gainedXP: 0
         }
         if (skill == "total") {
+            delete temp.actionsToNext;
             let xp = this.skillsList.total.startXP + this.skillsList.total.gainedXP;
             this.skillsList.total = temp;
             this.skillsList.total.startXP = xp;
@@ -229,6 +224,7 @@ export class GenLiteXpCalculator {
             this.totalLevelCalc(event, this);
             return;
         }
+        delete temp.gainedXP;
         this.skillsList[skill] = temp;
         if (this.isHookInstalled)
             PLAYER_INFO.updateTooltip();

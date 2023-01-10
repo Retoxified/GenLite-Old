@@ -1,49 +1,42 @@
 export class GenliteDropRecorderPlugin {
     static pluginName = 'GenLiteDropRecorderPlugin';
 
-    monsterData;
-    curCombat;
-    curEnemy;
-    enemyDead;
-    objectSpawns;
-    dropTable;
+    monsterData = {
+        Monster_Name: undefined,
+        Monster_Level: 0,
+        packID: "",
+        layer: undefined,
+        x: 0,
+        y: 0,
+
+        Drops: []
+    };
+    curCombat = undefined;
+    curEnemy = {
+        id: "",
+        pos2: { x: 0, y: 0 },
+        info: { name: "", level: 0 }
+    };
+    enemyDead = 0;
+    objectSpawns = [];
+
+    /* key for dropTable -> Monster_Name-Monster_Level */
+    dropTable = {};
+
+    /* for special mob packs that have the same name and level but different drops 
+        for now this needs to be detected and added manually
+    */
+    static specialMobs = {
+        "world:ns127": "tent"
+    }
 
     isPluginEnabled: boolean = false;
     submitItemsToServer: boolean = false;
 
-    constructor() {
-
-        /* json format for an indvidual monster */
-        this.monsterData = {
-            Monster_Name: undefined,
-            Monster_Level: 0,
-            hp: 0,
-            layer: undefined,
-            x: 0,
-            y: 0,
-
-            Drops: [],
-
-            vitXP: 0,
-            atkXP: 0,
-            strXP: 0,
-            defXP: 0,
-            playerCL: 0,
-            meleeTot: 0
-        };
-        this.curCombat = undefined;
-        this.curEnemy = { id: undefined }; //to prevent an undefined error down the line
-        this.enemyDead = 0;
-        this.objectSpawns = [];
-
-        /* key for dropTable -> Monster_Name-Monster_Level */
-        this.dropTable = {};
-    }
-
     async init() {
         window.genlite.registerModule(this);
         let dropTableString = localStorage.getItem("genliteDropTable")
-        if(dropTableString == null) {
+        if (dropTableString == null) {
             this.dropTable = {};
         } else {
             this.dropTable = JSON.parse(dropTableString);
@@ -56,7 +49,7 @@ export class GenliteDropRecorderPlugin {
             "checkbox", // Type
             this.handleSubmitToServer, // handler function
             this,  // context for handler
-            "Warning!\n"+ // Warning
+            "Warning!\n" + // Warning
             "Turning this setting on will send monster drop data along with your IP\u00A0address to an external server.\n\n" +
             "Are you sure you want to enable this setting?"
         );
@@ -71,7 +64,7 @@ export class GenliteDropRecorderPlugin {
     }
 
     handle(verb, payload) {
-        if(this.isPluginEnabled === false || NETWORK.loggedIn === false) {
+        if (this.isPluginEnabled === false || NETWORK.loggedIn === false) {
             return;
         }
 
@@ -79,52 +72,28 @@ export class GenliteDropRecorderPlugin {
         if (verb == "spawnObject" && payload.type == "combat" &&
             (payload.participant1 == PLAYER.id || payload.participant2 == PLAYER.id)) {
 
-            this.monsterData.layer = payload.location.position.layer;
-            this.monsterData.x = payload.location.position.x;
-            this.monsterData.y = payload.location.position.y;
             this.curCombat = GAME.combats[payload.id];
             if (this.curCombat.left.id != PLAYER.id) {
                 this.curEnemy = this.curCombat.left;
             } else {
                 this.curEnemy = this.curCombat.right;
             }
-            this.monsterData.Monster_Name = this.curEnemy.info.name;
-            this.monsterData.Monster_Level = this.curEnemy.info.level;
+            this.setMonsterData();
+            return;
         }
 
         /* if ranging look for projectiles */
         if (verb == "projectile" && payload.source == PLAYER.id) {
             this.curEnemy = GAME.npcs[payload.target];
-            this.monsterData.layer = PLAYER.location.layer; //pos2 layer isnt always defined so use PLAYER
-            this.monsterData.x = this.curEnemy.pos2.x;
-            this.monsterData.y = this.curEnemy.pos2.y;
-            this.monsterData.Monster_Name = this.curEnemy.info.name;
-            this.monsterData.Monster_Level = this.curEnemy.info.level;
+            this.setMonsterData();
+            return;
         }
 
-        /* for some reason npc.info doesnt contain health so grab it here */
-        if (verb == "damage" && payload.id == this.curEnemy.id) {
-            this.monsterData.Monster_HP = payload.maxhp;
-        }
-
-        /* record exp drops and set enemy dead on seeing vitality,
+        /* set enemy dead on seeing vitality,
             this is the tightest reliable window I can find for timestamps */
-        if (verb == "xp") {
-            switch(payload.skill) {
-            case "vitality":
-                this.enemyDead = payload.timestamp;
-                this.monsterData.vitXP = payload.xp;
-                break;
-            case "attack":
-                this.monsterData.atkXP = payload.xp;
-                break;
-            case "strength":
-                this.monsterData.strXP = payload.xp;
-                break;
-            case "defense":
-                this.monsterData.defXP = payload.xp;
-                break;
-            }
+        if (verb == "xp" && payload.skill == "vitality") {
+            this.enemyDead = payload.timestamp;
+            return;
         }
 
         /* in the interval between monster death and object removal record spawnObject
@@ -137,11 +106,12 @@ export class GenliteDropRecorderPlugin {
             }
             let itemX = payload.location.position.x;
             let itemY = payload.location.position.y;
-            let enemyX: number[] = [this.curEnemy.pos2.x, this.curEnemy.pos2.x + 1, this.curEnemy.pos2.x -1];
-            let enemyY: number[] = [this.curEnemy.pos2.y, this.curEnemy.pos2.y + 1, this.curEnemy.pos2.y -1];
-            if (enemyX.includes(itemX) && enemyY.includes(itemY)){
+            let enemyX: number[] = [this.curEnemy.pos2.x, this.curEnemy.pos2.x + 1, this.curEnemy.pos2.x - 1];
+            let enemyY: number[] = [this.curEnemy.pos2.y, this.curEnemy.pos2.y + 1, this.curEnemy.pos2.y - 1];
+            if (enemyX.includes(itemX) && enemyY.includes(itemY)) {
                 this.objectSpawns.push(payload);
             }
+            return;
         }
 
         /* when npc is removed look for drops at same timestamp could be a false positive
@@ -164,27 +134,26 @@ export class GenliteDropRecorderPlugin {
             }
 
             /* if no drops are detected create a "nothing" drop and add that */
-            if(this.monsterData.Drops.length == 0){
+            if (this.monsterData.Drops.length == 0) {
                 drop.Item_Code = "nothing";
                 drop.Item_Quantity = 1;
                 this.monsterData.Drops.push(structuredClone(drop));
             }
-            this.monsterData.playerCL = PLAYER.character.combatLevel;
-            this.monsterData.meleeTot = PLAYER_INFO.skills.attack.level + PLAYER_INFO.skills.strength.level + PLAYER_INFO.skills.defense.level;
             this.objectSpawns = [];
             this.enemyDead = 0;
-            if(this.submitItemsToServer === true) {
+            if (this.submitItemsToServer === true) {
                 window.genlite.sendDataToServer("droplogproject", this.monsterData);
             }
             this.localDropRecording();
+            return;
         }
     }
     /* on login scan for combats as some times you can spawn in to a combat
     */
-    loginOK(){
-        for (let i in GAME.combats){
+    loginOK() {
+        for (let i in GAME.combats) {
             let combat = GAME.combats[i];
-            if (combat.left.id == PLAYER.id){
+            if (combat.left.id == PLAYER.id) {
                 this.curCombat = combat;
                 this.curEnemy = combat.right;
             } else if (combat.right.id == PLAYER.id) {
@@ -195,16 +164,23 @@ export class GenliteDropRecorderPlugin {
         }
         if (this.curCombat === undefined)
             return;
+        this.setMonsterData();
+    }
+
+    setMonsterData() {
         this.monsterData.layer = this.monsterData.layer = PLAYER.location.layer
         this.monsterData.x = this.curEnemy.pos2.x;
         this.monsterData.y = this.curEnemy.pos2.y;
         this.monsterData.Monster_Name = this.curEnemy.info.name;
         this.monsterData.Monster_Level = this.curEnemy.info.level;
+        this.monsterData.packID = this.curEnemy.id.split('-')[0];
     }
 
     /* record and aggregate drops in local storage */
     localDropRecording() {
-        let dropKey = String.prototype.concat(this.monsterData.Monster_Name, "-", this.monsterData.Monster_Level);
+        let dropKey = String.prototype.concat(this.monsterData.Monster_Name, "-", this.monsterData.Monster_Level.toString());
+        if (Object.keys(GenliteDropRecorderPlugin.specialMobs).includes(this.monsterData.packID))
+            dropKey.concat("-", GenliteDropRecorderPlugin.specialMobs[this.monsterData.packID]);
         if (this.dropTable[dropKey] === undefined) {
             this.dropTable[dropKey] = {};
             this.dropTable[dropKey].Monster_Name = this.monsterData.Monster_Name;
@@ -219,7 +195,7 @@ export class GenliteDropRecorderPlugin {
             x: this.monsterData.x,
             y: this.monsterData.y
         });
-        for(let i in this.monsterData.Drops){
+        for (let i in this.monsterData.Drops) {
             let drop = this.monsterData.Drops[i]
             if (this.dropTable[dropKey].drops[drop.Item_Code] === undefined)
                 this.dropTable[dropKey].drops[drop.Item_Code] = 0;
