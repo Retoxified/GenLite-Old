@@ -159,6 +159,7 @@ export class GenliteHitRecorder {
                     break;
                 case "ranged_defensive":
                     this.statsList.ranged += 2;
+                    break;
             }
         }
     }
