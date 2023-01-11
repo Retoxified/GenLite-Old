@@ -2,6 +2,7 @@
 import { GenLite } from "./core/genlite.class";
 import { GenLiteNotificationPlugin } from "./core/plugins/genlite-notification.plugin";
 import { GenLiteSettingsPlugin } from "./core/plugins/genlite-settings.plugin";
+import { GenLiteCommandsPlugin } from "./core/plugins/genlite-commands.plugin";
 
 /** Official Plugins */
 import { GenLiteCameraPlugin } from "./plugins/genlite-camera.plugin";
@@ -26,6 +27,7 @@ import {GenLiteLocationsPlugin} from "./plugins/genlite-locations.plugin";
     /** Core Features */
     genlite.notifications = await genlite.pluginLoader.addPlugin(GenLiteNotificationPlugin);
     genlite.settings = await genlite.pluginLoader.addPlugin(GenLiteSettingsPlugin);
+	genlite.commands = await genlite.pluginLoader.addPlugin(GenLiteCommandsPlugin);
 
     /** Official Plugins */
     await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
