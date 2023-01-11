@@ -12,7 +12,7 @@ export class GenLite {
 
     notifications: GenLiteNotificationPlugin;
     settings: GenLiteSettingsPlugin;
-	commands: GenLiteCommandsPlugin;
+    commands: GenLiteCommandsPlugin;
 
     /** We allow setting "any field, to anything" in order to load core features such as genlite.notifications */
     [key: string]: any;

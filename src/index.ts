@@ -27,7 +27,7 @@ import {GenLiteLocationsPlugin} from "./plugins/genlite-locations.plugin";
     /** Core Features */
     genlite.notifications = await genlite.pluginLoader.addPlugin(GenLiteNotificationPlugin);
     genlite.settings = await genlite.pluginLoader.addPlugin(GenLiteSettingsPlugin);
-	genlite.commands = await genlite.pluginLoader.addPlugin(GenLiteCommandsPlugin);
+    genlite.commands = await genlite.pluginLoader.addPlugin(GenLiteCommandsPlugin);
 
     /** Official Plugins */
     await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);

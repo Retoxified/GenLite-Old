@@ -85,5 +85,5 @@ declare const WorldItem: {
 };
 
 declare const Chat: {
-	[key: string]: any,
+    [key: string]: any,
 };
