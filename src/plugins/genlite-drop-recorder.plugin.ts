@@ -17,7 +17,7 @@ export class GenliteDropRecorderPlugin {
         pos2: { x: 0, y: 0 },
         info: { name: "", level: 0 }
     };
-    enemyDead = 0;
+    enemyDead = Number.POSITIVE_INFINITY;
     objectSpawns = [];
 
     /* key for dropTable -> Monster_Name-Monster_Level */
@@ -100,7 +100,7 @@ export class GenliteDropRecorderPlugin {
             if the items are on a square one tile around the mob
             NOTE: this assumes removeObject comes last which might not be true across updates
         */
-        if (verb == "spawnObject" && payload.type == "item" && this.enemyDead != 0) {
+        if (verb == "spawnObject" && payload.type == "item" && this.enemyDead != Number.POSITIVE_INFINITY) {
             if (this.curEnemy.pos2 === undefined) {
                 return;
             }
@@ -118,11 +118,11 @@ export class GenliteDropRecorderPlugin {
             if two npcs die exactly at the same time but this should be like a once in a universe event
             then send data to server and record in local dropTable
         */
-        if (verb == "removeObject" && payload.id == this.curEnemy.id) {
+        if (verb == "removeObject" && payload.id == this.curEnemy.id && this.enemyDead != Number.POSITIVE_INFINITY) {
             let drop: any = {};
             this.monsterData.Drops = [];
             for (let item in this.objectSpawns) {
-                if (this.objectSpawns[item].timestamp <= payload.timestamp) {
+                if (this.objectSpawns[item].timestamp <= payload.timestamp && this.objectSpawns[item].timestamp >= this.enemyDead) {
                     drop.Item_Code = this.objectSpawns[item].item.item;
                     if (this.objectSpawns[item].item.quantity === undefined) {
                         drop.Item_Quantity = 1;
@@ -140,7 +140,7 @@ export class GenliteDropRecorderPlugin {
                 this.monsterData.Drops.push(structuredClone(drop));
             }
             this.objectSpawns = [];
-            this.enemyDead = 0;
+            this.enemyDead = Number.POSITIVE_INFINITY;
             if (this.submitItemsToServer === true) {
                 window.genlite.sendDataToServer("droplogproject", this.monsterData);
             }

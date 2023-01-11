@@ -109,6 +109,7 @@ export class GenLiteWikiDataCollectionPlugin {
         if (!this.isPluginEnabled) {
             return;
         }
+        //console.log(xp);
         if (xp.levelUp) {
             this.playerMeleeCL = Math.trunc((PLAYER_INFO.skills.attack.level + PLAYER_INFO.skills.defense.level + PLAYER_INFO.skills.strength.level) / 3);
             this.playerRangedCL = PLAYER_INFO.skills.ranged.level;
