@@ -24,7 +24,7 @@ export class GenLiteRecipeRecorderPlugin {
     async init() {
         window.genlite.registerModule(this);
         let dropTableString = localStorage.getItem("GenliteRecipeRecorder")
-        if(dropTableString == null) {
+        if (dropTableString == null) {
             this.crafting.resultsList = {};
         } else {
             this.crafting.resultsList = JSON.parse(dropTableString);
@@ -37,7 +37,7 @@ export class GenLiteRecipeRecorderPlugin {
     }
 
     action(verb, params) {
-        if(this.isPluginEnabled === false) {
+        if (this.isPluginEnabled === false) {
             return;
         }
 
@@ -59,75 +59,80 @@ export class GenLiteRecipeRecorderPlugin {
     }
 
     handle(verb, payload) {
-        if(this.isPluginEnabled === false) {
+        if (this.isPluginEnabled === false) {
             return;
         }
 
         let itemList = {};
-        /* filters NETWORK messages from other players
-            some messages have no ID set those are always unique to the player
+        /* TODO? I dont like relying on NETWORK message orders
+            but after filtering I have never seen them come in a different one
         */
-        if (this.crafting.isCrafting &&
-            (payload.id == PLAYER.id || payload.player == PLAYER.id ||
-                (payload.id === undefined && payload.player === undefined))) {
-            /* TODO? I dont like relying on NETWORK message orders
-                but after filtering I have never seen them come in a different one
-            */
-            if (verb == 'inventory') {
-                if (this.crafting.prevVerb == 'inventory') {
-                    for (let i in this.crafting.prevInventory) {
-                        /* add up the quantities of the inventory */
-                        if (itemList[this.crafting.prevInventory[i].item] === undefined)
-                            itemList[this.crafting.prevInventory[i].item] = 0;
-                        if (this.crafting.prevInventory[i].quantity === undefined) {
-                            itemList[this.crafting.prevInventory[i].item] += 1;
-                        } else {
-                            itemList[this.crafting.prevInventory[i].item] += this.crafting.prevInventory[i].quantity;
-                        }
-                    }
-                    /* subtract the new inventory */
-                    for (let i in payload) {
-                        if (itemList[payload[i].item] === undefined)
-                            itemList[payload[i].item] = 0;
-                        if (payload[i].quantity === undefined) {
-                            itemList[payload[i].item] -= 1;
-                        } else {
-                            itemList[payload[i].item] -= payload[i].quantity;
-                        }
-                    }
-                    /* negative values are outputs
-                        positive are inputs
-                    */
-                    for (let i in itemList) {
-                        if (itemList[i] < 0) {
-                            if (this.crafting.resultsList[this.crafting.recipeName].output[i] === undefined)
-                                this.crafting.resultsList[this.crafting.recipeName].output[i] = 0;
-                            this.crafting.resultsList[this.crafting.recipeName].output[i] -= itemList[i];
-                        } else if (itemList[i] > 0) {
-                            if (this.crafting.resultsList[this.crafting.recipeName].input[i] === undefined)
-                                this.crafting.resultsList[this.crafting.recipeName].input[i] = 0;
-                            this.crafting.resultsList[this.crafting.recipeName].input[i] += itemList[i];
-                        }
-                    }
-                    this.crafting.prevInventory = structuredClone(payload);
-                    localStorage.setItem("GenliteRecipeRecorder", JSON.stringify(this.crafting.resultsList));
-                }
-                /* determines if crafting is done by looking for the stop animation
-                    that comes only after the crafting animation
-                */
-            } else if (verb == 'animation') {
-                if (payload.anim) {
-                    this.crafting.stTime = payload.timestamp;
-                } else if (this.crafting.stTime < payload.timestamp && this.crafting.stTime != 0) {
-                    this.crafting.isCrafting = false;
-                    this.crafting.stTime = 0;
+        if (!this.crafting.isCrafting)
+            return;
+        if (verb == 'inventory') {
+            for (let i in this.crafting.prevInventory) {
+                /* add up the quantities of the inventory */
+                if (itemList[this.crafting.prevInventory[i].item] === undefined)
+                    itemList[this.crafting.prevInventory[i].item] = 0;
+
+                if (this.crafting.prevInventory[i].quantity === undefined) {
+                    itemList[this.crafting.prevInventory[i].item] += 1;
+                } else {
+                    itemList[this.crafting.prevInventory[i].item] += this.crafting.prevInventory[i].quantity;
                 }
             }
-            this.crafting.prevVerb = verb;
+
+            /* subtract the new inventory */
+            for (let i in payload) {
+                if (itemList[payload[i].item] === undefined)
+                    itemList[payload[i].item] = 0;
+                    
+                if (payload[i].quantity === undefined) {
+                    itemList[payload[i].item] -= 1;
+                } else {
+                    itemList[payload[i].item] -= payload[i].quantity;
+                }
+            }
+
+            /* negative values are outputs
+                positive are inputs
+            */
+            let isNothing = true;
+            for (let i in itemList) {
+                if (itemList[i] < 0) {
+                    if (this.crafting.resultsList[this.crafting.recipeName].output[i] === undefined)
+                        this.crafting.resultsList[this.crafting.recipeName].output[i] = 0;
+                    this.crafting.resultsList[this.crafting.recipeName].output[i] -= itemList[i];
+                    isNothing = false;
+                } else if (itemList[i] > 0) {
+                    if (this.crafting.resultsList[this.crafting.recipeName].input[i] === undefined)
+                        this.crafting.resultsList[this.crafting.recipeName].input[i] = 0;
+                    this.crafting.resultsList[this.crafting.recipeName].input[i] += itemList[i];
+                }
+            }
+            if (isNothing) {
+                if (this.crafting.resultsList[this.crafting.recipeName].output["nothing"] === undefined)
+                    this.crafting.resultsList[this.crafting.recipeName].output["nothing"] = 0;
+                this.crafting.resultsList[this.crafting.recipeName].output["nothing"]++;
+            }
+            this.crafting.prevInventory = structuredClone(payload);
+            localStorage.setItem("GenliteRecipeRecorder", JSON.stringify(this.crafting.resultsList));
+            /* determines if crafting is done by looking for the stop animation
+                that comes only after the crafting animation
+            */
+        } else if (verb == 'animation' && payload.player == PLAYER.id) {
+            if (payload.anim) {
+                this.crafting.stTime = payload.timestamp;
+            } else if (this.crafting.stTime < payload.timestamp && this.crafting.stTime != 0) {
+                this.crafting.isCrafting = false;
+                this.crafting.stTime = 0;
+            }
         }
+        this.crafting.prevVerb = verb;
     }
 
-    resetResultsList(){
+    resetResultsList() {
         this.crafting.resultsList = {};
+        localStorage.removeItem("GenliteRecipeRecorder");
     }
 }
