@@ -56,7 +56,10 @@ export class GenLiteWikiDataCollectionPlugin {
             "Monster_Name": object.info.name,
             "Monster_Level": object.info.level,
             "Monster_HP": update.maxhp,
-            "Monster_Pack_ID": update.id.split("-")[0]
+            "Monster_Pack_ID": update.id.split("-")[0],
+            "X": object.pos2.x,
+            "Y": object.pos2.y,
+            "Layer": PLAYER.location.layer
         };
         let mobKey = `${monsterdata.Monster_Name}-${monsterdata.Monster_Level}-${monsterdata.Monster_Pack_ID}`
 
@@ -136,13 +139,14 @@ export class GenLiteWikiDataCollectionPlugin {
                 xpDrop += 2
         }
         let levelDiff = (this.combatStyle == "melee" ? this.playerMeleeCL : this.playerRangedCL) - this.curEnemy.info.level;
+        levelDiff = Math.min(Math.max(levelDiff,-4), 12);
         let baseXp;
         if (levelDiff == 0) {
             baseXp = xpDrop;
         } else if (levelDiff < 0) {
-            baseXp = xpDrop / (1 - ((1 / 20) * Math.max(levelDiff, -4)));
+            baseXp = xpDrop / (1 - ((1 / 20) * levelDiff));
         } else {
-            baseXp = xpDrop / (1 - ((7 / 120) * Math.min(levelDiff, 12)));
+            baseXp = xpDrop / (1 - ((7 / 120) * levelDiff));
         }
         this.previously_seen[mobKey].baseXp = baseXp;
         this.previously_seen[mobKey].levelDiffBit = 1<<(levelDiff+4);
