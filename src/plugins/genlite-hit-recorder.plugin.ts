@@ -1,5 +1,5 @@
-export class GenliteHitRecorder {
-    static pluginName = 'GenliteHitRecorder';
+export class GenLiteHitRecorder {
+    static pluginName = 'GenLiteHitRecorder';
 
     curEnemy;
     statsList;

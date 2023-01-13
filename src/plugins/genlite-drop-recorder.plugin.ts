@@ -1,4 +1,4 @@
-export class GenliteDropRecorderPlugin {
+export class GenLiteDropRecorderPlugin {
     static pluginName = 'GenLiteDropRecorderPlugin';
 
     monsterData = {
@@ -179,8 +179,8 @@ export class GenliteDropRecorderPlugin {
     /* record and aggregate drops in local storage */
     localDropRecording() {
         let dropKey = String.prototype.concat(this.monsterData.Monster_Name, "-", this.monsterData.Monster_Level.toString());
-        if (Object.keys(GenliteDropRecorderPlugin.specialMobs).includes(this.monsterData.packID))
-            dropKey.concat("-", GenliteDropRecorderPlugin.specialMobs[this.monsterData.packID]);
+        if (Object.keys(GenLiteDropRecorderPlugin.specialMobs).includes(this.monsterData.packID))
+            dropKey.concat("-", GenLiteDropRecorderPlugin.specialMobs[this.monsterData.packID]);
         if (this.dropTable[dropKey] === undefined) {
             this.dropTable[dropKey] = {};
             this.dropTable[dropKey].Monster_Name = this.monsterData.Monster_Name;

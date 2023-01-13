@@ -1,4 +1,4 @@
-import { GenlitePluginLoader } from "./genlite-plugin-loader.class";
+import { GenLitePluginLoader } from "./genlite-plugin-loader.class";
 import { GenLiteNotificationPlugin } from "./plugins/genlite-notification.plugin";
 import { GenLiteSettingsPlugin } from "./plugins/genlite-settings.plugin";
 
@@ -16,7 +16,7 @@ export class GenLite {
     [key: string]: any;
 
     constructor() {
-        this.pluginLoader = new GenlitePluginLoader();
+        this.pluginLoader = new GenLitePluginLoader();
     }
 
     async init() {

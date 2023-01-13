@@ -1,4 +1,4 @@
-import { GenliteConfirmation } from "../helpers/genlite-confirmation.class";
+import { GenLiteConfirmation } from "../helpers/genlite-confirmation.class";
 
 export class GenLiteSettingsPlugin {
     public static pluginName = 'GenLiteSettingsPlugin';
@@ -61,7 +61,7 @@ export class GenLiteSettingsPlugin {
             // Update the setting value when the input value changes
             if(inputType === "checkbox") {
                 if(input.checked === true && confirmationMessage !== undefined) {
-                    if(await GenliteConfirmation.confirm(confirmationMessage) === false) {
+                    if(await GenLiteConfirmation.confirm(confirmationMessage) === false) {
                         input.checked = false;
                         event.preventDefault();
                         return;

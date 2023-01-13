@@ -1,6 +1,6 @@
 import { ExamplePlugin } from "./help/example-plugin.class";
 
-export class GenlitePluginLoader {
+export class GenLitePluginLoader {
     plugins;
 
     constructor() {

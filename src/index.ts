@@ -5,14 +5,14 @@ import { GenLiteSettingsPlugin } from "./core/plugins/genlite-settings.plugin";
 
 /** Official Plugins */
 import { GenLiteCameraPlugin } from "./plugins/genlite-camera.plugin";
-import { GenliteDropRecorderPlugin } from "./plugins/genlite-drop-recorder.plugin";
+import { GenLiteDropRecorderPlugin } from "./plugins/genlite-drop-recorder.plugin";
 import { GenLiteItemHighlightPlugin } from "./plugins/genlite-item-highlight.plugin";
 import { GenLiteNPCHighlightPlugin } from "./plugins/genlite-npc-highlight.plugin";
 import { GenLiteRecipeRecorderPlugin } from "./plugins/genlite-recipe-recorder.plugin";
 import { GenLiteWikiDataCollectionPlugin } from "./plugins/genlite-wiki-data-collection.plugin";
 import { GenLiteXpCalculator } from "./plugins/genlite-xp-calculator.plugin";
-import { GenliteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
-import { GenliteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
+import { GenLiteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
+import { GenLiteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
 import {GenLiteLocationsPlugin} from "./plugins/genlite-locations.plugin";
 
 
@@ -31,11 +31,11 @@ import {GenLiteLocationsPlugin} from "./plugins/genlite-locations.plugin";
     await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
-    await genlite.pluginLoader.addPlugin(GenliteDropRecorderPlugin);
+    await genlite.pluginLoader.addPlugin(GenLiteDropRecorderPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollectionPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteXpCalculator);
     await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);
-    await genlite.pluginLoader.addPlugin(GenliteHitRecorder);
-    await genlite.pluginLoader.addPlugin(GenliteMenuScaler);
+    await genlite.pluginLoader.addPlugin(GenLiteHitRecorder);
+    await genlite.pluginLoader.addPlugin(GenLiteMenuScaler);
     await genlite.pluginLoader.addPlugin(GenLiteLocationsPlugin);
 })();
