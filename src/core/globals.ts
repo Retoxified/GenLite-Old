@@ -83,3 +83,7 @@ declare const NETWORK: {
 declare const WorldItem: {
     [key: string]: any,
 };
+
+declare const Chat: {
+    [key: string]: any,
+};
