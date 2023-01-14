@@ -196,7 +196,7 @@ export class GenLiteHitRecorder {
         }
         hitInfo.hitList[damage]++;
         hitInfo.totalHits++;
-        hitInfo.hitRate = hitInfo.totalZero / hitInfo.totalHits
+        hitInfo.hitRate = hitInfo.totalNonZero / hitInfo.totalHits
 
     }
 
