@@ -10,6 +10,10 @@ Puls3
 
 BonesdogNardwe#0242 aka Bonesdog
 
+snwhd#3854 
+
+2 Pi#4824 aka 2 Pi
+
 
 
 For questions, suggestions, problems and everything in between join us on [Discord](https://discord.gg/Jn7s7pArdg)

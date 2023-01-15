@@ -41,7 +41,7 @@ export class GenLiteNPCHighlightPlugin {
 
         for(let key in npcsToAdd) {
             let npc = GAME.npcs[npcsToAdd[key]]
-            let hpKey = `${npc.info.name}-${npc.info.level}`;
+            let hpKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}`;
             let text = npc.htmlName;
             if (this.npcHealthList[hpKey] !== undefined)
                 text += ` HP: ${this.npcHealthList[hpKey]}`
@@ -88,7 +88,7 @@ export class GenLiteNPCHighlightPlugin {
         if(update.id == PLAYER.id || GAME.players[update.id] !== undefined || object === undefined)
             return;
 
-        let hpKey = `${object.info.name}-${object.info.level}`;
+        let hpKey = `${object.info.name}-${object.info.level ? object.info.level : 0}`;
 
         let npcsToMod;
         if(this.npcHealthList[hpKey] === undefined) {
