@@ -111,6 +111,8 @@ export class GenLiteLocationsPlugin {
     }
     private setupUILocationLabel(): void {
         this.locationLabel = document.createElement("div")
+        this.locationLabel.style.display = "none";
+        this.locationLabel.style.visibility = "hidden";
         this.locationLabel.classList.add( "location-label" )
         this.locationLabel.innerText = ""
         document.body.appendChild(this.locationLabel)
@@ -118,6 +120,8 @@ export class GenLiteLocationsPlugin {
     private setupUIMapIframe(): void {
         this.mapZoom = 0.55
         this.mapIframe = document.createElement("iframe")
+        this.mapIframe.style.display = "none";
+        this.mapIframe.style.visibility = "hidden";
         this.mapIframe.classList.add("map-iframe","map-iframe-hidden")
 
         this.mapIframe.src = `https://genfamap.com/?location=true#0_0_${ this.mapZoom }`
@@ -126,6 +130,8 @@ export class GenLiteLocationsPlugin {
     async init() {
         window.genlite.registerModule(this)
 
+
+
         this.locationLabels = window.genlite.settings.add("LocationLabels.Enable", true, "Location Labels", "checkbox", this.handleLocationLabelsEnableDisable, this)
         this.showCoordinates = window.genlite.settings.add("Coordinates.Enable", true, "Coordinates", "checkbox", this.handleShowCoordinatesDisable, this)
         this.compassMap = window.genlite.settings.add("CompassMap.Enable", true, "Compass Map", "checkbox", this.handleCompassMapEnableDisable, this)
@@ -133,7 +139,9 @@ export class GenLiteLocationsPlugin {
         //Decide how to handle initial setting grab as right now only returns true/false
         this.translucentScale = 0.5
         window.genlite.settings.add("CompassMapTranslucentScale", true, "Compass Map Translucent Scale", "range", this.handleCompassMapTranslucentSlider, this, undefined,
-            [['min', '0.01'], ['max', '1'], ['step', '0.01'], ['value', '0.5']]);
+            [['min', '0.01'], ['max', '1'], ['step', '0.01'], ['value', '0.5'], ['class','gen-slider']]);
+
+        this.addStylesheet()
         //
     }
     private handleCompassMapTranslucentSlider( value ) {
@@ -145,7 +153,7 @@ export class GenLiteLocationsPlugin {
                     opacity: ${this.translucentScale};
                     pointer-events: none;
             }
-        `)
+        `)//Not the best way to do this.
 
     }
     private handleLocationLabelsEnableDisable(state: boolean): void  {
@@ -339,6 +347,9 @@ export class GenLiteLocationsPlugin {
     }
     private addStylesheet() {
         this.addGlobalStylesheet(`
+            .gen-slider {
+            
+            }
             .location-label { 
                 font-size: 2em;
                 color: yellow;
@@ -418,6 +429,8 @@ export class GenLiteLocationsPlugin {
         this.toggleTranslucentMap()
     }
     private enableMapIframe() {
+        this.mapIframe.style.display = "block";
+        this.mapIframe.style.visibility = "visible"; //Not a fan of doing it like this; need to determine better way to reolve issue
         this.hideMap()
 
         let minimapCompass = document.getElementById("new_ux-minimap-compass")
