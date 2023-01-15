@@ -24,9 +24,11 @@ export class GenLiteHitRecorder {
         this.statsList = {
             aim: 0,
             power: 0,
+            armour: 0,
             attack: 0,
             strength: 0,
-            ranged: 0
+            ranged: 0,
+            defense: 0
         }
         this.playerHitInfo = {};
         this.playerHitInfo.hitList = {};
@@ -143,10 +145,12 @@ export class GenLiteHitRecorder {
             }
             this.statsList.aim = payload.equipment.stats.aim ?? payload.equipment.stats.ranged_aim;
             this.statsList.power = payload.equipment.stats.power ?? payload.equipment.stats.ranged_power;
+            this.statsList.armour = payload.equipment.stats.armour;
             switch (payload.stance) {
                 case "controlled":
                     this.statsList.attack += 1;
                     this.statsList.strength += 1;
+                    this.statsList.defense += 1;
                     break;
                 case "accurate":
                     this.statsList.attack += 3;
@@ -159,6 +163,7 @@ export class GenLiteHitRecorder {
                     break;
                 case "ranged_defensive":
                     this.statsList.ranged += 2;
+                    this.statsList.defense += 1;
                     break;
             }
         }

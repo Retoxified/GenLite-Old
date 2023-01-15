@@ -11,6 +11,7 @@ export class GenLiteWikiDataCollectionPlugin {
     vitDrop = 0;
 
     isPluginEnabled: boolean = false;
+    scanInterval;
 
     async init() {
         window.genlite.registerModule(this);
@@ -28,8 +29,21 @@ export class GenLiteWikiDataCollectionPlugin {
         );
     }
 
+    initializeUI() {
+        if (!this.isPluginEnabled) {
+            return;
+        }
+        this.scanInterval = setInterval(() => { this.scanNpcs(this) }, 30000);
+    }
+
     handlePluginEnableDisable(state: boolean) {
         this.isPluginEnabled = state;
+        if (state) {
+            this.initializeUI();
+        } else {
+            clearInterval(this.scanInterval);
+        }
+
     }
 
     updateSkills() {
@@ -59,11 +73,14 @@ export class GenLiteWikiDataCollectionPlugin {
             "Monster_Pack_ID": update.id.split("-")[0],
             "X": object.pos2.x,
             "Y": object.pos2.y,
-            "Layer": PLAYER.location.layer
+            "Layer": PLAYER.location.layer,
+            "Pack_Size": 0,
+            "Base_Xp": 0,
+            "Level_Diff_Bit": 0
         };
         let mobKey = `${monsterdata.Monster_Name}-${monsterdata.Monster_Level}-${monsterdata.Monster_Pack_ID}`
 
-        if (this.previously_seen[mobKey] === undefined) {
+        if (this.previously_seen[mobKey] === undefined || this.previously_seen[mobKey].Monster_HP == undefined) { // if we havent seen the monster or if we dont know its health
             this.previously_seen[mobKey] = monsterdata;
             window.genlite.sendDataToServer("monsterdata", monsterdata);
         }
@@ -139,7 +156,7 @@ export class GenLiteWikiDataCollectionPlugin {
                 xpDrop += 2
         }
         let levelDiff = (this.combatStyle == "melee" ? this.playerMeleeCL : this.playerRangedCL) - this.curEnemy.info.level;
-        levelDiff = Math.min(Math.max(levelDiff,-4), 12);
+        levelDiff = Math.min(Math.max(levelDiff, -4), 12);
         let baseXp;
         if (levelDiff == 0) {
             baseXp = xpDrop;
@@ -148,8 +165,55 @@ export class GenLiteWikiDataCollectionPlugin {
         } else {
             baseXp = xpDrop / (1 - ((7 / 120) * levelDiff));
         }
-        this.previously_seen[mobKey].baseXp = baseXp;
-        this.previously_seen[mobKey].levelDiffBit = 1<<(levelDiff+4);
+        this.previously_seen[mobKey].Base_Xp = baseXp;
+        this.previously_seen[mobKey].Level_Diff_Bit = 1 << (levelDiff + 4);
         window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
+    }
+
+    scanNpcs(callback_this) {
+        let npcIds = Object.keys(GAME.npcs).sort();
+        let numInPack = 0;
+        for (let i = 0; i < npcIds.length; i++) {
+            let npcId = npcIds[i]; //get the id and packID of the current mob
+            let npcPack = npcId.split('-')[0];
+            for (let k = 0; k + i < npcIds.length; k++) { //look ahead
+                let npcIdNext = npcIds[i + k];
+                if (npcPack == npcIdNext.split('-')[0]) { //if packID matches keep going
+                    numInPack++;
+                    continue;
+                } else { // if it doesnt match increase i by look ahead amount: k - 1 and break
+                    i = i + k - 1;
+                    break;
+                }
+            }
+            let npc = GAME.npcs[npcId];
+            let mobKey = `${npc.info.name}-${npc.info.level}-${npcPack}`;
+            if (callback_this.previously_seen[mobKey] !== undefined) {
+                if (!callback_this.previously_seen[mobKey].PackSize ||
+                    callback_this.previously_seen[mobKey].PackSize < numInPack) { // if we have seen it before but we counted more this time update
+
+                    let monsterdata = callback_this.previously_seen[mobKey];
+                    monsterdata.Pack_Size = numInPack;
+                    window.genlite.sendDataToServer("monsterdata", monsterdata);
+                }
+                numInPack = 0;
+                continue;
+            }
+            let monsterdata = {
+                "Monster_Name": npc.info.name,
+                "Monster_Level": npc.info.level ? npc.info.level : 0,
+                "Monster_Pack_ID": npcPack,
+                "X": npc.pos2.x,
+                "Y": npc.pos2.y,
+                "Layer": PLAYER.location.layer,
+                "Pack_Size": numInPack,
+                "Monster_HP": 0,
+                "Base_Xp": 0,
+                "Level_Diff_Bit": 0
+            }
+            callback_this.previously_seen[mobKey] = monsterdata;
+            numInPack = 0;
+            window.genlite.sendDataToServer("monsterdata", monsterdata);
+        }
     }
 }
