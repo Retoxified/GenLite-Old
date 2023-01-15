@@ -80,7 +80,7 @@ export class GenLiteWikiDataCollectionPlugin {
         };
         let mobKey = `${monsterdata.Monster_Name}-${monsterdata.Monster_Level}-${monsterdata.Monster_Pack_ID}`
 
-        if (this.previously_seen[mobKey] === undefined || this.previously_seen[mobKey].Monster_HP == undefined) { // if we havent seen the monster or if we dont know its health
+        if (this.previously_seen[mobKey] === undefined || this.previously_seen[mobKey].Monster_HP == 0) { // if we havent seen the monster or if we dont know its health
             this.previously_seen[mobKey] = monsterdata;
             window.genlite.sendDataToServer("monsterdata", monsterdata);
         }
