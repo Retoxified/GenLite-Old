@@ -172,7 +172,7 @@ export class GenLiteDropRecorderPlugin {
         this.monsterData.x = this.curEnemy.pos2.x;
         this.monsterData.y = this.curEnemy.pos2.y;
         this.monsterData.Monster_Name = this.curEnemy.info.name;
-        this.monsterData.Monster_Level = this.curEnemy.info.level;
+        this.monsterData.Monster_Level = this.curEnemy.info.level ? this.curEnemy.info.level : 0;
         this.monsterData.packID = this.curEnemy.id.split('-')[0];
     }
 

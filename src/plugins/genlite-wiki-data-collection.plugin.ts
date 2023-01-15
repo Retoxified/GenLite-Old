@@ -68,7 +68,7 @@ export class GenLiteWikiDataCollectionPlugin {
 
         let monsterdata = {
             "Monster_Name": object.info.name,
-            "Monster_Level": object.info.level,
+            "Monster_Level": object.info.level ? object.info.level : 0,
             "Monster_HP": update.maxhp,
             "Monster_Pack_ID": update.id.split("-")[0],
             "X": object.pos2.x,
@@ -76,7 +76,8 @@ export class GenLiteWikiDataCollectionPlugin {
             "Layer": PLAYER.location.layer,
             "Pack_Size": 0,
             "Base_Xp": 0,
-            "Level_Diff_Bit": 0
+            "Level_Diff_Bit": 0,
+            "Version": 2
         };
         let mobKey = `${monsterdata.Monster_Name}-${monsterdata.Monster_Level}-${monsterdata.Monster_Pack_ID}`
 
@@ -136,7 +137,7 @@ export class GenLiteWikiDataCollectionPlugin {
         }
         if (this.curEnemy === undefined)
             return;
-        let mobKey = `${this.curEnemy.info.name}-${this.curEnemy.info.level}-${this.curEnemy.id.split("-")[0]}`
+        let mobKey = `${this.curEnemy.info.name}-${this.curEnemy.info.level ? this.curEnemy.info.level : 0}-${this.curEnemy.id.split("-")[0]}`
         if (xp.skill == "vitality") {
             this.vitDrop = xp.xp;
             return;
@@ -146,15 +147,7 @@ export class GenLiteWikiDataCollectionPlugin {
 
         let xpDrop = xp.xp + this.vitDrop;
         // Hack? Math? i dunno i though i knew how this works but i dont but for some reason it increases the accuracy of the prediction
-        switch (xpDrop % 3) {
-            case 0:
-                break;
-            case 1:
-                xpDrop++;
-                break;
-            case 2:
-                xpDrop += 2
-        }
+        xpDrop += (xpDrop % 3);
         let levelDiff = (this.combatStyle == "melee" ? this.playerMeleeCL : this.playerRangedCL) - this.curEnemy.info.level;
         levelDiff = Math.min(Math.max(levelDiff, -4), 12);
         let baseXp;
@@ -171,32 +164,21 @@ export class GenLiteWikiDataCollectionPlugin {
     }
 
     scanNpcs(callback_this) {
-        let npcIds = Object.keys(GAME.npcs).sort();
-        let numInPack = 0;
-        for (let i = 0; i < npcIds.length; i++) {
-            let npcId = npcIds[i]; //get the id and packID of the current mob
-            let npcPack = npcId.split('-')[0];
-            for (let k = 0; k + i < npcIds.length; k++) { //look ahead
-                let npcIdNext = npcIds[i + k];
-                if (npcPack == npcIdNext.split('-')[0]) { //if packID matches keep going
-                    numInPack++;
-                    continue;
-                } else { // if it doesnt match increase i by look ahead amount: k - 1 and break
-                    i = i + k - 1;
-                    break;
-                }
-            }
+        const npcCounts = Object.keys(GAME.npcs).reduce((acc, npcKey) => acc.set(npcKey.split('-')[0], (acc.get(npcKey.split('-')[0]) || 0)+1), new Map());
+
+        for (let npcId in GAME.npcs) {
             let npc = GAME.npcs[npcId];
-            let mobKey = `${npc.info.name}-${npc.info.level}-${npcPack}`;
+            let npcPack = npcId.split('-')[0];
+
+            let mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}-${npcPack}`;
             if (callback_this.previously_seen[mobKey] !== undefined) {
-                if (!callback_this.previously_seen[mobKey].PackSize ||
-                    callback_this.previously_seen[mobKey].PackSize < numInPack) { // if we have seen it before but we counted more this time update
+                if (!callback_this.previously_seen[mobKey].Pack_Size ||
+                    callback_this.previously_seen[mobKey].Pack_Size < npcCounts.get(npcPack)) { // if we have seen it before but we counted more this time update
 
                     let monsterdata = callback_this.previously_seen[mobKey];
-                    monsterdata.Pack_Size = numInPack;
+                    monsterdata.Pack_Size = npcCounts.get(npcPack);
                     window.genlite.sendDataToServer("monsterdata", monsterdata);
                 }
-                numInPack = 0;
                 continue;
             }
             let monsterdata = {
@@ -206,13 +188,13 @@ export class GenLiteWikiDataCollectionPlugin {
                 "X": npc.pos2.x,
                 "Y": npc.pos2.y,
                 "Layer": PLAYER.location.layer,
-                "Pack_Size": numInPack,
+                "Pack_Size": npcCounts.get(npcPack),
                 "Monster_HP": 0,
                 "Base_Xp": 0,
-                "Level_Diff_Bit": 0
+                "Level_Diff_Bit": 0,
+                "Version": 2
             }
             callback_this.previously_seen[mobKey] = monsterdata;
-            numInPack = 0;
             window.genlite.sendDataToServer("monsterdata", monsterdata);
         }
     }
