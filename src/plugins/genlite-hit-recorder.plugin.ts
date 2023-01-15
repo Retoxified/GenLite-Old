@@ -1,5 +1,5 @@
-export class GenliteHitRecorder {
-    static pluginName = 'GenliteHitRecorder';
+export class GenLiteHitRecorder {
+    static pluginName = 'GenLiteHitRecorder';
 
     curEnemy;
     statsList;
@@ -24,9 +24,11 @@ export class GenliteHitRecorder {
         this.statsList = {
             aim: 0,
             power: 0,
+            armour: 0,
             attack: 0,
             strength: 0,
-            ranged: 0
+            ranged: 0,
+            defense: 0
         }
         this.playerHitInfo = {};
         this.playerHitInfo.hitList = {};
@@ -34,13 +36,12 @@ export class GenliteHitRecorder {
         this.playerHitInfo.consecutiveNonZero = 0;
         this.playerHitInfo.maxZero = 0;
         this.playerHitInfo.maxNonZero = 0;
+        this.playerHitInfo.totalZero = 0;
+        this.playerHitInfo.totalNonZero = 0;
+        this.playerHitInfo.totalHits = 0;
+        this.playerHitInfo.hitRate = 0;
 
         this.enemyHitInfo = {};
-        this.enemyHitInfo.hitList = {};
-        this.enemyHitInfo.consecutiveZero = 0;
-        this.enemyHitInfo.consecutiveNonZero = 0;
-        this.enemyHitInfo.maxZero = 0;
-        this.enemyHitInfo.maxNonZero = 0;
 
         this.curDpsAcc = {
             timeStart: 0,
@@ -59,6 +60,7 @@ export class GenliteHitRecorder {
 
     async init() {
         window.genlite.registerModule(this);
+        this.enemyHitInfo = structuredClone(this.playerHitInfo);
         this.isPluginEnabled = window.genlite.settings.add("HitRecorder.Enable", true, "Hit Recorder", "checkbox", this.handlePluginEnableDisable, this);
         this.dpsOverlayContainer.appendChild(this.dpsOverlay);
     }
@@ -143,10 +145,12 @@ export class GenliteHitRecorder {
             }
             this.statsList.aim = payload.equipment.stats.aim ?? payload.equipment.stats.ranged_aim;
             this.statsList.power = payload.equipment.stats.power ?? payload.equipment.stats.ranged_power;
+            this.statsList.armour = payload.equipment.stats.armour;
             switch (payload.stance) {
                 case "controlled":
                     this.statsList.attack += 1;
                     this.statsList.strength += 1;
+                    this.statsList.defense += 1;
                     break;
                 case "accurate":
                     this.statsList.attack += 3;
@@ -159,6 +163,8 @@ export class GenliteHitRecorder {
                     break;
                 case "ranged_defensive":
                     this.statsList.ranged += 2;
+                    this.statsList.defense += 1;
+                    break;
             }
         }
     }
@@ -181,17 +187,21 @@ export class GenliteHitRecorder {
             }
             hitInfo.consecutiveNonZero = 0;
             hitInfo.consecutiveZero++;
+            hitInfo.totalZero++;
         } else {
             if (hitInfo.consecutiveZero > hitInfo.maxZero) {
                 hitInfo.maxZero = hitInfo.consecutiveZero;
             }
             hitInfo.consecutiveZero = 0;
             hitInfo.consecutiveNonZero++;
+            hitInfo.totalNonZero++;
         }
         if (hitInfo.hitList[damage] === undefined) {
             hitInfo.hitList[damage] = 0;
         }
         hitInfo.hitList[damage]++;
+        hitInfo.totalHits++;
+        hitInfo.hitRate = hitInfo.totalNonZero / hitInfo.totalHits
 
     }
 

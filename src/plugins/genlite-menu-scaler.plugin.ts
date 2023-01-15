@@ -1,5 +1,5 @@
-export class GenliteMenuScaler {
-    static pluginName = 'GenliteMenuScaler';
+export class GenLiteMenuScaler {
+    static pluginName = 'GenLiteMenuScaler';
 
     scaleList;
 
