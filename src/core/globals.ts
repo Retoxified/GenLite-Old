@@ -87,3 +87,7 @@ declare const WorldItem: {
 declare const Chat: {
     [key: string]: any,
 };
+
+declare const NPC: {
+    [key: string]: any,
+}
