@@ -15,7 +15,7 @@ import { GenLiteXpCalculator } from "./plugins/genlite-xp-calculator.plugin";
 import { GenLiteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
 import { GenLiteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
 import { GenLiteLocationsPlugin } from "./plugins/genlite-locations.plugin";
-import { GenLiteLeftClickBankPlugin } from "./plugins/genlite-leftclickbank.plugin";
+import { GenLiteNPCMenuSwapperPlugin } from "./plugins/genlite-npcmenuswapper.plugin";
 
 
 
@@ -41,5 +41,5 @@ import { GenLiteLeftClickBankPlugin } from "./plugins/genlite-leftclickbank.plug
     await genlite.pluginLoader.addPlugin(GenLiteHitRecorder);
     await genlite.pluginLoader.addPlugin(GenLiteMenuScaler);
     await genlite.pluginLoader.addPlugin(GenLiteLocationsPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteLeftClickBankPlugin);
+    await genlite.pluginLoader.addPlugin(GenLiteNPCMenuSwapperPlugin);
 })();
