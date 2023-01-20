@@ -119,7 +119,7 @@ export class GenLiteItemTooltips {
         let healingAmount = Math.min(healedHealth - curHealth, healing)
         let textColor = (curHealth + healing > totalHealth) ? "red" : "LimeGreen";
         callback_this.itemToolTip.innerHTML = `
-        <div>Heal Amount: <span style="color:${textColor}">${healingAmount}</span></div>
+        <div>Heal Amount: <span style="color:${textColor}">${healing}</span></div>
         <div>Health: <span style="color:${textColor}">${healedHealth}</span>/${totalHealth}</div>`
 
         let healthbar = document.getElementById("new_ux-hp-bar__meter--bar");
