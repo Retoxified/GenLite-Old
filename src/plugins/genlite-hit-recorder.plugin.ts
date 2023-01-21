@@ -30,16 +30,18 @@ export class GenLiteHitRecorder {
             ranged: 0,
             defense: 0
         }
-        this.playerHitInfo = {};
-        this.playerHitInfo.hitList = {};
-        this.playerHitInfo.consecutiveZero = 0;
-        this.playerHitInfo.consecutiveNonZero = 0;
-        this.playerHitInfo.maxZero = 0;
-        this.playerHitInfo.maxNonZero = 0;
-        this.playerHitInfo.totalZero = 0;
-        this.playerHitInfo.totalNonZero = 0;
-        this.playerHitInfo.totalHits = 0;
-        this.playerHitInfo.hitRate = 0;
+        this.playerHitInfo = {
+            hitList: {},
+            consecutiveZero: 0,
+            consecutiveNonZero: 0,
+            maxZero: 0,
+            maxNonZero: 0,
+            totalZero: 0,
+            totalNonZero: 0,
+            totalHits: 0,
+            hitRate: 0,
+            avgDamage: 0
+        };
 
         this.enemyHitInfo = {};
 
@@ -142,6 +144,7 @@ export class GenLiteHitRecorder {
                 this.statsList.attack = PLAYER_INFO.skills.attack.level;
                 this.statsList.strength = PLAYER_INFO.skills.strength.level;
                 this.statsList.ranged = PLAYER_INFO.skills.ranged.level;
+                this.statsList.defense = PLAYER_INFO.skills.defense.level;
             }
             this.statsList.aim = payload.equipment.stats.aim ?? payload.equipment.stats.ranged_aim;
             this.statsList.power = payload.equipment.stats.power ?? payload.equipment.stats.ranged_power;
@@ -157,6 +160,9 @@ export class GenLiteHitRecorder {
                     break;
                 case "aggressive":
                     this.statsList.strength += 3;
+                    break;
+                case "defensive":
+                    this.statsList.defense += 3;
                     break;
                 case "ranged_offensive":
                     this.statsList.ranged += 3;
@@ -202,7 +208,37 @@ export class GenLiteHitRecorder {
         hitInfo.hitList[damage]++;
         hitInfo.totalHits++;
         hitInfo.hitRate = hitInfo.totalNonZero / hitInfo.totalHits
+        this.calcAvgDamage(hitInfo);
+    }
 
+    calcAvgDamage(hitInfo) {
+        let totDam = 0;
+        for (let dam in hitInfo.hitList)
+            totDam += hitInfo.hitList[dam] * parseInt(dam);
+        hitInfo.avgDamage = totDam / hitInfo.totalHits;
+    }
+
+    resetHitInfo(hitInfo){
+        Object.assign(hitInfo, {
+            hitList: {},
+            consecutiveZero: 0,
+            consecutiveNonZero: 0,
+            maxZero: 0,
+            maxNonZero: 0,
+            totalZero: 0,
+            totalNonZero: 0,
+            totalHits: 0,
+            hitRate: 0,
+            avgDamage: 0
+        });
+    }
+
+    resetPlayerHitInfo(){
+        this.resetHitInfo(this.playerHitInfo);
+    }
+
+    resetEnemyHitInto(){
+        this.resetHitInfo(this.enemyHitInfo);
     }
 
     /* doing html and css soley though JS sucks */
