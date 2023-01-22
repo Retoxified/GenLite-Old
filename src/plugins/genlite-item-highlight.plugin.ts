@@ -268,7 +268,11 @@ export class GenLiteItemHighlightPlugin {
                 }
             }
         }
-        item.element.children[0].innerText = `${item.item_name}(${quantity})`
+        if (quantity == 1) {
+            item.element.children[0].innerText = `${item.item_name}`
+        } else {
+            item.element.children[0].innerText = `${item.item_name}(${quantity})`
+        }
     }
 
     hide_item(item_key) {
