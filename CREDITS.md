@@ -10,9 +10,11 @@ Puls3
 
 BonesdogNardwe#0242 aka Bonesdog
 
-snwhd#3854 
+snwhd#3854 aka snwhd
 
 2 Pi#4824 aka 2 Pi
+
+wario#1912 aka Wario
 
 
 
