@@ -12,6 +12,7 @@ export class GenLiteItemHighlightPlugin {
     styleRuleIndex: number = -1
 
     isPluginEnabled: boolean = false;
+    doCondenseItems: boolean = false;
 
     async init() {
         window.genlite.registerModule(this);
@@ -27,6 +28,7 @@ export class GenLiteItemHighlightPlugin {
         this.item_highlight_div.className = 'item-indicators-list';
         document.body.appendChild(this.item_highlight_div);
         this.isPluginEnabled = window.genlite.settings.add("ItemHighlight.Enable", true, "Highlight Items", "checkbox", this.handlePluginEnableDisable, this);
+        this.doCondenseItems = window.genlite.settings.add("CondenseItems.Enable", true, "Condence Items", "checkbox", this.handleCondeseEnableDisable, this);
         let storedPriorityColor = window.genlite.settings.add("ItemHighlight.PriorityColor", "#ffa500", "Priority Item Color", "color", this.handleColorChange, this);
 
         let sheet = document.styleSheets[0];
@@ -80,6 +82,15 @@ export class GenLiteItemHighlightPlugin {
         this.isPluginEnabled = state;
     }
 
+    handleCondeseEnableDisable(state: boolean) {
+        // no matter what clear the current items to refresh the display
+        this.item_highlight_div.innerHTML = '';
+        this.itemElements = [];
+        this.trackedItems = [];
+        this.doCondenseItems = state;
+    }
+
+
     handleColorChange(value: string) {
         let sheet = document.styleSheets[0] as any;
 
@@ -98,6 +109,11 @@ export class GenLiteItemHighlightPlugin {
 
         for (let key in itemsToAdd) {
             let item = GAME.items[itemsToAdd[key]];
+            if(!this.doCondenseItems){
+                this.itemElements.push(this.create_text_element(itemsToAdd[key], item));
+                this.trackedItems.push(itemsToAdd[key]);
+                return;
+            }
             let isNewTag = true;
             for (let tKey in this.itemElements) {
                 let tItem = this.itemElements[tKey];
@@ -111,7 +127,6 @@ export class GenLiteItemHighlightPlugin {
             if (isNewTag)
                 this.itemElements.push(this.create_text_element(itemsToAdd[key], item));
             this.trackedItems.push(itemsToAdd[key]);
-            console.log(this.itemElements);
         }
 
         for (let key in itemsToRemove) {
