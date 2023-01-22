@@ -35,7 +35,7 @@ export class GenLiteItemTooltips {
     */
     initToolTip() {
         for(let slot in INVENTORY.DOM_slots){
-            let DOM_slot = INVENTORY.DOM_slots[slot].div;
+            let DOM_slot = INVENTORY.DOM_slots[slot].item_div;
             DOM_slot.onmouseenter = this.installEventHook(DOM_slot.onmouseenter, this.onmouseenter, this);
             DOM_slot.onmousemove = this.installEventHook(DOM_slot.onmousemove, this.onmousemove, this);
             DOM_slot.onmouseleave = this.installEventHook(DOM_slot.onmouseleave, this.onmouseleave, this);
@@ -72,8 +72,8 @@ export class GenLiteItemTooltips {
         callback_this.itemToolTip.style.left = `${event.clientX + 15}px`
         callback_this.itemToolTip.style.top = `${event.clientY + 15}px`
         callback_this.itemToolTip.style.display = "block";
-        let slot  = parseInt(event.target.id.split('-').at(-1)) - 1; //pls dont change this field heleor
-        let itemData = DATA.items[INVENTORY.slots[slot].item];
+        let slot  = parseInt(event.target.offsetParent.slot_number); //pls dont change this field heleor; EDIT: damnit heleor you changed it like an hour after i wrote this line you asshat
+        let itemData = DATA.items[INVENTORY.items[slot].item];
         if(itemData.consumable && itemData.consumable.vitality){
             callback_this.foodTooltip(itemData, callback_this);
         } else {
