@@ -1,7 +1,8 @@
 export class GenLiteItemHighlightPlugin {
     static pluginName = 'GenLiteItemHighlightPlugin';
 
-    trackedItems = {};
+    itemElements = [];
+    trackedItems = [];
     itemData = {};
     item_highlight_div = null;
     render = false;
@@ -11,6 +12,7 @@ export class GenLiteItemHighlightPlugin {
     styleRuleIndex: number = -1
 
     isPluginEnabled: boolean = false;
+    doCondenseItems: boolean = false;
 
     async init() {
         window.genlite.registerModule(this);
@@ -18,14 +20,15 @@ export class GenLiteItemHighlightPlugin {
         this.originalItemIntersects = WorldItem.prototype.intersects;
 
         let storedItemData = localStorage.getItem("genliteItemData")
-        if(storedItemData !== null) {
+        if (storedItemData !== null) {
             this.itemData = JSON.parse(storedItemData);
         }
 
-        this.item_highlight_div = document.createElement( 'div' );
+        this.item_highlight_div = document.createElement('div');
         this.item_highlight_div.className = 'item-indicators-list';
         document.body.appendChild(this.item_highlight_div);
         this.isPluginEnabled = window.genlite.settings.add("ItemHighlight.Enable", true, "Highlight Items", "checkbox", this.handlePluginEnableDisable, this);
+        this.doCondenseItems = window.genlite.settings.add("CondenseItems.Enable", true, "Condence Items", "checkbox", this.handleCondeseEnableDisable, this);
         let storedPriorityColor = window.genlite.settings.add("ItemHighlight.PriorityColor", "#ffa500", "Priority Item Color", "color", this.handleColorChange, this);
 
         let sheet = document.styleSheets[0];
@@ -35,7 +38,7 @@ export class GenLiteItemHighlightPlugin {
         window.addEventListener('keyup', this.keyUpHandler.bind(this));
         window.addEventListener("blur", this.blurHandler.bind(this))
 
-        if(this.isPluginEnabled === true){
+        if (this.isPluginEnabled === true) {
             WorldItem.prototype.intersects = this.worlditem_intersects_priority;
         }
     }
@@ -67,9 +70,10 @@ export class GenLiteItemHighlightPlugin {
 
     handlePluginEnableDisable(state: boolean) {
         // when disabling the plugin clear the current list of items
-        if(state === false) {
+        if (state === false) {
             this.item_highlight_div.innerHTML = '';
-            this.trackedItems = {};
+            this.itemElements = [];
+            this.trackedItems = [];
             WorldItem.prototype.intersects = this.originalItemIntersects
         } else {
             WorldItem.prototype.intersects = this.worlditem_intersects_priority;
@@ -78,6 +82,15 @@ export class GenLiteItemHighlightPlugin {
         this.isPluginEnabled = state;
     }
 
+    handleCondeseEnableDisable(state: boolean) {
+        // no matter what clear the current items to refresh the display
+        this.item_highlight_div.innerHTML = '';
+        this.itemElements = [];
+        this.trackedItems = [];
+        this.doCondenseItems = state;
+    }
+
+
     handleColorChange(value: string) {
         let sheet = document.styleSheets[0] as any;
 
@@ -85,44 +98,84 @@ export class GenLiteItemHighlightPlugin {
     }
 
     update(dt) {
-        if(this.isPluginEnabled === false || this.render == false) {
+        if (this.isPluginEnabled === false || this.render == false) {
             return;
         }
 
         let stack_counter = {};
-        let itemsToAdd = Object.keys(GAME.items).filter( x => !Object.keys(this.trackedItems).includes(x) );
-        let itemsToRemove = Object.keys(this.trackedItems).filter( x => !Object.keys(GAME.items).includes(x) );
+        let itemsToAdd = Object.keys(GAME.items).filter(x => !this.trackedItems.includes(x));
+        let itemsToRemove = this.trackedItems.filter(x => !Object.keys(GAME.items).includes(x));
 
-        for(let key in itemsToAdd) {
-            this.trackedItems[itemsToAdd[key]] = this.create_text_element(itemsToAdd[key], GAME.items[itemsToAdd[key]]);
+
+        for (let key in itemsToAdd) {
+            let item = GAME.items[itemsToAdd[key]];
+            if(!this.doCondenseItems){
+                this.itemElements.push(this.create_text_element(itemsToAdd[key], item));
+                this.trackedItems.push(itemsToAdd[key]);
+                return;
+            }
+            let isNewTag = true;
+            for (let tKey in this.itemElements) {
+                let tItem = this.itemElements[tKey];
+                if (tItem.item_name == item.item_name && tItem.x == item.pos2.x && tItem.y == item.pos2.y) {
+                    tItem.itemIds.push(itemsToAdd[key]);
+                    this.update_text_element(tItem);
+                    isNewTag = false;
+                    break;
+                }
+            }
+            if (isNewTag)
+                this.itemElements.push(this.create_text_element(itemsToAdd[key], item));
+            this.trackedItems.push(itemsToAdd[key]);
         }
 
-        for(let key in itemsToRemove) {
-            this.trackedItems[itemsToRemove[key]].remove();
-            delete this.trackedItems[itemsToRemove[key]];
+        for (let key in itemsToRemove) {
+            let remove = -1;
+            this.trackedItems.splice(this.trackedItems.indexOf(itemsToRemove[key]), 1)
+            for (let tKey in this.itemElements) {
+                let tItem = this.itemElements[tKey];
+                let index = tItem.itemIds.indexOf(itemsToRemove[key]);
+                if (index != -1) {
+                    tItem.itemIds.splice(index, 1);
+                    if (tItem.itemIds.length == 0)
+                        remove = parseInt(tKey);
+                    this.update_text_element(tItem);
+                    break;
+                }
+            }
+            if (remove != -1) {
+                this.itemElements[remove].element.remove();
+                delete this.itemElements[remove].element;
+                delete this.itemElements[remove].itemIds;
+                delete this.itemElements[remove].item_name;
+                delete this.itemElements[remove].stackable;
+                this.itemElements.splice(remove, 1);
+            }
+
         }
 
-        for(let key in this.trackedItems) {
-            if(GAME.items[key] !== undefined) {
-                if(this.get_item_data(GAME.items[key].definition.item) == -1 && !this.isAltDown) {
-                    this.trackedItems[key].style.visibility = 'hidden';
+        for (let i in this.itemElements) {
+            let key = this.itemElements[i].itemIds[0];
+            if (GAME.items[key] !== undefined) {
+                if (this.get_item_data(GAME.items[key].definition.item) == -1 && !this.isAltDown) {
+                    this.itemElements[i].element.style.visibility = 'hidden';
                     continue;
                 }
-                let posKey = GAME.items[key].pos2.x+','+GAME.items[key].pos2.y;
-                if(stack_counter[posKey] === undefined) {
+                let posKey = GAME.items[key].pos2.x + ',' + GAME.items[key].pos2.y;
+                if (stack_counter[posKey] === undefined) {
                     stack_counter[posKey] = 0;
                 }
 
                 let worldPos = new THREE.Vector3().copy(GAME.items[key].position());
                 worldPos.y += 0.5;
                 let screenPos = this.world_to_screen(worldPos, stack_counter[posKey]);
-                if(screenPos.z > 1.0) {
-                    this.trackedItems[key].style.visibility = 'hidden'; // Behind camera, hide
+                if (screenPos.z > 1.0) {
+                    this.itemElements[i].element.style.visibility = 'hidden'; // Behind camera, hide
                 } else {
-                    this.trackedItems[key].style.visibility = 'visible'; // In front of camera, show
+                    this.itemElements[i].element.style.visibility = 'visible'; // In front of camera, show
                 }
-                this.trackedItems[key].style.left = screenPos.x + "px";
-                this.trackedItems[key].style.top = screenPos.y + "px";
+                this.itemElements[i].element.style.left = screenPos.x + "px";
+                this.itemElements[i].element.style.top = screenPos.y + "px";
 
                 stack_counter[posKey]++;
             }
@@ -134,7 +187,8 @@ export class GenLiteItemHighlightPlugin {
     }
     logoutOK() {
         this.item_highlight_div.innerHTML = '';
-        this.trackedItems = {};
+        this.itemElements = [];
+        this.trackedItems = [];
         this.render = false;
     }
 
@@ -163,23 +217,23 @@ export class GenLiteItemHighlightPlugin {
 
     getItemColor(item) {
         let itemPriority = this.get_item_data(item.definition.item)
-        if(itemPriority == -1) {
+        if (itemPriority == -1) {
             return "spell-locked";
-        } else if(itemPriority == 1) {
+        } else if (itemPriority == 1) {
             return "genlite-priority-item";
         }
 
         let itemValue = this.getItemValue(item);
 
-        if(itemValue >= 10000) {
+        if (itemValue >= 10000) {
             return 'text-ran';
-        } else if(itemValue >= 5000) {
+        } else if (itemValue >= 5000) {
             return 'text-purple';
-        } else if(itemValue >= 1000) {
+        } else if (itemValue >= 1000) {
             return 'text-magenta';
-        } else if(itemValue >= 500) {
+        } else if (itemValue >= 500) {
             return 'text-gold';
-        } else if(itemValue >= 100) {
+        } else if (itemValue >= 100) {
             return 'text-limegreen';
         } else {
             return 'text-white';
@@ -187,7 +241,7 @@ export class GenLiteItemHighlightPlugin {
     }
 
     create_text_element(key, item) {
-        let element = document.createElement( 'div' );
+        let element = document.createElement('div');
 
         let itemDefId = item.definition.item;
         let stackable = false;
@@ -202,7 +256,7 @@ export class GenLiteItemHighlightPlugin {
         element.style.position = 'absolute';
         //element.style.zIndex = '99999';
         let item_name = item.item_name;
-        if(stackable === true) {
+        if (stackable === true) {
             item_name = `${item.item_name}(${item.definition.quantity})`;
         }
         element.innerHTML = `<span style="display: inline-block;">${item_name}</span>
@@ -214,14 +268,33 @@ export class GenLiteItemHighlightPlugin {
 
         this.item_highlight_div.appendChild(element);
 
-        return element;
+        return { "element": element, "itemIds": [item.id], "item_name": item.item_name, "stackable": stackable, x: item.pos2.x, y: item.pos2.y };
+    }
+
+    update_text_element(item) {
+        let quantity = 0
+        for (let key in GAME.items) {
+            let gItem = GAME.items[key];
+            if (gItem.item_name == item.item_name && item.x == gItem.pos2.x && item.y == gItem.pos2.y) {
+                if (item.stackable) {
+                    quantity += gItem.definition.quantity;
+                } else {
+                    quantity++;
+                }
+            }
+        }
+        if (quantity == 1) {
+            item.element.children[0].innerText = `${item.item_name}`
+        } else {
+            item.element.children[0].innerText = `${item.item_name}(${quantity})`
+        }
     }
 
     hide_item(item_key) {
-        if(!this.itemData.hasOwnProperty(item_key))
+        if (!this.itemData.hasOwnProperty(item_key))
             this.itemData[item_key] = 0;
 
-        if(this.itemData[item_key] != -1)
+        if (this.itemData[item_key] != -1)
             this.itemData[item_key] = -1;
         else
             this.itemData[item_key] = 0;
@@ -230,10 +303,10 @@ export class GenLiteItemHighlightPlugin {
     }
 
     important_item(item_key) {
-        if(!this.itemData.hasOwnProperty(item_key))
+        if (!this.itemData.hasOwnProperty(item_key))
             this.itemData[item_key] = 0;
 
-        if(this.itemData[item_key] != 1)
+        if (this.itemData[item_key] != 1)
             this.itemData[item_key] = 1;
         else
             this.itemData[item_key] = 0;
@@ -253,7 +326,7 @@ export class GenLiteItemHighlightPlugin {
             priority: -1,
             object: self,
             text: "Examine",
-            action: ()=>CHAT.addGameMessage(self.item_examine)
+            action: () => CHAT.addGameMessage(self.item_examine)
         });
         list.push({
             color: 'red',
@@ -261,13 +334,13 @@ export class GenLiteItemHighlightPlugin {
             priority: 1 + window[GenLiteItemHighlightPlugin.pluginName].get_item_data(self.definition.item) * 50,
             object: self,
             text: "Take",
-            action: ()=>NETWORK.action('take', {
+            action: () => NETWORK.action('take', {
                 item: self.id
             })
         });
     }
     get_item_data(item_key) {
-        if(!this.itemData.hasOwnProperty(item_key))
+        if (!this.itemData.hasOwnProperty(item_key))
             return 0;
 
         return this.itemData[item_key];
@@ -275,7 +348,8 @@ export class GenLiteItemHighlightPlugin {
 
     save_item_list() {
         this.item_highlight_div.innerHTML = '';
-        this.trackedItems = {};
+        this.itemElements = [];
+        this.trackedItems = [];
 
         localStorage.setItem("genliteItemData", JSON.stringify(this.itemData));
     }
