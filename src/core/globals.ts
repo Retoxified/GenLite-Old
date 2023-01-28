@@ -3,6 +3,14 @@ declare interface Window {
     [key: string]: any,
 };
 
+declare interface CommandSpec {
+    command: string,
+    handler: (a: string) => void,
+    helpFunction: (a: string) => string,
+    helpText: string,
+    echo: boolean,
+};
+
 /** Library globals */
 declare const THREE: {
     items: any,
