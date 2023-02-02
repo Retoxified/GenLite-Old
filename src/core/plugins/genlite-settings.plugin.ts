@@ -86,7 +86,7 @@ export class GenLiteSettingsPlugin {
 
         settingContainer.className = "new_ux-settings-modal__settings-row";
         labelElement.className = "new_ux-settings-modal__setting-name";
-        labelElement.textContent = label;
+        labelElement.innerHTML = label;
 
         settingContainer.appendChild(labelElement);
         settingContainer.appendChild(input);

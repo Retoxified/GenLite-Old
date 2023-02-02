@@ -73,11 +73,7 @@ export class GenLiteDropRecorderPlugin {
             (payload.participant1 == PLAYER.id || payload.participant2 == PLAYER.id)) {
 
             this.curCombat = GAME.combats[payload.id];
-            if (this.curCombat.left.id != PLAYER.id) {
-                this.curEnemy = this.curCombat.left;
-            } else {
-                this.curEnemy = this.curCombat.right;
-            }
+            this.curEnemy = this.curCombat.left.id == PLAYER.id ? this.curCombat.right : this.curCombat.left;
             this.setMonsterData();
             return;
         }
