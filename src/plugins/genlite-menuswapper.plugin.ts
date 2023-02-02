@@ -11,7 +11,7 @@ export class GenLiteMenuSwapperPlugin {
 
         this.useOneClickBank = window.genlite.settings.add("NPCMenuSwapper.LeftClickBank", true, "Left Click Bank", "checkbox", this.handleLeftClickBankToggle, this);
         this.useOneClickTrade = window.genlite.settings.add("NPCMenuSwapper.LeftClickTrade", true, "Left Click Trade", "checkbox", this.handleLeftClickTradeToggle, this);
-        this.hideStairs = window.genlite.settings.add("NPCMenuSwapper.hideStairs", true, "Hide Stairs", "checkbox", this.handleHideStairsToggle, this);
+        this.hideStairs = window.genlite.settings.add("NPCMenuSwapper.hideStairs", false, "Hide Stairs", "checkbox", this.handleHideStairsToggle, this);
 
         NPC.prototype.intersects = this.leftClickBankIntersects;
         OptimizedScene.prototype.intersects = this.sceneryIntersects;

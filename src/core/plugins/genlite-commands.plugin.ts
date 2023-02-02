@@ -63,6 +63,10 @@ export class GenLiteCommandsPlugin {
         );
     }
 
+    initializeUI(){
+        this.print("Genlite Commands Loaded type //help to see list of commands");
+    }
+
     public handleCommand(text: string) {
         let end = text.indexOf(" ");
         if (end == -1) {

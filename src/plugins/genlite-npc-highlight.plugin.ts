@@ -20,7 +20,7 @@ export class GenLiteNPCHighlightPlugin {
         this.npc_highlight_div.className = 'npc-indicators-list';
         document.body.appendChild(this.npc_highlight_div);
         this.npcHealthList = JSON.parse(localStorage.getItem("GenliteNPCHealthList"));
-        if (this.npcHealthList == null)
+        if (this.npcHealthList == null) 
             this.npcHealthList = {};
 
         this.isPluginEnabled = window.genlite.settings.add("NpcHighlight.Enable", true, "Highlight NPCs", "checkbox", this.handlePluginEnableDisable, this);
@@ -61,33 +61,28 @@ export class GenLiteNPCHighlightPlugin {
         for (let key in this.trackedNpcs) {
             let worldPos;
             if (GAME.npcs[key] !== undefined) {
+                /* if in combat grab the threeObject position (the actual current position of the sprite not the world pos)
+                    mult by 0.8 which is the height of the health bar
+                */
                 if (key == this.curEnemy) {
                     worldPos = new THREE.Vector3().copy(GAME.npcs[key].object.position());
-                    worldPos.y += this.combatY;
-                } else {
+                    worldPos.y += 0.8;
+                } else {    
                     worldPos = new THREE.Vector3().copy(GAME.npcs[key].position());
                     worldPos.y += GAME.npcs[key].height
                 }
                 let screenPos = this.world_to_screen(worldPos);
-
+                if(key == this.curEnemy)
+                    screenPos.y *= 0.9; // move the name tag a fixed position above the name tag
 
                 if (screenPos.z > 1.0) {
                     this.trackedNpcs[key].style.visibility = 'hidden'; // Behind camera, hide
                 } else {
                     this.trackedNpcs[key].style.visibility = 'visible'; // In front of camera, show
-                }/*
-                if(key == this.curEnemy && GAME.npcs[key].object.hp_container){
-                    let hpBar = GAME.npcs[key].object.hp_container;
-                    let hpBarX = hpBar.style.left.substring(0, hpBar.style.left.length - 2);
-                    let hpBarY = hpBar.style.top.substring(0, hpBar.style.top.length - 2);
-                    this.trackedNpcs[key].style.left = hpBarX + this.combatX + "px";
-                    this.trackedNpcs[key].style.top = hpBarY  + this.combatY + "px";
-                } else {
-                    this.trackedNpcs[key].style.left = screenPos.x + "px";
-                    this.trackedNpcs[key].style.top = screenPos.y + "px";
-                */
-                this.trackedNpcs[key].style.left = screenPos.x + "px";
+                }
                 this.trackedNpcs[key].style.top = screenPos.y + "px";
+                this.trackedNpcs[key].style.left = screenPos.x + "px";
+
             }
         }
     }
@@ -153,7 +148,7 @@ export class GenLiteNPCHighlightPlugin {
         var p = pos;
         var screenPos = p.project(GRAPHICS.threeCamera());
 
-        screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
+        screenPos.x = (screenPos.x + 1) /  2 * window.innerWidth;
         screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight;
 
         return screenPos;
