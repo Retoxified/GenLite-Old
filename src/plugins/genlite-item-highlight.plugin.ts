@@ -109,7 +109,7 @@ export class GenLiteItemHighlightPlugin {
 
         for (let key in itemsToAdd) {
             let item = GAME.items[itemsToAdd[key]];
-            if(!this.doCondenseItems){
+            if (!this.doCondenseItems) {
                 this.itemElements.push(this.create_text_element(itemsToAdd[key], item));
                 this.trackedItems.push(itemsToAdd[key]);
                 return;

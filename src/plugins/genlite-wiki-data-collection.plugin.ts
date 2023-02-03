@@ -2,6 +2,7 @@ export class GenLiteWikiDataCollectionPlugin {
     static pluginName = 'GenLiteWikiDataCollectionPlugin';
 
     previously_seen = {};
+    toSend = [];
     playerMeleeCL = 0;
     playerRangedCL = 0;
     combatStyle = "";
@@ -12,6 +13,7 @@ export class GenLiteWikiDataCollectionPlugin {
 
     isPluginEnabled: boolean = false;
     scanInterval;
+    sendInterval;
 
     async init() {
         window.genlite.registerModule(this);
@@ -164,7 +166,7 @@ export class GenLiteWikiDataCollectionPlugin {
     }
 
     scanNpcs(callback_this) {
-        const npcCounts = Object.keys(GAME.npcs).reduce((acc, npcKey) => acc.set(npcKey.split('-')[0], (acc.get(npcKey.split('-')[0]) || 0)+1), new Map());
+        const npcCounts = Object.keys(GAME.npcs).reduce((acc, npcKey) => acc.set(npcKey.split('-')[0], (acc.get(npcKey.split('-')[0]) || 0) + 1), new Map());
 
         for (let npcId in GAME.npcs) {
             let npc = GAME.npcs[npcId];
@@ -194,8 +196,18 @@ export class GenLiteWikiDataCollectionPlugin {
                 "Level_Diff_Bit": 0,
                 "Version": 2
             }
-            callback_this.previously_seen[mobKey] = monsterdata;
-            window.genlite.sendDataToServer("monsterdata", monsterdata);
+            callback_this.toSend.push(monsterdata);
         }
+        if (callback_this.toSend.length > 0)
+            callback_this.sendTimeInterval = setInterval(() => { callback_this.sendToServer(callback_this) }, 20000 / callback_this.toSend.length)
+    }
+
+    sendToServer(callback_this) {
+        let monsterdata = callback_this.toSend.pop();
+        let mobKey = `${monsterdata.Monster_Name}-${monsterdata.Monster_Level}-${monsterdata.Monster_Pack_ID}`;
+        callback_this.previously_seen[mobKey] = monsterdata;
+        window.genlite.sendDataToServer("monsterdata", monsterdata);
+        if (callback_this.toSend.length == 0)
+            clearInterval(callback_this.sendTimeInterval);
     }
 }

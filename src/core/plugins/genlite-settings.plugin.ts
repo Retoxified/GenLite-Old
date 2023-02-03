@@ -2,7 +2,7 @@ import { GenLiteConfirmation } from "../helpers/genlite-confirmation.class";
 
 export class GenLiteSettingsPlugin {
     public static pluginName = 'GenLiteSettingsPlugin';
-    private settings: {[key: string]: any} = {};
+    private settings: { [key: string]: any } = {};
     private container: HTMLElement;
 
     async init() {
@@ -21,6 +21,16 @@ export class GenLiteSettingsPlugin {
         headerElement.appendChild(headerText);
         this.container.appendChild(headerElement);
 
+        //add a search box for settings
+        let searchBox = document.createElement("input");
+        searchBox.type = "text";
+        searchBox.onkeyup = (event) => { this.searchSettings.call(this, event) };
+        searchBox.onfocus = () => { CHAT.focus_locked = true; }
+        searchBox.onblur = () => { CHAT.focus_locked = false; }
+        searchBox.placeholder = "Settings Search";
+        searchBox.id = "GenliteSettingsSearch";
+        this.container.appendChild(searchBox);
+
         // Add GenLite settings to the modal
         let settingsModal = document.getElementById("new_ux-settings-modal__inner-space");
         settingsModal.appendChild(this.container);
@@ -33,7 +43,7 @@ export class GenLiteSettingsPlugin {
             let localStorageKey = "GenLite." + key;
             const storedValue = localStorage.getItem(localStorageKey);
             if (storedValue) {
-                if(inputType === "checkbox") {
+                if (inputType === "checkbox") {
                     this.settings[key] = (storedValue === "true" ? true : false); // localStorage is always a string, so we need to compare to "true"
                 } else {
                     this.settings[key] = storedValue;
@@ -47,21 +57,21 @@ export class GenLiteSettingsPlugin {
         // Create an input element for the setting
         const input = document.createElement('input');
         input.type = inputType;
-        for (let i in attributeList){
+        for (let i in attributeList) {
             let attr = attributeList[i]
             input.setAttribute(attr[0], attr[1]);
         }
-        if(inputType === "checkbox") {
+        if (inputType === "checkbox") {
             input.checked = this.settings[key];
         } else {
             input.value = this.settings[key];
         }
 
-        input.addEventListener('change', async(event) => {
+        input.addEventListener('change', async (event) => {
             // Update the setting value when the input value changes
-            if(inputType === "checkbox") {
-                if(input.checked === true && confirmationMessage !== undefined) {
-                    if(await GenLiteConfirmation.confirm(confirmationMessage) === false) {
+            if (inputType === "checkbox") {
+                if (input.checked === true && confirmationMessage !== undefined) {
+                    if (await GenLiteConfirmation.confirm(confirmationMessage) === false) {
                         input.checked = false;
                         event.preventDefault();
                         return;
@@ -85,6 +95,7 @@ export class GenLiteSettingsPlugin {
         const labelElement = document.createElement('label');
 
         settingContainer.className = "new_ux-settings-modal__settings-row";
+        settingContainer.classList.add(context.constructor.pluginName);
         labelElement.className = "new_ux-settings-modal__setting-name";
         labelElement.innerHTML = label;
 
@@ -93,5 +104,22 @@ export class GenLiteSettingsPlugin {
         this.container.appendChild(settingContainer);
 
         return this.settings[key];
+    }
+
+    searchSettings(event) {
+        let input = <HTMLInputElement>document.getElementById("GenliteSettingsSearch");
+        let filter = input.value.toUpperCase();
+        for (let i = 0; i < this.container.children.length; i++) {
+            let setting = <HTMLElement>this.container.children[i];
+            if (!setting.classList.contains("new_ux-settings-modal__settings-row"))
+                continue;
+            let text = setting.innerText;
+            if (text.toUpperCase().indexOf(filter) > -1 ||
+                setting.classList[1].toString().toUpperCase().indexOf(filter) > -1) {
+                setting.style.display = "";
+            } else {
+                setting.style.display = "none";
+            }
+        }
     }
 }

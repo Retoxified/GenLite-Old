@@ -32,6 +32,7 @@ export class GenLiteHitRecorder {
         }
         this.playerHitInfo = {
             hitList: {},
+            totDam: 0,
             consecutiveZero: 0,
             consecutiveNonZero: 0,
             maxZero: 0,
@@ -40,7 +41,10 @@ export class GenLiteHitRecorder {
             totalNonZero: 0,
             totalHits: 0,
             hitRate: 0,
-            avgDamage: 0
+            avgDamage: 0,
+            avgNonZero: 0,
+            stdDeviation: 0,
+            ctlStdDeviation: 0
         };
 
         this.enemyHitInfo = {};
@@ -205,22 +209,39 @@ export class GenLiteHitRecorder {
         if (hitInfo.hitList[damage] === undefined) {
             hitInfo.hitList[damage] = 0;
         }
+        hitInfo.totDam += damage;
         hitInfo.hitList[damage]++;
         hitInfo.totalHits++;
         hitInfo.hitRate = hitInfo.totalNonZero / hitInfo.totalHits
         this.calcAvgDamage(hitInfo);
+        this.calcAvgNonZero(hitInfo);
+        this.calcStdDeviation(hitInfo);
+        this.calcCtlStdDeviation(hitInfo);
     }
 
     calcAvgDamage(hitInfo) {
-        let totDam = 0;
-        for (let dam in hitInfo.hitList)
-            totDam += hitInfo.hitList[dam] * parseInt(dam);
-        hitInfo.avgDamage = totDam / hitInfo.totalHits;
+        hitInfo.avgDamage = hitInfo.totDam / hitInfo.totalHits;
     }
 
-    resetHitInfo(hitInfo){
+    calcAvgNonZero(hitInfo) {
+        hitInfo.avgNonZero = hitInfo.avgDamage / hitInfo.hitRate;
+    }
+
+    calcStdDeviation(hitInfo) {
+        let tot = 0;
+        for (let hit in hitInfo.hitList)
+            tot += hitInfo.hitList[hit] * Math.pow(parseInt(hit) - hitInfo.avgNonZero, 2);
+        hitInfo.stdDeviation = Math.sqrt(tot / hitInfo.totalNonZero);
+    }
+
+    calcCtlStdDeviation(hitInfo) {
+        hitInfo.ctlStdDeviation = hitInfo.stdDeviation / Math.sqrt(hitInfo.totalNonZero);
+    }
+
+    resetHitInfo(hitInfo) {
         Object.assign(hitInfo, {
             hitList: {},
+            totDam: 0,
             consecutiveZero: 0,
             consecutiveNonZero: 0,
             maxZero: 0,
@@ -229,16 +250,24 @@ export class GenLiteHitRecorder {
             totalNonZero: 0,
             totalHits: 0,
             hitRate: 0,
-            avgDamage: 0
+            avgDamage: 0,
+            avgNonZero: 0,
+            stdDeviation: 0,
+            ctlStdDeviation: 0
         });
     }
 
-    resetPlayerHitInfo(){
+    resetPlayerHitInfo() {
         this.resetHitInfo(this.playerHitInfo);
     }
 
-    resetEnemyHitInto(){
+    resetEnemyHitInto() {
         this.resetHitInfo(this.enemyHitInfo);
+    }
+
+    resetAll() {
+        this.resetPlayerHitInfo();
+        this.resetEnemyHitInto();
     }
 
     /* doing html and css soley though JS sucks */

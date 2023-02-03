@@ -104,7 +104,7 @@ export class GenLiteItemTooltips {
             callback_this.foodCondTooltip(itemData, callback_this);
         if (callback_this.isValueEnabled && itemData.value)
             callback_this.valueTooltip(itemData, callback_this);
-        if(callback_this.itemToolTip.innerHTML == "")
+        if (callback_this.itemToolTip.innerHTML == "")
             callback_this.itemToolTip.style.display = "none";
     }
 
@@ -115,7 +115,7 @@ export class GenLiteItemTooltips {
         }
         if (callback_this.itemToolTip.style.display == "none")
             return;
-        if (window.innerWidth <= callback_this.itemToolTip.getClientRects()[0].right + 15){
+        if (window.innerWidth <= callback_this.itemToolTip.getClientRects()[0].right + 15) {
             callback_this.itemToolTip.style.left = `${window.innerWidth - callback_this.itemToolTip.getClientRects()[0].width - 15}px`
         } else {
             callback_this.itemToolTip.style.left = `${event.clientX + 15}px`
@@ -158,15 +158,15 @@ export class GenLiteItemTooltips {
         callback_this.healthBarHealing.style.width = `${healPercent * 100}%`;
     }
 
-    foodCondTooltip(itemData, callback_this){
+    foodCondTooltip(itemData, callback_this) {
         let healing = "";
         let condition = itemData.consumable.condition
-        let dummyItem = {consumable: {vitality: 0}};
-        switch (condition.params.trigger){
+        let dummyItem = { consumable: { vitality: 0 } };
+        switch (condition.params.trigger) {
             case "skill_below_threshold_%":
-                switch (condition.params.skill){
+                switch (condition.params.skill) {
                     case "vitality":
-                        dummyItem.consumable.vitality = PLAYER_INFO.skills.vitality.current < PLAYER_INFO.skills.vitality.level * condition.params.threshold_rate 
+                        dummyItem.consumable.vitality = PLAYER_INFO.skills.vitality.current < PLAYER_INFO.skills.vitality.level * condition.params.threshold_rate
                             ? condition.true.vitality : condition.false.vitality;
                         break;
                 }
@@ -175,11 +175,11 @@ export class GenLiteItemTooltips {
                 let skillA = condition.params.skill_a;
                 let skillB = condition.params.skill_b;
                 dummyItem.consumable.vitality = PLAYER_INFO.skills[skillA].level > PLAYER_INFO.skills[skillB].level
-                ? condition.true.vitality : condition.false.vitality;
+                    ? condition.true.vitality : condition.false.vitality;
                 break;
             case "location_layer":
                 dummyItem.consumable.vitality = PLAYER_INFO.location.layer == condition.params.layer
-                ? condition.true.vitality : condition.false.vitality;
+                    ? condition.true.vitality : condition.false.vitality;
                 break;
             case "pacifist":
                 //TODO: this is a time out of combat based on ticks but no clue how long a tick is
@@ -192,8 +192,8 @@ export class GenLiteItemTooltips {
         }
         callback_this.foodTooltip(dummyItem, callback_this);
     }
-    
-    valueTooltip(itemData, callback_this){
+
+    valueTooltip(itemData, callback_this) {
         let value = Math.max(Math.floor(itemData.value / 10), 1);
         callback_this.itemToolTip.innerHTML += `
         <div>Value: ${value}</div>`
