@@ -15,8 +15,8 @@ export class GenLiteMenuScaler {
 
     handlePluginEnableDisable(state: boolean) {
         this.isPluginEnabled = state;
-        let menu = <HTMLDivElement> document.getElementById("new_ux-contextual-menu-modal");
-        if(state){
+        let menu = <HTMLDivElement>document.getElementById("new_ux-contextual-menu-modal");
+        if (state) {
             menu.style.transform = `scale(${this.scaleList.rightClick})`;
         } else {
             menu.style.transform = "";
@@ -25,15 +25,15 @@ export class GenLiteMenuScaler {
 
     scaleRightClick(scaler: Number) {
         this.scaleList.rightClick = scaler;
-        if(!this.isPluginEnabled){
+        if (!this.isPluginEnabled) {
             return;
         }
         let menu = document.getElementById("new_ux-contextual-menu-modal");
         menu.style.transform = `scale(${scaler})`;
     }
 
-    initializeUI(){
-        if(!this.isPluginEnabled){
+    initializeUI() {
+        if (!this.isPluginEnabled) {
             return;
         }
         let menu = document.getElementById("new_ux-contextual-menu-modal");

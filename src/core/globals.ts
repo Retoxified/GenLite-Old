@@ -99,3 +99,19 @@ declare const Chat: {
 declare const NPC: {
     [key: string]: any,
 }
+
+declare const PlayerHUD: {
+    [key: string]: any,
+}
+
+declare const SFX_PLAYER: {
+    [key: string]: any,
+}
+
+declare const OptimizedScene: {
+    [key: string]: any,
+}
+
+declare const KEYBOARD: {
+    [key: string]: any,
+}

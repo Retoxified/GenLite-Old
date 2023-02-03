@@ -15,8 +15,10 @@ import { GenLiteXpCalculator } from "./plugins/genlite-xp-calculator.plugin";
 import { GenLiteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
 import { GenLiteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
 import { GenLiteLocationsPlugin } from "./plugins/genlite-locations.plugin";
-import { GenLiteNPCMenuSwapperPlugin } from "./plugins/genlite-npcmenuswapper.plugin";
+import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
 import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
+import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
+import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
 
 
 
@@ -43,6 +45,9 @@ import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
     await genlite.pluginLoader.addPlugin(GenLiteHitRecorder);
     await genlite.pluginLoader.addPlugin(GenLiteMenuScaler);
     await genlite.pluginLoader.addPlugin(GenLiteLocationsPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteNPCMenuSwapperPlugin);
+    await genlite.pluginLoader.addPlugin(GenLiteMenuSwapperPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteItemTooltips);
+    await genlite.pluginLoader.addPlugin(GenLiteSoundNotification);
+    await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
+
 })();
