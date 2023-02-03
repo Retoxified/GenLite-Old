@@ -29,8 +29,8 @@ export class GenLiteCameraPlugin {
     }
 
     setCameraMode() {
-        if(WORLDMANAGER !== undefined) {
-            if(this.hideRoofs === true) {
+        if (WORLDMANAGER !== undefined) {
+            if (this.hideRoofs === true) {
                 WORLDMANAGER.updatePlayerTile = this.noRoofCameraMode.bind(WORLDMANAGER);
             } else {
                 WORLDMANAGER.updatePlayerTile = this.originalCameraMode.bind(WORLDMANAGER);
@@ -38,7 +38,7 @@ export class GenLiteCameraPlugin {
             WORLDMANAGER.updatePlayerTile.call(WORLDMANAGER);
         }
 
-        if(GRAPHICS !== undefined) {
+        if (GRAPHICS !== undefined) {
             if (this.unlockCamera === true) {
                 GRAPHICS.camera.controls.maxDistance = 15;
                 GRAPHICS.camera.controls.minPolarAngle = 0.35;
@@ -56,7 +56,7 @@ export class GenLiteCameraPlugin {
         let tile = self.loadedSegments[self.segmentKey].getTile(self.segment.lx, self.segment.ly)
         if (!tile)
             throw `Invalid location: ${self.segmentKey} ${self.segment.lx}, ${self.segment.ly}`
-            self.indoors = true;
+        self.indoors = true;
         for (let i in self.loadedSegments) {
             self.loadedSegments[i].setIndoorStatus(self.indoors);
         }

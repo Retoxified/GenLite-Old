@@ -77,6 +77,7 @@ export class GenLiteItemTooltips {
         healthbar.after(this.healthBarHealing);
     }
 
+    /* every time health is updated move the healthBarHealing element to where the end of the health bar is */
     setHealth(current, max) {
         let healthbar = document.getElementById("new_ux-hp-bar__meter--bar");
         this.healthBarHealing.style.left = healthbar.style.width;
@@ -158,6 +159,7 @@ export class GenLiteItemTooltips {
         callback_this.healthBarHealing.style.width = `${healPercent * 100}%`;
     }
 
+    /* test the condition for conditional food to print the correct value */
     foodCondTooltip(itemData, callback_this) {
         let healing = "";
         let condition = itemData.consumable.condition

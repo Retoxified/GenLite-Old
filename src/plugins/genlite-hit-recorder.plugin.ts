@@ -30,7 +30,7 @@ export class GenLiteHitRecorder {
             ranged: 0,
             defense: 0
         }
-        this.playerHitInfo = {
+        this.playerHitInfo = { //this needs to be moved to an interface once i figure out how TS interfaces work
             hitList: {},
             totDam: 0,
             consecutiveZero: 0,
@@ -179,6 +179,7 @@ export class GenLiteHitRecorder {
         }
     }
 
+    /* init stats and the dpeElement */
     initializeUI() {
         if (!this.isPluginEnabled) {
             return;
@@ -190,6 +191,7 @@ export class GenLiteHitRecorder {
         this.initDpsElements();
     }
 
+    /* record the damage and call nerd funcs */
     recordDamage(hitInfo, damage) {
         if (damage == 0) {
             if (hitInfo.consecutiveNonZero > hitInfo.maxNonZero) {
@@ -219,6 +221,7 @@ export class GenLiteHitRecorder {
         this.calcCtlStdDeviation(hitInfo);
     }
 
+    /* nerd functions because 2pi */
     calcAvgDamage(hitInfo) {
         hitInfo.avgDamage = hitInfo.totDam / hitInfo.totalHits;
     }
@@ -238,6 +241,7 @@ export class GenLiteHitRecorder {
         hitInfo.ctlStdDeviation = hitInfo.stdDeviation / Math.sqrt(hitInfo.totalNonZero);
     }
 
+    /* resets */
     resetHitInfo(hitInfo) {
         Object.assign(hitInfo, {
             hitList: {},

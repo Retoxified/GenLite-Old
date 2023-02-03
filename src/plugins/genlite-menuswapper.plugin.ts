@@ -84,6 +84,7 @@ export class GenLiteMenuSwapperPlugin {
             });
     }
 
+    /* clone of the original function with toggle for stairs */
     sceneryIntersects(ray, list) {
         const self = (this as any);
         let seen = new Set();
@@ -102,7 +103,8 @@ export class GenLiteMenuSwapperPlugin {
                 let thing = o.source;
                 let actions = thing.actions();
                 for (let i in actions) {
-                    if (window[GenLiteMenuSwapperPlugin.pluginName].hideStairs && !KEYBOARD['16']) {
+                    /* if stairs or ladder depo if setting checked */
+                    if (window[GenLiteMenuSwapperPlugin.pluginName].hideStairs && !KEYBOARD['16']) { //its conveint genfanad keeps track of all keyboard keys
                         switch (actions[i].text) {
                             case "Climb up":
                             case "Climb down":

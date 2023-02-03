@@ -198,6 +198,8 @@ export class GenLiteWikiDataCollectionPlugin {
             }
             callback_this.toSend.push(monsterdata);
         }
+
+        // spread the server messages over a 20 second interval to lessen server stress
         if (callback_this.toSend.length > 0)
             callback_this.sendTimeInterval = setInterval(() => { callback_this.sendToServer(callback_this) }, 20000 / callback_this.toSend.length)
     }

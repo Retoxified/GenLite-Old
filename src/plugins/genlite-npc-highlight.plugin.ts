@@ -20,7 +20,7 @@ export class GenLiteNPCHighlightPlugin {
         this.npc_highlight_div.className = 'npc-indicators-list';
         document.body.appendChild(this.npc_highlight_div);
         this.npcHealthList = JSON.parse(localStorage.getItem("GenliteNPCHealthList"));
-        if (this.npcHealthList == null) 
+        if (this.npcHealthList == null)
             this.npcHealthList = {};
 
         this.isPluginEnabled = window.genlite.settings.add("NpcHighlight.Enable", true, "Highlight NPCs", "checkbox", this.handlePluginEnableDisable, this);
@@ -67,12 +67,12 @@ export class GenLiteNPCHighlightPlugin {
                 if (key == this.curEnemy) {
                     worldPos = new THREE.Vector3().copy(GAME.npcs[key].object.position());
                     worldPos.y += 0.8;
-                } else {    
+                } else {
                     worldPos = new THREE.Vector3().copy(GAME.npcs[key].position());
                     worldPos.y += GAME.npcs[key].height
                 }
                 let screenPos = this.world_to_screen(worldPos);
-                if(key == this.curEnemy)
+                if (key == this.curEnemy)
                     screenPos.y *= 0.9; // move the name tag a fixed position above the name tag
 
                 if (screenPos.z > 1.0) {
@@ -97,6 +97,7 @@ export class GenLiteNPCHighlightPlugin {
         this.render = false;
     }
 
+    /* figure out which npc we are fighting and when that combat ends */
     handle(verb, payload) {
         if (this.isPluginEnabled === false || NETWORK.loggedIn === false) {
             return;
@@ -148,7 +149,7 @@ export class GenLiteNPCHighlightPlugin {
         var p = pos;
         var screenPos = p.project(GRAPHICS.threeCamera());
 
-        screenPos.x = (screenPos.x + 1) /  2 * window.innerWidth;
+        screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
         screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight;
 
         return screenPos;

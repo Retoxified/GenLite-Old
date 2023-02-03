@@ -86,7 +86,7 @@ export class GenLiteRecipeRecorderPlugin {
             for (let i in payload) {
                 if (itemList[payload[i].item] === undefined)
                     itemList[payload[i].item] = 0;
-                    
+
                 if (payload[i].quantity === undefined) {
                     itemList[payload[i].item] -= 1;
                 } else {
