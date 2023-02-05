@@ -1,33 +1,32 @@
 export class GenLiteRecipeRecorderPlugin {
     static pluginName = 'GenLiteRecipeRecorderPlugin';
 
-    crafting;
+    isCrafting = false;
+    recipe;
+    recipeName = "";
+    prevInventory;
+    prevVerb;
+    stTime = 0;
+
+    isGathering = false;
+    gatherTask = "";
+    gatherNode = "";
+
+    recipeResults = {};
+    gatherResults = {};
 
     isPluginEnabled: boolean = false;
-
-    constructor() {
-
-        /* stores state needed for recording crafting */
-        this.crafting = {
-            isCrafting: false,
-            recipe: undefined,
-            recipeName: undefined,
-            prevInventory: undefined,
-            prevVerb: undefined,
-            stTime: 0,
-
-            resultsList: {}
-        };
-
-    }
 
     async init() {
         window.genlite.registerModule(this);
         let dropTableString = localStorage.getItem("GenliteRecipeRecorder")
         if (dropTableString == null) {
-            this.crafting.resultsList = {};
+            this.recipeResults = {};
+            this.gatherResults = {};
         } else {
-            this.crafting.resultsList = JSON.parse(dropTableString);
+            let saved = JSON.parse(dropTableString);
+            this.recipeResults = saved.recipe;
+            this.gatherResults = saved.gathering;
         }
         this.isPluginEnabled = window.genlite.settings.add("RecipeRecorder.Enable", true, "Record Recipes", "checkbox", this.handlePluginEnableDisable, this);
     }
@@ -40,21 +39,46 @@ export class GenLiteRecipeRecorderPlugin {
         if (this.isPluginEnabled === false) {
             return;
         }
+        console.log(verb, params);
 
         if (params.hasOwnProperty('action')) {
             if (params.action.hasOwnProperty('recipe')) {
-                this.crafting.isCrafting = true;
-                this.crafting.recipe = params.action.recipe;
-                this.crafting.prevInventory = INVENTORY.items;
-                this.crafting.recipeName = params.action.recipe;
+                this.isCrafting = true;
+                this.recipe = params.action.recipe;
+                this.prevInventory = INVENTORY.items;
+                this.recipeName = params.action.recipe;
                 for (let i in params.action.params) // if params is set here then record a complex recipe name
-                    this.crafting.recipeName = this.crafting.recipeName.concat("__", i, params.action.params[i]);
-                if (this.crafting.resultsList[this.crafting.recipeName] === undefined)
-                    this.crafting.resultsList[this.crafting.recipeName] = {
+                    this.recipeName = this.recipeName.concat("__", i, params.action.params[i]);
+                if (this.recipeResults[this.recipeName] === undefined)
+                    this.recipeResults[this.recipeName] = {
                         input: {},
                         output: {}
                     };
+                return;
             }
+
+            switch (params.action) {
+                case "Mine":
+                    this.gatherTask = "mining";
+                    break;
+                case "Chop down":
+                    this.gatherTask = "logging";
+                    break;
+                case "Harvest":
+                    this.gatherTask = "botany";
+                    break;
+                default:
+                    this.gatherTask = "";
+                    break;
+            }
+            if (this.gatherTask !== "") {
+                this.isGathering = true;
+                this.gatherNode = params.id;
+                this.prevInventory = INVENTORY.items;
+            }
+        }
+        if (verb == "walk") {
+            this.isGathering = false;
         }
     }
 
@@ -67,18 +91,18 @@ export class GenLiteRecipeRecorderPlugin {
         /* TODO? I dont like relying on NETWORK message orders
             but after filtering I have never seen them come in a different one
         */
-        if (!this.crafting.isCrafting)
+        if (!(this.isCrafting || this.isGathering))
             return;
         if (verb == 'inventory') {
-            for (let i in this.crafting.prevInventory) {
+            for (let i in this.prevInventory) {
                 /* add up the quantities of the inventory */
-                if (itemList[this.crafting.prevInventory[i].item] === undefined)
-                    itemList[this.crafting.prevInventory[i].item] = 0;
+                if (itemList[this.prevInventory[i].item] === undefined)
+                    itemList[this.prevInventory[i].item] = 0;
 
-                if (this.crafting.prevInventory[i].quantity === undefined) {
-                    itemList[this.crafting.prevInventory[i].item] += 1;
+                if (this.prevInventory[i].quantity === undefined) {
+                    itemList[this.prevInventory[i].item] += 1;
                 } else {
-                    itemList[this.crafting.prevInventory[i].item] += this.crafting.prevInventory[i].quantity;
+                    itemList[this.prevInventory[i].item] += this.prevInventory[i].quantity;
                 }
             }
 
@@ -94,45 +118,91 @@ export class GenLiteRecipeRecorderPlugin {
                 }
             }
 
-            /* negative values are outputs
-                positive are inputs
-            */
-            let isNothing = true;
-            for (let i in itemList) {
-                if (itemList[i] < 0) {
-                    if (this.crafting.resultsList[this.crafting.recipeName].output[i] === undefined)
-                        this.crafting.resultsList[this.crafting.recipeName].output[i] = 0;
-                    this.crafting.resultsList[this.crafting.recipeName].output[i] -= itemList[i];
-                    isNothing = false;
-                } else if (itemList[i] > 0) {
-                    if (this.crafting.resultsList[this.crafting.recipeName].input[i] === undefined)
-                        this.crafting.resultsList[this.crafting.recipeName].input[i] = 0;
-                    this.crafting.resultsList[this.crafting.recipeName].input[i] += itemList[i];
-                }
+            if (this.isCrafting) {
+                this.storeRecipeData(itemList);
+            } else if (this.isGathering) {
+                this.storeGatherData(itemList);
             }
-            if (isNothing) {
-                if (this.crafting.resultsList[this.crafting.recipeName].output["nothing"] === undefined)
-                    this.crafting.resultsList[this.crafting.recipeName].output["nothing"] = 0;
-                this.crafting.resultsList[this.crafting.recipeName].output["nothing"]++;
-            }
-            this.crafting.prevInventory = structuredClone(payload);
-            localStorage.setItem("GenliteRecipeRecorder", JSON.stringify(this.crafting.resultsList));
+            this.prevInventory = structuredClone(payload);
+            localStorage.setItem("GenliteRecipeRecorder", JSON.stringify({ recipe: this.recipeResults, gathering: this.gatherResults }));
             /* determines if crafting is done by looking for the stop animation
                 that comes only after the crafting animation
             */
         } else if (verb == 'animation' && payload.player == PLAYER.id) {
             if (payload.anim) {
-                this.crafting.stTime = payload.timestamp;
-            } else if (this.crafting.stTime < payload.timestamp && this.crafting.stTime != 0) {
-                this.crafting.isCrafting = false;
-                this.crafting.stTime = 0;
+                this.stTime = payload.timestamp;
+            } else if (this.stTime < payload.timestamp && this.stTime != 0) {
+                this.isCrafting = false;
+                this.isGathering = false;
+                this.stTime = 0;
+            }
+        } else if (verb == "action" && payload.type.match("fail")) {
+            if (this.gatherResults[this.gatherTask] === undefined)
+                this.gatherResults[this.gatherTask] = {};
+            let gather = this.gatherResults[this.gatherTask];
+            let nodeKey = GRAPHICS.scene.allObjects[this.gatherNode].modelInfo.nick;
+            if (gather[nodeKey] === undefined)
+                gather[nodeKey] = {};
+            let node = gather[nodeKey];
+            if (node["nothing"] == undefined)
+                node["nothing"] = 0;
+            node["nothing"]++;
+            localStorage.setItem("GenliteRecipeRecorder", JSON.stringify({ recipe: this.recipeResults, gathering: this.gatherResults }));
+        }
+        this.prevVerb = verb;
+    }
+
+    storeRecipeData(itemList) {
+        /* negative values are outputs
+            positive are inputs
+        */
+        let isNothing = true;
+        for (let i in itemList) {
+            if (i == "undefined")
+                continue;
+
+            if (itemList[i] < 0) {
+                if (this.recipeResults[this.recipeName].output[i] === undefined)
+                    this.recipeResults[this.recipeName].output[i] = 0;
+                this.recipeResults[this.recipeName].output[i] -= itemList[i];
+                isNothing = false;
+            } else if (itemList[i] > 0) {
+                if (this.recipeResults[this.recipeName].input[i] === undefined)
+                    this.recipeResults[this.recipeName].input[i] = 0;
+                this.recipeResults[this.recipeName].input[i] += itemList[i];
             }
         }
-        this.crafting.prevVerb = verb;
+        if (isNothing) {
+            if (this.recipeResults[this.recipeName].output["nothing"] === undefined)
+                this.recipeResults[this.recipeName].output["nothing"] = 0;
+            this.recipeResults[this.recipeName].output["nothing"]++;
+        }
+
+    }
+
+    storeGatherData(itemList) {
+        if (this.gatherResults[this.gatherTask] === undefined)
+            this.gatherResults[this.gatherTask] = {};
+        let gather = this.gatherResults[this.gatherTask];
+        let nodeKey = GRAPHICS.scene.allObjects[this.gatherNode].modelInfo.impl.params;
+        if (gather[nodeKey] === undefined)
+            gather[nodeKey] = {};
+        let node = gather[nodeKey];
+        for (let i in itemList) {
+            if (i == "undefined")
+                continue;
+            if (itemList[i] < 0) {
+                if (node[i] === undefined)
+                    node[i] = 0;
+                node[i] -= itemList[i];
+            }
+        }
+
     }
 
     resetResultsList() {
-        this.crafting.resultsList = {};
+        this.recipeResults = {};
+        this.gatherResults = {};
         localStorage.removeItem("GenliteRecipeRecorder");
     }
 }

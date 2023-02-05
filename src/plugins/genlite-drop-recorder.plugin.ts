@@ -51,12 +51,15 @@ export class GenLiteDropRecorderPlugin {
             this,  // context for handler
             "Warning!\n" + // Warning
             "Turning this setting on will send monster drop data along with your IP\u00A0address to an external server.\n\n" +
-            "Are you sure you want to enable this setting?"
+            "Are you sure you want to enable this setting?",
+            undefined,
+            "DropRecorder.Enable"
         );
     }
 
     handlePluginEnableDisable(state: boolean) {
         this.isPluginEnabled = state;
+
     }
 
     handleSubmitToServer(state: boolean) {

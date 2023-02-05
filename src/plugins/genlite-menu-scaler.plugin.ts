@@ -10,7 +10,7 @@ export class GenLiteMenuScaler {
         this.scaleList = {};
         this.isPluginEnabled = window.genlite.settings.add("MenuScaler.Enable", true, "MenuScaler", "checkbox", this.handlePluginEnableDisable, this);
         this.scaleList.rightClick = window.genlite.settings.add("MenuScalerRightCLick.1", true, "Scale Right Click Menu", "range", this.scaleRightClick, this, undefined,
-            [['min', '0.1'], ['max', '4'], ['step', '0.1'], ['value', '1']]);
+            [['min', '0.1'], ['max', '4'], ['step', '0.1'], ['value', '1']], "MenuScaler.Enable");
     }
 
     handlePluginEnableDisable(state: boolean) {

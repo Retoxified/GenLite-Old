@@ -2,7 +2,7 @@ import { GenLiteConfirmation } from "../helpers/genlite-confirmation.class";
 
 export class GenLiteSettingsPlugin {
     public static pluginName = 'GenLiteSettingsPlugin';
-    private settings: { [key: string]: any } = {};
+    private settings: { [key: string]: { value: any, DOM: HTMLElement } } = {};
     private container: HTMLElement;
 
     async init() {
@@ -36,21 +36,41 @@ export class GenLiteSettingsPlugin {
         settingsModal.appendChild(this.container);
     }
 
-    public add(key: string, defaultValue: any, label: string, inputType: string, callback: (value: any) => void, context: any, confirmationMessage: string = undefined, attributeList = undefined): any {
+    /* goes through and disables child settings if needed */
+    async postInit() {
+        for (let key in this.settings) {
+            let setting = this.settings[key];
+            if (setting.value)
+                continue;
+            //disable child elements
+            let children = document.getElementsByClassName(key);
+            for (let i = 0; i < children.length; i++) {
+                let element = <HTMLElement>children[i];
+                element.style.opacity = setting.value ? "1" : "0.6";
+                let elementInput = <HTMLInputElement>element.children[1]
+                elementInput.disabled = !setting.value;
+            }
+
+        }
+
+    }
+
+    public add(key: string, defaultValue: any, label: string, inputType: string, callback: (value: any) => void, context: any, confirmationMessage: string = undefined, attributeList = undefined, parent = undefined): any {
         // Set the default value for the setting if it has not been set already
         if (!(key in this.settings)) {
+            this.settings[key] = { value: undefined, DOM: undefined };
 
             let localStorageKey = "GenLite." + key;
             const storedValue = localStorage.getItem(localStorageKey);
             if (storedValue) {
                 if (inputType === "checkbox") {
-                    this.settings[key] = (storedValue === "true" ? true : false); // localStorage is always a string, so we need to compare to "true"
+                    this.settings[key].value = (storedValue === "true" ? true : false); // localStorage is always a string, so we need to compare to "true"
                 } else {
-                    this.settings[key] = storedValue;
+                    this.settings[key].value = storedValue;
                 }
 
             } else {
-                this.settings[key] = defaultValue;
+                this.settings[key].value = defaultValue;
             }
         }
 
@@ -62,9 +82,9 @@ export class GenLiteSettingsPlugin {
             input.setAttribute(attr[0], attr[1]);
         }
         if (inputType === "checkbox") {
-            input.checked = this.settings[key];
+            input.checked = this.settings[key].value;
         } else {
-            input.value = this.settings[key];
+            input.value = this.settings[key].value;
         }
 
         input.addEventListener('change', async (event) => {
@@ -78,16 +98,26 @@ export class GenLiteSettingsPlugin {
                     }
                 }
 
-                this.settings[key] = input.checked;
+                this.settings[key].value = input.checked;
             } else {
-                this.settings[key] = input.value;
+                this.settings[key].value = input.value;
             }
 
             // Save the setting to local storage
-            localStorage.setItem("GenLite." + key, this.settings[key]);
+            localStorage.setItem("GenLite." + key, this.settings[key].value);
 
             // Call the callback function with the new value
-            callback.call(context, this.settings[key]);
+            callback.call(context, this.settings[key].value);
+
+            //disable child elements
+            let children = document.getElementsByClassName(key);
+            for (let i = 0; i < children.length; i++) {
+                let element = <HTMLElement>children[i];
+                element.style.opacity = input.checked ? "1" : "0.6";
+                let elementInput = <HTMLInputElement>element.children[1]
+                elementInput.disabled = !input.checked;
+            }
+
         });
 
         // Add the label and input element to the container
@@ -96,6 +126,8 @@ export class GenLiteSettingsPlugin {
 
         settingContainer.className = "new_ux-settings-modal__settings-row";
         settingContainer.classList.add(context.constructor.pluginName);
+        if (parent)
+            settingContainer.classList.add(parent);
         labelElement.className = "new_ux-settings-modal__setting-name";
         labelElement.innerHTML = label;
 
@@ -103,7 +135,7 @@ export class GenLiteSettingsPlugin {
         settingContainer.appendChild(input);
         this.container.appendChild(settingContainer);
 
-        return this.settings[key];
+        return this.settings[key].value;
     }
 
     searchSettings(event) {

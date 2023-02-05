@@ -50,4 +50,8 @@ import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand
     await genlite.pluginLoader.addPlugin(GenLiteSoundNotification);
     await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
 
-})();
+    /** post init things */
+    await window.GenLiteSettingsPlugin.postInit();
+}
+)();
+
