@@ -39,8 +39,6 @@ export class GenLiteRecipeRecorderPlugin {
         if (this.isPluginEnabled === false) {
             return;
         }
-        console.log(verb, params);
-
         if (params.hasOwnProperty('action')) {
             if (params.action.hasOwnProperty('recipe')) {
                 this.isCrafting = true;
