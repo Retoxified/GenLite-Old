@@ -8,9 +8,9 @@ export class GenLiteSoundNotification {
     async init() {
         window.genlite.registerModule(this);
         this.doHealthCheck = window.genlite.settings.add("LowHealth.Enable", false, "Low Health Sound", "checkbox", this.handleDoHealthCheck, this);
-                                                                                //this is a stupid ass thing but *shrug*
+        //this is a stupid ass thing but *shrug*
         this.healthThreshold = window.genlite.settings.add("LowHealth.0", 0, "Low Health Threshold: <div style=\"display: contents;\" id=\"GenLiteHealthThresholdOutput\"></div>", "range", this.setHealthThreshold, this, undefined,
-            [['min', '1'], ['max', '100'], ['step', '1'], ['value', '0']]);
+            [['min', '1'], ['max', '100'], ['step', '1'], ['value', '0']], "LowHealth.Enable");
         document.getElementById("GenLiteHealthThresholdOutput").innerText = ` ${this.healthThreshold}%`
     }
 

@@ -27,9 +27,9 @@ export class GenLiteItemHighlightPlugin {
         this.item_highlight_div = document.createElement('div');
         this.item_highlight_div.className = 'item-indicators-list';
         document.body.appendChild(this.item_highlight_div);
-        this.isPluginEnabled = window.genlite.settings.add("ItemHighlight.Enable", true, "Highlight Items", "checkbox", this.handlePluginEnableDisable, this);
-        this.doCondenseItems = window.genlite.settings.add("CondenseItems.Enable", true, "Condence Items", "checkbox", this.handleCondeseEnableDisable, this);
-        let storedPriorityColor = window.genlite.settings.add("ItemHighlight.PriorityColor", "#ffa500", "Priority Item Color", "color", this.handleColorChange, this);
+        this.isPluginEnabled = window.genlite.settings.add("ItemHighlight.Enable", true, "Highlight Items", "checkbox", this.handlePluginEnableDisable, this, undefined, undefined);
+        this.doCondenseItems = window.genlite.settings.add("CondenseItems.Enable", true, "Condence Items", "checkbox", this.handleCondeseEnableDisable, this, undefined, undefined, "ItemHighlight.Enable");
+        let storedPriorityColor = window.genlite.settings.add("ItemHighlight.PriorityColor", "#ffa500", "Priority Item Color", "color", this.handleColorChange, this, undefined, undefined, "ItemHighlight.Enable");
 
         let sheet = document.styleSheets[0];
         this.styleRuleIndex = sheet.insertRule(`.genlite-priority-item { color: ${storedPriorityColor}; }`, sheet.cssRules.length);

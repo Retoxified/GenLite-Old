@@ -4,6 +4,10 @@ export class GenLiteItemTooltips {
     itemToolTip: HTMLElement;
     healthBarHealing: HTMLElement; //this name sucks
 
+    curCombat;
+    pacifistTime = 0; // we can just assume on init its probably been 5 minutes or at the very least it doesnt matter, i mean who uses veggies
+    stepCount = 0;
+
     isUiInit: boolean = false;
     isPluginEnabled: boolean = false;
     isFoodEnabled: boolean = false;
@@ -13,8 +17,8 @@ export class GenLiteItemTooltips {
         window.genlite.registerModule(this);
 
         this.isPluginEnabled = window.genlite.settings.add("ItemToolTips.Enable", true, "Tooltips", "checkbox", this.handlePluginEnableDisable, this);
-        this.isFoodEnabled = window.genlite.settings.add("ItemToolTips.Enable", true, "Food Tooltips", "checkbox", this.handleFoodEnableDisable, this);
-        this.isValueEnabled = window.genlite.settings.add("ItemToolTips.Enable", true, "Value Tooltips", "checkbox", this.handleValueEnableDisable, this);
+        this.isFoodEnabled = window.genlite.settings.add("FoodToolTips.Enable", true, "Food Tooltips", "checkbox", this.handleFoodEnableDisable, this, undefined, undefined, "ItemToolTips.Enable");
+        this.isValueEnabled = window.genlite.settings.add("ValueToolTips.Enable", true, "Value Tooltips", "checkbox", this.handleValueEnableDisable, this, undefined, undefined, "ItemToolTips.Enable");
 
 
     }
@@ -52,6 +56,8 @@ export class GenLiteItemTooltips {
             DOM_slot.onmouseenter = this.installEventHook(DOM_slot.onmouseenter, this.onmouseenter, this);
             DOM_slot.onmousemove = this.installEventHook(DOM_slot.onmousemove, this.onmousemove, this);
             DOM_slot.onmouseleave = this.installEventHook(DOM_slot.onmouseleave, this.onmouseleave, this);
+            DOM_slot.onclick = this.installEventHook(DOM_slot.onclick, this.onclick, this);
+
         }
         /* setup the tool tip, im lazy and just copy the computed style of the xp on
             seems to work fine
@@ -75,12 +81,41 @@ export class GenLiteItemTooltips {
         this.healthBarHealing.style.background = "LimeGreen";
         let healthbar = document.getElementById("new_ux-hp-bar__meter--bar");
         healthbar.after(this.healthBarHealing);
+
+        this.isUiInit = true;
     }
 
     /* every time health is updated move the healthBarHealing element to where the end of the health bar is */
     setHealth(current, max) {
-        let healthbar = document.getElementById("new_ux-hp-bar__meter--bar");
-        this.healthBarHealing.style.left = healthbar.style.width;
+        if (this.isUiInit) {
+            let healthbar = document.getElementById("new_ux-hp-bar__meter--bar");
+            this.healthBarHealing.style.left = healthbar.style.width;
+        }
+    }
+
+    /* figure out which npc we are fighting and when that combat ends */
+    handle(verb, payload) {
+        if (this.isPluginEnabled === false || NETWORK.loggedIn === false) {
+            return;
+        }
+
+        /* look for start of combat set the curEnemy and record data */
+        if (verb == "spawnObject" && payload.type == "combat" &&
+            (payload.participant1 == PLAYER.id || payload.participant2 == PLAYER.id)) {
+            this.curCombat = payload.id;
+            this.pacifistTime = Number.POSITIVE_INFINITY;
+            return;
+        }
+        if (verb == "removeObject" && payload.type == "combat" && payload.id == this.curCombat) {
+            this.curCombat = "";
+            this.pacifistTime = Date.now();
+            return;
+        }
+
+        if (verb == "move" && PLAYER && payload.id == PLAYER.id) {
+            this.stepCount++;
+            return;
+        }
     }
 
     /* do the toolbar stuff depending on what item your hovering over */
@@ -131,6 +166,20 @@ export class GenLiteItemTooltips {
         callback_this.healthBarHealing.style.width = "0%";
     }
 
+    onclick(event, callback_this) {
+        let slot = 0;
+        if (event.target.classList.contains("new_ux-item-quantity-span")) {
+            slot = event.target.offsetParent.offsetParent.offsetParent.slot_number; //this is stupid
+        } else {
+            slot = event.target.offsetParent.offsetParent.slot_number;
+        }
+        let itemData = DATA.items[INVENTORY.items[slot].item];
+        if (callback_this.isFoodEnabled && itemData.consumable
+            && itemData.consumable.condition && itemData.consumable.condition.params.threshold_steps)
+            callback_this.stepCount = 0;
+
+    }
+
     /* simple hook that runs this.onmouseenter() after the game function */
     installEventHook(eventBase, callback, callback_this) {
         let oldE = eventBase;
@@ -154,7 +203,6 @@ export class GenLiteItemTooltips {
         <div>Heal Amount: <span style="color:${textColor}">${healingAmount}</span></div>
         <div>Health: <span style="color:${textColor}">${healedHealth}</span>/${totalHealth}</div>`
 
-        let healthbar = document.getElementById("new_ux-hp-bar__meter--bar");
         let healPercent = healingAmount / totalHealth;
         callback_this.healthBarHealing.style.width = `${healPercent * 100}%`;
     }
@@ -184,12 +232,14 @@ export class GenLiteItemTooltips {
                     ? condition.true.vitality : condition.false.vitality;
                 break;
             case "pacifist":
-                //TODO: this is a time out of combat based on ticks but no clue how long a tick is
-                dummyItem.consumable.vitality = condition.false.vitality;
+                // ticks are 150ms
+                let oocTime = Date.now() - callback_this.pacifistTime;
+                dummyItem.consumable.vitality = oocTime >= condition.params.threshold_ticks * 150
+                    ? condition.true.vitality : condition.false.vitality
                 break;
             case "wanderer":
-                //TODO: need step counter
-                dummyItem.consumable.vitality = condition.false.vitality;
+                dummyItem.consumable.vitality = callback_this.stepCount >= condition.params.threshold_steps
+                    ? condition.true.vitality : condition.false.vitality;
                 break;
         }
         callback_this.foodTooltip(dummyItem, callback_this);

@@ -106,7 +106,6 @@ export class GenLiteNPCHighlightPlugin {
         /* look for start of combat set the curEnemy and record data */
         if (verb == "spawnObject" && payload.type == "combat" &&
             (payload.participant1 == PLAYER.id || payload.participant2 == PLAYER.id)) {
-            console.log(payload);
             this.curCombat = payload.id;
             let curCombat = GAME.combats[payload.id];
             this.curEnemy = curCombat.left.id == PLAYER.id ? curCombat.right.id : curCombat.left.id;

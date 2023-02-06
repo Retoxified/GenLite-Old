@@ -15,7 +15,7 @@ export class GenLiteMenuSwapperPlugin {
 
         NPC.prototype.intersects = this.leftClickBankIntersects;
         OptimizedScene.prototype.intersects = this.sceneryIntersects;
-        
+
     }
 
 
