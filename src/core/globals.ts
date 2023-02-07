@@ -115,3 +115,10 @@ declare const OptimizedScene: {
 declare const KEYBOARD: {
     [key: string]: any,
 }
+
+declare class SFXPlayer {
+};
+
+declare const Inventory: {
+    [key: string]: any,
+};

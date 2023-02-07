@@ -13,6 +13,7 @@ export class GenLiteItemHighlightPlugin {
 
     isPluginEnabled: boolean = false;
     doCondenseItems: boolean = false;
+    hideLables: boolean = false;
 
     async init() {
         window.genlite.registerModule(this);
@@ -28,7 +29,9 @@ export class GenLiteItemHighlightPlugin {
         this.item_highlight_div.className = 'item-indicators-list';
         document.body.appendChild(this.item_highlight_div);
         this.isPluginEnabled = window.genlite.settings.add("ItemHighlight.Enable", true, "Highlight Items", "checkbox", this.handlePluginEnableDisable, this, undefined, undefined);
-        this.doCondenseItems = window.genlite.settings.add("CondenseItems.Enable", true, "Condence Items", "checkbox", this.handleCondeseEnableDisable, this, undefined, undefined, "ItemHighlight.Enable");
+        this.doCondenseItems = window.genlite.settings.add("CondenseItems.Enable", true, "Condense Items", "checkbox", this.handleCondeseEnableDisable, this, undefined, undefined, "ItemHighlight.Enable");
+        this.hideLables = window.genlite.settings.add("HideItemLabels.Enable", false, "Hide Item Labels", "checkbox", this.handleHideLabelsEnableDisable, this, undefined, undefined, "ItemHighlight.Enable");
+
         let storedPriorityColor = window.genlite.settings.add("ItemHighlight.PriorityColor", "#ffa500", "Priority Item Color", "color", this.handleColorChange, this, undefined, undefined, "ItemHighlight.Enable");
 
         let sheet = document.styleSheets[0];
@@ -88,6 +91,14 @@ export class GenLiteItemHighlightPlugin {
         this.itemElements = [];
         this.trackedItems = [];
         this.doCondenseItems = state;
+    }
+
+    handleHideLabelsEnableDisable(state: boolean) {
+        // no matter what clear the current items to refresh the display
+        this.item_highlight_div.innerHTML = '';
+        this.itemElements = [];
+        this.trackedItems = [];
+        this.hideLables = state;
     }
 
 
@@ -157,7 +168,7 @@ export class GenLiteItemHighlightPlugin {
         for (let i in this.itemElements) {
             let key = this.itemElements[i].itemIds[0];
             if (GAME.items[key] !== undefined) {
-                if (this.get_item_data(GAME.items[key].definition.item) == -1 && !this.isAltDown) {
+                if ((this.get_item_data(GAME.items[key].definition.item) == -1 || this.hideLables) && !this.isAltDown) {
                     this.itemElements[i].element.style.visibility = 'hidden';
                     continue;
                 }
