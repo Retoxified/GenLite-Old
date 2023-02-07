@@ -31,8 +31,8 @@ export class GenLiteLocationsPlugin {
         this.setupUIMapIframe()
     }
     private setupLocations(): void {
-        this.lastPosition = [0,0]
-        this.currentLocation = [[0,0]]
+        this.lastPosition = [0, 0]
+        this.currentLocation = [[0, 0]]
         this.currentLocationLabel = ""
         this.currentSubLocation = ""
         this.mainLocations = {
@@ -43,51 +43,51 @@ export class GenLiteLocationsPlugin {
                 }
             },
             "Cent": {
-                polygon: [[54,64],[85,58],[126,56],[125,128],[28,127],[-18,101],[-18,91],[-1,64],[54,64]],
+                polygon: [[54, 64], [85, 58], [126, 56], [125, 128], [28, 127], [-18, 101], [-18, 91], [-1, 64], [54, 64]],
                 subLocations: {
-                    "Cent Anvil": [[98,89],[100,89],[100,92],[98,92],[98,89]],
-                    "Wolfgang's Sheepfold": [[100,59],[112,59],[112,70],[109,73],[101,73],[101,65],[100,64],[100,59]],
-                    "Jax Butchery": [[111,96],[115,96],[115,98],[111,98]],
-                    "Kordan's Armoury": [[109,92],[111,92],[111,96],[109,96]],
-                    "Fern's General Store": [[97,93],[100,93],[100,95],[99,96],[97,96],[97,99],[95,99],[95,96],[97,94]],
-                    "Tutorial": [[91,104],[97,104],[98,105],[99,105],[100,104],[103,104],[103,101],[120,101],[120,102],[121,103],[120,110],[120,111],[119,112],[120,113],[120,119],[118,121],[118,123],[116,125],[111,125],[110,124],[109,124],[109,122],[99,122],[96,119],[92,119],[92,113],[91,112],[91,104]]
+                    "Cent Anvil": [[98, 89], [100, 89], [100, 92], [98, 92], [98, 89]],
+                    "Wolfgang's Sheepfold": [[100, 59], [112, 59], [112, 70], [109, 73], [101, 73], [101, 65], [100, 64], [100, 59]],
+                    "Jax Butchery": [[111, 96], [115, 96], [115, 98], [111, 98]],
+                    "Kordan's Armoury": [[109, 92], [111, 92], [111, 96], [109, 96]],
+                    "Fern's General Store": [[97, 93], [100, 93], [100, 95], [99, 96], [97, 96], [97, 99], [95, 99], [95, 96], [97, 94]],
+                    "Tutorial": [[91, 104], [97, 104], [98, 105], [99, 105], [100, 104], [103, 104], [103, 101], [120, 101], [120, 102], [121, 103], [120, 110], [120, 111], [119, 112], [120, 113], [120, 119], [118, 121], [118, 123], [116, 125], [111, 125], [110, 124], [109, 124], [109, 122], [99, 122], [96, 119], [92, 119], [92, 113], [91, 112], [91, 104]]
                 }
             },
             "Zamok": {
-                polygon: [[26,-13],[-5,20],[-5,40],[1,47],[1,49],[4,51],[7,52],[14,59],[14,61],[16,62],[21,62],[22,61],[32,61],[33,62],[39,62],[44,56],[53,61],[62,54],[68,57],[84,55],[99,40],[95,7],[68,10],[67,0],[67,-9],[63,-13],[26,-13]],
+                polygon: [[26, -13], [-5, 20], [-5, 40], [1, 47], [1, 49], [4, 51], [7, 52], [14, 59], [14, 61], [16, 62], [21, 62], [22, 61], [32, 61], [33, 62], [39, 62], [44, 56], [53, 61], [62, 54], [68, 57], [84, 55], [99, 40], [95, 7], [68, 10], [67, 0], [67, -9], [63, -13], [26, -13]],
                 subLocations: {
-                    "Zamok Bank": [[78,24],[83,24],[83,29],[78,29],[78,24]],
-                    "Oberon's Armour Shop": [[85,19],[88,19],[85,19],[85,23],[88,23]],
-                    "Remmy's Pottery": [[90,23],[93,23],[93,26],[90,26],[90,23]],
-                    "Zarchery's Investation": [[80,34],[80,37],[83,37],[83,34],[80,34]],
-                    "Helena's Kitchen": [[89,36],[89,39],[92,39],[92,36],[89,36]],
-                    "Tom's Tanery": [[88,41],[88,44],[91,44],[91,41],[88,41]],
-                    "Zamok Mine": [[82,15],[81,12],[75,12],[72,14],[77,21],[82,15]],
-                    "Zamok Castle": [[42,15],[49,15],[52,13],[56,16],[62,16],[68,11],[75,22],[75,56],[68,57],[63,54],[54,60],[47,56],[42,55],[42,15]]
+                    "Zamok Bank": [[78, 24], [83, 24], [83, 29], [78, 29], [78, 24]],
+                    "Oberon's Armour Shop": [[85, 19], [88, 19], [85, 19], [85, 23], [88, 23]],
+                    "Remmy's Pottery": [[90, 23], [93, 23], [93, 26], [90, 26], [90, 23]],
+                    "Zarchery's Investation": [[80, 34], [80, 37], [83, 37], [83, 34], [80, 34]],
+                    "Helena's Kitchen": [[89, 36], [89, 39], [92, 39], [92, 36], [89, 36]],
+                    "Tom's Tanery": [[88, 41], [88, 44], [91, 44], [91, 41], [88, 41]],
+                    "Zamok Mine": [[82, 15], [81, 12], [75, 12], [72, 14], [77, 21], [82, 15]],
+                    "Zamok Castle": [[42, 15], [49, 15], [52, 13], [56, 16], [62, 16], [68, 11], [75, 22], [75, 56], [68, 57], [63, 54], [54, 60], [47, 56], [42, 55], [42, 15]]
                 }
             },
             "Coyn": {
-                polygon: [[200,150],[270,160],[289,242],[174,235]]
+                polygon: [[200, 150], [270, 160], [289, 242], [174, 235]]
             },
             "Thralltown": {
                 polygon: [[]]
             },
             "Plenty": {
                 //Currently some points are in the river, may need to change if/when boating because a skill
-                polygon: [[137,169],[141,165],[165,165],[173,173],[173,175],[177,179],[179,179],[188,188],[198,188],[192,196],[180,199],[177,209],[173,209],[173,213],[178,213],[178,223],[160,223],[147,221],[147,218],[146,217],[146,214],[147,213],[147,209],[143,205],[139,205],[137,203],[132,203],[131,204],[122,204],[120,202],[120,196],[119,195],[119,189],[122,186],[122,181],[124,179],[134,179],[137,176],[137,169]],
+                polygon: [[137, 169], [141, 165], [165, 165], [173, 173], [173, 175], [177, 179], [179, 179], [188, 188], [198, 188], [192, 196], [180, 199], [177, 209], [173, 209], [173, 213], [178, 213], [178, 223], [160, 223], [147, 221], [147, 218], [146, 217], [146, 214], [147, 213], [147, 209], [143, 205], [139, 205], [137, 203], [132, 203], [131, 204], [122, 204], [120, 202], [120, 196], [119, 195], [119, 189], [122, 186], [122, 181], [124, 179], [134, 179], [137, 176], [137, 169]],
                 //subLocations: {}
             },
             "Emerald City": {
-                polygon: [[-55,382],[-8,382],[-8,336],[-55,336],[-55,382]]
+                polygon: [[-55, 382], [-8, 382], [-8, 336], [-55, 336], [-55, 382]]
             },
             "Wicked Witches Fortress": {
-                polygon: [[-185,332],[-186,340],[-190,347],[-189,367],[-179,370],[-171,380],[-149,380],[-130,377],[-129,370],[-97,382],[-100,354],[-121,337],[-162,316],[-185,332]]
+                polygon: [[-185, 332], [-186, 340], [-190, 347], [-189, 367], [-179, 370], [-171, 380], [-149, 380], [-130, 377], [-129, 370], [-97, 382], [-100, 354], [-121, 337], [-162, 316], [-185, 332]]
             },
             "Skal": {
-                polygon: [[-218,269],[-136,270],[-137,293],[-169,294],[-179,302],[-220,309],[-225,302],[-223,282],[-218,269]]
+                polygon: [[-218, 269], [-136, 270], [-137, 293], [-169, 294], [-179, 302], [-220, 309], [-225, 302], [-223, 282], [-218, 269]]
             },
             "Milltown": {
-                polygon: [[178,14],[190,14],[194,18],[192,38],[186,46],[177,46],[176,47],[171,47],[170,46],[167,46],[161,40],[161,35],[162,34],[162,29],[161,28],[161,21],[171,21],[178,14]]
+                polygon: [[178, 14], [190, 14], [194, 18], [192, 38], [186, 46], [177, 46], [176, 47], [171, 47], [170, 46], [167, 46], [161, 40], [161, 35], [162, 34], [162, 29], [161, 28], [161, 21], [171, 21], [178, 14]]
             }
 
         }
@@ -99,21 +99,21 @@ export class GenLiteLocationsPlugin {
                 }
             },
             "Tutorial Dungeon": {
-                polygon: [[77,73],[130,73],[130,124],[82,125],[77,73]],
+                polygon: [[77, 73], [130, 73], [130, 124], [82, 125], [77, 73]],
             }
         }
         this.regionLocations = {
-            "Reka Valley": [[-128,-128],[227,-128],[240,-55],[240,-51],[235,-46],[235,-38],[240,-33],[228,-21],[227,17],[235,34],[237,50],[244,57],[246,86],[248,109],[251,113],[251,130],[253,132],[253,144],[258,149],[258,151],[268,161],[272,161],[280,169],[280,178],[290,201],[291,224],[338,255],[-75,255],[-90,244],[-98,244],[-106,236],[-114,237],[-121,227],[-121,208],[-108,195],[-108,185],[-97,174],[-97,154],[-102,149],[-76,145],[-60,127],[-48,123],[-38,116],[-22,118],[-17,109],[-6,40],[-7,0],[-60,-10],[-73,-34],[-76,-55],[-127,-59],[-128,-128]],
-            "Kosten Ridge": [[247,-76],[295,-110],[490,-112],[509,215],[472,254],[342,254],[290,221],[247,-76]],
-            "Paridot Plains": [[127,256],[-75,256],[-68,263],[-77,282],[-102,287],[-121,314],[-95,383],[0,383],[0,511],[127,511],[127,256]],
-            "Timberlode Threshold": [[-256,127],[-161,128],[-128,149],[-103,149],[-98,154],[-98,174],[-109,185],[-109,195],[-122,208],[-122,228],[-103,383],[-256,383],[-256,127]]
+            "Reka Valley": [[-128, -128], [227, -128], [240, -55], [240, -51], [235, -46], [235, -38], [240, -33], [228, -21], [227, 17], [235, 34], [237, 50], [244, 57], [246, 86], [248, 109], [251, 113], [251, 130], [253, 132], [253, 144], [258, 149], [258, 151], [268, 161], [272, 161], [280, 169], [280, 178], [290, 201], [291, 224], [338, 255], [-75, 255], [-90, 244], [-98, 244], [-106, 236], [-114, 237], [-121, 227], [-121, 208], [-108, 195], [-108, 185], [-97, 174], [-97, 154], [-102, 149], [-76, 145], [-60, 127], [-48, 123], [-38, 116], [-22, 118], [-17, 109], [-6, 40], [-7, 0], [-60, -10], [-73, -34], [-76, -55], [-127, -59], [-128, -128]],
+            "Kosten Ridge": [[247, -76], [295, -110], [490, -112], [509, 215], [472, 254], [342, 254], [290, 221], [247, -76]],
+            "Paridot Plains": [[127, 256], [-75, 256], [-68, 263], [-77, 282], [-102, 287], [-121, 314], [-95, 383], [0, 383], [0, 511], [127, 511], [127, 256]],
+            "Timberlode Threshold": [[-256, 127], [-161, 128], [-128, 149], [-103, 149], [-98, 154], [-98, 174], [-109, 185], [-109, 195], [-122, 208], [-122, 228], [-103, 383], [-256, 383], [-256, 127]]
         }
     }
     private setupUILocationLabel(): void {
         this.locationLabel = document.createElement("div")
         this.locationLabel.style.display = "none";
         this.locationLabel.style.visibility = "hidden";
-        this.locationLabel.classList.add( "location-label" )
+        this.locationLabel.classList.add("location-label")
         this.locationLabel.innerText = ""
         document.body.appendChild(this.locationLabel)
     }
@@ -122,10 +122,10 @@ export class GenLiteLocationsPlugin {
         this.mapIframe = document.createElement("iframe")
         this.mapIframe.style.display = "none";
         this.mapIframe.style.visibility = "hidden";
-        this.mapIframe.classList.add("map-iframe","map-iframe-hidden")
+        this.mapIframe.classList.add("map-iframe", "map-iframe-hidden")
 
-        this.mapIframe.src = `https://genfamap.com/?location=true#0_0_${ this.mapZoom }`
-        document.body.appendChild( this.mapIframe )
+        this.mapIframe.src = `https://genfamap.com/?location=true#0_0_${this.mapZoom}`
+        document.body.appendChild(this.mapIframe)
     }
     async init() {
         window.genlite.registerModule(this)
@@ -133,18 +133,18 @@ export class GenLiteLocationsPlugin {
 
 
         this.locationLabels = window.genlite.settings.add("LocationLabels.Enable", true, "Location Labels", "checkbox", this.handleLocationLabelsEnableDisable, this)
-        this.showCoordinates = window.genlite.settings.add("Coordinates.Enable", true, "Coordinates", "checkbox", this.handleShowCoordinatesDisable, this)
+        this.showCoordinates = window.genlite.settings.add("Coordinates.Enable", true, "Coordinates", "checkbox", this.handleShowCoordinatesDisable, this, undefined, undefined, "LocationLabels.Enable")
         this.compassMap = window.genlite.settings.add("CompassMap.Enable", true, "Compass Map", "checkbox", this.handleCompassMapEnableDisable, this)
 
         //Decide how to handle initial setting grab as right now only returns true/false
         this.translucentScale = 0.5
         window.genlite.settings.add("CompassMapTranslucentScale", true, "Compass Map Translucent Scale", "range", this.handleCompassMapTranslucentSlider, this, undefined,
-            [['min', '0.01'], ['max', '1'], ['step', '0.01'], ['value', '0.5'], ['class','gen-slider']]);
+            [['min', '0.01'], ['max', '1'], ['step', '0.01'], ['value', '0.5'], ['class', 'gen-slider']], "CompassMap.Enable");
 
         this.addStylesheet()
         //
     }
-    private handleCompassMapTranslucentSlider( value ) {
+    private handleCompassMapTranslucentSlider(value) {
         this.translucentScale = value
         this.addGlobalStylesheet(`
             .map-iframe-translucent {
@@ -156,55 +156,53 @@ export class GenLiteLocationsPlugin {
         `)//Not the best way to do this.
 
     }
-    private handleLocationLabelsEnableDisable(state: boolean): void  {
+    private handleLocationLabelsEnableDisable(state: boolean): void {
         this.locationLabels = state
         this.checkLocationLabels()
     }
     private checkLocationLabels(): void {
-        if( this.locationLabels ) {
+        if (this.locationLabels) {
             this.enableLocationLabels()
-            this.enableMapIframe()
-        } else if ( !this.locationLabels ) {
+        } else if (!this.locationLabels) {
             this.disableLocationLabels()
-            this.disableMapIframe()
         }
     }
-    private handleShowCoordinatesDisable(state: boolean): void  {
+    private handleShowCoordinatesDisable(state: boolean): void {
         this.showCoordinates = state
         this.checkShowCoordinates()
 
     }
     private checkShowCoordinates(): void {
-        if( this.showCoordinates ) {
+        if (this.showCoordinates) {
             this.locationCheck()
-        } else if ( !this.showCoordinates ) {
+        } else if (!this.showCoordinates) {
             this.locationCheck()
         }
     }
-    private handleCompassMapEnableDisable(state: boolean): void  {
+    private handleCompassMapEnableDisable(state: boolean): void {
         this.compassMap = state
-        if( this.compassMap ) {
+        if (this.compassMap) {
             this.enableMapIframe()
-        } else if ( !this.compassMap ) {
+        } else if (!this.compassMap) {
             this.disableMapIframe()
         }
         this.locationCheck()
     }
-    private updateMapIframeSrc(): void  {
+    private updateMapIframeSrc(): void {
         let layer = PLAYER.location.layer.includes("world") ?
             PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
         //Zoom Logic Goes here?
 
-        this.mapIframe.src = `https://genfamap.com/${ layer }?location=true#${ PLAYER.character.pos2.x+.5 }_${ PLAYER.character.pos2.y-.5 }_${ this.mapZoom }`
+        this.mapIframe.src = `https://genfamap.com/${layer}?location=true#${PLAYER.character.pos2.x + .5}_${PLAYER.character.pos2.y - .5}_${this.mapZoom}`
     }
-    private toggleTranslucentMap(): void  {
+    private toggleTranslucentMap(): void {
         this.mapTranslucent = !this.mapTranslucent
 
-        if( this.mapTranslucent ) {
+        if (this.mapTranslucent) {
             this.mapIframe.classList.add("map-iframe-translucent")
             this.mapIframe.classList.remove("map-iframe-hidden")
             this.mapIframe.classList.remove("map-iframe-focus")
-        } else if ( !this.mapTranslucent ) {
+        } else if (!this.mapTranslucent) {
             this.mapIframe.classList.add("map-iframe-hidden")
             this.mapIframe.classList.remove("map-iframe-translucent")
             this.mapIframe.classList.remove("map-iframe-focus")
@@ -212,7 +210,7 @@ export class GenLiteLocationsPlugin {
         }
         this.updateMapIframeSrc()
     }
-    private hideMap(): void  {
+    private hideMap(): void {
         this.mapFocus = false
         this.mapTranslucent = false
 
@@ -220,7 +218,7 @@ export class GenLiteLocationsPlugin {
         this.mapIframe.classList.remove("map-iframe-focus")
         this.mapIframe.classList.remove("map-iframe-translucent")
     }
-    private focusMap(): void  {
+    private focusMap(): void {
         this.mapFocus = true
         this.mapTranslucent = false
 
@@ -234,22 +232,22 @@ export class GenLiteLocationsPlugin {
         let layer = PLAYER.location.layer.includes("world") ?
             PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
 
-        this.popupMap = window.open(`https://genfamap.com/${ layer }?location=true#${PLAYER.character.pos2.x}_${PLAYER.character.pos2.y}_0.67`, "genfanad-map", 'width=800,height=600')
+        this.popupMap = window.open(`https://genfamap.com/${layer}?location=true#${PLAYER.character.pos2.x}_${PLAYER.character.pos2.y}_0.67`, "genfanad-map", 'width=800,height=600')
     }
     private setLocationLabelUnknown(): void {
         this.showCoordinates ?
             this.locationLabel.innerText = `(${GAME.world.x},${GAME.world.y})` :
             this.locationLabel.innerText = ``
     }
-    private setLocationLabel( value: string ): void {
+    private setLocationLabel(value: string): void {
         this.showCoordinates ?
             this.locationLabel.innerText = `${value} (${GAME.world.x},${GAME.world.y})` :
             this.locationLabel.innerText = `${value}`
     }
-    private checkSubLocation( subLocations:object , currentPosition:number[] ): boolean {
+    private checkSubLocation(subLocations: object, currentPosition: number[]): boolean {
         for (const subLocation in subLocations) {
-            if( this.classifyPoint(subLocations[subLocation], currentPosition) != 1) {
-                this.setLocationLabel( subLocation )
+            if (this.classifyPoint(subLocations[subLocation], currentPosition) != 1) {
+                this.setLocationLabel(subLocation)
                 this.currentLocation = subLocations[subLocation]
                 this.currentLocationLabel = subLocation
                 this.currentSubLocation = subLocations[subLocation]
@@ -258,11 +256,11 @@ export class GenLiteLocationsPlugin {
             }
         }
     }/////////
-    private checkRegionLocations( regionLocations:object , currentPosition:number[] ): boolean  {
+    private checkRegionLocations(regionLocations: object, currentPosition: number[]): boolean {
         //hmmmm ^^^^ This is duplicate of above; but also not sure if regions should be complex polygons perhaps only squares/cubes
         for (const regionLocation in regionLocations) {
-            if( this.classifyPoint(regionLocations[regionLocation], currentPosition) != 1) {
-                this.setLocationLabel( regionLocation )
+            if (this.classifyPoint(regionLocations[regionLocation], currentPosition) != 1) {
+                this.setLocationLabel(regionLocation)
                 this.currentLocation = regionLocations[regionLocation]
                 this.currentLocationLabel = regionLocation
                 this.currentSubLocation = regionLocations[regionLocation]
@@ -272,47 +270,47 @@ export class GenLiteLocationsPlugin {
         }
 
     }
-    private checkLocations( locationsToCheck:object , currentPosition:number[] ): boolean  {
+    private checkLocations(locationsToCheck: object, currentPosition: number[]): boolean {
         for (const location in locationsToCheck) {
-            if( this.classifyPointOrPolygon( locationsToCheck[location], currentPosition) != 1 ) {
+            if (this.classifyPointOrPolygon(locationsToCheck[location], currentPosition) != 1) {
                 this.currentLocation = locationsToCheck[location].polygon
                 this.currentLocationLabel = location
 
-                if( locationsToCheck[location].subLocations !== undefined ) {
-                    if ( this.checkSubLocation( locationsToCheck[location].subLocations, currentPosition ) )
+                if (locationsToCheck[location].subLocations !== undefined) {
+                    if (this.checkSubLocation(locationsToCheck[location].subLocations, currentPosition))
                         return true
                 }
 
-                this.setLocationLabel( location )
+                this.setLocationLabel(location)
                 return true
             }
         }
-        return this.checkRegionLocations( this.regionLocations, currentPosition )
+        return this.checkRegionLocations(this.regionLocations, currentPosition)
     }
-    private classifyPointOrPolygon( pointOrPolygon:any, position:number[] ): number { //-1, 0, 1
-        return this.classifyPoint( (pointOrPolygon.polygon !== undefined) ? pointOrPolygon.polygon : pointOrPolygon, position )
+    private classifyPointOrPolygon(pointOrPolygon: any, position: number[]): number { //-1, 0, 1
+        return this.classifyPoint((pointOrPolygon.polygon !== undefined) ? pointOrPolygon.polygon : pointOrPolygon, position)
     }
-    private startLocationCheck( currentPosition:number[], lastPosition:number[] ): void {
-        if( currentPosition != lastPosition ) {
+    private startLocationCheck(currentPosition: number[], lastPosition: number[]): void {
+        if (currentPosition != lastPosition) {
 
             //TODO re-add check previous location here and skip the switch if still in region.
             let found: boolean
-            switch ( PLAYER.location.layer ) {
+            switch (PLAYER.location.layer) {
                 case "dungeon":
-                    found = this.checkLocations( this.dungeonLocations , currentPosition )
+                    found = this.checkLocations(this.dungeonLocations, currentPosition)
                     break;
                 case "fae":
-                    this.setLocationLabel( "Fae" )//
+                    this.setLocationLabel("Fae")//
                     break;
                 case "world1":
                 case "world2":
                 case "world3":
                 default:
-                    found = this.checkLocations( this.mainLocations, currentPosition )
+                    found = this.checkLocations(this.mainLocations, currentPosition)
                     break;
 
             }
-            if( !found ) {
+            if (!found) {
                 this.setLocationLabelUnknown()
             }
         }
@@ -320,15 +318,15 @@ export class GenLiteLocationsPlugin {
     }
 
     private locationCheck() {
-        let currentPosition:number[] = [ PLAYER.character.pos2.x, PLAYER.character.pos2.y ]
-        this.startLocationCheck( currentPosition, this.lastPosition )
+        let currentPosition: number[] = [PLAYER.character.pos2.x, PLAYER.character.pos2.y]
+        this.startLocationCheck(currentPosition, this.lastPosition)
 
         this.updateMapIframeSrc()
     }
-    animationDetector( animation ) {
+    animationDetector(animation) {
         this.locationCheck()
     }
-    private addGlobalStylesheet( css ) {
+    private addGlobalStylesheet(css) {
         let head, style
 
         head = document.head || document.getElementsByTagName('head')[0]
@@ -337,9 +335,9 @@ export class GenLiteLocationsPlugin {
         style.type = 'text/css'
         //style.innerHTML = css.replace(/;/g, ' ! important;')
 
-        head.appendChild( style )
+        head.appendChild(style)
 
-        if ( style.styleSheet ) {
+        if (style.styleSheet) {
             style.styleSheet.cssText = css // This is required for IE8 and below.
         } else {
             style.appendChild(document.createTextNode(css))
@@ -400,31 +398,30 @@ export class GenLiteLocationsPlugin {
         this.stylesheetAdded = true
     }
     loginOK() {
-        if(!this.locationLabels)
-            return //TODO add a DISABLE ALL option... this isnt setup correctly right now
-
-        if(!this.stylesheetAdded) {
-            this.addStylesheet( ) //Would do in init but not working properly when used there...
+        if (this.locationLabels) {
+            this.enableLocationLabels()
+            this.locationCheck()
         }
-        this.enableLocationLabels()
-        this.enableMapIframe()
-        this.locationCheck()
+        if (!this.stylesheetAdded) {
+            this.addStylesheet() //Would do in init but not working properly when used there...
+        }
+        if (this.compassMap)
+            this.enableMapIframe()
     }
     logoutOK() {
-        if(!this.locationLabels) return;
         this.disableLocationLabels()
         this.disableMapIframe()
     }
 
     private minimapCompassClick = () => {
-        if( this.mapFocus ) {
+        if (this.mapFocus) {
             this.hideMap()
-        } else if ( !this.mapFocus ) {
+        } else if (!this.mapFocus) {
             this.focusMap()
         }
     }
 
-    private minimapCompassRightClick = ( event ) => {
+    private minimapCompassRightClick = (event) => {
         event.preventDefault()
         this.toggleTranslucentMap()
     }
@@ -434,19 +431,19 @@ export class GenLiteLocationsPlugin {
         this.hideMap()
 
         let minimapCompass = document.getElementById("new_ux-minimap-compass")
-        minimapCompass.addEventListener( "click", this.minimapCompassClick )
-        minimapCompass.addEventListener( "mouseover", this.minimapCompassMouseOver )
-        minimapCompass.addEventListener( "mouseout", this.minimapCompassMouseOut )
-        minimapCompass.addEventListener('contextmenu', this.minimapCompassRightClick )
+        minimapCompass.addEventListener("click", this.minimapCompassClick)
+        minimapCompass.addEventListener("mouseover", this.minimapCompassMouseOver)
+        minimapCompass.addEventListener("mouseout", this.minimapCompassMouseOut)
+        minimapCompass.addEventListener('contextmenu', this.minimapCompassRightClick)
     }
     private disableMapIframe() {
         this.hideMap()
 
         let minimapCompass = document.getElementById("new_ux-minimap-compass")
-        minimapCompass.removeEventListener( "click", this.minimapCompassClick )
-        minimapCompass.removeEventListener( "mouseover", this.minimapCompassMouseOver )
-        minimapCompass.removeEventListener( "mouseout", this.minimapCompassMouseOut )
-        minimapCompass.removeEventListener( "contextmenu", this.minimapCompassRightClick )
+        minimapCompass.removeEventListener("click", this.minimapCompassClick)
+        minimapCompass.removeEventListener("mouseover", this.minimapCompassMouseOver)
+        minimapCompass.removeEventListener("mouseout", this.minimapCompassMouseOut)
+        minimapCompass.removeEventListener("contextmenu", this.minimapCompassRightClick)
     }
     private minimapCompassMouseOver = () => {
         let minimapCompass = document.getElementById("new_ux-minimap-compass")
@@ -460,17 +457,17 @@ export class GenLiteLocationsPlugin {
         this.locationLabel.style.display = "none"
         this.locationLabel.style.visibility = "hidden"
         Object.defineProperty(PLAYER.character, "movement_animation", {
-            set: ( animation ) => {}
-        } )
+            set: (animation) => { }
+        })
     }
     private enableLocationLabels() {
         this.locationLabel.style.display = "block"
         this.locationLabel.style.visibility = "visible"
         Object.defineProperty(PLAYER.character, "movement_animation", {
-            set: ( animation ) => {
-                this.animationDetector( animation )
+            set: (animation) => {
+                this.animationDetector(animation)
             }
-        } )
+        })
     }
 
     /* hook_PlayerMove(layer, x, y, force) {

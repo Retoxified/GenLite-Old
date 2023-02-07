@@ -109,7 +109,6 @@ export class GenLiteNPCHighlightPlugin {
             this.curCombat = payload.id;
             let curCombat = GAME.combats[payload.id];
             this.curEnemy = curCombat.left.id == PLAYER.id ? curCombat.right.id : curCombat.left.id;
-            console.log(GAME.npcs[this.curEnemy]);
             return;
         }
         if (verb == "removeObject" && payload.type == "combat" && payload.id == this.curCombat) {

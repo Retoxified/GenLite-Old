@@ -1,9 +1,31 @@
+class HitInfo {
+    //this needs to be moved to an interface once i figure out how TS interfaces work
+    hitList = {};
+    totDam = 0;
+    consecutiveZero = 0;
+    consecutiveNonZero = 0;
+    maxZero = 0;
+    maxNonZero = 0;
+    totalZero = 0;
+    totalNonZero = 0;
+    totalHits = 0;
+    hitRate = 0;
+    avgDamage = 0;
+    avgNonZero = 0;
+    stdDeviation = 0;
+    CLTStdDeviation = 0;
+    mad = 0;
+    skew = 0;
+    kurt = 0;
+    entropy = 0;
+}
+
 export class GenLiteHitRecorder {
     static pluginName = 'GenLiteHitRecorder';
 
     curEnemy;
     statsList;
-    playerHitInfo;
+    playerHitInfo: HitInfo;
     enemyHitInfo;
     consecutiveZero;
     consecutiveNonZero;
@@ -30,24 +52,9 @@ export class GenLiteHitRecorder {
             ranged: 0,
             defense: 0
         }
-        this.playerHitInfo = { //this needs to be moved to an interface once i figure out how TS interfaces work
-            hitList: {},
-            totDam: 0,
-            consecutiveZero: 0,
-            consecutiveNonZero: 0,
-            maxZero: 0,
-            maxNonZero: 0,
-            totalZero: 0,
-            totalNonZero: 0,
-            totalHits: 0,
-            hitRate: 0,
-            avgDamage: 0,
-            avgNonZero: 0,
-            stdDeviation: 0,
-            ctlStdDeviation: 0
-        };
+        this.playerHitInfo = new HitInfo();
 
-        this.enemyHitInfo = {};
+        this.enemyHitInfo = new HitInfo();
 
         this.curDpsAcc = {
             timeStart: 0,
@@ -66,7 +73,6 @@ export class GenLiteHitRecorder {
 
     async init() {
         window.genlite.registerModule(this);
-        this.enemyHitInfo = structuredClone(this.playerHitInfo);
         this.isPluginEnabled = window.genlite.settings.add("HitRecorder.Enable", true, "Hit Recorder", "checkbox", this.handlePluginEnableDisable, this);
         this.dpsOverlayContainer.appendChild(this.dpsOverlay);
     }
@@ -218,7 +224,11 @@ export class GenLiteHitRecorder {
         this.calcAvgDamage(hitInfo);
         this.calcAvgNonZero(hitInfo);
         this.calcStdDeviation(hitInfo);
-        this.calcCtlStdDeviation(hitInfo);
+        this.calcCLTStdDeviation(hitInfo);
+        this.calcMAD(hitInfo);
+        this.calcSkewness(hitInfo);
+        this.calcKurtosis(hitInfo);
+        this.calcEntropy(hitInfo);
     }
 
     /* nerd functions because 2pi */
@@ -232,33 +242,57 @@ export class GenLiteHitRecorder {
 
     calcStdDeviation(hitInfo) {
         let tot = 0;
-        for (let hit in hitInfo.hitList)
+        for (let hit in hitInfo.hitList) {
+            if (hit == "0") continue;
             tot += hitInfo.hitList[hit] * Math.pow(parseInt(hit) - hitInfo.avgNonZero, 2);
+        }
         hitInfo.stdDeviation = Math.sqrt(tot / hitInfo.totalNonZero);
     }
 
-    calcCtlStdDeviation(hitInfo) {
-        hitInfo.ctlStdDeviation = hitInfo.stdDeviation / Math.sqrt(hitInfo.totalNonZero);
+    calcCLTStdDeviation(hitInfo) {
+        hitInfo.CLTStdDeviation = hitInfo.stdDeviation / Math.sqrt(hitInfo.totalNonZero);
+    }
+
+    calcMAD(hitInfo) {
+        let tot = 0;
+        for (let hit in hitInfo.hitList) {
+            if (hit == "0") continue;
+            tot += hitInfo.hitList[hit.toString()] * Math.abs(parseInt(hit) - hitInfo.avgNonZero);
+        }
+        hitInfo.mad = 1 / hitInfo.totalNonZero * tot
+    }
+
+    calcSkewness(hitInfo) {
+        let tot = 0;
+        for (let hit in hitInfo.hitList) {
+            if (hit == "0") continue;
+            tot += hitInfo.hitList[hit.toString()] * Math.pow(parseInt(hit) - hitInfo.avgNonZero, 3);
+        }
+        hitInfo.skew = tot / (hitInfo.totalNonZero * Math.pow(hitInfo.stdDeviation, 1.5));
+    }
+
+    calcKurtosis(hitInfo) {
+        let tot = 0;
+        for (let hit in hitInfo.hitList) {
+            if (hit == "0") continue;
+            tot += hitInfo.hitList[hit.toString()] * Math.pow(parseInt(hit) - hitInfo.avgNonZero, 4);
+        }
+        hitInfo.kurt = tot / (hitInfo.totalNonZero * hitInfo.stdDeviation * hitInfo.stdDeviation);
+    }
+
+    calcEntropy(hitInfo) {
+        let tot = 0;
+        for (let hit in hitInfo.hitList) {
+            if (hit == "0") continue;
+            let p = hitInfo.hitList[hit] / hitInfo.totalHits;
+            tot -= p * Math.log(p);
+        }
+        hitInfo.entropy = tot;
     }
 
     /* resets */
     resetHitInfo(hitInfo) {
-        Object.assign(hitInfo, {
-            hitList: {},
-            totDam: 0,
-            consecutiveZero: 0,
-            consecutiveNonZero: 0,
-            maxZero: 0,
-            maxNonZero: 0,
-            totalZero: 0,
-            totalNonZero: 0,
-            totalHits: 0,
-            hitRate: 0,
-            avgDamage: 0,
-            avgNonZero: 0,
-            stdDeviation: 0,
-            ctlStdDeviation: 0
-        });
+        Object.assign(hitInfo, new HitInfo());
     }
 
     resetPlayerHitInfo() {
@@ -310,8 +344,8 @@ export class GenLiteHitRecorder {
             div.style.paddingRight = "5%";
             div.style.display = "flex";
             div.style.justifyContent = "space-between";
-            div.style.color = "#DAA520";
-            div.style.position = "relative";
+            div.style.color = "#DAA5    20";
+            div.style.position = "re    lative";
             for (let k = 0; k < 2; k++) {
                 let span = document.createElement("span");
                 span.style.position = "relative";

@@ -33,6 +33,8 @@ export class GenLite {
         this.installHook(window, 'initializeUI', this.hook_window_initializeUI, this);
         this.installHook(Game.prototype, 'combatUpdate', this.hook_Game_combatUpdate, this);
         this.installHook(PlayerHUD.prototype, 'setHealth', this.hook_PlayerHUD_setHealth, this);
+        this.installHook(Inventory.prototype, 'handleUpdatePacket', this.hook_Inventory_handleUpdatePacket, this);
+
     }
 
     hook_Camera_update() {
@@ -121,6 +123,14 @@ export class GenLite {
         for (var i = 0; i < this.moduleList.length; i++) {
             if (typeof this.moduleList[i].setHealth === 'function') {
                 this.moduleList[i].setHealth.apply(this.moduleList[i], arguments);
+            }
+        }
+    }
+
+    hook_Inventory_handleUpdatePacket() {
+        for (var i = 0; i < this.moduleList.length; i++) {
+            if (typeof this.moduleList[i].handleUpdatePacket === 'function') {
+                this.moduleList[i].handleUpdatePacket.apply(this.moduleList[i], arguments);
             }
         }
     }
