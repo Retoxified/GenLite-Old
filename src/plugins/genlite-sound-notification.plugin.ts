@@ -97,6 +97,8 @@ export class GenLiteSoundNotification {
     }
 
     handleUpdatePacket(packet) {
+        if (!this.doInvCheck)
+            return;
         let inUse = Object.keys(INVENTORY.items).length;
         if (this.prevSlotsUsed == null) {
             this.prevSlotsUsed = inUse;
