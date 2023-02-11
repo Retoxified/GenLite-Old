@@ -131,7 +131,6 @@ export class GenLiteRecipeRecorderPlugin {
                 this.stTime = payload.timestamp;
             } else if (this.stTime < payload.timestamp && this.stTime != 0) {
                 this.isCrafting = false;
-                this.isGathering = false;
                 this.stTime = 0;
             }
         } else if (verb == "action" && payload.type.match("fail")) {
