@@ -36,5 +36,3 @@ To build the project run:
 
 # IDE & Setup
 If you're using a well known IDE, we suggest [enabling coding assistance](https://blog.jetbrains.com/webstorm/2015/11/node-js-coding-assistance-in-webstorm-11/) for Node.JS.
-
-Test
