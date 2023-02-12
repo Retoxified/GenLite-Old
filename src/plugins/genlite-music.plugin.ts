@@ -1,5 +1,8 @@
 export class GenLiteMusicPlugin {
     static pluginName = 'GenLiteMusicPlugin';
+    static missingTracks = [
+        "snow-relax",
+    ];
 
     isPluginEnabled: boolean = false;
     originalSetTrack: Function;
@@ -37,19 +40,28 @@ export class GenLiteMusicPlugin {
 
         this.selectionMenu = <HTMLElement>document.createElement("div");
         this.selectionMenu.style.position = "fixed";
-        this.selectionMenu.style.border = "2px solid black";
         this.selectionMenu.style.right = "20px";
         this.selectionMenu.style.top = "20px";
+
         this.selectionMenu.style.height = "20em";
         this.selectionMenu.style.display = "flex";
         this.selectionMenu.style.flexDirection = "column";
+
+        this.selectionMenu.style.color = "#ffd593";
+        this.selectionMenu.style.borderTop = "2px solid #b54f08";
+        this.selectionMenu.style.borderLeft = "2px solid #572008";
+        this.selectionMenu.style.borderRight = "2px solid #572008";
+        this.selectionMenu.style.borderBottom = "2px solid #250801";
         this.selectionMenu.style.fontFamily = "acme,times new roman,Times,serif";
 
         let header = <HTMLElement>document.createElement("div");
         header.innerText = "Music Selection";
-        header.style.backgroundColor = "darkgray";
+        header.style.fontWeight = "bold";
         header.style.padding = "4px";
         header.style.textAlign = "center";
+        header.style.textShadow = "-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000";
+        header.style.backgroundColor = "#9c4209";
+        header.style.color = "#fdda2e";
         this.selectionMenu.appendChild(header);
 
         let container = <HTMLElement>document.createElement("div");
@@ -58,9 +70,12 @@ export class GenLiteMusicPlugin {
         this.selectionMenu.appendChild(container);
 
         for (const track in MUSIC_TRACK_NAMES) {
+            if (GenLiteMusicPlugin.missingTracks.includes(track)) {
+                continue;
+            }
             let name = MUSIC_TRACK_NAMES[track];
             let b = <HTMLElement>document.createElement("div");
-            b.style.backgroundColor = 'lightgray';
+            b.style.backgroundColor = '#461400';
             b.style.width = "100%";
             b.innerText = name;
             b.onclick = (e) => {
@@ -159,13 +174,13 @@ export class GenLiteMusicPlugin {
 
     setNextTrack(track: string) {
         if (this.currentSelection != null) {
-            this.currentSelection.style.backgroundColor = 'lightgray';
+            this.currentSelection.style.backgroundColor = '#461400';
         }
 
         var e = this.selectionOptions[track];
         if (e) {
             this.currentSelection = e;
-            e.style.backgroundColor = 'green';
+            e.style.backgroundColor = '#008000';
         }
 
         this.currentTrack = track;
