@@ -43,7 +43,7 @@ export class GenLiteMusicPlugin {
         this.selectionMenu.style.height = "20em";
         this.selectionMenu.style.display = "flex";
         this.selectionMenu.style.flexDirection = "column";
-        this.selectionMenu.style.fontFamily = "iacme,times new roman,Times,serif";
+        this.selectionMenu.style.fontFamily = "acme,times new roman,Times,serif";
 
         let header = <HTMLElement>document.createElement("div");
         header.innerText = "Music Selection";
