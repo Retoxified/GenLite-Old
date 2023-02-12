@@ -14,6 +14,7 @@ import { GenLiteWikiDataCollectionPlugin } from "./plugins/genlite-wiki-data-col
 import { GenLiteXpCalculator } from "./plugins/genlite-xp-calculator.plugin";
 import { GenLiteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
 import { GenLiteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
+import { GenLiteMusicPlugin } from "./plugins/genlite-music.plugin";
 import { GenLiteLocationsPlugin } from "./plugins/genlite-locations.plugin";
 import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
 import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
@@ -44,6 +45,7 @@ import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand
     await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteHitRecorder);
     await genlite.pluginLoader.addPlugin(GenLiteMenuScaler);
+    await genlite.pluginLoader.addPlugin(GenLiteMusicPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteLocationsPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteMenuSwapperPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteItemTooltips);
