@@ -64,11 +64,10 @@ export class GenLiteMusicPlugin {
             b.style.width = "100%";
             b.innerText = name;
             b.onclick = (e) => {
-                if (this.musicMode != "shuffle") {
-                    this.musicMode = "manual";
-                } else if (this.shuffleTimeout != 0) {
+                this.setManual();
+                if (this.musicMode == "shuffle" && this.shuffleTimeout != 0) {
                     clearTimeout(this.shuffleTimeout);
-                    this.shuffleTimeout = window.setTimeout(this.nextShuffle, 1 * 60 * 1000);
+                    this.shuffleTimeout = window.setTimeout(this.nextShuffle.bind(this), 3 * 60 * 1000);
                 }
 
                 SETTINGS.setMusicTrackText("Transitioning...");
@@ -78,6 +77,12 @@ export class GenLiteMusicPlugin {
             container.appendChild(b);
             this.selectionOptions[track] = b;
         }
+
+        window.genlite.commands.register(
+            "music",
+            this.handleCommand.bind(this),
+            this.helpCommand.bind(this)
+        );
     }
 
     handlePluginEnableDisable(state: boolean) {
@@ -106,6 +111,12 @@ export class GenLiteMusicPlugin {
         }
     }
 
+    setManual() {
+        if (this.musicMode != "shuffle") {
+            this.musicMode = "manual";
+        }
+    }
+
     enableShuffle() {
         if (this.musicMode != "shuffle") {
             this.previousMode = this.musicMode;
@@ -125,7 +136,7 @@ export class GenLiteMusicPlugin {
             var choices = Object.keys(this.selectionOptions);
             var track = choices[Math.floor(Math.random() * choices.length)];
             this.setNextTrack(track);
-            this.shuffleTimeout = window.setTimeout(this.nextShuffle, 1 * 60 * 1000);
+            this.shuffleTimeout = window.setTimeout(this.nextShuffle.bind(this), 3 * 60 * 1000);
         }
     }
 
@@ -177,6 +188,105 @@ export class GenLiteMusicPlugin {
     hideMusicSelection() {
         this.selectionMenu.remove();
         this.displayed = false;
+    }
+
+    helpCommand(args: string) {
+        let end = args.indexOf(" ");
+        if (end == -1) {
+            end = args.length;
+        }
+        let subcommand = args.slice(0, end);
+
+        switch (subcommand) {
+            case "list":
+                window.genlite.commands.print("List available tracks.");
+                break;
+            case "play":
+                window.genlite.commands.print("Play a track; e.g. '//music play Genfanad Theme'");
+                break;
+            case "shuffle":
+                window.genlite.commands.print("Enable or disable shuffle; e.g. '//music shuffle off'");
+                break;
+            case "default":
+                window.genlite.commands.print("Restore to default Genfanad music");
+                break;
+            default:
+                window.genlite.commands.print("Controls music player.");
+                window.genlite.commands.print("subcommands: list, play, shuffle, default");
+                break;
+        }
+    }
+
+    handleCommand(args: string) {
+        let end = args.indexOf(" ");
+        if (end == -1) {
+            end = args.length;
+        }
+        let subcommand = args.slice(0, end);
+        let arg = args.slice(end + 1);
+
+        switch (subcommand) {
+            case "list":
+                var names = [];
+                for (const track in this.selectionOptions) {
+                    names.push(this.selectionOptions[track].innerText);
+                }
+                window.genlite.commands.print(names.join(", "));
+                break;
+            case "play":
+                let song = arg;
+                if (song) {
+                    // if it's a direct track name, play it
+                    if (this.selectionOptions[song]) {
+                        this.setManual();
+                        this.setNextTrack(song);
+                        window.genlite.commands.print("playing: " + song);
+                        return;
+                    }
+
+                    // otherwise, look up full name
+                    let tracks = [];
+                    let matches = [];
+                    for (const track in this.selectionOptions) {
+                        let name = this.selectionOptions[track].innerText;
+                        if (name.toLowerCase().startsWith(arg.toLowerCase())) {
+                            tracks.push(track);
+                            matches.push(name);
+                        }
+                    }
+
+                    if (matches.length == 0) {
+                        window.genlite.commands.print("no such song");
+                    } else if (matches.length == 1) {
+                        this.setManual();
+                        this.setNextTrack(tracks[0]);
+                        window.genlite.commands.print("playing: " + matches[0]);
+                    } else {
+                        window.genlite.commands.print("be more specific: " + matches.join(", "));
+                    }
+                } else {
+                    window.genlite.commands.print("specify a track to play");
+                    this.helpCommand("play");
+                }
+                break;
+            case "shuffle":
+                switch (arg) {
+                    case "off":
+                        this.disableShuffle();
+                        break;
+                    case "on":
+                    default:
+                        this.enableShuffle();
+                        break;
+                }
+                break;
+            case "default":
+                this.musicMode = "passthrough";
+                break;
+            default:
+                this.helpCommand("");
+                break;
+        }
     }
 
 }
