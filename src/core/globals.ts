@@ -60,9 +60,15 @@ declare const MUSIC_PLAYER: {
     [key: string]: any,
 };
 
+declare const MUSIC_TRACK_NAMES: {
+    [key: string]: string,
+};
+
 declare const GRAPHICS: {
     [key: string]: any,
 };
+
+declare const SETTINGS: any;
 
 declare const PhasedLoadingManager: {
     [key: string]: any,
