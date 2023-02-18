@@ -1,7 +1,24 @@
+class MonsterData {
+    //this needs to be moved to an interface once i figure out how TS interfaces work
+    "Monster_Name" = "";
+    "Monster_Level" = 0;
+    "Monster_Pack_ID" = "";
+    "X" = 0;
+    "Y" = 0;
+    "Layer" = "";
+    "Pack_Size" = 0;
+    "Monster_HP" = 0;
+    "Base_Xp" = 0;
+    "ign_mobkey" = "";
+    "Level_Diff_Bit" = 0;
+    "Version" = 3;
+}
+
 export class GenLiteWikiDataCollectionPlugin {
     static pluginName = 'GenLiteWikiDataCollectionPlugin';
 
     previously_seen = {};
+    packList = {};
     toSend = [];
     playerMeleeCL = 0;
     playerRangedCL = 0;
@@ -31,21 +48,13 @@ export class GenLiteWikiDataCollectionPlugin {
         );
     }
 
-    initializeUI() {
-        if (!this.isPluginEnabled) {
-            return;
-        }
+    loginOK() {
+        this.scanNpcs(this);
         this.scanInterval = setInterval(() => { this.scanNpcs(this) }, 30000);
     }
 
     handlePluginEnableDisable(state: boolean) {
         this.isPluginEnabled = state;
-        if (state) {
-            this.initializeUI();
-        } else {
-            clearInterval(this.scanInterval);
-        }
-
     }
 
     updateSkills() {
@@ -57,9 +66,6 @@ export class GenLiteWikiDataCollectionPlugin {
     }
 
     combatUpdate(update) {
-        if (!this.isPluginEnabled) {
-            return;
-        }
         let object = GAME.objectById(update.id);
 
         if (update.id == PLAYER.id || GAME.players[update.id] !== undefined)
@@ -68,31 +74,18 @@ export class GenLiteWikiDataCollectionPlugin {
         if (!object || !object.object)
             return;
 
-        let monsterdata = {
-            "Monster_Name": object.info.name,
-            "Monster_Level": object.info.level ? object.info.level : 0,
-            "Monster_HP": update.maxhp,
-            "Monster_Pack_ID": update.id.split("-")[0],
-            "X": object.pos2.x,
-            "Y": object.pos2.y,
-            "Layer": PLAYER.location.layer,
-            "Pack_Size": 0,
-            "Base_Xp": 0,
-            "Level_Diff_Bit": 0,
-            "Version": 2
-        };
-        let mobKey = `${monsterdata.Monster_Name}-${monsterdata.Monster_Level}-${monsterdata.Monster_Pack_ID}`
-
-        if (this.previously_seen[mobKey] === undefined || this.previously_seen[mobKey].Monster_HP == 0) { // if we havent seen the monster or if we dont know its health
-            this.previously_seen[mobKey] = monsterdata;
-            window.genlite.sendDataToServer("monsterdata", monsterdata);
+        let packId = update.id.split("-")[0];
+        let mobKey = this.packList[packId];
+        if (mobKey === undefined)
+            return;
+        if (this.previously_seen[mobKey].Monster_HP == 0) { // if we havent seen the monster or if we dont know its health
+            this.previously_seen[mobKey].Monster_HP = update.maxhp;
+            if (this.isPluginEnabled)
+                window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
         }
     }
 
     handle(verb, payload) {
-        if (!this.isPluginEnabled) {
-            return;
-        }
 
         /* look for start of combat set the curEnemy and record data */
         if (verb == "spawnObject" && payload.type == "combat" &&
@@ -129,17 +122,13 @@ export class GenLiteWikiDataCollectionPlugin {
     }
 
     updateXP(xp) {
-        if (!this.isPluginEnabled) {
-            return;
-        }
-        //console.log(xp);
         if (xp.levelUp) {
             this.playerMeleeCL = Math.trunc((PLAYER_INFO.skills.attack.level + PLAYER_INFO.skills.defense.level + PLAYER_INFO.skills.strength.level) / 3);
             this.playerRangedCL = PLAYER_INFO.skills.ranged.level;
         }
         if (this.curEnemy === undefined)
             return;
-        let mobKey = `${this.curEnemy.info.name}-${this.curEnemy.info.level ? this.curEnemy.info.level : 0}-${this.curEnemy.id.split("-")[0]}`
+        let mobKey = this.packList[this.curEnemy.id.split("-")[0]];
         if (xp.skill == "vitality") {
             this.vitDrop = xp.xp;
             return;
@@ -148,7 +137,7 @@ export class GenLiteWikiDataCollectionPlugin {
             return;
 
         let xpDrop = xp.xp + this.vitDrop;
-        // Hack? Math? i dunno i though i knew how this works but i dont but for some reason it increases the accuracy of the prediction
+        // ack? Math? i dunno i though i knew how this works but i dont but for some reason it increases the accuracy of the prediction
         xpDrop += (xpDrop % 3);
         let levelDiff = (this.combatStyle == "melee" ? this.playerMeleeCL : this.playerRangedCL) - this.curEnemy.info.level;
         levelDiff = Math.min(Math.max(levelDiff, -4), 12);
@@ -162,52 +151,77 @@ export class GenLiteWikiDataCollectionPlugin {
         }
         this.previously_seen[mobKey].Base_Xp = baseXp;
         this.previously_seen[mobKey].Level_Diff_Bit = 1 << (levelDiff + 4);
-        window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
+        if (this.isPluginEnabled)
+            window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
     }
 
     scanNpcs(callback_this) {
-        const npcCounts = Object.keys(GAME.npcs).reduce((acc, npcKey) => acc.set(npcKey.split('-')[0], (acc.get(npcKey.split('-')[0]) || 0) + 1), new Map());
+        let clustersize = 40
+        let npcs = {}
+        /* do some aggregrate stuff packSize, and add up mapsegment for averaging later */
+        for (let key in GAME.npcs) {
+            let packId = key.split('-')[0];
+            if (npcs[packId] === undefined)
+                npcs[packId] = { packSize: 0, mapSegX: 0, mapSegY: 0, npc: GAME.npcs[key] };
+            npcs[packId].packSize++;
+            npcs[packId].mapSegX += GAME.npcs[key].pos2.x / clustersize;
+            npcs[packId].mapSegY += GAME.npcs[key].pos2.y / clustersize;
+        }
+        /* calculate the mob key check if we need to update the server */
+        for (let packId in npcs) {
+            let npcInfo = npcs[packId];
+            // finish calculating the map segment by averaging the aggragate location
+            npcInfo.mapSegX = Math.round(npcInfo.mapSegX / npcInfo.packSize);
+            npcInfo.mapSegY = Math.round(npcInfo.mapSegY / npcInfo.packSize);
+            let group = 'A';
+            let npc = npcs[packId].npc;
+            /* calculate the mob key and increment the group if the key conflicts with a prexisting entry */
+            let mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${PLAYER.location.layer}:${npcInfo.mapSegX}-${npcInfo.mapSegY}-${group}`;
+            while (this.previously_seen[mobKey] !== undefined && this.previously_seen[mobKey].ign_mobkey != packId) {
+                group = String.fromCharCode(group.charCodeAt(0) + 1);
+                mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${PLAYER.location.layer}:${npcInfo.mapSegX}-${npcInfo.mapSegY}-${group}`;
+            }
+            /* if we have an existing key just ignore the above */
+            mobKey = this.packList[packId] ? this.packList[packId] : mobKey;
+            if (this.previously_seen[mobKey] !== undefined) {
+                if (!this.previously_seen[mobKey].Pack_Size ||
+                    this.previously_seen[mobKey].Pack_Size < npcInfo.packSize) { // if we have seen it before but we counted more this time update
 
-        for (let npcId in GAME.npcs) {
-            let npc = GAME.npcs[npcId];
-            let npcPack = npcId.split('-')[0];
-
-            let mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}-${npcPack}`;
-            if (callback_this.previously_seen[mobKey] !== undefined) {
-                if (!callback_this.previously_seen[mobKey].Pack_Size ||
-                    callback_this.previously_seen[mobKey].Pack_Size < npcCounts.get(npcPack)) { // if we have seen it before but we counted more this time update
-
-                    let monsterdata = callback_this.previously_seen[mobKey];
-                    monsterdata.Pack_Size = npcCounts.get(npcPack);
-                    window.genlite.sendDataToServer("monsterdata", monsterdata);
+                    let monsterdata = this.previously_seen[mobKey];
+                    monsterdata.Pack_Size = npcInfo.packSize;
+                    if (this.isPluginEnabled)
+                        window.genlite.sendDataToServer("monsterdata", monsterdata);
                 }
                 continue;
             }
             let monsterdata = {
                 "Monster_Name": npc.info.name,
                 "Monster_Level": npc.info.level ? npc.info.level : 0,
-                "Monster_Pack_ID": npcPack,
-                "X": npc.pos2.x,
-                "Y": npc.pos2.y,
+                "Monster_Pack_ID": mobKey,
+                "X": npcInfo.mapSegX * clustersize,
+                "Y": npcInfo.mapSegY * clustersize,
                 "Layer": PLAYER.location.layer,
-                "Pack_Size": npcCounts.get(npcPack),
+                "Pack_Size": npcInfo.packSize,
                 "Monster_HP": 0,
                 "Base_Xp": 0,
+                "ign_mobkey": packId,
                 "Level_Diff_Bit": 0,
-                "Version": 2
-            }
-            callback_this.toSend.push(monsterdata);
+                "Version": 3
+            };
+            this.previously_seen[mobKey] = monsterdata;
+            this.packList[packId] = mobKey;
+            if (this.isPluginEnabled)
+                this.toSend.push(monsterdata);
         }
-
-        // spread the server messages over a 20 second interval to lessen server stress
-        if (callback_this.toSend.length > 0)
-            callback_this.sendTimeInterval = setInterval(() => { callback_this.sendToServer(callback_this) }, 20000 / callback_this.toSend.length)
+        /*
+                // spread the server messages over a 20 second interval to lessen server stress
+                if (callback_this.toSend.length > 0)
+                    callback_this.sendTimeInterval = setInterval(() => { callback_this.sendToServer(callback_this) }, 20000 / callback_this.toSend.length)
+                    */
     }
 
     sendToServer(callback_this) {
         let monsterdata = callback_this.toSend.pop();
-        let mobKey = `${monsterdata.Monster_Name}-${monsterdata.Monster_Level}-${monsterdata.Monster_Pack_ID}`;
-        callback_this.previously_seen[mobKey] = monsterdata;
         window.genlite.sendDataToServer("monsterdata", monsterdata);
         if (callback_this.toSend.length == 0)
             clearInterval(callback_this.sendTimeInterval);

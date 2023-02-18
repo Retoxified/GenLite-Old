@@ -6,7 +6,7 @@ export class GenLiteRecipeRecorderPlugin {
     recipeName = "";
     prevInventory;
     prevVerb;
-    stTime = 0;
+    swapped_inv = false;
 
     isGathering = false;
     gatherTask = "";
@@ -35,6 +35,11 @@ export class GenLiteRecipeRecorderPlugin {
         this.isPluginEnabled = state;
     }
 
+    logoutOK(){
+        this.isCrafting = false;
+        this.isGathering = false;
+    }
+
     action(verb, params) {
         if (this.isPluginEnabled === false) {
             return;
@@ -42,6 +47,7 @@ export class GenLiteRecipeRecorderPlugin {
         if (params.hasOwnProperty('action')) {
             if (params.action.hasOwnProperty('recipe')) {
                 this.isCrafting = true;
+                this.isGathering = false;
                 this.recipe = params.action.recipe;
                 this.prevInventory = INVENTORY.items;
                 this.recipeName = params.action.recipe;
@@ -52,6 +58,7 @@ export class GenLiteRecipeRecorderPlugin {
                         input: {},
                         output: {}
                     };
+                console.log("action:", this.isCrafting, this.isGathering)
                 return;
             }
 
@@ -71,12 +78,21 @@ export class GenLiteRecipeRecorderPlugin {
             }
             if (this.gatherTask !== "") {
                 this.isGathering = true;
+                this.isCrafting = false;
                 this.gatherNode = params.id;
                 this.prevInventory = INVENTORY.items;
             }
+            return;
         }
         if (verb == "walk") {
             this.isGathering = false;
+            this.isCrafting = false;
+            return;
+        }
+
+        if (verb == "inventory_swap"){
+            this.swapped_inv = true;
+            return;
         }
     }
 
@@ -92,6 +108,12 @@ export class GenLiteRecipeRecorderPlugin {
         if (!(this.isCrafting || this.isGathering))
             return;
         if (verb == 'inventory') {
+            if(this.swapped_inv){
+                this.swapped_inv = false;
+                console.log("swapped");
+                return;
+            }
+            console.log(this.prevInventory);
             for (let i in this.prevInventory) {
                 /* add up the quantities of the inventory */
                 if (itemList[this.prevInventory[i].item] === undefined)
@@ -103,6 +125,7 @@ export class GenLiteRecipeRecorderPlugin {
                     itemList[this.prevInventory[i].item] += this.prevInventory[i].quantity;
                 }
             }
+            console.log(itemList);
 
             /* subtract the new inventory */
             for (let i in payload) {
@@ -115,6 +138,7 @@ export class GenLiteRecipeRecorderPlugin {
                     itemList[payload[i].item] -= payload[i].quantity;
                 }
             }
+            console.log(itemList);
 
             if (this.isCrafting) {
                 this.storeRecipeData(itemList);
@@ -126,13 +150,6 @@ export class GenLiteRecipeRecorderPlugin {
             /* determines if crafting is done by looking for the stop animation
                 that comes only after the crafting animation
             */
-        } else if (verb == 'animation' && payload.player == PLAYER.id) {
-            if (payload.anim) {
-                this.stTime = payload.timestamp;
-            } else if (this.stTime < payload.timestamp && this.stTime != 0) {
-                this.isCrafting = false;
-                this.stTime = 0;
-            }
         } else if (verb == "action" && payload.type.match("fail")) {
             if (this.gatherResults[this.gatherTask] === undefined)
                 this.gatherResults[this.gatherTask] = {};

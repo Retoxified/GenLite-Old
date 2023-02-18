@@ -33,6 +33,11 @@ export class GenLiteHitRecorder {
     maxNonZero;
     curDpsAcc;
     cumDpsAcc;
+    prevHitInfo = {
+        overkill: 0,
+        name: "",
+        level: 0
+    };
 
     dpsOverlay: HTMLElement;
     dpsOverlayContainer: HTMLElement;
@@ -136,10 +141,23 @@ export class GenLiteHitRecorder {
         }
 
         if (verb == "damage" && this.curEnemy != undefined && payload.id == this.curEnemy.id && payload.style == "melee") {
-            this.recordDamage(this.playerHitInfo, payload.amount);
-            this.curDpsAcc.totDam += payload.amount;
+            let damage = payload.amount
+            /* if enemy name and level is the same subtract overkill damage from stats */
+            if (this.prevHitInfo.name == this.curEnemy.info.name && this.prevHitInfo.level == this.curEnemy.info.level) {
+                damage -= this.prevHitInfo.overkill;
+                console.log(this.prevHitInfo);
+                console.log(damage);
+            }
+            this.recordDamage(this.playerHitInfo, damage);
+            this.curDpsAcc.totDam += damage;
             if (this.cumDpsAcc.timeStart != 0) //in case user resets dps mid combat for whatever reason
-                this.cumDpsAcc.totDam += payload.amount;
+                this.cumDpsAcc.totDam += damage;
+            /* record overkill damage and mob */
+            if(payload.hp < 0){
+                this.prevHitInfo = {overkill: -1 * payload.hp, name: this.curEnemy.info.name, level: this.curEnemy.info.level};
+            } else {
+                this.prevHitInfo = {overkill: 0, name: "", level: 0};
+            }
         } else if (verb == "damage" && this.curEnemy != undefined && payload.id == PLAYER.id) {
             this.recordDamage(this.enemyHitInfo, payload.amount);
         }
@@ -344,15 +362,15 @@ export class GenLiteHitRecorder {
             div.style.paddingRight = "5%";
             div.style.display = "flex";
             div.style.justifyContent = "space-between";
-            div.style.color = "#DAA5    20";
-            div.style.position = "re    lative";
+            div.style.color = "#DAA520";
+            div.style.position = "relative";
             for (let k = 0; k < 2; k++) {
                 let span = document.createElement("span");
                 span.style.position = "relative";
                 span.style.fontSize = "smaller";
                 span.style.fontFamily = "ui-monospaced";
                 span.classList.add("GenliteDpsText");
-                span.innerHTML = "Samual is a nerd";
+                span.innerHTML = "Samual is a nerd and smells";
                 div.appendChild(span);
             }
             this.dpsOverlay.appendChild(div);
