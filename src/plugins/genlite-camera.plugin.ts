@@ -47,6 +47,18 @@ export class GenLiteCameraPlugin {
     handleRenderDistance(value: number) {
         GRAPHICS.camera.camera.far = value;
         GRAPHICS.camera.camera.updateProjectionMatrix();
+
+        // genfanad does a bit of it's own object pruning, so we update that
+        // distance as well Then we need to iterate over every object and
+        // render the newly visible ones, because by default this would only
+        // occur when the player moves.
+        GRAPHICS.scene.dd2 = value * value;
+        for (let i in GRAPHICS.scene.allObjects) {
+            let o = GRAPHICS.scene.allObjects[i];
+            if (GRAPHICS.scene.checkObject(o)) {
+                GRAPHICS.scene.showObject(i);
+            }
+        }
     }
 
     loginOK() {
