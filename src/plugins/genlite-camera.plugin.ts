@@ -7,6 +7,9 @@ export class GenLiteCameraPlugin {
     hideRoofs: boolean = false;
     maxDistance: Number = 15;
     minDistance: Number = Math.PI;
+
+    renderDistance: number = 65;
+
     async init() {
         window.genlite.registerModule(this);
 
@@ -48,8 +51,25 @@ export class GenLiteCameraPlugin {
             ], "Camera.UnlockCam"
         ));
         document.getElementById("GenLiteMinDistanceOutput").innerHTML = this.minDistance.toString();
+        this.renderDistance = parseFloat(window.genlite.settings.add(
+            "Camera.RenderDistance",
+            "65",
+            "Render Distance",
+            "range",
+            function (v) {
+                this.handleRenderDistance(parseFloat(v));
+            },
+            this,
+            undefined,
+            [
+                ["min", "40"],
+                ["max", "150"],
+                ["step", "5"],
+                ["value", "65"],
+                ["class", "gen-slider"]
+            ]
+        ));
     }
-
 
     handleUnlockCameraToggle(state: boolean) {
         this.unlockCamera = state;
@@ -71,9 +91,15 @@ export class GenLiteCameraPlugin {
         document.getElementById("GenLiteMinDistanceOutput").innerHTML = value.toString();
         this.setCameraMode();
     }
+    
+    handleRenderDistance(value: number) {
+        GRAPHICS.camera.camera.far = value;
+        GRAPHICS.camera.camera.updateProjectionMatrix();
+    }
 
     loginOK() {
         this.setCameraMode();
+        this.handleRenderDistance(this.renderDistance);
     }
 
     setCameraMode() {
