@@ -1,5 +1,19 @@
+import {
+    SkyboxUriLeft,
+    SkyboxUriRight,
+    SkyboxUriUp,
+    SkyboxUriDown,
+    SkyboxUriBack,
+    SkyboxUriMiddle,
+} from "./skybox-data";
+
+
 export class GenLiteCameraPlugin {
     static pluginName = 'GenLiteCameraPlugin';
+
+    static minRenderDistance = 40;
+    static maxRenderDistance = 150;
+    static defaultRenderDistance = 65;
 
     originalCameraMode: Function;
 
@@ -7,6 +21,9 @@ export class GenLiteCameraPlugin {
     hideRoofs: boolean = false;
 
     renderDistance: number = 65;
+    distanceFog = true;
+    skyboxEnabled: boolean = true;
+    skybox: any = null;
 
     async init() {
         window.genlite.registerModule(this);
@@ -15,9 +32,11 @@ export class GenLiteCameraPlugin {
 
         this.unlockCamera = window.genlite.settings.add("Camera.UnlockCam", true, "Unlock Camera", "checkbox", this.handleUnlockCameraToggle, this);
         this.hideRoofs = window.genlite.settings.add("Camera.HideRoofs", true, "Hide Roofs", "checkbox", this.handleHideRoofToggle, this);
+        this.skyboxEnabled = window.genlite.settings.add("Camera.Skybox", true, "Skybox", "checkbox", this.handleSkybox, this);
+        this.distanceFog = window.genlite.settings.add("Camera.Fog", true, "Fog", "checkbox", this.handleFog, this);
         this.renderDistance = parseFloat(window.genlite.settings.add(
             "Camera.RenderDistance",
-            "65",
+            GenLiteCameraPlugin.defaultRenderDistance.toString(),
             "Render Distance",
             "range",
             function (v) {
@@ -26,11 +45,11 @@ export class GenLiteCameraPlugin {
             this,
             undefined,
             [
-                ["min", "40"],
-                ["max", "150"],
+                ["min", GenLiteCameraPlugin.minRenderDistance.toString()],
+                ["max", GenLiteCameraPlugin.maxRenderDistance.toString()],
+                ["value", GenLiteCameraPlugin.defaultRenderDistance.toString()],
+                ["class", "gen-slider"],
                 ["step", "5"],
-                ["value", "65"],
-                ["class", "gen-slider"]
             ]
         ));
     }
@@ -45,6 +64,7 @@ export class GenLiteCameraPlugin {
     }
 
     handleRenderDistance(value: number) {
+        this.renderDistance = value;
         GRAPHICS.camera.camera.far = value;
         GRAPHICS.camera.camera.updateProjectionMatrix();
 
@@ -59,11 +79,54 @@ export class GenLiteCameraPlugin {
                 GRAPHICS.scene.showObject(i);
             }
         }
+
+        this.handleFog(this.distanceFog); // update fog distance
+    }
+
+    handleSkybox(value: boolean) {
+        this.skyboxEnabled = value;
+        if (value) {
+            if (this.skybox == null) {
+                const loader = new THREE.CubeTextureLoader();
+                this.skybox = loader.load([
+                    SkyboxUriLeft,
+                    SkyboxUriRight,
+                    SkyboxUriUp,
+                    SkyboxUriDown,
+                    SkyboxUriBack,
+                    SkyboxUriMiddle,
+                ]);
+            }
+            GRAPHICS.scene.threeScene.background = this.skybox;
+        } else {
+            GRAPHICS.scene.threeScene.background = null;
+            this.skybox = null;
+        }
+
+        this.handleFog(this.distanceFog); // update fog color
+    }
+
+    handleFog(value: boolean) {
+        this.distanceFog = value;
+        if (value) {
+            let color = 0x000000;
+            if (this.skyboxEnabled) {
+                color = 0xDEFDFF;
+            }
+            // density ranges from 0.010 to 0.015 based on render distance
+            let delta = this.renderDistance - GenLiteCameraPlugin.minRenderDistance;
+            let maxDelta = GenLiteCameraPlugin.maxRenderDistance - GenLiteCameraPlugin.minRenderDistance;
+            let density = 0.01 + 0.0025 * (delta / maxDelta);
+            GRAPHICS.scene.threeScene.fog = new THREE.FogExp2(color, density);
+        } else {
+            GRAPHICS.scene.threeScene.fog = null;
+        }
     }
 
     loginOK() {
         this.setCameraMode();
         this.handleRenderDistance(this.renderDistance);
+        this.handleSkybox(this.skyboxEnabled);
     }
 
     setCameraMode() {
@@ -109,4 +172,5 @@ export class GenLiteCameraPlugin {
         }
         MUSIC_PLAYER.setNextTrack(tile.music);
     }
+
 }
