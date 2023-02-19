@@ -4,7 +4,7 @@ import {
     SkyboxUriUp,
     SkyboxUriDown,
     SkyboxUriBack,
-    SkyboxUriMiddle,
+    SkyboxUriFront,
 } from "./skybox-data";
 
 
@@ -21,7 +21,7 @@ export class GenLiteCameraPlugin {
     hideRoofs: boolean = false;
 
     renderDistance: number = 65;
-    distanceFog = true;
+    distanceFog: boolean = true;
     skyboxEnabled: boolean = true;
     skybox: any = null;
 
@@ -113,7 +113,7 @@ export class GenLiteCameraPlugin {
             if (this.skyboxEnabled) {
                 color = 0xDEFDFF;
             }
-            // density ranges from 0.010 to 0.015 based on render distance
+            // density ranges from 0.01 to 0.0125 based on render distance
             let delta = this.renderDistance - GenLiteCameraPlugin.minRenderDistance;
             let maxDelta = GenLiteCameraPlugin.maxRenderDistance - GenLiteCameraPlugin.minRenderDistance;
             let density = 0.01 + 0.0025 * (delta / maxDelta);
@@ -172,5 +172,4 @@ export class GenLiteCameraPlugin {
         }
         MUSIC_PLAYER.setNextTrack(tile.music);
     }
-
 }
