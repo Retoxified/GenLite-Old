@@ -94,7 +94,7 @@ export class GenLiteCameraPlugin {
                     SkyboxUriUp,
                     SkyboxUriDown,
                     SkyboxUriBack,
-                    SkyboxUriMiddle,
+                    SkyboxUriFront,
                 ]);
             }
             GRAPHICS.scene.threeScene.background = this.skybox;
