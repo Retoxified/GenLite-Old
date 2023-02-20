@@ -23,48 +23,42 @@ class HitInfo {
 export class GenLiteHitRecorder {
     static pluginName = 'GenLiteHitRecorder';
 
-    curEnemy;
-    statsList;
+    curEnemy: { [key: string]: any } = undefined;
+    statsList = {
+        aim: 0,
+        power: 0,
+        armour: 0,
+        attack: 0,
+        strength: 0,
+        ranged: 0,
+        defense: 0
+    };
     playerHitInfo: HitInfo;
-    enemyHitInfo;
-    consecutiveZero;
-    consecutiveNonZero;
-    maxZero;
-    maxNonZero;
-    curDpsAcc;
-    cumDpsAcc;
+    enemyHitInfo: HitInfo;
+    consecutiveZero: Number = 0;
+    consecutiveNonZero: Number = 0;
+    maxZero: Number = 0;
+    maxNonZero: Number = 0;
+    curDpsAcc = {
+        timeStart: 0,
+        doUpdate: 1, //1 update contiiously; -1 do one more update; 0 stop updating - Yay, trinary logic
+        totDam: 0
+    };
+    cumDpsAcc = {
+        timeStart: 0,
+        totDam: 0
+    };
 
-    dpsOverlay: HTMLElement;
-    dpsOverlayContainer: HTMLElement;
-    dpsUiUpdateInterval;
-    isUIinit: boolean;
+    dpsOverlay: HTMLElement = undefined;
+    dpsOverlayContainer: HTMLElement = undefined;
+    dpsUiUpdateInterval: NodeJS.Timer = undefined;
+    isUIinit: boolean = false;
 
     isPluginEnabled: boolean = false;
 
     constructor() {
-        this.curEnemy = null;
-        this.statsList = {
-            aim: 0,
-            power: 0,
-            armour: 0,
-            attack: 0,
-            strength: 0,
-            ranged: 0,
-            defense: 0
-        }
         this.playerHitInfo = new HitInfo();
-
         this.enemyHitInfo = new HitInfo();
-
-        this.curDpsAcc = {
-            timeStart: 0,
-            doUpdate: 1, //1 update contiiously; -1 do one more update; 0 stop updating - Yay, trinary logic
-            totDam: 0
-        };
-        this.cumDpsAcc = {
-            timeStart: 0,
-            totDam: 0
-        };
 
         this.isUIinit = false;
         this.dpsOverlayContainer = <HTMLElement>document.createElement("div");
@@ -135,7 +129,7 @@ export class GenLiteHitRecorder {
             this.cumDpsAcc.totDam += payload.damage;
         }
 
-        if (verb == "damage" && this.curEnemy != undefined && payload.id == this.curEnemy.id && payload.style == "melee") {
+        if (verb == "damage" && this.curEnemy !== undefined && payload.id == this.curEnemy.id && payload.style == "melee") {
             this.recordDamage(this.playerHitInfo, payload.amount);
             this.curDpsAcc.totDam += payload.amount;
             if (this.cumDpsAcc.timeStart != 0) //in case user resets dps mid combat for whatever reason
