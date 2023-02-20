@@ -122,7 +122,7 @@ export class GenLiteDropRecorderPlugin {
             for (let item in this.objectSpawns) {
                 if (this.objectSpawns[item].timestamp <= payload.timestamp && this.objectSpawns[item].timestamp >= this.enemyDead) {
                     drop.Item_Code = this.objectSpawns[item].item.item;
-                    drop.Item_Quantity = this.objectSpawns[item].item.quantity === undefined ? drop.Item_Quantity = 1 : drop.Item_Quantity[item].item.quantity;
+                    drop.Item_Quantity = this.objectSpawns[item].item.quantity === undefined ? drop.Item_Quantity = 1 : this.objectSpawns[item].item.quantity;
                     this.monsterData.drops.push(structuredClone(drop));
                 }
             }
