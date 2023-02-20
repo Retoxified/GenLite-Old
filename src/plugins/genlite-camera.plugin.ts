@@ -1,5 +1,19 @@
+import {
+    SkyboxUriLeft,
+    SkyboxUriRight,
+    SkyboxUriUp,
+    SkyboxUriDown,
+    SkyboxUriBack,
+    SkyboxUriFront,
+} from "./skybox-data";
+
+
 export class GenLiteCameraPlugin {
     static pluginName = 'GenLiteCameraPlugin';
+
+    static minRenderDistance = 40;
+    static maxRenderDistance = 150;
+    static defaultRenderDistance = 65;
 
     originalCameraMode: Function;
 
@@ -7,6 +21,12 @@ export class GenLiteCameraPlugin {
     hideRoofs: boolean = false;
     maxDistance: Number = 15;
     minDistance: Number = Math.PI;
+
+    renderDistance: number = 65;
+    distanceFog: boolean = true;
+    skyboxEnabled: boolean = true;
+    skybox: any = null;
+
     async init() {
         window.genlite.registerModule(this);
 
@@ -48,8 +68,27 @@ export class GenLiteCameraPlugin {
             ], "Camera.UnlockCam"
         ));
         document.getElementById("GenLiteMinDistanceOutput").innerHTML = this.minDistance.toString();
+        this.skyboxEnabled = window.genlite.settings.add("Camera.Skybox", true, "Skybox", "checkbox", this.handleSkybox, this);
+        this.distanceFog = window.genlite.settings.add("Camera.Fog", true, "Fog", "checkbox", this.handleFog, this);
+        this.renderDistance = parseFloat(window.genlite.settings.add(
+            "Camera.RenderDistance",
+            GenLiteCameraPlugin.defaultRenderDistance.toString(),
+            "Render Distance",
+            "range",
+            function (v) {
+                this.handleRenderDistance(parseFloat(v));
+            },
+            this,
+            undefined,
+            [
+                ["min", GenLiteCameraPlugin.minRenderDistance.toString()],
+                ["max", GenLiteCameraPlugin.maxRenderDistance.toString()],
+                ["value", GenLiteCameraPlugin.defaultRenderDistance.toString()],
+                ["class", "gen-slider"],
+                ["step", "5"],
+            ]
+        ));
     }
-
 
     handleUnlockCameraToggle(state: boolean) {
         this.unlockCamera = state;
@@ -60,20 +99,82 @@ export class GenLiteCameraPlugin {
         this.setCameraMode();
     }
 
-    handleMaxDistance(value: Number){
+    handleMaxDistance(value: Number) {
         this.maxDistance = value;
         document.getElementById("GenLiteMaxDistanceOutput").innerHTML = value.toString();
         this.setCameraMode();
     }
 
-    handleMinDistance(value: Number){
+    handleMinDistance(value: Number) {
         this.minDistance = value;
         document.getElementById("GenLiteMinDistanceOutput").innerHTML = value.toString();
         this.setCameraMode();
     }
+    
+    handleRenderDistance(value: number) {
+        this.renderDistance = value;
+        GRAPHICS.camera.camera.far = value;
+        GRAPHICS.camera.camera.updateProjectionMatrix();
+
+        // genfanad does a bit of it's own object pruning, so we update that
+        // distance as well Then we need to iterate over every object and
+        // render the newly visible ones, because by default this would only
+        // occur when the player moves.
+        GRAPHICS.scene.dd2 = value * value;
+        for (let i in GRAPHICS.scene.allObjects) {
+            let o = GRAPHICS.scene.allObjects[i];
+            if (GRAPHICS.scene.checkObject(o)) {
+                GRAPHICS.scene.showObject(i);
+            }
+        }
+
+        this.handleFog(this.distanceFog); // update fog distance
+    }
+
+    handleSkybox(value: boolean) {
+        this.skyboxEnabled = value;
+        if (value) {
+            if (this.skybox == null) {
+                const loader = new THREE.CubeTextureLoader();
+                this.skybox = loader.load([
+                    SkyboxUriLeft,
+                    SkyboxUriRight,
+                    SkyboxUriUp,
+                    SkyboxUriDown,
+                    SkyboxUriBack,
+                    SkyboxUriFront,
+                ]);
+            }
+            GRAPHICS.scene.threeScene.background = this.skybox;
+        } else {
+            GRAPHICS.scene.threeScene.background = null;
+            this.skybox = null;
+        }
+
+        this.handleFog(this.distanceFog); // update fog color
+    }
+
+    handleFog(value: boolean) {
+        this.distanceFog = value;
+        if (value) {
+            let color = 0x000000;
+            if (this.skyboxEnabled) {
+                color = 0xDEFDFF;
+            }
+            // density ranges from 0.01 to 0.0125 based on render distance
+            let delta = this.renderDistance - GenLiteCameraPlugin.minRenderDistance;
+            let maxDelta = GenLiteCameraPlugin.maxRenderDistance - GenLiteCameraPlugin.minRenderDistance;
+            let density = 0.01 + 0.0025 * (delta / maxDelta);
+            GRAPHICS.scene.threeScene.fog = new THREE.FogExp2(color, density);
+        } else {
+            GRAPHICS.scene.threeScene.fog = null;
+        }
+    }
 
     loginOK() {
         this.setCameraMode();
+        this.handleRenderDistance(this.renderDistance);
+        this.handleSkybox(this.skyboxEnabled);
     }
 
     setCameraMode() {
