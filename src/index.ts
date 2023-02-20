@@ -6,6 +6,7 @@ import { GenLiteCommandsPlugin } from "./core/plugins/genlite-commands.plugin";
 
 /** Official Plugins */
 import { GenLiteCameraPlugin } from "./plugins/genlite-camera.plugin";
+import { GenLiteChatPlugin } from "./plugins/genlite-chat.plugin";
 import { GenLiteDropRecorderPlugin } from "./plugins/genlite-drop-recorder.plugin";
 import { GenLiteItemHighlightPlugin } from "./plugins/genlite-item-highlight.plugin";
 import { GenLiteNPCHighlightPlugin } from "./plugins/genlite-npc-highlight.plugin";
@@ -37,6 +38,7 @@ import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand
 
     /** Official Plugins */
     await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
+    await genlite.pluginLoader.addPlugin(GenLiteChatPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
     //await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteDropRecorderPlugin);
