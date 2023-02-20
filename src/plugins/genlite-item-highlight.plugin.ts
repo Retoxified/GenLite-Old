@@ -28,7 +28,7 @@ export class GenLiteItemHighlightPlugin {
         this.item_highlight_div = document.createElement('div');
         this.item_highlight_div.className = 'item-indicators-list';
         document.body.appendChild(this.item_highlight_div);
-        this.isPluginEnabled = window.genlite.settings.add("ItemHighlight.Enable", true, "Highlight Items", "checkbox", this.handlePluginEnableDisable, this, undefined, undefined);
+        this.isPluginEnabled = window.genlite.settings.add("ItemHighlight.Enable", true, "Item Additions", "checkbox", this.handlePluginEnableDisable, this, undefined, undefined);
         this.doCondenseItems = window.genlite.settings.add("CondenseItems.Enable", true, "Condense Items", "checkbox", this.handleCondeseEnableDisable, this, undefined, undefined, "ItemHighlight.Enable");
         this.hideLables = window.genlite.settings.add("HideItemLabels.Enable", false, "Hide Item Labels", "checkbox", this.handleHideLabelsEnableDisable, this, undefined, undefined, "ItemHighlight.Enable");
 

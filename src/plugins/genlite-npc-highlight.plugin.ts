@@ -1,10 +1,17 @@
+import { GenLiteWikiDataCollectionPlugin } from "./genlite-wiki-data-collection.plugin";
+
 export class GenLiteNPCHighlightPlugin {
     static pluginName = 'GenLiteNPCHighlightPlugin';
+    static healthListVersion = "2"
 
     trackedNpcs = {};
+    npcData = {};
     npc_highlight_div = null;
     render = false;
-    npcHealthList = {};
+    npcHealthList: {
+        [key: string]: any
+        version: string
+    };
     curCombat: string = "";
     curEnemy: string = ""
 
@@ -12,7 +19,10 @@ export class GenLiteNPCHighlightPlugin {
     combatY = 0;
 
     isPluginEnabled: boolean = false;
+    hideInvert: boolean = true;
+    isAltDown: boolean = false;
 
+    packList;
     async init() {
         window.genlite.registerModule(this);
 
@@ -20,10 +30,23 @@ export class GenLiteNPCHighlightPlugin {
         this.npc_highlight_div.className = 'npc-indicators-list';
         document.body.appendChild(this.npc_highlight_div);
         this.npcHealthList = JSON.parse(localStorage.getItem("GenliteNPCHealthList"));
-        if (this.npcHealthList == null)
-            this.npcHealthList = {};
+        if (this.npcHealthList == null || GenLiteNPCHighlightPlugin.healthListVersion != this.npcHealthList.version)
+            this.npcHealthList = { version: GenLiteNPCHighlightPlugin.healthListVersion };
+        this.npcData = JSON.parse(localStorage.getItem("GenliteNpcHideData"));
+        if (this.npcData == null || GenLiteNPCHighlightPlugin.healthListVersion != this.npcHealthList.version)
+            this.npcData = {};
+
+        window.addEventListener('keydown', this.keyDownHandler.bind(this));
+        window.addEventListener('keyup', this.keyUpHandler.bind(this));
+        window.addEventListener("blur", this.blurHandler.bind(this))
 
         this.isPluginEnabled = window.genlite.settings.add("NpcHighlight.Enable", true, "Highlight NPCs", "checkbox", this.handlePluginEnableDisable, this);
+        this.hideInvert = window.genlite.settings.add("NpcHideInvert.Enable", true, "Invert NPC Hiding", "checkbox", this.handleHideInvertEnableDisable, this, undefined, undefined, "NpcHighlight.Enable");
+
+    }
+
+    async postInit() {
+        this.packList = window.GenLiteWikiDataCollectionPlugin.packList;
     }
 
     handlePluginEnableDisable(state: boolean) {
@@ -36,6 +59,14 @@ export class GenLiteNPCHighlightPlugin {
         this.isPluginEnabled = state;
     }
 
+    handleHideInvertEnableDisable(state: boolean) {
+        // always clear the current list of npcs
+        this.npc_highlight_div.innerHTML = '';
+        this.trackedNpcs = {};
+
+        this.hideInvert = state;
+    }
+
     update(dt) {
         if (this.isPluginEnabled === false || this.render === false) {
             return;
@@ -46,11 +77,13 @@ export class GenLiteNPCHighlightPlugin {
 
         for (let key in npcsToAdd) {
             let npc = GAME.npcs[npcsToAdd[key]]
-            let hpKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}`;
+            let hpKey = this.packList[npc.id.split('-')[0]]
             let text = npc.htmlName;
             if (this.npcHealthList[hpKey] !== undefined)
                 text += ` HP: ${this.npcHealthList[hpKey]}`
-            this.trackedNpcs[npcsToAdd[key]] = this.create_text_element(npcsToAdd[key], text);
+            text += `
+            <div class="genlite-npc-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteNPCHighlightPlugin.pluginName}.hide_item('${hpKey}');void(0);"> &#8863;</div>`;
+            this.trackedNpcs[npcsToAdd[key]] = this.create_text_element(hpKey, text);
         }
 
         for (let key in npcsToRemove) {
@@ -74,11 +107,12 @@ export class GenLiteNPCHighlightPlugin {
                 let screenPos = this.world_to_screen(worldPos);
                 if (key == this.curEnemy)
                     screenPos.y *= 0.9; // move the name tag a fixed position above the name tag
-
-                if (screenPos.z > 1.0) {
-                    this.trackedNpcs[key].style.visibility = 'hidden'; // Behind camera, hide
+                let zHide = screenPos.z > 1.0; //if behind camera
+                let npcHide = this.hideInvert ? this.npcData[this.packList[key.split('-')[0]]] == 1 : !(this.npcData[this.packList[key.split('-')[0]]] == 1);
+                if (zHide || (npcHide && !this.isAltDown)) {
+                    this.trackedNpcs[key].style.visibility = 'hidden';
                 } else {
-                    this.trackedNpcs[key].style.visibility = 'visible'; // In front of camera, show
+                    this.trackedNpcs[key].style.visibility = 'visible';
                 }
                 this.trackedNpcs[key].style.top = screenPos.y + "px";
                 this.trackedNpcs[key].style.left = screenPos.x + "px";
@@ -126,13 +160,15 @@ export class GenLiteNPCHighlightPlugin {
         if (update.id == PLAYER.id || GAME.players[update.id] !== undefined || object === undefined)
             return;
 
-        let hpKey = `${object.info.name}-${object.info.level ? object.info.level : 0}`;
+        let hpKey = this.packList[object.id.split('-')[0]];
+        if (hpKey === undefined)
+            return;
 
         let npcsToMod;
         if (this.npcHealthList[hpKey] === undefined) {
             this.npcHealthList[hpKey] = update.maxhp;
             localStorage.setItem("GenliteNPCHealthList", JSON.stringify(this.npcHealthList));
-            npcsToMod = Object.keys(GAME.npcs).filter(x => GAME.npcs[x].htmlName == object.htmlName);
+            npcsToMod = Object.keys(GAME.npcs).filter(x => GAME.npcs[x].id.split('-')[0] == object.id.split('-')[0]);
         }
         for (let key in npcsToMod) {
             let npcid = npcsToMod[key];
@@ -155,7 +191,11 @@ export class GenLiteNPCHighlightPlugin {
 
     create_text_element(key, text) {
         let element = document.createElement('div');
-        element.className = 'text-yellow'
+        if (this.hideInvert) {
+            element.className = this.npcData[key] == 1 ? 'spell-locked' : 'text-yellow';
+        } else {
+            element.className = this.npcData[key] == 1 ? 'text-yellow' : 'spell-locked';
+        }
         element.style.position = 'absolute';
         //element.style.zIndex = '99999';
         element.innerHTML = text;
@@ -166,5 +206,57 @@ export class GenLiteNPCHighlightPlugin {
         this.npc_highlight_div.appendChild(element);
 
         return element;
+    }
+
+    hide_item(packId) {
+        if (!this.npcData.hasOwnProperty(packId))
+            this.npcData[packId] = 0;
+
+        if (this.npcData[packId] != 1)
+            this.npcData[packId] = 1;
+        else
+            this.npcData[packId] = 0;
+
+        this.save_item_list();
+    }
+
+    save_item_list() {
+        this.npc_highlight_div.innerHTML = '';
+        this.trackedNpcs = {};
+        localStorage.setItem("GenliteNpcHideData", JSON.stringify(this.npcData));
+    }
+
+
+    keyDownHandler(event) {
+        if (event.key !== "Alt")
+            return;
+
+        event.preventDefault();
+        if (!event.repeat) {
+            this.isAltDown = true;
+            this.setDisplayState("inline-block");
+        }
+    }
+    keyUpHandler(event) {
+        if (event.key !== "Alt")
+            return;
+
+        event.preventDefault();
+
+        this.isAltDown = false;
+        this.setDisplayState("none");
+    }
+
+    blurHandler() {
+        this.isAltDown = false;
+        this.setDisplayState("none");
+    }
+
+    setDisplayState(state) {
+        const hiddenElements = document.querySelectorAll('.genlite-npc-setting') as NodeListOf<HTMLElement>;
+
+        hiddenElements.forEach((element) => {
+            element.style.display = state;
+        });
     }
 }
