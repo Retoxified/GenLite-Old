@@ -116,6 +116,7 @@ export class GenLiteHitRecorder {
                     this.cumDpsAcc.timeStart = this.curDpsAcc.timeStart;
             }
             this.curEnemy = enemy;
+            return;
         }
 
         if (verb == "projectile" && payload.source == PLAYER.id) {
@@ -132,6 +133,7 @@ export class GenLiteHitRecorder {
             this.recordDamage(this.playerHitInfo, payload.damage);
             this.curDpsAcc.totDam += payload.damage;
             this.cumDpsAcc.totDam += payload.damage;
+            return;
         }
 
         if (verb == "damage" && this.curEnemy != undefined && payload.id == this.curEnemy.id && payload.style == "melee") {
@@ -147,17 +149,20 @@ export class GenLiteHitRecorder {
             if (this.cumDpsAcc.timeStart != 0) //in case user resets dps mid combat for whatever reason
                 this.cumDpsAcc.totDam += damage;
             /* record overkill damage and mob */
-            if(payload.hp < 0){
+            if(payload.hp < 0)
                 this.prevHitInfo = {overkill: -1 * payload.hp, name: this.curEnemy.info.name, level: this.curEnemy.info.level};
-            } else {
-                this.prevHitInfo = {overkill: 0, name: "", level: 0};
-            }
-        } else if (verb == "damage" && this.curEnemy != undefined && payload.id == PLAYER.id) {
+            return;
+
+        }
+
+        if (verb == "damage" && this.curEnemy != undefined && payload.id == PLAYER.id) {
             this.recordDamage(this.enemyHitInfo, payload.amount);
+            return;
         }
 
         if (verb == "removeObject" && this.curEnemy && payload.id == this.curEnemy.id) {
             this.curDpsAcc.doUpdate = -1; //make sure the ui is updated with the last hit
+            return;
         }
 
 
@@ -194,6 +199,7 @@ export class GenLiteHitRecorder {
                     this.statsList.defense += 1;
                     break;
             }
+            return;
         }
     }
 
