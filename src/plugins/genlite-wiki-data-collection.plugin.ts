@@ -164,22 +164,22 @@ export class GenLiteWikiDataCollectionPlugin {
             if (npcs[packId] === undefined)
                 npcs[packId] = { packSize: 0, mapSegX: 0, mapSegY: 0, npc: GAME.npcs[key] };
             npcs[packId].packSize++;
-            npcs[packId].mapSegX += GAME.npcs[key].pos2.x / clustersize;
-            npcs[packId].mapSegY += GAME.npcs[key].pos2.y / clustersize;
+            npcs[packId].mapSegX += GAME.npcs[key].pos2.x;
+            npcs[packId].mapSegY += GAME.npcs[key].pos2.y;
         }
         /* calculate the mob key check if we need to update the server */
         for (let packId in npcs) {
             let npcInfo = npcs[packId];
             // finish calculating the map segment by averaging the aggragate location
-            npcInfo.mapSegX = Math.round(npcInfo.mapSegX / npcInfo.packSize);
-            npcInfo.mapSegY = Math.round(npcInfo.mapSegY / npcInfo.packSize);
+            let mapSegX = Math.round((npcInfo.mapSegX / clustersize) / npcInfo.packSize);
+            let mapSegY = Math.round((npcInfo.mapSegY / clustersize) / npcInfo.packSize);
             let group = 'A';
             let npc = npcs[packId].npc;
             /* calculate the mob key and increment the group if the key conflicts with a prexisting entry */
-            let mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${PLAYER.location.layer}:${npcInfo.mapSegX}-${npcInfo.mapSegY}-${group}`;
+            let mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
             while (this.previously_seen[mobKey] !== undefined && this.previously_seen[mobKey].ign_mobkey != packId) {
                 group = String.fromCharCode(group.charCodeAt(0) + 1);
-                mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${PLAYER.location.layer}:${npcInfo.mapSegX}-${npcInfo.mapSegY}-${group}`;
+                mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
             }
             /* if we have an existing key just ignore the above */
             mobKey = this.packList[packId] ? this.packList[packId] : mobKey;
@@ -198,8 +198,8 @@ export class GenLiteWikiDataCollectionPlugin {
                 "Monster_Name": npc.info.name,
                 "Monster_Level": npc.info.level ? npc.info.level : 0,
                 "Monster_Pack_ID": mobKey,
-                "X": npcInfo.mapSegX * clustersize,
-                "Y": npcInfo.mapSegY * clustersize,
+                "X": npcInfo.mapSegX / npcInfo.packSize,
+                "Y": npcInfo.mapSegY / npcInfo.packSize,
                 "Layer": PLAYER.location.layer,
                 "Pack_Size": npcInfo.packSize,
                 "Monster_HP": 0,

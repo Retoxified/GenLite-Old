@@ -55,6 +55,8 @@ import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand
     /** post init things */
     await window.GenLiteSettingsPlugin.postInit();
     await window.GenLiteNPCHighlightPlugin.postInit();
+    await window.GenLiteDropRecorderPlugin.postInit();
+
 }
 )();
 

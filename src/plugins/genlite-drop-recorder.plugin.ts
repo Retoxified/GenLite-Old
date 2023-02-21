@@ -23,12 +23,7 @@ export class GenLiteDropRecorderPlugin {
     /* key for dropTable -> Monster_Name-Monster_Level */
     dropTable = {};
 
-    /* for special mob packs that have the same name and level but different drops 
-        for now this needs to be detected and added manually
-    */
-    static specialMobs = {
-        "world:ns127": "tent"
-    }
+    packList;
 
     isPluginEnabled: boolean = false;
     submitItemsToServer: boolean = false;
@@ -55,6 +50,10 @@ export class GenLiteDropRecorderPlugin {
             undefined,
             "DropRecorder.Enable"
         );
+    }
+
+    async postInit() {
+        this.packList = window.GenLiteWikiDataCollectionPlugin.packList;
     }
 
     handlePluginEnableDisable(state: boolean) {
@@ -172,14 +171,12 @@ export class GenLiteDropRecorderPlugin {
         this.monsterData.y = this.curEnemy.pos2.y;
         this.monsterData.Monster_Name = this.curEnemy.info.name;
         this.monsterData.Monster_Level = this.curEnemy.info.level ? this.curEnemy.info.level : 0;
-        this.monsterData.packID = this.curEnemy.id.split('-')[0];
+        this.monsterData.packID = this.packList[this.curEnemy.id.split('-')[0]];
     }
 
     /* record and aggregate drops in local storage */
     localDropRecording() {
         let dropKey = String.prototype.concat(this.monsterData.Monster_Name, "-", this.monsterData.Monster_Level.toString());
-        if (Object.keys(GenLiteDropRecorderPlugin.specialMobs).includes(this.monsterData.packID))
-            dropKey.concat("-", GenLiteDropRecorderPlugin.specialMobs[this.monsterData.packID]);
         if (this.dropTable[dropKey] === undefined) {
             this.dropTable[dropKey] = {};
             this.dropTable[dropKey].Monster_Name = this.monsterData.Monster_Name;
