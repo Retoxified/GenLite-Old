@@ -14,7 +14,7 @@ export class GenLiteMenuSwapperPlugin {
         this.hideStairs = window.genlite.settings.add("NPCMenuSwapper.hideStairs", false, "Hide Stairs", "checkbox", this.handleHideStairsToggle, this);
 
         NPC.prototype.intersects = this.leftClickBankIntersects;
-        OptimizedScene.prototype.intersects = this.sceneryIntersects;
+        //OptimizedScene.prototype.intersects = this.sceneryIntersects;
 
     }
 
