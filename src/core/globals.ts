@@ -38,6 +38,8 @@ declare const INVENTORY: {
     [key: string]: any,
 };
 
+declare const BANK: Bank;
+
 declare const PLAYER: {
     items: any,
     [key: string]: any,
