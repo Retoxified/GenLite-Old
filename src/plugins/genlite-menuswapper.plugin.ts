@@ -24,19 +24,25 @@ export class GenLiteMenuSwapperPlugin {
     updateState() {
         if (this.hideStairs) {
             OptimizedScene.prototype.intersects = this.sceneryIntersects;
-            NPC.prototype.intersects = this.leftClickBankIntersects;
         } else {
             OptimizedScene.prototype.intersects = this.originalSceneIntersects;
+        }
+
+        if (this.useOneClickBank || this.useOneClickTrade) {
+            NPC.prototype.intersects = this.leftClickBankIntersects;
+        } else {
             NPC.prototype.intersects = this.originalNPCIntersects;
         }
     }
 
     handleLeftClickBankToggle(state: boolean) {
         this.useOneClickBank = state;
+        this.updateState();
     }
 
     handleLeftClickTradeToggle(state: boolean) {
         this.useOneClickTrade = state;
+        this.updateState();
     }
 
     handleHideStairsToggle(state: boolean) {
