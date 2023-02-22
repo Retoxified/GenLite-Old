@@ -5,6 +5,9 @@ export class GenLiteMenuSwapperPlugin {
     useOneClickTrade: boolean = false;
     hideStairs: boolean = false;
 
+    originalSceneIntersects: Function;
+    originalNPCIntersects: Function;
+
     intersect_vector = new THREE.Vector3();
     async init() {
         window.genlite.registerModule(this);
@@ -13,11 +16,20 @@ export class GenLiteMenuSwapperPlugin {
         this.useOneClickTrade = window.genlite.settings.add("NPCMenuSwapper.LeftClickTrade", true, "Left Click Trade", "checkbox", this.handleLeftClickTradeToggle, this);
         this.hideStairs = window.genlite.settings.add("NPCMenuSwapper.hideStairs", false, "Hide Stairs", "checkbox", this.handleHideStairsToggle, this);
 
-        NPC.prototype.intersects = this.leftClickBankIntersects;
-        OptimizedScene.prototype.intersects = this.sceneryIntersects;
-
+        this.originalSceneIntersects = OptimizedScene.prototype.intersects;
+        this.originalNPCIntersects = NPC.prototype.intersects;
+        this.updateState();
     }
 
+    updateState() {
+        if (this.hideStairs) {
+            OptimizedScene.prototype.intersects = this.sceneryIntersects;
+            NPC.prototype.intersects = this.leftClickBankIntersects;
+        } else {
+            OptimizedScene.prototype.intersects = this.originalSceneIntersects;
+            NPC.prototype.intersects = this.originalNPCIntersects;
+        }
+    }
 
     handleLeftClickBankToggle(state: boolean) {
         this.useOneClickBank = state;
@@ -29,6 +41,7 @@ export class GenLiteMenuSwapperPlugin {
 
     handleHideStairsToggle(state: boolean) {
         this.hideStairs = state;
+        this.updateState();
     }
 
     leftClickBankIntersects(ray, list) {
@@ -90,8 +103,9 @@ export class GenLiteMenuSwapperPlugin {
         let seen = new Set();
         for (let i in self.objectStatus) {
             let o = self.allObjects[i];
-            if (!self.checkInteract(o))
-                continue;
+            if (!self.checkInteract(o)) continue;
+            if (o.ignore_intersections) continue;
+
             let oi;
             if (o.bounding_box) {
                 let point = ray.ray.intersectBox(o.bounding_box, window[GenLiteMenuSwapperPlugin.pluginName].intersect_vector);
