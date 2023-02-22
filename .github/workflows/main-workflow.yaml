@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: git checkout --orphan release
-      - run: sed "2s/Genlite/GenLite-${{github.event.repository.name}}/"
+      - run: sed -i "2s/Genlite/GenLite-${{github.event.repository.name}}/" userscript-banner.txt
       - run: npm i
       - run: npm run build --if-present
       - run: git add dist -f
