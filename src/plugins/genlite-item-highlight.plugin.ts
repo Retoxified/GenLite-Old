@@ -406,6 +406,7 @@ export class GenLiteItemHighlightPlugin {
 
     updateElements() {
         let stack_counter = {};
+        let duplicates = {};
 
         for (let instanceId in this.itemElements) {
             let element = this.itemElements[instanceId];
@@ -419,6 +420,18 @@ export class GenLiteItemHighlightPlugin {
 
                 let pos = stack.location.position;
                 let posKey = pos.x + ',' + pos.y;
+
+                let dupeKey = posKey + '-' + itemId;
+                if (duplicates[dupeKey]) {
+                    element.element.style.visibility = 'hidden';
+                    duplicates[dupeKey].count++;
+                    continue;
+                }
+                duplicates[dupeKey] = {
+                    count: 1,
+                    element: element,
+                };
+
                 if (stack_counter[posKey] === undefined) {
                     stack_counter[posKey] = 0;
                 }
@@ -434,6 +447,16 @@ export class GenLiteItemHighlightPlugin {
                 element.element.style.left = screenPos.x + "px";
                 element.element.style.top = screenPos.y + "px";
                 stack_counter[posKey]++;
+            }
+        }
+
+        for (const i in duplicates) {
+            let entry = duplicates[i];
+            let e = entry.element;
+            if (entry.count > 1) {
+                e.element.children[0].innerText = `${e.itemName} x${entry.count}`
+            } else {
+                e.element.children[0].innerText = e.itemName;
             }
         }
     }
