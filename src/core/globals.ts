@@ -11,6 +11,8 @@ declare interface CommandSpec {
     echo: boolean,
 };
 
+declare const ITEM_RIGHTCLICK_LIMIT: number;
+
 /** Library globals */
 declare const THREE: {
     items: any,
@@ -19,12 +21,11 @@ declare const THREE: {
 
 /** GenFanad specific globals */
 declare const GAME: {
-    items: any,
+    items: Record<string, typeof ItemStack>,
     [key: string]: any,
 };
 
 declare const Game: {
-    items: any,
     [key: string]: any,
 };
 
@@ -38,6 +39,8 @@ declare const INVENTORY: {
     [key: string]: any,
 };
 
+declare const BANK: Bank;
+
 declare const PLAYER: {
     items: any,
     [key: string]: any,
@@ -49,6 +52,10 @@ declare const PLAYER_INFO: {
 };
 
 declare const WorldManager: {
+    [key: string]: any,
+};
+
+declare const ItemStack: {
     [key: string]: any,
 };
 
@@ -91,10 +98,6 @@ declare const CHAT: {
 };
 
 declare const NETWORK: {
-    [key: string]: any,
-};
-
-declare const WorldItem: {
     [key: string]: any,
 };
 

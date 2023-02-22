@@ -1,36 +1,89 @@
+interface Element {
+    element: HTMLElement,
+    itemId: string,
+    itemName: string,
+    instanceId: number,
+    x: number,
+    y: number,
+};
+
+/*
+ * how dropped items work as of 0.117
+ *  Item.js defines a class, ItemStack which represents the stack of all
+ *          items at one particular location in the world.
+ *
+ *  Since multiple kinds of string identifier are used, I've come up with some
+ *  terms for them. This might not map to genfanad source code, but are used in
+ *  genlite.
+ *
+ *      instanceId - a unique identifier for a specific item on the ground
+ *                   e.g: "i1cc50" or "is217-1557e"
+ *
+ *      itemId - a unique identifier for a kind of item
+ *               e.g: "cooking-raw-rat_lq"
+ *
+ *      itemName - a human readable item name
+ *               e.g.: "L.Q. Raw Rat Meat"
+ *
+ *  Game.js maintains two separate maps of ItemStacks:
+ *      GAME.item_stacks maps from a location it's ItemStack
+ *      GAME.items maps from an instanceId to it's ItemStack
+ *
+ *  WorldItem was removed in v0.117
+ *
+ * This plugin's update loop checks GAME.items for any new item instances,
+ * generates UI for displaying their name and setting priorities. It then
+ * overrides the ItemStack.intersect method to apply our custom priorities
+ * to each item, modifying the left-click and right-click actions order.
+*/
+
 export class GenLiteItemHighlightPlugin {
     static pluginName = 'GenLiteItemHighlightPlugin';
 
-    itemElements = [];
-    trackedItems = [];
+    originalItemStackIntersects: Function;
+
+    trackedStacks: string[] = [];
+    itemElements: Record<string, Element> = {};
+
     itemData = {};
-    item_highlight_div = null;
+    itemHighlightDiv = null;
+
     render = false;
 
     isAltDown: boolean = false;
-    originalItemIntersects: Function
     styleRuleIndex: number = -1
 
     isPluginEnabled: boolean = false;
-    doCondenseItems: boolean = false;
     hideLables: boolean = false;
 
     async init() {
         window.genlite.registerModule(this);
+        this.originalItemStackIntersects = ItemStack.prototype.intersects;
 
-        this.originalItemIntersects = WorldItem.prototype.intersects;
+        this.loadItemList();
+        this.createDiv();
 
-        let storedItemData = localStorage.getItem("genliteItemData")
-        if (storedItemData !== null) {
-            this.itemData = JSON.parse(storedItemData);
-        }
-
-        this.item_highlight_div = document.createElement('div');
-        this.item_highlight_div.className = 'item-indicators-list';
-        document.body.appendChild(this.item_highlight_div);
-        this.isPluginEnabled = window.genlite.settings.add("ItemHighlight.Enable", true, "Item Additions", "checkbox", this.handlePluginEnableDisable, this, undefined, undefined);
-        this.doCondenseItems = window.genlite.settings.add("CondenseItems.Enable", true, "Condense Items", "checkbox", this.handleCondeseEnableDisable, this, undefined, undefined, "ItemHighlight.Enable");
-        this.hideLables = window.genlite.settings.add("HideItemLabels.Enable", false, "Hide Item Labels", "checkbox", this.handleHideLabelsEnableDisable, this, undefined, undefined, "ItemHighlight.Enable");
+        this.isPluginEnabled = window.genlite.settings.add(
+            "ItemHighlight.Enable",
+            true,
+            "Highlight Items",
+            "checkbox",
+            this.handlePluginEnableDisable,
+            this,
+            undefined,
+            undefined
+        );
+        this.hideLables = window.genlite.settings.add(
+            "HideItemLabels.Enable",
+            false,
+            "Hide Item Labels",
+            "checkbox",
+            this.handleHideLabelsEnableDisable,
+            this,
+            undefined,
+            undefined,
+            "ItemHighlight.Enable"
+        );
 
         let storedPriorityColor = window.genlite.settings.add("ItemHighlight.PriorityColor", "#ffa500", "Priority Item Color", "color", this.handleColorChange, this, undefined, undefined, "ItemHighlight.Enable");
 
@@ -42,9 +95,104 @@ export class GenLiteItemHighlightPlugin {
         window.addEventListener("blur", this.blurHandler.bind(this))
 
         if (this.isPluginEnabled === true) {
-            WorldItem.prototype.intersects = this.worlditem_intersects_priority;
+            ItemStack.prototype.intersects = this.ItemStack_intersects;
         }
     }
+
+    //
+    // internal state
+    //
+
+    saveItemList() {
+        this.clearTracked();
+        localStorage.setItem("genliteItemData", JSON.stringify(this.itemData));
+    }
+
+    loadItemList() {
+        let storedItemData = localStorage.getItem("genliteItemData")
+        if (storedItemData !== null) {
+            this.itemData = JSON.parse(storedItemData);
+        }
+    }
+
+    clearTracked() {
+        this.itemHighlightDiv.innerHTML = '';
+        this.itemElements = {};
+        this.trackedStacks = [];
+    }
+
+    setDisplayState(state) {
+        const hiddenElements = document.querySelectorAll('.genlite-item-setting') as NodeListOf<HTMLElement>;
+        hiddenElements.forEach((element) => {
+            element.style.display = state;
+        });
+    }
+
+    //
+    // ui
+    //
+
+    createDiv() {
+        this.itemHighlightDiv = document.createElement('div');
+        this.itemHighlightDiv.className = 'item-indicators-list';
+        document.body.appendChild(this.itemHighlightDiv);
+    }
+
+    createOrUpdateElement(instanceId) {
+        let element = this.itemElements[instanceId];
+        if (!element) {
+            element = this.createElement(instanceId);
+        }
+        return element;
+    }
+
+    createElement(instanceId) {
+        let stackable = false;
+        let itemStack = GAME.items[instanceId];
+        let itemId = itemStack.item_keys[instanceId].item_id;
+        let itemName = itemStack.item_info[itemId].name;
+
+        if (itemId.startsWith('$scrip-')) {
+            itemId = itemId.substring(7);
+            stackable = true;
+        } else {
+            stackable = DATA.items[itemId].stackable ?? false;
+        }
+
+        let div = document.createElement('div');
+        div.className = this.getItemColor(itemId);
+        div.style.position = 'absolute';
+        // afaict quantity info is not available in the new item system
+        // if (stackable === true) {
+        //     itemName= `${itemName}(${item.definition.quantity})`;
+        // }
+        div.innerHTML = `<span style="display: inline-block;">${itemName}</span>
+                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.hideItem('${itemId}');void(0);"> &#8863;</div>
+                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.importantItem('${itemId}');void(0);"> &#8862;</div>`;
+        div.style.transform = 'translateX(-50%)';
+        div.style.pointerEvents = "none";
+        div.style.textShadow = '-1px -1px 0 #000,0   -1px 0 #000, 1px -1px 0 #000, 1px  0   0 #000, 1px  1px 0 #000, 0    1px 0 #000, -1px  1px 0 #000, -1px  0   0 #000';
+        this.itemHighlightDiv.appendChild(div);
+        let e = {
+            element: div,
+            itemId: itemId,
+            itemName: itemName,
+            instanceId: instanceId,
+            x: itemStack.location.position.x,
+            y: itemStack.location.position.y
+        };
+        this.itemElements[instanceId] = e;
+        return e;
+    }
+
+    removeElement(key) {
+        this.itemElements[key].element.remove();
+        delete this.itemElements[key];
+    }
+
+    //
+    // event handling
+    //
 
     keyDownHandler(event) {
         if (event.key !== "Alt")
@@ -61,7 +209,6 @@ export class GenLiteItemHighlightPlugin {
             return;
 
         event.preventDefault();
-
         this.isAltDown = false;
         this.setDisplayState("none");
     }
@@ -71,171 +218,67 @@ export class GenLiteItemHighlightPlugin {
         this.setDisplayState("none");
     }
 
+    loginOK() {
+        this.render = true;
+    }
+
+    logoutOK() {
+        this.render = false;
+        this.clearTracked();
+    }
+
+    //
+    // settings handling
+    //
+
     handlePluginEnableDisable(state: boolean) {
         // when disabling the plugin clear the current list of items
         if (state === false) {
-            this.item_highlight_div.innerHTML = '';
-            this.itemElements = [];
-            this.trackedItems = [];
-            WorldItem.prototype.intersects = this.originalItemIntersects
+            this.clearTracked();
+            ItemStack.prototype.intersects = this.originalItemStackIntersects;
         } else {
-            WorldItem.prototype.intersects = this.worlditem_intersects_priority;
+            ItemStack.prototype.intersects = this.ItemStack_intersects;
         }
 
         this.isPluginEnabled = state;
     }
 
-    handleCondeseEnableDisable(state: boolean) {
-        // no matter what clear the current items to refresh the display
-        this.item_highlight_div.innerHTML = '';
-        this.itemElements = [];
-        this.trackedItems = [];
-        this.doCondenseItems = state;
-    }
-
     handleHideLabelsEnableDisable(state: boolean) {
         // no matter what clear the current items to refresh the display
-        this.item_highlight_div.innerHTML = '';
-        this.itemElements = [];
-        this.trackedItems = [];
+        this.clearTracked();
         this.hideLables = state;
     }
 
-
     handleColorChange(value: string) {
         let sheet = document.styleSheets[0] as any;
-
         sheet.cssRules[this.styleRuleIndex].style.color = value;
     }
 
-    update(dt) {
-        if (this.isPluginEnabled === false || this.render == false) {
-            return;
-        }
+    //
+    // item utils
+    //
 
-        let stack_counter = {};
-        let itemsToAdd = Object.keys(GAME.items).filter(x => !this.trackedItems.includes(x));
-        let itemsToRemove = this.trackedItems.filter(x => !Object.keys(GAME.items).includes(x));
-
-
-        for (let key in itemsToAdd) {
-            let item = GAME.items[itemsToAdd[key]];
-            if (!this.doCondenseItems) {
-                this.itemElements.push(this.create_text_element(itemsToAdd[key], item));
-                this.trackedItems.push(itemsToAdd[key]);
-                return;
-            }
-            let isNewTag = true;
-            for (let tKey in this.itemElements) {
-                let tItem = this.itemElements[tKey];
-                if (tItem.item_name == item.item_name && tItem.x == item.pos2.x && tItem.y == item.pos2.y) {
-                    tItem.itemIds.push(itemsToAdd[key]);
-                    this.update_text_element(tItem);
-                    isNewTag = false;
-                    break;
-                }
-            }
-            if (isNewTag)
-                this.itemElements.push(this.create_text_element(itemsToAdd[key], item));
-            this.trackedItems.push(itemsToAdd[key]);
-        }
-
-        for (let key in itemsToRemove) {
-            let remove = -1;
-            this.trackedItems.splice(this.trackedItems.indexOf(itemsToRemove[key]), 1)
-            for (let tKey in this.itemElements) {
-                let tItem = this.itemElements[tKey];
-                let index = tItem.itemIds.indexOf(itemsToRemove[key]);
-                if (index != -1) {
-                    tItem.itemIds.splice(index, 1);
-                    if (tItem.itemIds.length == 0)
-                        remove = parseInt(tKey);
-                    this.update_text_element(tItem);
-                    break;
-                }
-            }
-            if (remove != -1) {
-                this.itemElements[remove].element.remove();
-                delete this.itemElements[remove].element;
-                delete this.itemElements[remove].itemIds;
-                delete this.itemElements[remove].item_name;
-                delete this.itemElements[remove].stackable;
-                this.itemElements.splice(remove, 1);
-            }
-
-        }
-
-        for (let i in this.itemElements) {
-            let key = this.itemElements[i].itemIds[0];
-            if (GAME.items[key] !== undefined) {
-                if ((this.get_item_data(GAME.items[key].definition.item) == -1 || this.hideLables) && !this.isAltDown) {
-                    this.itemElements[i].element.style.visibility = 'hidden';
-                    continue;
-                }
-                let posKey = GAME.items[key].pos2.x + ',' + GAME.items[key].pos2.y;
-                if (stack_counter[posKey] === undefined) {
-                    stack_counter[posKey] = 0;
-                }
-
-                let worldPos = new THREE.Vector3().copy(GAME.items[key].position());
-                worldPos.y += 0.5;
-                let screenPos = this.world_to_screen(worldPos, stack_counter[posKey]);
-                if (screenPos.z > 1.0) {
-                    this.itemElements[i].element.style.visibility = 'hidden'; // Behind camera, hide
-                } else {
-                    this.itemElements[i].element.style.visibility = 'visible'; // In front of camera, show
-                }
-                this.itemElements[i].element.style.left = screenPos.x + "px";
-                this.itemElements[i].element.style.top = screenPos.y + "px";
-
-                stack_counter[posKey]++;
-            }
-        }
+    getItemData(itemId) {
+        if (!this.itemData.hasOwnProperty(itemId))
+            return 0;
+        return this.itemData[itemId];
     }
 
-    loginOK() {
-        this.render = true;
-    }
-    logoutOK() {
-        this.item_highlight_div.innerHTML = '';
-        this.itemElements = [];
-        this.trackedItems = [];
-        this.render = false;
+    getItemValue(itemId) {
+        let gameValue = DATA.items[itemId].value ?? 1;
+        return gameValue;
     }
 
-    world_to_screen(pos, stack_count) {
-        var p = pos;
-        var screenPos = p.project(GRAPHICS.threeCamera());
-
-        screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
-        screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight - (stack_count * 15);
-
-        return screenPos;
-    }
-
-    getItemValue(item) {
-        let itemDefId = item.definition.item;
-        let quantity = item.definition.quantity ?? 1;
-
-        if (itemDefId.startsWith('$scrip-')) {
-            itemDefId = itemDefId.substring(7);
-            quantity *= 5;
-        }
-
-        let gameValue = DATA.items[itemDefId].value ?? 1;
-        return gameValue * quantity;
-    }
-
-    getItemColor(item) {
-        let itemPriority = this.get_item_data(item.definition.item)
+    getItemColor(itemId) {
+        let itemPriority = this.getItemData(itemId);
         if (itemPriority == -1) {
             return "spell-locked";
         } else if (itemPriority == 1) {
             return "genlite-priority-item";
         }
-
-        let itemValue = this.getItemValue(item);
-
+   
+        let itemValue = this.getItemValue(itemId);
+  
         if (itemValue >= 10000) {
             return 'text-ran';
         } else if (itemValue >= 5000) {
@@ -251,125 +294,170 @@ export class GenLiteItemHighlightPlugin {
         }
     }
 
-    create_text_element(key, item) {
-        let element = document.createElement('div');
-
-        let itemDefId = item.definition.item;
-        let stackable = false;
-        if (itemDefId.startsWith('$scrip-')) {
-            itemDefId = itemDefId.substring(7);
-            stackable = true;
+    hideItem(key) {
+        if (!this.itemData.hasOwnProperty(key) || this.itemData[key] != -1) {
+            this.itemData[key] = -1;
         } else {
-            stackable = DATA.items[itemDefId].stackable ?? false;
+            this.itemData[key] = 0;
         }
-
-        element.className = this.getItemColor(item);
-        element.style.position = 'absolute';
-        //element.style.zIndex = '99999';
-        let item_name = item.item_name;
-        if (stackable === true) {
-            item_name = `${item.item_name}(${item.definition.quantity})`;
-        }
-        element.innerHTML = `<span style="display: inline-block;">${item_name}</span>
-                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.hide_item('${itemDefId}');void(0);"> &#8863;</div>
-                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.important_item('${itemDefId}');void(0);"> &#8862;</div>`;
-        element.style.transform = 'translateX(-50%)';
-        element.style.pointerEvents = "none";
-        element.style.textShadow = '-1px -1px 0 #000,0   -1px 0 #000, 1px -1px 0 #000, 1px  0   0 #000, 1px  1px 0 #000, 0    1px 0 #000, -1px  1px 0 #000, -1px  0   0 #000';
-
-        this.item_highlight_div.appendChild(element);
-
-        return { "element": element, "itemIds": [item.id], "item_name": item.item_name, "stackable": stackable, x: item.pos2.x, y: item.pos2.y };
+        this.saveItemList();
     }
 
-    update_text_element(item) {
-        let quantity = 0
-        for (let key in GAME.items) {
-            let gItem = GAME.items[key];
-            if (gItem.item_name == item.item_name && item.x == gItem.pos2.x && item.y == gItem.pos2.y) {
-                if (item.stackable) {
-                    quantity += gItem.definition.quantity;
-                } else {
-                    quantity++;
+    importantItem(key) {
+        if (!this.itemData.hasOwnProperty(key) || this.itemData[key] != 1) {
+            this.itemData[key] = 1;
+        } else {
+            this.itemData[key] = 0;
+        }
+        this.saveItemList();
+    }
+
+    //
+    // other utils
+    //
+
+    world_to_screen(pos, stack_count) {
+        var p = pos;
+        var screenPos = p.project(GRAPHICS.threeCamera());
+        screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
+        screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight - (stack_count * 15);
+        return screenPos;
+    }
+
+    ItemStack_intersects(ray, list) {
+        const self = (this as any);
+        let i = ray.intersectObject(self.mesh);
+        if (!i || i.length == 0) return;
+
+        let all_items = [];
+        for (let i in self.item_info) {
+            all_items.push({
+                item: self.item_info[i],
+                id: i
+            });
+        }
+        all_items.sort((a, b) => b.item.value - a.item.value);
+
+        let show_examine_options = true;
+        if (all_items.length > ITEM_RIGHTCLICK_LIMIT / 2) show_examine_options = false;
+
+        let options = 0;
+        for (let entry of all_items) {
+            let itemId = entry.id;
+            let item = entry.item;
+            if (options > ITEM_RIGHTCLICK_LIMIT) break;
+            options++;
+            if (show_examine_options) {
+                list.push({
+                    color: 'green',
+                    distance: i.distance,
+                    priority: - 1,
+                    object: item,
+                    text: 'Examine',
+                    action: () =>CHAT.addGameMessage(item.examine)
+                });
+            }
+            let all_keys = Object.keys(item.ids);
+            list.push({
+                color: 'red',
+                distance: i.distance,
+                priority: 1 + window[GenLiteItemHighlightPlugin.pluginName].getItemData(itemId) * 50,
+                object: item,
+                text: all_keys.length > 1 ? 'Take one' : 'Take',
+                action: () =>{
+                    let take_id = all_keys[Math.floor(Math.random() * all_keys.length)];
+                    NETWORK.action('take', {
+                        item: take_id
+                    })
                 }
+            });
+        }
+    }
+
+    //
+    // update loop
+    //
+
+    update(dt) {
+        if (this.isPluginEnabled && this.render) {
+            this.updateTrackedStacks();
+            this.updateElements();
+        }
+    }
+
+    updateTrackedStacks() {
+        let itemStacks = GAME.items;
+        let itemKeys = Object.keys(itemStacks);
+        let keysToAdd = itemKeys.filter(k => !this.trackedStacks.includes(k));
+        let keysToRemove = this.trackedStacks.filter(k => !itemKeys.includes(k));
+
+        for (let key of keysToAdd) {
+            // this.trackItem(key);
+            let stack = itemStacks[key];
+            this.createOrUpdateElement(key);
+            this.trackedStacks.push(key);
+        }
+
+        for (let key of keysToRemove) {
+            this.trackedStacks.splice(this.trackedStacks.indexOf(key), 1);
+            this.removeElement(key);
+        }
+    }
+
+    updateElements() {
+        let stack_counter = {};
+        let duplicates = {};
+
+        for (let instanceId in this.itemElements) {
+            let element = this.itemElements[instanceId];
+            let stack = GAME.items[element.instanceId];
+            let itemId = element.itemId;
+            if (stack !== undefined) {
+                if ((this.getItemData(itemId) == -1 || this.hideLables) && !this.isAltDown) {
+                    element.element.style.visibility = 'hidden';
+                    continue;
+                }
+
+                let pos = stack.location.position;
+                let posKey = pos.x + ',' + pos.y;
+
+                let dupeKey = posKey + '-' + itemId;
+                if (duplicates[dupeKey]) {
+                    element.element.style.visibility = 'hidden';
+                    duplicates[dupeKey].count++;
+                    continue;
+                }
+                duplicates[dupeKey] = {
+                    count: 1,
+                    element: element,
+                };
+
+                if (stack_counter[posKey] === undefined) {
+                    stack_counter[posKey] = 0;
+                }
+
+                let worldPos = new THREE.Vector3().copy(stack.position());
+                worldPos.y += 0.5;
+                let screenPos = this.world_to_screen(worldPos, stack_counter[posKey]);
+                if (screenPos.z > 1.0) {
+                    element.element.style.visibility = 'hidden'; // Behind camera, hide
+                } else {
+                    element.element.style.visibility = 'visible'; // In front of camera, show
+                }
+                element.element.style.left = screenPos.x + "px";
+                element.element.style.top = screenPos.y + "px";
+                stack_counter[posKey]++;
             }
         }
-        if (quantity == 1) {
-            item.element.children[0].innerText = `${item.item_name}`
-        } else {
-            item.element.children[0].innerText = `${item.item_name}(${quantity})`
+
+        for (const i in duplicates) {
+            let entry = duplicates[i];
+            let e = entry.element;
+            if (entry.count > 1) {
+                e.element.children[0].innerText = `${e.itemName} x${entry.count}`
+            } else {
+                e.element.children[0].innerText = e.itemName;
+            }
         }
-    }
-
-    hide_item(item_key) {
-        if (!this.itemData.hasOwnProperty(item_key))
-            this.itemData[item_key] = 0;
-
-        if (this.itemData[item_key] != -1)
-            this.itemData[item_key] = -1;
-        else
-            this.itemData[item_key] = 0;
-
-        this.save_item_list();
-    }
-
-    important_item(item_key) {
-        if (!this.itemData.hasOwnProperty(item_key))
-            this.itemData[item_key] = 0;
-
-        if (this.itemData[item_key] != 1)
-            this.itemData[item_key] = 1;
-        else
-            this.itemData[item_key] = 0;
-
-        this.save_item_list();
-    }
-
-    worlditem_intersects_priority(ray, list) {
-        const self = (this as any);
-
-        let i = ray.intersectObject(self.sprite);
-        if (!i || i.length == 0)
-            return;
-        list.push({
-            color: 'green',
-            distance: i.distance,
-            priority: -1,
-            object: self,
-            text: "Examine",
-            action: () => CHAT.addGameMessage(self.item_examine)
-        });
-        list.push({
-            color: 'red',
-            distance: i.distance,
-            priority: 1 + window[GenLiteItemHighlightPlugin.pluginName].get_item_data(self.definition.item) * 50,
-            object: self,
-            text: "Take",
-            action: () => NETWORK.action('take', {
-                item: self.id
-            })
-        });
-    }
-    get_item_data(item_key) {
-        if (!this.itemData.hasOwnProperty(item_key))
-            return 0;
-
-        return this.itemData[item_key];
-    }
-
-    save_item_list() {
-        this.item_highlight_div.innerHTML = '';
-        this.itemElements = [];
-        this.trackedItems = [];
-
-        localStorage.setItem("genliteItemData", JSON.stringify(this.itemData));
-    }
-
-    setDisplayState(state) {
-        const hiddenElements = document.querySelectorAll('.genlite-item-setting') as NodeListOf<HTMLElement>;
-
-        hiddenElements.forEach((element) => {
-            element.style.display = state;
-        });
     }
 }
