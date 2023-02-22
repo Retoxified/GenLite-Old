@@ -2,33 +2,28 @@ export class GenLiteDropRecorderPlugin {
     static pluginName = 'GenLiteDropRecorderPlugin';
 
     monsterData = {
-        Monster_Name: undefined,
+        Monster_Name: "",
         Monster_Level: 0,
         packID: "",
-        layer: undefined,
+        layer: "",
         x: 0,
         y: 0,
 
-        Drops: []
+        drops: []
     };
-    curCombat = undefined;
+    curCombat: { [key: string]: any } = undefined;
     curEnemy = {
         id: "",
         pos2: { x: 0, y: 0 },
         info: { name: "", level: 0 }
     };
-    enemyDead = Number.POSITIVE_INFINITY;
+    enemyDead: Number = Number.POSITIVE_INFINITY;
     objectSpawns = [];
 
     /* key for dropTable -> Monster_Name-Monster_Level */
     dropTable = {};
 
-    /* for special mob packs that have the same name and level but different drops 
-        for now this needs to be detected and added manually
-    */
-    static specialMobs = {
-        "world:ns127": "tent"
-    }
+    packList;
 
     isPluginEnabled: boolean = false;
     submitItemsToServer: boolean = false;
@@ -57,6 +52,10 @@ export class GenLiteDropRecorderPlugin {
         );
     }
 
+    async postInit() {
+        this.packList = window.GenLiteWikiDataCollectionPlugin.packList;
+    }
+
     handlePluginEnableDisable(state: boolean) {
         this.isPluginEnabled = state;
 
@@ -66,7 +65,7 @@ export class GenLiteDropRecorderPlugin {
         this.submitItemsToServer = state;
     }
 
-    handle(verb, payload) {
+    handle(verb: string, payload: { [key: string]: any }) {
         if (this.isPluginEnabled === false || NETWORK.loggedIn === false) {
             return;
         }
@@ -100,16 +99,15 @@ export class GenLiteDropRecorderPlugin {
             NOTE: this assumes removeObject comes last which might not be true across updates
         */
         if (verb == "spawnObject" && payload.type == "item" && this.enemyDead != Number.POSITIVE_INFINITY) {
-            if (this.curEnemy.pos2 === undefined) {
+            if (this.curEnemy.pos2 === undefined)
                 return;
-            }
-            let itemX = payload.location.position.x;
-            let itemY = payload.location.position.y;
-            let enemyX: number[] = [this.curEnemy.pos2.x, this.curEnemy.pos2.x + 1, this.curEnemy.pos2.x - 1];
-            let enemyY: number[] = [this.curEnemy.pos2.y, this.curEnemy.pos2.y + 1, this.curEnemy.pos2.y - 1];
-            if (enemyX.includes(itemX) && enemyY.includes(itemY)) {
+
+            let itemX: Number = payload.location.position.x;
+            let itemY: Number = payload.location.position.y;
+            let enemyX: Number[] = [this.curEnemy.pos2.x, this.curEnemy.pos2.x + 1, this.curEnemy.pos2.x - 1];
+            let enemyY: Number[] = [this.curEnemy.pos2.y, this.curEnemy.pos2.y + 1, this.curEnemy.pos2.y - 1];
+            if (enemyX.includes(itemX) && enemyY.includes(itemY))
                 this.objectSpawns.push(payload);
-            }
             return;
         }
 
@@ -119,30 +117,26 @@ export class GenLiteDropRecorderPlugin {
         */
         if (verb == "removeObject" && payload.id == this.curEnemy.id && this.enemyDead != Number.POSITIVE_INFINITY) {
             let drop: any = {};
-            this.monsterData.Drops = [];
+            this.monsterData.drops = [];
             for (let item in this.objectSpawns) {
                 if (this.objectSpawns[item].timestamp <= payload.timestamp && this.objectSpawns[item].timestamp >= this.enemyDead) {
                     drop.Item_Code = this.objectSpawns[item].item.item;
-                    if (this.objectSpawns[item].item.quantity === undefined) {
-                        drop.Item_Quantity = 1;
-                    } else {
-                        drop.Item_Quantity = this.objectSpawns[item].item.quantity;
-                    }
-                    this.monsterData.Drops.push(structuredClone(drop));
+                    drop.Item_Quantity = this.objectSpawns[item].item.quantity === undefined ? drop.Item_Quantity = 1 : this.objectSpawns[item].item.quantity;
+                    this.monsterData.drops.push(structuredClone(drop));
                 }
             }
 
             /* if no drops are detected create a "nothing" drop and add that */
-            if (this.monsterData.Drops.length == 0) {
+            if (this.monsterData.drops.length == 0) {
                 drop.Item_Code = "nothing";
                 drop.Item_Quantity = 1;
-                this.monsterData.Drops.push(structuredClone(drop));
+                this.monsterData.drops.push(structuredClone(drop));
             }
             this.objectSpawns = [];
             this.enemyDead = Number.POSITIVE_INFINITY;
-            if (this.submitItemsToServer === true) {
+            if (this.submitItemsToServer === true)
                 window.genlite.sendDataToServer("droplogproject", this.monsterData);
-            }
+
             this.localDropRecording();
             return;
         }
@@ -161,9 +155,8 @@ export class GenLiteDropRecorderPlugin {
             }
             break;
         }
-        if (this.curCombat === undefined)
-            return;
-        this.setMonsterData();
+        if (this.curCombat !== undefined)
+            this.setMonsterData();
     }
 
     setMonsterData() {
@@ -172,14 +165,12 @@ export class GenLiteDropRecorderPlugin {
         this.monsterData.y = this.curEnemy.pos2.y;
         this.monsterData.Monster_Name = this.curEnemy.info.name;
         this.monsterData.Monster_Level = this.curEnemy.info.level ? this.curEnemy.info.level : 0;
-        this.monsterData.packID = this.curEnemy.id.split('-')[0];
+        this.monsterData.packID = this.packList[this.curEnemy.id.split('-')[0]];
     }
 
     /* record and aggregate drops in local storage */
     localDropRecording() {
         let dropKey = String.prototype.concat(this.monsterData.Monster_Name, "-", this.monsterData.Monster_Level.toString());
-        if (Object.keys(GenLiteDropRecorderPlugin.specialMobs).includes(this.monsterData.packID))
-            dropKey.concat("-", GenLiteDropRecorderPlugin.specialMobs[this.monsterData.packID]);
         if (this.dropTable[dropKey] === undefined) {
             this.dropTable[dropKey] = {};
             this.dropTable[dropKey].Monster_Name = this.monsterData.Monster_Name;
@@ -194,8 +185,8 @@ export class GenLiteDropRecorderPlugin {
             x: this.monsterData.x,
             y: this.monsterData.y
         });
-        for (let i in this.monsterData.Drops) {
-            let drop = this.monsterData.Drops[i]
+        for (let i in this.monsterData.drops) {
+            let drop = this.monsterData.drops[i]
             if (this.dropTable[dropKey].drops[drop.Item_Code] === undefined)
                 this.dropTable[dropKey].drops[drop.Item_Code] = 0;
             this.dropTable[dropKey].drops[drop.Item_Code] += drop.Item_Quantity;

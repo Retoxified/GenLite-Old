@@ -19,6 +19,8 @@ export class GenLiteCameraPlugin {
 
     unlockCamera: boolean = false;
     hideRoofs: boolean = false;
+    maxDistance: Number = 15;
+    minDistance: Number = Math.PI;
 
     renderDistance: number = 65;
     distanceFog: boolean = true;
@@ -32,6 +34,40 @@ export class GenLiteCameraPlugin {
 
         this.unlockCamera = window.genlite.settings.add("Camera.UnlockCam", true, "Unlock Camera", "checkbox", this.handleUnlockCameraToggle, this);
         this.hideRoofs = window.genlite.settings.add("Camera.HideRoofs", true, "Hide Roofs", "checkbox", this.handleHideRoofToggle, this);
+        this.maxDistance = parseInt(window.genlite.settings.add(
+            "Camera.maxDistance",
+            "15",
+            "Max Distance: <div style=\"display: contents;\" id=\"GenLiteMaxDistanceOutput\"></div>",
+            "range",
+            this.handleMaxDistance,
+            this,
+            undefined,
+            [
+                ["min", "8"],
+                ["max", "32"],
+                ["step", "1"],
+                ["value", "15"],
+                ["class", "gen-slider"]
+            ], "Camera.UnlockCam"
+        ));
+        document.getElementById("GenLiteMaxDistanceOutput").innerHTML = this.maxDistance.toString();
+        this.minDistance = parseInt(window.genlite.settings.add(
+            "Camera.minDistance",
+            "3.14",
+            "Min Distance: <div style=\"display: contents;\" id=\"GenLiteMinDistanceOutput\"></div>",
+            "range",
+            this.handleMinDistance,
+            this,
+            undefined,
+            [
+                ["min", "0"],
+                ["max", "8"],
+                ["step", "1"],
+                ["value", "3.14"],
+                ["class", "gen-slider"]
+            ], "Camera.UnlockCam"
+        ));
+        document.getElementById("GenLiteMinDistanceOutput").innerHTML = this.minDistance.toString();
         this.skyboxEnabled = window.genlite.settings.add("Camera.Skybox", true, "Skybox", "checkbox", this.handleSkybox, this);
         this.distanceFog = window.genlite.settings.add("Camera.Fog", true, "Fog", "checkbox", this.handleFog, this);
         this.renderDistance = parseFloat(window.genlite.settings.add(
@@ -63,6 +99,18 @@ export class GenLiteCameraPlugin {
         this.setCameraMode();
     }
 
+    handleMaxDistance(value: Number) {
+        this.maxDistance = value;
+        document.getElementById("GenLiteMaxDistanceOutput").innerHTML = value.toString();
+        this.setCameraMode();
+    }
+
+    handleMinDistance(value: Number) {
+        this.minDistance = value;
+        document.getElementById("GenLiteMinDistanceOutput").innerHTML = value.toString();
+        this.setCameraMode();
+    }
+    
     handleRenderDistance(value: number) {
         this.renderDistance = value;
         GRAPHICS.camera.camera.far = value;
@@ -141,10 +189,12 @@ export class GenLiteCameraPlugin {
 
         if (GRAPHICS !== undefined) {
             if (this.unlockCamera === true) {
-                GRAPHICS.camera.controls.maxDistance = 15;
+                GRAPHICS.camera.controls.minDistance = this.minDistance;
+                GRAPHICS.camera.controls.maxDistance = this.maxDistance;
                 GRAPHICS.camera.controls.minPolarAngle = 0.35;
                 GRAPHICS.camera.controls.maxPolarAngle = 1.4;
             } else {
+                GRAPHICS.camera.controls.minDistance = 8
                 GRAPHICS.camera.controls.maxDistance = 8;
                 GRAPHICS.camera.controls.minPolarAngle = THREE.Math.degToRad(45);
                 GRAPHICS.camera.controls.maxPolarAngle = THREE.Math.degToRad(57);

@@ -38,7 +38,7 @@ import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand
     /** Official Plugins */
     await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
+    //await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteDropRecorderPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollectionPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteXpCalculator);
@@ -54,6 +54,9 @@ import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand
 
     /** post init things */
     await window.GenLiteSettingsPlugin.postInit();
+    await window.GenLiteNPCHighlightPlugin.postInit();
+    await window.GenLiteDropRecorderPlugin.postInit();
+
 }
 )();
 

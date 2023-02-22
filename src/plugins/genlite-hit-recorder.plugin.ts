@@ -23,48 +23,47 @@ class HitInfo {
 export class GenLiteHitRecorder {
     static pluginName = 'GenLiteHitRecorder';
 
-    curEnemy;
-    statsList;
+    curEnemy: { [key: string]: any } = undefined;
+    statsList = {
+        aim: 0,
+        power: 0,
+        armour: 0,
+        attack: 0,
+        strength: 0,
+        ranged: 0,
+        defense: 0
+    };
     playerHitInfo: HitInfo;
-    enemyHitInfo;
-    consecutiveZero;
-    consecutiveNonZero;
-    maxZero;
-    maxNonZero;
-    curDpsAcc;
-    cumDpsAcc;
+    enemyHitInfo: HitInfo;
+    consecutiveZero: Number = 0;
+    consecutiveNonZero: Number = 0;
+    maxZero: Number = 0;
+    maxNonZero: Number = 0;
+    curDpsAcc = {
+        timeStart: 0,
+        doUpdate: 1, //1 update contiiously; -1 do one more update; 0 stop updating - Yay, trinary logic
+        totDam: 0
+    };
+    cumDpsAcc = {
+        timeStart: 0,
+        totDam: 0
+    };
+    prevHitInfo = {
+        overkill: 0,
+        name: "",
+        level: 0
+    };
 
-    dpsOverlay: HTMLElement;
-    dpsOverlayContainer: HTMLElement;
-    dpsUiUpdateInterval;
-    isUIinit: boolean;
+    dpsOverlay: HTMLElement = undefined;
+    dpsOverlayContainer: HTMLElement = undefined;
+    dpsUiUpdateInterval: NodeJS.Timer = undefined;
+    isUIinit: boolean = false;
 
     isPluginEnabled: boolean = false;
 
     constructor() {
-        this.curEnemy = null;
-        this.statsList = {
-            aim: 0,
-            power: 0,
-            armour: 0,
-            attack: 0,
-            strength: 0,
-            ranged: 0,
-            defense: 0
-        }
         this.playerHitInfo = new HitInfo();
-
         this.enemyHitInfo = new HitInfo();
-
-        this.curDpsAcc = {
-            timeStart: 0,
-            doUpdate: 1, //1 update contiiously; -1 do one more update; 0 stop updating - Yay, trinary logic
-            totDam: 0
-        };
-        this.cumDpsAcc = {
-            timeStart: 0,
-            totDam: 0
-        };
 
         this.isUIinit = false;
         this.dpsOverlayContainer = <HTMLElement>document.createElement("div");
@@ -117,6 +116,7 @@ export class GenLiteHitRecorder {
                     this.cumDpsAcc.timeStart = this.curDpsAcc.timeStart;
             }
             this.curEnemy = enemy;
+            return;
         }
 
         if (verb == "projectile" && payload.source == PLAYER.id) {
@@ -133,19 +133,36 @@ export class GenLiteHitRecorder {
             this.recordDamage(this.playerHitInfo, payload.damage);
             this.curDpsAcc.totDam += payload.damage;
             this.cumDpsAcc.totDam += payload.damage;
+            return;
         }
 
         if (verb == "damage" && this.curEnemy != undefined && payload.id == this.curEnemy.id && payload.style == "melee") {
-            this.recordDamage(this.playerHitInfo, payload.amount);
-            this.curDpsAcc.totDam += payload.amount;
+            let damage = payload.amount
+            /* if enemy name and level is the same subtract overkill damage from stats */
+            if (this.prevHitInfo.name == this.curEnemy.info.name && this.prevHitInfo.level == this.curEnemy.info.level) {
+                damage -= this.prevHitInfo.overkill;
+                console.log(this.prevHitInfo);
+                console.log(damage);
+            }
+            this.recordDamage(this.playerHitInfo, damage);
+            this.curDpsAcc.totDam += damage;
             if (this.cumDpsAcc.timeStart != 0) //in case user resets dps mid combat for whatever reason
-                this.cumDpsAcc.totDam += payload.amount;
-        } else if (verb == "damage" && this.curEnemy != undefined && payload.id == PLAYER.id) {
+                this.cumDpsAcc.totDam += damage;
+            /* record overkill damage and mob */
+            if(payload.hp < 0)
+                this.prevHitInfo = {overkill: -1 * payload.hp, name: this.curEnemy.info.name, level: this.curEnemy.info.level};
+            return;
+
+        }
+
+        if (verb == "damage" && this.curEnemy != undefined && payload.id == PLAYER.id) {
             this.recordDamage(this.enemyHitInfo, payload.amount);
+            return;
         }
 
         if (verb == "removeObject" && this.curEnemy && payload.id == this.curEnemy.id) {
             this.curDpsAcc.doUpdate = -1; //make sure the ui is updated with the last hit
+            return;
         }
 
 
@@ -182,6 +199,7 @@ export class GenLiteHitRecorder {
                     this.statsList.defense += 1;
                     break;
             }
+            return;
         }
     }
 
@@ -344,15 +362,15 @@ export class GenLiteHitRecorder {
             div.style.paddingRight = "5%";
             div.style.display = "flex";
             div.style.justifyContent = "space-between";
-            div.style.color = "#DAA5    20";
-            div.style.position = "re    lative";
+            div.style.color = "#DAA520";
+            div.style.position = "relative";
             for (let k = 0; k < 2; k++) {
                 let span = document.createElement("span");
                 span.style.position = "relative";
                 span.style.fontSize = "smaller";
                 span.style.fontFamily = "ui-monospaced";
                 span.classList.add("GenliteDpsText");
-                span.innerHTML = "Samual is a nerd";
+                span.innerHTML = "Samual is a nerd and smells";
                 div.appendChild(span);
             }
             this.dpsOverlay.appendChild(div);
