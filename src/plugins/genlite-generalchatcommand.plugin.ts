@@ -1,14 +1,16 @@
-export class GenLiteGeneralChatCommands {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteGeneralChatCommands implements GenLitePlugin {
     static pluginName = 'GenLiteGeneralChatCommands';
 
     loginTime: number = 0;
     playedTime: number = 0; // this is a running counter not a date
     timeSinceLastSave: number = 0;
 
-    playedSaveInverval: NodeJS.Timer;;
+    playedSaveInverval: NodeJS.Timer;
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
 
         let playedString = localStorage.getItem("genlitePlayed")
         if (playedString == null) {

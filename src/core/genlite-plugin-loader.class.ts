@@ -1,4 +1,5 @@
 import { ExamplePlugin } from "./help/example-plugin.class";
+import {GenLitePlugin} from './interfaces/plugin.interface';
 
 export class GenLitePluginLoader {
     plugins;
@@ -15,24 +16,27 @@ export class GenLitePluginLoader {
      * @param pluginClass
      * @returns {Promise<boolean>}
      */
-    async addPlugin(pluginClass) {
+    async addPlugin<T extends GenLitePlugin>(pluginClass): Promise<T> {
         try {
             this.verifyPluginClassStructure(pluginClass);
         } catch (e) {
             console.error('[GenLitePluginLoader]: Error loading plugin:', e);
             console.error('[GenLitePluginLoader]: Plugin classes need to follow the given example structure', this.getExampleStructure());
-            return false;
+            return undefined;
         }
 
-        const pluginInstance = new pluginClass();
-        await pluginInstance.init();
+        try {
+            const pluginInstance = new pluginClass();
+            await pluginInstance.init();
 
-        window[pluginClass.pluginName] = pluginInstance;
+            window[pluginClass.pluginName] = pluginInstance;
 
-        this.plugins.push(pluginInstance);
-        console.log(`[GenLitePluginLoader]: Loaded plugin ${pluginClass.pluginName}`);
-
-        return window[pluginClass.pluginName];
+            this.plugins.push(pluginInstance);
+            console.log(`[GenLitePluginLoader]: Loaded plugin ${pluginClass.pluginName}`);
+            return pluginInstance;
+        } catch (e) {
+            console.error(`[GenLitePluginLoader]: Error initialising plugin ${pluginClass.pluginName}`, e);
+        }
     }
 
     /**

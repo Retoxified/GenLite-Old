@@ -6,7 +6,7 @@ export class GenLiteCommandsPlugin {
     private originalProcessInput: Function;
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
 
         this.originalProcessInput = Chat.prototype.processInput;
         this.register("help", function (s) {

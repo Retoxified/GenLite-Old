@@ -1,4 +1,6 @@
-export class GenLiteMenuSwapperPlugin {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteMenuSwapperPlugin';
 
     useOneClickBank: boolean = false;
@@ -10,7 +12,7 @@ export class GenLiteMenuSwapperPlugin {
 
     intersect_vector = new THREE.Vector3();
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
 
         this.useOneClickBank = window.genlite.settings.add("NPCMenuSwapper.LeftClickBank", true, "Left Click Bank", "checkbox", this.handleLeftClickBankToggle, this);
         this.useOneClickTrade = window.genlite.settings.add("NPCMenuSwapper.LeftClickTrade", true, "Left Click Trade", "checkbox", this.handleLeftClickTradeToggle, this);

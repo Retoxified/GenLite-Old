@@ -1,4 +1,6 @@
-export class GenLiteMusicPlugin {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteMusicPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteMusicPlugin';
     static missingTracks = [
         "snow-relax",
@@ -26,7 +28,7 @@ export class GenLiteMusicPlugin {
     currentTrack = "";
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
         this.originalSetTrack = MUSIC_PLAYER.setNextTrack;
 
         this.isPluginEnabled = window.genlite.settings.add(
