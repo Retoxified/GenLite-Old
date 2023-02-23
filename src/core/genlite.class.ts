@@ -43,7 +43,7 @@ export class GenLite {
                 try {
                     module[fnName].apply(module, args);
                 } catch (e) {
-                    console.error(`GenLite plugin ${module.name} error in ${fnName}:`, e);
+                    console.error(`GenLite plugin ${module.constructor.pluginName} error in ${fnName}:`, e);
                 }
             }
         }
