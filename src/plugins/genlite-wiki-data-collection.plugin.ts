@@ -28,14 +28,14 @@ export class GenLiteWikiDataCollectionPlugin {
     curEnemy = undefined;
     vitDrop = 0;
 
-    isPluginEnabled: boolean = false;
+    isRemoteEnabled: boolean = false;
     scanInterval;
     sendInterval;
 
     async init() {
         window.genlite.registerModule(this);
 
-        this.isPluginEnabled = window.genlite.settings.add(
+        this.isRemoteEnabled = window.genlite.settings.add(
             "WikiDataColl.Enable",
             false,
             "Wiki Data collection(REMOTE SERVER)",
@@ -49,16 +49,29 @@ export class GenLiteWikiDataCollectionPlugin {
     }
 
     loginOK() {
-        this.scanNpcs(this);
-        this.scanInterval = setInterval(() => { this.scanNpcs(this) }, 30000);
+        this.scanNpcs();
+        this.scanInterval = setInterval(() => { this.scanNpcs() }, 1000);
+        // send out a monsterdata once every 1s to lesson server load
+            //if (this.isRemoteEnabled)
+                //this.sendInterval = setInterval(() => { this.sendToServer(this) }, 1000);
+    }
+
+    logoutOK(){
+        clearInterval(this.scanInterval);
+        clearInterval(this.sendInterval)
     }
 
     handlePluginEnableDisable(state: boolean) {
-        this.isPluginEnabled = state;
+        this.isRemoteEnabled = state;
+        if(state) {
+            this.sendInterval = setInterval(() => { this.sendToServer(this) }, 200);
+        } else {
+            clearInterval(this.sendInterval);
+        }
     }
 
     updateSkills() {
-        if (!this.isPluginEnabled) {
+        if (!this.isRemoteEnabled) {
             return;
         }
         this.playerMeleeCL = Math.trunc((PLAYER_INFO.skills.attack.level + PLAYER_INFO.skills.defense.level + PLAYER_INFO.skills.strength.level) / 3);
@@ -80,7 +93,7 @@ export class GenLiteWikiDataCollectionPlugin {
             return;
         if (this.previously_seen[mobKey].Monster_HP == 0) { // if we havent seen the monster or if we dont know its health
             this.previously_seen[mobKey].Monster_HP = update.maxhp;
-            if (this.isPluginEnabled)
+            if (this.isRemoteEnabled)
                 window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
         }
     }
@@ -151,11 +164,11 @@ export class GenLiteWikiDataCollectionPlugin {
         }
         this.previously_seen[mobKey].Base_Xp = baseXp;
         this.previously_seen[mobKey].Level_Diff_Bit = 1 << (levelDiff + 4);
-        if (this.isPluginEnabled)
+        if (this.isRemoteEnabled)
             window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
     }
 
-    scanNpcs(callback_this) {
+    scanNpcs() {
         let clustersize = 40
         let npcs = {}
         /* do some aggregrate stuff packSize, and add up mapsegment for averaging later */
@@ -176,24 +189,20 @@ export class GenLiteWikiDataCollectionPlugin {
             let group = 'A';
             let npc = npcs[packId].npc;
             /* calculate the mob key and increment the group if the key conflicts with a prexisting entry */
-            let mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
+            let mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${npcInfo.packSize}--${PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
             while (this.previously_seen[mobKey] !== undefined && this.previously_seen[mobKey].ign_mobkey != packId) {
                 group = String.fromCharCode(group.charCodeAt(0) + 1);
-                mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
+                mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${npcInfo.packSize}--${PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
             }
             /* if we have an existing key just ignore the above */
             mobKey = this.packList[packId] ? this.packList[packId] : mobKey;
             if (this.previously_seen[mobKey] !== undefined) {
-                if (!this.previously_seen[mobKey].Pack_Size ||
-                    this.previously_seen[mobKey].Pack_Size < npcInfo.packSize) { // if we have seen it before but we counted more this time update
-
-                    let monsterdata = this.previously_seen[mobKey];
-                    monsterdata.Pack_Size = npcInfo.packSize;
-                    if (this.isPluginEnabled)
-                        window.genlite.sendDataToServer("monsterdata", monsterdata);
-                }
+                if (this.previously_seen[mobKey].numSeen == 10)
+                    this.toSend.push(this.previously_seen[mobKey]);
+                this.previously_seen[mobKey].numSeen++;
                 continue;
             }
+
             let monsterdata = {
                 "Monster_Name": npc.info.name,
                 "Monster_Level": npc.info.level ? npc.info.level : 0,
@@ -204,26 +213,21 @@ export class GenLiteWikiDataCollectionPlugin {
                 "Pack_Size": npcInfo.packSize,
                 "Monster_HP": 0,
                 "Base_Xp": 0,
-                "ign_mobkey": packId,
                 "Level_Diff_Bit": 0,
-                "Version": 3
+                "ign_mobkey": packId,
+                "numSeen": 1,
+                "Version": 4
             };
             this.previously_seen[mobKey] = monsterdata;
             this.packList[packId] = mobKey;
-            if (this.isPluginEnabled)
-                this.toSend.push(monsterdata);
         }
-        /*
-                // spread the server messages over a 20 second interval to lessen server stress
-                if (callback_this.toSend.length > 0)
-                    callback_this.sendTimeInterval = setInterval(() => { callback_this.sendToServer(callback_this) }, 20000 / callback_this.toSend.length)
-                    */
+
     }
 
     sendToServer(callback_this) {
+        if(callback_this.toSend.length <= 0)
+            return;
         let monsterdata = callback_this.toSend.pop();
         window.genlite.sendDataToServer("monsterdata", monsterdata);
-        if (callback_this.toSend.length == 0)
-            clearInterval(callback_this.sendTimeInterval);
     }
 }
