@@ -1,4 +1,6 @@
-export class GenLiteDropRecorderPlugin {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteDropRecorderPlugin';
 
     monsterData = {

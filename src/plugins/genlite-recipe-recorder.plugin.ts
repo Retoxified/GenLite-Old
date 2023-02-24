@@ -1,4 +1,6 @@
-export class GenLiteRecipeRecorderPlugin {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteRecipeRecorderPlugin';
 
     isCrafting = false;
@@ -18,7 +20,7 @@ export class GenLiteRecipeRecorderPlugin {
     isPluginEnabled: boolean = false;
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
         let dropTableString = localStorage.getItem("GenliteRecipeRecorder")
         if (dropTableString == null) {
             this.recipeResults = {};

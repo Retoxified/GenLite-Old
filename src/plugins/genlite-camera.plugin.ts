@@ -6,9 +6,9 @@ import {
     SkyboxUriBack,
     SkyboxUriFront,
 } from "./skybox-data";
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
 
-
-export class GenLiteCameraPlugin {
+export class GenLiteCameraPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteCameraPlugin';
 
     static minRenderDistance = 40;
@@ -33,7 +33,7 @@ export class GenLiteCameraPlugin {
     skybox: any = null;
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
 
         this.originalCameraMode = WorldManager.prototype.updatePlayerTile;
 

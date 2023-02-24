@@ -37,7 +37,9 @@ interface Element {
  * to each item, modifying the left-click and right-click actions order.
 */
 
-export class GenLiteItemHighlightPlugin {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteItemHighlightPlugin';
 
     originalItemStackIntersects: Function;
@@ -57,7 +59,7 @@ export class GenLiteItemHighlightPlugin {
     hideLables: boolean = false;
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
         this.originalItemStackIntersects = ItemStack.prototype.intersects;
 
         this.loadItemList();
@@ -378,7 +380,7 @@ export class GenLiteItemHighlightPlugin {
     // update loop
     //
 
-    update(dt) {
+    update() {
         if (this.isPluginEnabled && this.render) {
             this.updateTrackedStacks();
             this.updateElements();

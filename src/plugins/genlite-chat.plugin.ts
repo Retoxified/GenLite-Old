@@ -1,4 +1,6 @@
-export class GenLiteChatPlugin {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteChatPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteChatPlugin';
 
     static gameMessagesToIgnore: Set<string> = new Set<string>([
@@ -13,7 +15,7 @@ export class GenLiteChatPlugin {
     originalGameMessage: Function;
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
         this.filterGameMessages = window.genlite.settings.add(
             "Chat.FilterGameMessages",
             false,

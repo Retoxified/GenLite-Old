@@ -1,6 +1,8 @@
 import { GenLiteWikiDataCollectionPlugin } from "./genlite-wiki-data-collection.plugin";
 
-export class GenLiteNPCHighlightPlugin {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteNPCHighlightPlugin';
     static healthListVersion = "2"
 
@@ -24,7 +26,7 @@ export class GenLiteNPCHighlightPlugin {
 
     packList;
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
 
         this.npc_highlight_div = document.createElement('div');
         this.npc_highlight_div.className = 'npc-indicators-list';

@@ -14,7 +14,9 @@ class MonsterData {
     "Version" = 3;
 }
 
-export class GenLiteWikiDataCollectionPlugin {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteWikiDataCollectionPlugin';
 
     previously_seen = {};
@@ -33,7 +35,7 @@ export class GenLiteWikiDataCollectionPlugin {
     sendInterval;
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
 
         this.isRemoteEnabled = window.genlite.settings.add(
             "WikiDataColl.Enable",

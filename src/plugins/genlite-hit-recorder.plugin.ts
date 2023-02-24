@@ -1,3 +1,5 @@
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
 class HitInfo {
     //this needs to be moved to an interface once i figure out how TS interfaces work
     hitList = {};
@@ -20,7 +22,7 @@ class HitInfo {
     entropy = 0;
 }
 
-export class GenLiteHitRecorder {
+export class GenLiteHitRecorder implements GenLitePlugin {
     static pluginName = 'GenLiteHitRecorder';
 
     curEnemy: { [key: string]: any } = undefined;
@@ -71,7 +73,7 @@ export class GenLiteHitRecorder {
     }
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
         this.isPluginEnabled = window.genlite.settings.add("HitRecorder.Enable", true, "Hit Recorder", "checkbox", this.handlePluginEnableDisable, this);
         this.dpsOverlayContainer.appendChild(this.dpsOverlay);
     }

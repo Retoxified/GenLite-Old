@@ -1,7 +1,7 @@
 /** Browser globals */
 declare interface Window {
     [key: string]: any,
-};
+}
 
 declare interface CommandSpec {
     command: string,
@@ -9,7 +9,7 @@ declare interface CommandSpec {
     helpFunction: (a: string) => string,
     helpText: string,
     echo: boolean,
-};
+}
 
 declare const ITEM_RIGHTCLICK_LIMIT: number;
 
@@ -126,7 +126,7 @@ declare const KEYBOARD: {
 }
 
 declare class SFXPlayer {
-};
+}
 
 declare const Inventory: {
     [key: string]: any,

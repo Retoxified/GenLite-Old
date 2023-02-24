@@ -1,4 +1,6 @@
-export class GenLiteXpCalculator {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteXpCalculator implements GenLitePlugin {
     static pluginName = 'GenLiteXpCalculatorPlugin';
 
     skillsList = {
@@ -42,7 +44,7 @@ export class GenLiteXpCalculator {
     isPluginEnabled: boolean = false;
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
         this.resetCalculatorAll();
         this.isPluginEnabled = window.genlite.settings.add("XPCalculator.Enable", true, "XP Calculator", "checkbox", this.handlePluginEnableDisable, this);
     }
