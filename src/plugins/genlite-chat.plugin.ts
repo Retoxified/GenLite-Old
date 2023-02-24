@@ -217,7 +217,6 @@ export class GenLiteChatPlugin implements GenLitePlugin {
             this
         );
         this.customMessagesToIgnore = this.loadSavedSettings();
-
         document.genlite.commands.register(
             'log',
             this.handleCommand.bind(this),
