@@ -15,6 +15,10 @@ export class GenLiteCameraPlugin {
     static maxRenderDistance = 150;
     static defaultRenderDistance = 65;
 
+    static minFogLevel = 0.0;
+    static maxFogLevel = 1.0;
+    static defaultFogLevel = 0.5;
+
     originalCameraMode: Function;
 
     unlockCamera: boolean = false;
@@ -24,6 +28,7 @@ export class GenLiteCameraPlugin {
 
     renderDistance: number = 65;
     distanceFog: boolean = true;
+    fogLevel: number = 0.5;
     skyboxEnabled: boolean = true;
     skybox: any = null;
 
@@ -70,6 +75,25 @@ export class GenLiteCameraPlugin {
         document.getElementById("GenLiteMinDistanceOutput").innerHTML = this.minDistance.toString();
         this.skyboxEnabled = window.genlite.settings.add("Camera.Skybox", true, "Skybox", "checkbox", this.handleSkybox, this);
         this.distanceFog = window.genlite.settings.add("Camera.Fog", true, "Fog", "checkbox", this.handleFog, this);
+        this.fogLevel = parseFloat(window.genlite.settings.add(
+            "Camera.FogLevel",
+            GenLiteCameraPlugin.defaultFogLevel.toString(),
+            "Fog Level",
+            "range",
+            function (v) {
+                this.handleFogLevel(parseFloat(v));
+            },
+            this,
+            undefined,
+            [
+                ["min", GenLiteCameraPlugin.minFogLevel.toString()],
+                ["max", GenLiteCameraPlugin.maxFogLevel.toString()],
+                ["value", GenLiteCameraPlugin.defaultFogLevel.toString()],
+                ["class", "gen-slider"],
+                ["step", "0.05"],
+            ],
+            this.distanceFog
+        ));
         this.renderDistance = parseFloat(window.genlite.settings.add(
             "Camera.RenderDistance",
             GenLiteCameraPlugin.defaultRenderDistance.toString(),
@@ -156,16 +180,23 @@ export class GenLiteCameraPlugin {
 
     handleFog(value: boolean) {
         this.distanceFog = value;
-        if (value) {
+        this.updateFog();
+    }
+
+    handleFogLevel(value: number) {
+        this.fogLevel = value;
+        this.updateFog();
+    }
+
+    updateFog() {
+        if (this.distanceFog) {
             let color = 0x000000;
             if (this.skyboxEnabled) {
                 color = 0xDEFDFF;
             }
-            // density ranges from 0.01 to 0.0125 based on render distance
-            let delta = this.renderDistance - GenLiteCameraPlugin.minRenderDistance;
-            let maxDelta = GenLiteCameraPlugin.maxRenderDistance - GenLiteCameraPlugin.minRenderDistance;
-            let density = 0.01 + 0.0025 * (delta / maxDelta);
-            GRAPHICS.scene.threeScene.fog = new THREE.FogExp2(color, density);
+            let far = this.renderDistance;
+            let near = -1.0 + (far - (far * this.fogLevel));
+            GRAPHICS.scene.threeScene.fog = new THREE.Fog(color, near, far);
         } else {
             GRAPHICS.scene.threeScene.fog = null;
         }
