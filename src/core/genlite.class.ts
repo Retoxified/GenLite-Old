@@ -2,13 +2,14 @@ import { GenLitePluginLoader } from "./genlite-plugin-loader.class";
 import { GenLiteNotificationPlugin } from "./plugins/genlite-notification.plugin";
 import { GenLiteSettingsPlugin } from "./plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./plugins/genlite-commands.plugin";
+import {GenLitePlugin} from './interfaces/plugin.interface';
 
 export class GenLite {
     static pluginName = 'GenLite';
 
-    pluginLoader;
+    pluginLoader: GenLitePluginLoader;
 
-    moduleList = [];
+    pluginList = [];
 
     notifications: GenLiteNotificationPlugin;
     settings: GenLiteSettingsPlugin;
@@ -22,139 +23,58 @@ export class GenLite {
     }
 
     async init() {
-        this.installHook(Camera.prototype, 'update', this.hook_Camera_update, this);
-        this.installHook(Network.prototype, 'logoutOK', this.hook_Network_logoutOK, this);
-        this.installHook(PhasedLoadingManager.prototype, 'start_phase', this.hook_PhasedLoadingManager_start_phase, this);
-        this.installHook(Network.prototype, 'action', this.hook_Network_action, this);
-        this.installHook(Network.prototype, 'handle', this.hook_Network_handle, this);
-        this.installHook(PlayerInfo.prototype, 'updateXP', this.hook_PlayerInfo_updateXP, this);
-        this.installHook(PlayerInfo.prototype, 'updateTooltip', this.hook_PlayerInfo_updateTooltip, this);
-        this.installHook(PlayerInfo.prototype, 'updateSkills', this.hook_PlayerInfo_updateSkills, this);
-        this.installHook(window, 'initializeUI', this.hook_window_initializeUI, this);
-        this.installHook(Game.prototype, 'combatUpdate', this.hook_Game_combatUpdate, this);
-        this.installHook(PlayerHUD.prototype, 'setHealth', this.hook_PlayerHUD_setHealth, this);
-        this.installHook(Inventory.prototype, 'handleUpdatePacket', this.hook_Inventory_handleUpdatePacket, this);
-
+        this.installHook(Camera.prototype, 'update');
+        this.installHook(Network.prototype, 'logoutOK');
+        this.installHook(PhasedLoadingManager.prototype, 'start_phase', this.hookPhased);
+        this.installHook(Network.prototype, 'action');
+        this.installHook(Network.prototype, 'handle');
+        this.installHook(PlayerInfo.prototype, 'updateXP');
+        this.installHook(PlayerInfo.prototype, 'updateTooltip');
+        this.installHook(PlayerInfo.prototype, 'updateSkills');
+        this.installHook(window, 'initializeUI');
+        this.installHook(Game.prototype, 'combatUpdate');
+        this.installHook(PlayerHUD.prototype, 'setHealth');
+        this.installHook(Inventory.prototype, 'handleUpdatePacket');
     }
 
-    hook_Camera_update() {
-        for (var i = 0; i < this.moduleList.length; i++) {
-            if (typeof this.moduleList[i].update === 'function') {
-                this.moduleList[i].update.apply(this.moduleList[i], arguments);
-            }
-        }
-    }
-
-    hook_Network_logoutOK() {
-        for (var i = 0; i < this.moduleList.length; i++) {
-            if (typeof this.moduleList[i].logoutOK === 'function') {
-                this.moduleList[i].logoutOK.apply(this.moduleList[i], arguments);
-            }
-        }
-    }
-
-    hook_Network_action() {
-        for (var i = 0; i < this.moduleList.length; i++) {
-            if (typeof this.moduleList[i].action === 'function') {
-                this.moduleList[i].action.apply(this.moduleList[i], arguments);
-            }
-        }
-    }
-
-    hook_Network_handle() {
-        for (var i = 0; i < this.moduleList.length; i++) {
-            if (typeof this.moduleList[i].handle === 'function') {
-                this.moduleList[i].handle.apply(this.moduleList[i], arguments);
-            }
-        }
-    }
-
-    hook_PhasedLoadingManager_start_phase(phase) {
-        if (phase === "game_loaded") {
-            for (var i = 0; i < this.moduleList.length; i++) {
-                if (typeof this.moduleList[i].loginOK === 'function') {
-                    this.moduleList[i].loginOK.apply(this.moduleList[i], arguments);
+    hook(fnName: string, ...args: Array<unknown>) {
+        for (const module of this.pluginList) {
+            if (typeof module[fnName] === 'function') {
+                try {
+                    module[fnName].apply(module, args);
+                } catch (e) {
+                    console.error(`GenLite plugin ${module.constructor.pluginName} error in ${fnName}:`, e);
                 }
             }
         }
     }
 
-    hook_PlayerInfo_updateXP() {
-        for (var i = 0; i < this.moduleList.length; i++) {
-            if (typeof this.moduleList[i].updateXP === 'function') {
-                this.moduleList[i].updateXP.apply(this.moduleList[i], arguments);
-            }
+    hookPhased(fnName: string, ...args: Array<unknown>) {
+        if (args[0] === "game_loaded") {
+            this.hook('loginOK', args);
         }
     }
 
-    hook_PlayerInfo_updateTooltip() {
-        for (var i = 0; i < this.moduleList.length; i++) {
-            if (typeof this.moduleList[i].updateTooltip === 'function') {
-                this.moduleList[i].updateTooltip.apply(this.moduleList[i], arguments);
-            }
+    registerPlugin(plugin: GenLitePlugin) {
+        this.pluginList.push(plugin);
+    }
+
+    unregisterPlugin(plugin: GenLitePlugin) {
+        const index = this.pluginList.indexOf(plugin);
+
+        if (index !== -1) {
+            this.pluginList.splice(index, 1);
         }
     }
 
-    hook_PlayerInfo_updateSkills() {
-        for (var i = 0; i < this.moduleList.length; i++) {
-            if (typeof this.moduleList[i].updateSkills === 'function') {
-                this.moduleList[i].updateSkills.apply(this.moduleList[i], arguments);
-            }
-        }
-    }
+    installHook(object: Object, functionName: string, hookFn = this.hook) {
+        const self = this;
 
-
-    hook_window_initializeUI() {
-        for (var i = 0; i < this.moduleList.length; i++) {
-            if (typeof this.moduleList[i].initializeUI === 'function') {
-                this.moduleList[i].initializeUI.apply(this.moduleList[i], arguments);
-            }
-        }
-    }
-    hook_Game_combatUpdate() {
-        for (var i = 0; i < this.moduleList.length; i++) {
-            if (typeof this.moduleList[i].combatUpdate === 'function') {
-                this.moduleList[i].combatUpdate.apply(this.moduleList[i], arguments);
-            }
-        }
-    }
-
-    hook_PlayerHUD_setHealth() {
-        for (var i = 0; i < this.moduleList.length; i++) {
-            if (typeof this.moduleList[i].setHealth === 'function') {
-                this.moduleList[i].setHealth.apply(this.moduleList[i], arguments);
-            }
-        }
-    }
-
-    hook_Inventory_handleUpdatePacket() {
-        for (var i = 0; i < this.moduleList.length; i++) {
-            if (typeof this.moduleList[i].handleUpdatePacket === 'function') {
-                this.moduleList[i].handleUpdatePacket.apply(this.moduleList[i], arguments);
-            }
-        }
-    }
-
-    registerModule(module) {
-        this.moduleList[this.moduleList.length] = module;
-    }
-
-    unregisterModule(module) {
-        for (var i = 0; i < this.moduleList.length; i++) {
-            if (this.moduleList[i] === module) {
-                this.moduleList.splice(i, 1);
-                break;
-            }
-        }
-    }
-
-    installHook(object, functionName, callback, callback_this) {
         (function (originalFunction) {
-            object[functionName] = function () {
-                var returnValue = originalFunction.apply(this, arguments);
-                if (callback !== undefined) {
-                    callback.apply(callback_this ?? this, arguments);
-                }
+            object[functionName] = function (...args: Array<unknown>) {
+                const returnValue = originalFunction.apply(this, arguments);
+
+                hookFn.apply(self, [functionName, ...args]);
 
                 return returnValue;
             };
@@ -162,7 +82,7 @@ export class GenLite {
     }
 
     sendDataToServer(url, data) {
-        var xmlhttp = new XMLHttpRequest();
+        const xmlhttp = new XMLHttpRequest();
         xmlhttp.open("POST", `https://nextgensoftware.nl/${url}.php`);
         xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xmlhttp.send(JSON.stringify(data));

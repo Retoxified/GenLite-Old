@@ -1,4 +1,6 @@
-export class GenLiteSoundNotification {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteSoundNotification implements GenLitePlugin {
     static pluginName = 'GenLiteSoundNotification';
 
     doHealthCheck: boolean = false;
@@ -17,7 +19,7 @@ export class GenLiteSoundNotification {
 
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
         this.doHealthCheck = window.genlite.settings.add("LowHealth.Enable", false, "Low Health Sound", "checkbox", this.handleDoHealthCheck, this);
         //this is a stupid ass thing but *shrug*
         this.healthThreshold = window.genlite.settings.add("LowHealth.0", 0, "Low Health Threshold: <div style=\"display: contents;\" id=\"GenLiteHealthThresholdOutput\"></div>", "range", this.setHealthThreshold, this, undefined,

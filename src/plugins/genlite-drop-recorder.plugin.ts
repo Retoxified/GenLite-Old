@@ -1,4 +1,6 @@
-export class GenLiteDropRecorderPlugin {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteDropRecorderPlugin';
 
     monsterData = {
@@ -29,7 +31,7 @@ export class GenLiteDropRecorderPlugin {
     submitItemsToServer: boolean = false;
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
         let dropTableString = localStorage.getItem("genliteDropTable")
         if (dropTableString == null) {
             this.dropTable = {};

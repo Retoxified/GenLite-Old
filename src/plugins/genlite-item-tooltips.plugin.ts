@@ -1,4 +1,6 @@
-export class GenLiteItemTooltips {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteItemTooltips implements GenLitePlugin {
     static pluginName = 'GenLiteItemTooltips';
 
     itemToolTip: HTMLElement;
@@ -14,7 +16,7 @@ export class GenLiteItemTooltips {
     isValueEnabled: boolean = false;
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
 
         this.isPluginEnabled = window.genlite.settings.add("ItemToolTips.Enable", true, "Tooltips", "checkbox", this.handlePluginEnableDisable, this);
         this.isFoodEnabled = window.genlite.settings.add("FoodToolTips.Enable", true, "Food Tooltips", "checkbox", this.handleFoodEnableDisable, this, undefined, undefined, "ItemToolTips.Enable");

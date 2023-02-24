@@ -1,10 +1,12 @@
-export class GenLiteInventoryPlugin {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteInventoryPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteInventoryPlugin';
 
     disableDragOnShift: boolean = false;
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
         this.disableDragOnShift = window.genlite.settings.add(
             "Inventory.ShiftDisableDrag",
             true,

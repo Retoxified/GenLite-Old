@@ -4,7 +4,9 @@
  Known Issues:
  */
 
-export class GenLiteLocationsPlugin {
+import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+
+export class GenLiteLocationsPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteLocationsPlugin'
     private classifyPoint = require("robust-point-in-polygon")
     private stylesheetAdded: boolean
@@ -128,7 +130,7 @@ export class GenLiteLocationsPlugin {
         document.body.appendChild(this.mapIframe)
     }
     async init() {
-        window.genlite.registerModule(this)
+        window.genlite.registerPlugin(this)
 
 
 
