@@ -15,6 +15,7 @@ import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteChatPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteChatPlugin';
+    static storageKey = 'IgnoredGameChatMessages';
 
     static gameMessagesToIgnore: Set<string> = new Set<string>([
         "You start mining the rock.",
@@ -22,7 +23,11 @@ export class GenLiteChatPlugin implements GenLitePlugin {
         "You get some ore.",
         "You stop mining the rock.",
         "The rock is out of ore.",
+        "Your inventory is full",
+        "Might have some useful ore inside.",
     ]);
+
+    customMessagesToIgnore: Set<string> = new Set<string>();
 
     filterGameMessages: boolean = false;
     originalGameMessage: Function;
@@ -37,6 +42,7 @@ export class GenLiteChatPlugin implements GenLitePlugin {
             this.handleFilterGameMessages,
             this
         );
+        this.customMessagesToIgnore = this.loadSavedSettings();
     }
 
     public loginOK() {
@@ -53,6 +59,7 @@ export class GenLiteChatPlugin implements GenLitePlugin {
         if (this.filterGameMessages) {
             document.game.CHAT.addGameMessage = this.newGameMessage.bind(
                 document.game.CHAT,
+                this,
                 this.originalGameMessage
             );
         } else {
@@ -60,18 +67,56 @@ export class GenLiteChatPlugin implements GenLitePlugin {
         }
     }
 
-    newGameMessage(original, text) {
-        if (!GenLiteChatPlugin.gameMessagesToIgnore.has(text)) {
-            original.bind(this)(text);
+    newGameMessage(plugin, original, text) {
+        let ignore = (
+            GenLiteChatPlugin.gameMessagesToIgnore.has(text) ||
+            plugin.customMessagesToIgnore.has(text)
+        );
+        if (!ignore) {
+            let dom = original.bind(this)(text);
+            if (dom && !dom.add_interactions) {
+                dom.add_interactions = (list) => {
+                    list.push({
+                        color: 'red',
+                        blockLeftClick: true,
+                        priority: 1,
+                        object: null,
+                        text: 'Ignore This Message',
+                        action: () => {
+                            plugin.ignoreGameMessage(dom.lastChild.innerHTML);
+                        },
+                    });
+                };
+            }
         }
     }
 
     ignoreGameMessage(text) {
-        GenLiteChatPlugin.gameMessagesToIgnore.add(text);
+        this.customMessagesToIgnore.add(text);
+        this.saveSettings();
     }
 
     stopIgnoringGameMessage(text) {
-        GenLiteChatPlugin.gameMessagesToIgnore.delete(text);
+        this.customMessagesToIgnore.delete(text);
+        this.saveSettings();
+    }
+
+    loadSavedSettings() {
+        let s = localStorage.getItem(GenLiteChatPlugin.storageKey);
+        var c : string[] = JSON.parse(s);
+        if (!c) {
+            c = [];
+        }
+        return new Set(c);
+    }
+
+    saveSettings() {
+        let s = this.customMessagesToIgnore;
+        console.log('saving', s);
+        localStorage.setItem(
+            GenLiteChatPlugin.storageKey,
+            JSON.stringify(Array.from(s))
+        );
     }
 
 }
