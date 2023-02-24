@@ -31,7 +31,7 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     submitItemsToServer: boolean = false;
 
     async init() {
-        window.genlite.registerModule(this);
+        window.genlite.registerPlugin(this);
         let dropTableString = localStorage.getItem("genliteDropTable");
         if (dropTableString == null) {
             this.dropTable = {};
