@@ -121,8 +121,9 @@ export class GenLiteXpCalculator {
         div.innerHTML += `
             <div>XP per Action: ${Math.round(skill.avgActionXP * 10) / 100}</div>
             <div>Action TNL: ${skill.actionsToNext}</div>
-            <div>XP per hour: ${xpRate}</div>
-            <div>Time To Level: ${ttl}</div>`;
+            <div>XP per Hour: ${xpRate}</div>
+            <div>Time To Level: ${ttl}</div>
+            <div>Xp Tracked: ${skill.startXP == 0 ? 0 : ((piSkill.xp - skill.startXP) / 10).toLocaleString("en-US")}`;
     }
 
     /* clicking on a skill with shift will reset it

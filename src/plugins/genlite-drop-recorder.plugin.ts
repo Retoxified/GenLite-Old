@@ -30,7 +30,7 @@ export class GenLiteDropRecorderPlugin {
 
     async init() {
         window.genlite.registerModule(this);
-        let dropTableString = localStorage.getItem("genliteDropTable")
+        let dropTableString = localStorage.getItem("genliteDropTable");
         if (dropTableString == null) {
             this.dropTable = {};
         } else {

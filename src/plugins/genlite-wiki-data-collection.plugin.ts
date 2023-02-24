@@ -153,14 +153,14 @@ export class GenLiteWikiDataCollectionPlugin {
         // ack? Math? i dunno i though i knew how this works but i dont but for some reason it increases the accuracy of the prediction
         xpDrop += (xpDrop % 3);
         let levelDiff = (this.combatStyle == "melee" ? this.playerMeleeCL : this.playerRangedCL) - this.curEnemy.info.level;
-        levelDiff = Math.min(Math.max(levelDiff, -4), 12);
+        levelDiff = Math.min(Math.max(levelDiff, -4), 9);
         let baseXp;
         if (levelDiff == 0) {
             baseXp = xpDrop;
         } else if (levelDiff < 0) {
             baseXp = xpDrop / (1 - ((1 / 20) * levelDiff));
         } else {
-            baseXp = xpDrop / (1 - ((7 / 120) * levelDiff));
+            baseXp = xpDrop / (1 - ((1 / 10) * levelDiff));
         }
         this.previously_seen[mobKey].Base_Xp = baseXp;
         this.previously_seen[mobKey].Level_Diff_Bit = 1 << (levelDiff + 4);
@@ -171,14 +171,24 @@ export class GenLiteWikiDataCollectionPlugin {
     scanNpcs() {
         let clustersize = 40
         let npcs = {}
+        let blackList = [];
         /* do some aggregrate stuff packSize, and add up mapsegment for averaging later */
         for (let key in GAME.npcs) {
+            let npc = GAME.npcs[key];
+            let npcX = npc.pos2.x;
+            let npcY = npc.pos2.y;
             let packId = key.split('-')[0];
+            /* if any member of the pack is above 30 tiles away ignore it because there might be more memeber out of range */
+            if (Math.abs(npcX - PLAYER.character.pos2.x) > 30 || Math.abs(npcY - PLAYER.character.pos2.y) > 30 || blackList.includes(packId)){
+                delete npcs[packId]
+                blackList.push(packId)
+                continue;
+            }
             if (npcs[packId] === undefined)
-                npcs[packId] = { packSize: 0, mapSegX: 0, mapSegY: 0, npc: GAME.npcs[key] };
+                npcs[packId] = { packSize: 0, mapSegX: 0, mapSegY: 0, npc: npc };
             npcs[packId].packSize++;
-            npcs[packId].mapSegX += GAME.npcs[key].pos2.x;
-            npcs[packId].mapSegY += GAME.npcs[key].pos2.y;
+            npcs[packId].mapSegX += npcX
+            npcs[packId].mapSegY += npcY
         }
         /* calculate the mob key check if we need to update the server */
         for (let packId in npcs) {
@@ -194,10 +204,9 @@ export class GenLiteWikiDataCollectionPlugin {
                 group = String.fromCharCode(group.charCodeAt(0) + 1);
                 mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${npcInfo.packSize}--${PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
             }
-            /* if we have an existing key just ignore the above */
-            mobKey = this.packList[packId] ? this.packList[packId] : mobKey;
+
             if (this.previously_seen[mobKey] !== undefined) {
-                if (this.previously_seen[mobKey].numSeen == 10)
+                if (this.previously_seen[mobKey].numSeen == 100)
                     this.toSend.push(this.previously_seen[mobKey]);
                 this.previously_seen[mobKey].numSeen++;
                 continue;
@@ -219,9 +228,13 @@ export class GenLiteWikiDataCollectionPlugin {
                 "Version": 4
             };
             this.previously_seen[mobKey] = monsterdata;
-            this.packList[packId] = mobKey;
+            if (!this.packList[packId])
+                this.packList[packId] = mobKey;
+            if (this.previously_seen[this.packList[packId]].Pack_Size < monsterdata.Pack_Size) {
+                delete this.previously_seen[this.packList[packId]];
+                this.packList[packId] = mobKey;
+            }
         }
-
     }
 
     sendToServer(callback_this) {

@@ -94,6 +94,13 @@ export class GenLiteNPCHighlightPlugin {
         for (let key in this.trackedNpcs) {
             let worldPos;
             if (GAME.npcs[key] !== undefined) {
+                /* if the health was updated but the npc tag doesnt have that set regen the tag */
+                if (this.npcHealthList[this.packList[key.split('-')[0]]] && this.trackedNpcs[key].innerHTML.search("HP:") == -1){
+                    this.trackedNpcs[key].remove();
+                    delete this.trackedNpcs[key];
+                    continue;
+                }
+
                 /* if in combat grab the threeObject position (the actual current position of the sprite not the world pos)
                     mult by 0.8 which is the height of the health bar
                 */
@@ -116,7 +123,6 @@ export class GenLiteNPCHighlightPlugin {
                 }
                 this.trackedNpcs[key].style.top = screenPos.y + "px";
                 this.trackedNpcs[key].style.left = screenPos.x + "px";
-
             }
         }
     }

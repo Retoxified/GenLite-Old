@@ -43,9 +43,12 @@ export class GenLiteGeneralChatCommands {
 
     savePlayed() {
         let curTime = Date.now();
+        if(this.timeSinceLastSave == 0)
+            alert("the fuck did you just do //played just broke. Please report to @dpepls");
         this.playedTime += curTime - this.timeSinceLastSave;
+        console.log(curTime - this.timeSinceLastSave);
         this.timeSinceLastSave = curTime;
-        localStorage.setItem("genlitePlayed", this.playedTime.toString())
+        localStorage.setItem("genlitePlayed", this.playedTime.toString());
     }
 
     msToHumanTime(ms) {
