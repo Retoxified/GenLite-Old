@@ -1,19 +1,3 @@
-class MonsterData {
-    //this needs to be moved to an interface once i figure out how TS interfaces work
-    "Monster_Name" = "";
-    "Monster_Level" = 0;
-    "Monster_Pack_ID" = "";
-    "X" = 0;
-    "Y" = 0;
-    "Layer" = "";
-    "Pack_Size" = 0;
-    "Monster_HP" = 0;
-    "Base_Xp" = 0;
-    "ign_mobkey" = "";
-    "Level_Diff_Bit" = 0;
-    "Version" = 3;
-}
-
 import {GenLitePlugin} from '../core/interfaces/plugin.interface';
 
 export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {

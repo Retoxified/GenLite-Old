@@ -45,8 +45,10 @@ export class GenLiteGeneralChatCommands implements GenLitePlugin {
 
     savePlayed() {
         let curTime = Date.now();
-        if(this.timeSinceLastSave == 0)
-            alert("the fuck did you just do //played just broke. Please report to @dpepls");
+        if(this.timeSinceLastSave == 0) { //if for whatever reason this wasnt set (currently caused by a genfanad bug not genlite set it now and just ignore this update)
+            this.timeSinceLastSave = Date.now();
+            return;
+        }
         this.playedTime += curTime - this.timeSinceLastSave;
         this.timeSinceLastSave = curTime;
         localStorage.setItem("genlitePlayed", this.playedTime.toString());
