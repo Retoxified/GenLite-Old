@@ -3,6 +3,8 @@ import { GenLite } from "./core/genlite.class";
 import { GenLiteNotificationPlugin } from "./core/plugins/genlite-notification.plugin";
 import { GenLiteSettingsPlugin } from "./core/plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./core/plugins/genlite-commands.plugin";
+import { GenLiteConfirmation } from "./core/helpers/genlite-confirmation.class";
+
 
 /** Official Plugins */
 import { GenLiteCameraPlugin } from "./plugins/genlite-camera.plugin";
@@ -22,7 +24,8 @@ import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
 import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
 import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
 import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
-import { GenLiteConfirmation } from "./core/helpers/genlite-confirmation.class";
+import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
+
 
 
 
@@ -69,6 +72,8 @@ Press Cancel to Load, Press Okay to Stop.`;
     await genlite.pluginLoader.addPlugin(GenLiteItemTooltips);
     await genlite.pluginLoader.addPlugin(GenLiteSoundNotification);
     await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
+    await genlite.pluginLoader.addPlugin(GenLiteHighscores);
+
 
     /** post init things */
     await window.GenLiteSettingsPlugin.postInit();
