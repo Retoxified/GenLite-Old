@@ -4,7 +4,7 @@ import {GenLitePlugin} from '../core/interfaces/plugin.interface';
 
 export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteNPCHighlightPlugin';
-    static healthListVersion = "2"
+    static healthListVersion = "3"
 
     trackedNpcs = {};
     npcData = {};
