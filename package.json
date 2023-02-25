@@ -1,7 +1,9 @@
 {
   "name": "GenLite",
+  "version": "0.1.31",
   "scripts": {
-    "build": "npx webpack",
+    "build:prod": "npm version patch && npx webpack --mode production",
+    "build:dev": "npx webpack --mode development",
     "docs": "jsdoc -r ./src/"
   },
   "dependencies": {

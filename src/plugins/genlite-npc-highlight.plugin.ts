@@ -202,6 +202,7 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         //element.style.zIndex = '99999';
         element.innerHTML = text;
         element.style.transform = 'translateX(-50%)';
+        element.style.fontFamily = 'acme, times new roman, Times, serif'; // Set Font
         element.style.textShadow = '-1px -1px 0 #000,0   -1px 0 #000, 1px -1px 0 #000, 1px  0   0 #000, 1px  1px 0 #000, 0    1px 0 #000, -1px  1px 0 #000, -1px  0   0 #000';
         element.style.pointerEvents = 'none';
 

@@ -5,6 +5,7 @@ import { GenLiteSettingsPlugin } from "./core/plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./core/plugins/genlite-commands.plugin";
 
 /** Official Plugins */
+import { GenLiteVersionPlugin } from "./plugins/genlite-version.plugin";
 import { GenLiteCameraPlugin } from "./plugins/genlite-camera.plugin";
 import { GenLiteChatPlugin } from "./plugins/genlite-chat.plugin";
 import { GenLiteDropRecorderPlugin } from "./plugins/genlite-drop-recorder.plugin";
@@ -22,10 +23,7 @@ import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
 import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
 import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
 import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
-
-
-
-
+import { GenLitePlayerToolsPlugin }  from "./plugins/genlite-playertools.plugin";
 
 (async function load() {
     const genlite = new GenLite();
@@ -38,6 +36,7 @@ import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand
     genlite.commands = await genlite.pluginLoader.addPlugin(GenLiteCommandsPlugin);
 
     /** Official Plugins */
+    await genlite.pluginLoader.addPlugin(GenLiteVersionPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteChatPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
@@ -55,6 +54,7 @@ import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand
     await genlite.pluginLoader.addPlugin(GenLiteItemTooltips);
     await genlite.pluginLoader.addPlugin(GenLiteSoundNotification);
     await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
+    await genlite.pluginLoader.addPlugin(GenLitePlayerToolsPlugin);
 
     /** post init things */
     await window.GenLiteSettingsPlugin.postInit();

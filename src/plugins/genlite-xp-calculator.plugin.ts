@@ -121,9 +121,9 @@ export class GenLiteXpCalculator implements GenLitePlugin {
         }
         let ttl = Math.round(piSkill.tnl / xpRate) / 10;
         div.innerHTML += `
-            <div>XP per Action: ${Math.round(skill.avgActionXP * 10) / 100}</div>
-            <div>Action TNL: ${skill.actionsToNext}</div>
-            <div>XP per hour: ${xpRate}</div>
+            <div>XP per Action: ${(Math.round(skill.avgActionXP * 10) / 100).toLocaleString("en-US")}</div>
+            <div>Action TNL: ${skill.actionsToNext.toLocaleString("en-US")}</div>
+            <div>XP per hour: ${xpRate.toLocaleString("en-US")}</div>
             <div>Time To Level: ${ttl}</div>`;
     }
 
@@ -197,8 +197,8 @@ export class GenLiteXpCalculator implements GenLitePlugin {
         <div>Total</div>
         <div>Current XP: ${xp.toLocaleString("en-US")}</div>
         <div>Gained XP: ${(total.gainedXP / 10).toLocaleString("en-US")}</div>
-        <div>XP per Action: ${Math.round(total.avgActionXP * 10) / 100}</div>
-        <div>XP per hour: ${xpRate}</div>
+        <div>XP per Action: ${(Math.round(total.avgActionXP * 10) / 100).toLocaleString("en-US")}</div>
+        <div>XP per hour: ${xpRate.toLocaleString("en-US")}</div>
         `;
         if (event) { //if its an event update he poistion of the tooltip
             div.style.left = event.clientX + 15 + "px";

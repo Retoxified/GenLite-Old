@@ -3,8 +3,8 @@ const webpack = require('webpack');
 const fs = require('fs');
 
 const TerserPlugin = require("terser-webpack-plugin");
-
-const METADATA = fs.readFileSync('./userscript-banner.txt', 'utf8');
+const PACKAGE = require('./package.json');
+let METADATA = fs.readFileSync('./userscript-banner.txt', 'utf8').replace('${version}', PACKAGE.version);
 
 module.exports = {
     mode: 'production',
