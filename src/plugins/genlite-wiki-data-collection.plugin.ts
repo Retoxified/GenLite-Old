@@ -152,7 +152,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
             return;
 
         let xpDrop = xp.xp + this.vitDrop;
-        // ack? Math? i dunno i though i knew how this works but i dont but for some reason it increases the accuracy of the prediction
+        // hack? Math? i dunno i though i knew how this works but i dont but for some reason it increases the accuracy of the prediction
         xpDrop += (xpDrop % 3);
         let levelDiff = (this.combatStyle == "melee" ? this.playerMeleeCL : this.playerRangedCL) - this.curEnemy.info.level;
         levelDiff = Math.min(Math.max(levelDiff, -4), 9);
@@ -181,7 +181,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
             let npcY = npc.pos2.y;
             let packId = key.split('-')[0];
             /* if any member of the pack is above 30 tiles away ignore it because there might be more memeber out of range */
-            if (Math.abs(npcX - PLAYER.character.pos2.x) > 30 || Math.abs(npcY - PLAYER.character.pos2.y) > 30 || blackList.includes(packId)){
+             if(Math.abs(npcX - PLAYER.character.pos2.x) > 30 || Math.abs(npcY - PLAYER.character.pos2.y) > 30 || blackList.includes(packId)){
                 delete npcs[packId]
                 blackList.push(packId)
                 continue;
@@ -229,9 +229,15 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
                 "numSeen": 1,
                 "Version": 4
             };
+            /* if scanned pack is smaller ignore it and continue */
+            if (this.previously_seen[this.packList[packId]] && this.previously_seen[this.packList[packId]].Pack_Size > monsterdata.Pack_Size)
+                continue;
+            /* store key */
             this.previously_seen[mobKey] = monsterdata;
+            /* if pack list not set, link packId and genKey */
             if (!this.packList[packId])
                 this.packList[packId] = mobKey;
+            /* if packId key is smaller than genKey delete old and set new */
             if (this.previously_seen[this.packList[packId]].Pack_Size < monsterdata.Pack_Size) {
                 delete this.previously_seen[this.packList[packId]];
                 this.packList[packId] = mobKey;

@@ -86,6 +86,8 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
             text += `
             <div class="genlite-npc-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteNPCHighlightPlugin.pluginName}.hide_item('${hpKey}');void(0);"> &#8863;</div>`;
             this.trackedNpcs[npcsToAdd[key]] = this.create_text_element(hpKey, text);
+            if (this.npcHealthList[hpKey] !== undefined)
+                this.trackedNpcs[npcsToAdd[key]].hasHp = true;
         }
 
         for (let key in npcsToRemove) {
@@ -97,7 +99,7 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
             let worldPos;
             if (GAME.npcs[key] !== undefined) {
                 /* if the health was updated but the npc tag doesnt have that set regen the tag */
-                if (this.npcHealthList[this.packList[key.split('-')[0]]] && this.trackedNpcs[key].innerHTML.search("HP:") == -1){
+                if (!this.trackedNpcs[key].hasHp && this.npcHealthList[this.packList[key.split('-')[0]]]){
                     this.trackedNpcs[key].remove();
                     delete this.trackedNpcs[key];
                     continue;
@@ -176,11 +178,14 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         if (this.npcHealthList[hpKey] === undefined) {
             this.npcHealthList[hpKey] = update.maxhp;
             localStorage.setItem("GenliteNPCHealthList", JSON.stringify(this.npcHealthList));
-            npcsToMod = Object.keys(GAME.npcs).filter(x => GAME.npcs[x].id.split('-')[0] == object.id.split('-')[0]);
         }
+        npcsToMod = Object.keys(GAME.npcs).filter(x => GAME.npcs[x].id.split('-')[0] == object.id.split('-')[0]);
         for (let key in npcsToMod) {
             let npcid = npcsToMod[key];
+            if(this.trackedNpcs[npcid].hasHp)
+                continue;
             this.trackedNpcs[npcid].innerHTML += ` HP: ${this.npcHealthList[hpKey]}`;
+            this.trackedNpcs[npcid].hasHp = true;
         }
         if (this.trackedNpcs.hasOwnProperty(object.id))
             this.trackedNpcs[object.id].innerHTML = `<div>${object.htmlName}</div><div>HP: ${update.hp}/${update.maxhp}</div>`;

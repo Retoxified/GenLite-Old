@@ -228,7 +228,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         this.render = false;
         this.clearTracked();
     }
-
+    
     //
     // settings handling
     //
