@@ -17,16 +17,6 @@ export class GenLiteChatPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteChatPlugin';
     static storageKey = 'IgnoredGameChatMessages';
 
-    static gameMessagesToIgnore: Set<string> = new Set<string>([
-        "You start mining the rock.",
-        "You fail to get some ore.",
-        "You get some ore.",
-        "You stop mining the rock.",
-        "The rock is out of ore.",
-        "Your inventory is full",
-        "Might have some useful ore inside.",
-    ]);
-
     customMessagesToIgnore: Set<string> = new Set<string>();
 
     filterGameMessages: boolean = false;
@@ -68,11 +58,7 @@ export class GenLiteChatPlugin implements GenLitePlugin {
     }
 
     newGameMessage(plugin, original, text) {
-        let ignore = (
-            GenLiteChatPlugin.gameMessagesToIgnore.has(text) ||
-            plugin.customMessagesToIgnore.has(text)
-        );
-        if (!ignore) {
+        if (!plugin.customMessagesToIgnore.has(text)) {
             let dom = original.bind(this)(text);
             if (dom && !dom.add_interactions) {
                 dom.add_interactions = (list) => {
