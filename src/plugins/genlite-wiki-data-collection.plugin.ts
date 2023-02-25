@@ -54,8 +54,8 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         this.scanNpcs();
         this.scanInterval = setInterval(() => { this.scanNpcs() }, 1000);
         // send out a monsterdata once every 1s to lesson server load
-            //if (this.isRemoteEnabled)
-                //this.sendInterval = setInterval(() => { this.sendToServer(this) }, 1000);
+            if (this.isRemoteEnabled)
+                this.sendInterval = setInterval(() => { this.sendToServer(this) }, 1000);
     }
 
     logoutOK(){
