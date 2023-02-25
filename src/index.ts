@@ -27,12 +27,12 @@ import { GenLiteConfirmation } from "./core/helpers/genlite-confirmation.class";
 
 
 const DISCLAIMER = `
-GenLite is NOT associated with rose-tinted games.
+GenLite is NOT associated with Rose-Tinted Games.
 Do not talk about GenLite in the main discord.
 Do not report bugs to the devs with GenLite enabled, they will ignore you and get annoyed.
 Do disable GenLite first and test for the bug again.
 If you find a bug and are unsure post in the GenLite Server. We will help you.
-While we work are to ensure compatibility, Use At Your Own Risk.
+While we work to ensure compatibility, Use At Your Own Risk.
 Press Cancel to Load, Press Okay to Stop.`;
 
 (async function load() {
