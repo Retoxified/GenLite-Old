@@ -32,6 +32,14 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
             "checkbox",
             this.handleHighlightSettingChange,
             this);
+
+        window.genlite.settings.add(
+            "PlayerTools.HidePlayer",
+            false,
+            "Hide My Character",
+            "checkbox",
+            this.handleHidePlayerSettingChange,
+            this);
     }
 
     update(dt) {
@@ -159,6 +167,10 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
         }
 
         this.isEnabled = state;
+    }
+
+    handleHidePlayerSettingChange(state: boolean) {
+        GRAPHICS.threeScene.getObjectByName(GAME.me.id).visible = !state;
     }
 
 
