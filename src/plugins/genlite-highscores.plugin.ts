@@ -30,6 +30,7 @@ export class GenLiteHighscores implements GenLitePlugin {
     sendInterval: NodeJS.Timer;
 
     submitItemsToServer: boolean;
+    /* a list of all stats we are collecting */
     statsToSend: {
         [stat: string]: boolean
     } = {
@@ -61,6 +62,7 @@ export class GenLiteHighscores implements GenLitePlugin {
     }
 
     handleSubmitToServer(state) {
+        this.submitItemsToServer = state;
         if (state) {
             this.loginOK();
         } else {
@@ -68,12 +70,16 @@ export class GenLiteHighscores implements GenLitePlugin {
         }
     }
 
+    /* this will set all the settings to whatever the current stat of toggle all is
+    bit clunky but better than nothing 
+    */
     toggleAll(state) {
         this.sendAll = state;
-        for(let key in this.statsToSend)
-            window.genlite.settings.toggle(`Highscore.${key}.Enable`, state); 
+        for (let key in this.statsToSend)
+            window.genlite.settings.toggle(`Highscore.${key}.Enable`, state);
     }
 
+    /* interval setup */
     loginOK() {
         if (!this.submitItemsToServer)
             return;
@@ -81,12 +87,14 @@ export class GenLiteHighscores implements GenLitePlugin {
         this.sendInterval = setInterval(() => { this.sendToServer.apply(this) }, 60 * 1000)
     }
 
+    /* stop intercals */
     logoutOK() {
         clearInterval(this.sendInterval);
         this.sendInterval = null;
     }
 
     handle(verb, payload) {
+        /* count steps */
         if (verb == "move" && PLAYER && payload.id == PLAYER.id) {
             switch (payload.direction) {
                 case 0:
@@ -126,6 +134,7 @@ export class GenLiteHighscores implements GenLitePlugin {
         }
     }
 
+    /* update the high scores object */
     updateScores() {
         this.highscores = new Highscore();
         this.highscores.Player = PLAYER.character.name()
