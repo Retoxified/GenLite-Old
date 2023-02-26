@@ -154,6 +154,8 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
 
     logoutOK() {
         this.doRender = false;
+        this.trackedPlayers = {};
+        this.PlayerTagContainer.innerHTML = "";
     }
 
     // Setting Callbacks
