@@ -152,9 +152,7 @@ export class GenLiteHighscores implements GenLitePlugin {
 
         if (this.statsToSend.Played) {
             if (window.GenLiteGeneralChatCommands.playedTime > 31556926000) {
-                alert("Your //played is bugged.\
-                If you never reset it before then reset it with `GenLiteGeneralChatCommands.playedTime = 0` in your browser console \
-                If this is the second time you have seen this after reseting please @dpepls on discord with details");
+                window.GenLiteGeneralChatCommands.playedTime = 0;      
             } else {
                 this.highscores.Stats.push(
                     {
