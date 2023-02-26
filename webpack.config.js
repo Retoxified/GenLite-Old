@@ -17,6 +17,9 @@ let newVersionString = versionString.replace(/([0-9.]+)/, PACKAGE.version);
 // Update README with latest version
 readme = readme.replace(versionString, newVersionString);
 
+// Write README.md
+fs.writeFileSync('./README.md', readme);
+
 
 module.exports = {
     mode: 'production',
