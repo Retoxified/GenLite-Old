@@ -39,6 +39,26 @@ export class GenLiteHighscores implements GenLitePlugin {
             "Walking": false
         };
     sendAll: boolean;
+    updatedSkills: { [skill: string]: boolean} = {
+        vitality: true,
+        attack: true,
+        strength: true,
+        defense: true,
+        ranged: true,
+        sorcery: true,
+        evocation: true,
+        survival: true,
+        piety: true,
+        logging: true,
+        mining: true,
+        botany: true,
+        butchery: true,
+        cooking: true,
+        forging: true,
+        artistry: true,
+        tailoring: true,
+        whittling: true
+    }
     async init() {
         window.genlite.registerPlugin(this);
         this.submitItemsToServer = window.genlite.settings.add(
@@ -84,7 +104,7 @@ export class GenLiteHighscores implements GenLitePlugin {
         if (!this.submitItemsToServer)
             return;
         this.sendToServer();
-        this.sendInterval = setInterval(() => { this.sendToServer.apply(this) }, 60 * 1000)
+        this.sendInterval = setInterval(() => { this.sendToServer.apply(this) }, 5 * 60 * 1000)
     }
 
     /* stop intercals */
@@ -132,6 +152,10 @@ export class GenLiteHighscores implements GenLitePlugin {
             localStorage.setItem("Highscores.walkData", JSON.stringify(this.walkStats))
             return;
         }
+
+        if(verb == 'xp'){
+            this.updatedSkills[payload.skill] = true;
+        }
     }
 
     /* update the high scores object */
@@ -142,12 +166,15 @@ export class GenLiteHighscores implements GenLitePlugin {
         if (this.statsToSend.Skills) {
             for (let key in PLAYER_INFO.skills) {
                 let skill = PLAYER_INFO.skills[key];
+                if (!this.updatedSkills[key])
+                    continue;
                 this.highscores.Stats.push({
                     Stat: skill.name,
                     Data1: skill.level,
                     Data2: skill.xp
                 })
             }
+            this.updatedSkills = {};
         }
 
         if (this.statsToSend.Played) {

@@ -1,4 +1,4 @@
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteWikiDataCollectionPlugin';
@@ -38,18 +38,18 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         this.scanNpcs();
         this.scanInterval = setInterval(() => { this.scanNpcs() }, 1000);
         // send out a monsterdata once every 1s to lesson server load
-            if (this.isRemoteEnabled)
-                this.sendInterval = setInterval(() => { this.sendToServer(this) }, 1000);
+        if (this.isRemoteEnabled)
+            this.sendInterval = setInterval(() => { this.sendToServer(this) }, 1000);
     }
 
-    logoutOK(){
+    logoutOK() {
         clearInterval(this.scanInterval);
         clearInterval(this.sendInterval)
     }
 
     handlePluginEnableDisable(state: boolean) {
         this.isRemoteEnabled = state;
-        if(state) {
+        if (state) {
             this.sendInterval = setInterval(() => { this.sendToServer(this) }, 200);
         } else {
             clearInterval(this.sendInterval);
@@ -79,7 +79,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
             return;
         if (this.previously_seen[mobKey].Monster_HP == 0) { // if we havent seen the monster or if we dont know its health
             this.previously_seen[mobKey].Monster_HP = update.maxhp;
-            if (this.isRemoteEnabled)
+            if (this.isRemoteEnabled && this.previously_seen[mobKey].numSeen >= 100)
                 window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
         }
     }
@@ -150,7 +150,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         }
         this.previously_seen[mobKey].Base_Xp = baseXp;
         this.previously_seen[mobKey].Level_Diff_Bit = 1 << (levelDiff + 4);
-        if (this.isRemoteEnabled)
+        if (this.isRemoteEnabled && this.previously_seen[mobKey].numSeen >= 100)
             window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
     }
 
@@ -165,7 +165,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
             let npcY = npc.pos2.y;
             let packId = key.split('-')[0];
             /* if any member of the pack is above 30 tiles away ignore it because there might be more memeber out of range */
-             if(Math.abs(npcX - PLAYER.character.pos2.x) > 30 || Math.abs(npcY - PLAYER.character.pos2.y) > 30 || blackList.includes(packId)){
+            if (Math.abs(npcX - PLAYER.character.pos2.x) > 30 || Math.abs(npcY - PLAYER.character.pos2.y) > 30 || blackList.includes(packId)) {
                 delete npcs[packId]
                 blackList.push(packId)
                 continue;
@@ -230,7 +230,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
     }
 
     sendToServer(callback_this) {
-        if(callback_this.toSend.length <= 0)
+        if (callback_this.toSend.length <= 0)
             return;
         let monsterdata = callback_this.toSend.pop();
         window.genlite.sendDataToServer("monsterdata", monsterdata);
