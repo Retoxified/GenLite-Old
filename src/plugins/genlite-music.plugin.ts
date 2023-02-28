@@ -1,4 +1,4 @@
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteMusicPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteMusicPlugin';
@@ -12,7 +12,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
     selectionMenu: HTMLElement;
     displayed = false;
 
-    selectionOptions: {[key: string]: HTMLElement} = {};
+    selectionOptions: { [key: string]: HTMLElement } = {};
     currentSelection: HTMLElement = null;
 
     // plugin modes
@@ -123,7 +123,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
             };
         } else {
             MUSIC_PLAYER.setNextTrack = this.originalSetTrack;
-            SETTINGS.DOM_music_text.onclick = (e) => {};
+            SETTINGS.DOM_music_text.onclick = (e) => { };
             this.hideMusicSelection();
         }
     }

@@ -27,7 +27,7 @@ export class GenLiteHighscores implements GenLitePlugin {
         total: 0
     }
 
-    sendInterval: NodeJS.Timer;
+    sendInterval: NodeJS.Timer = null;
 
     submitItemsToServer: boolean;
     /* a list of all stats we are collecting */
@@ -39,7 +39,7 @@ export class GenLiteHighscores implements GenLitePlugin {
             "Walking": false
         };
     sendAll: boolean;
-    updatedSkills: { [skill: string]: boolean} = {
+    updatedSkills: { [skill: string]: boolean } = {
         vitality: true,
         attack: true,
         strength: true,
@@ -104,7 +104,8 @@ export class GenLiteHighscores implements GenLitePlugin {
         if (!this.submitItemsToServer)
             return;
         this.sendToServer();
-        this.sendInterval = setInterval(() => { this.sendToServer.apply(this) }, 5 * 60 * 1000)
+        if (this.sendInterval == null)
+            this.sendInterval = setInterval(() => { this.sendToServer.apply(this) }, 5 * 60 * 1000)
     }
 
     /* stop intercals */
@@ -153,7 +154,7 @@ export class GenLiteHighscores implements GenLitePlugin {
             return;
         }
 
-        if(verb == 'xp'){
+        if (verb == 'xp') {
             this.updatedSkills[payload.skill] = true;
         }
     }
@@ -179,7 +180,7 @@ export class GenLiteHighscores implements GenLitePlugin {
 
         if (this.statsToSend.Played) {
             if (window.GenLiteGeneralChatCommands.playedTime > 31556926000) {
-                window.GenLiteGeneralChatCommands.playedTime = 0;      
+                window.GenLiteGeneralChatCommands.playedTime = 0;
             } else {
                 this.highscores.Stats.push(
                     {

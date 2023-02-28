@@ -6,7 +6,7 @@ import {
     SkyboxUriBack,
     SkyboxUriFront,
 } from "./skybox-data";
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteCameraPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteCameraPlugin';
@@ -134,7 +134,7 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
         document.getElementById("GenLiteMinDistanceOutput").innerHTML = value.toString();
         this.setCameraMode();
     }
-    
+
     handleRenderDistance(value: number) {
         this.renderDistance = value;
         GRAPHICS.camera.camera.far = value;

@@ -37,7 +37,7 @@ interface Element {
  * to each item, modifying the left-click and right-click actions order.
 */
 
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteItemHighlightPlugin';
@@ -228,7 +228,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         this.render = false;
         this.clearTracked();
     }
-    
+
     //
     // settings handling
     //
@@ -278,9 +278,9 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         } else if (itemPriority == 1) {
             return "genlite-priority-item";
         }
-   
+
         let itemValue = this.getItemValue(itemId);
-  
+
         if (itemValue >= 10000) {
             return 'text-ran';
         } else if (itemValue >= 5000) {
@@ -356,7 +356,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
                     priority: - 1,
                     object: item,
                     text: 'Examine',
-                    action: () =>CHAT.addGameMessage(item.examine)
+                    action: () => CHAT.addGameMessage(item.examine)
                 });
             }
             let all_keys = Object.keys(item.ids);
@@ -366,7 +366,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
                 priority: 1 + window[GenLiteItemHighlightPlugin.pluginName].getItemData(itemId) * 50,
                 object: item,
                 text: all_keys.length > 1 ? 'Take one' : 'Take',
-                action: () =>{
+                action: () => {
                     let take_id = all_keys[Math.floor(Math.random() * all_keys.length)];
                     NETWORK.action('take', {
                         item: take_id

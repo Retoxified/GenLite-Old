@@ -15,8 +15,8 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
     vitDrop = 0;
 
     isRemoteEnabled: boolean = false;
-    scanInterval;
-    sendInterval;
+    scanInterval: NodeJS.Timer = null;
+    sendInterval: NodeJS.Timer = null;
 
     async init() {
         window.genlite.registerPlugin(this);
@@ -36,15 +36,18 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
 
     loginOK() {
         this.scanNpcs();
-        this.scanInterval = setInterval(() => { this.scanNpcs() }, 1000);
+        if (this.scanInterval == null)
+            this.scanInterval = setInterval(() => { this.scanNpcs() }, 1000);
         // send out a monsterdata once every 1s to lesson server load
-        if (this.isRemoteEnabled)
+        if (this.isRemoteEnabled && this.sendInterval == null)
             this.sendInterval = setInterval(() => { this.sendToServer(this) }, 1000);
     }
 
     logoutOK() {
         clearInterval(this.scanInterval);
-        clearInterval(this.sendInterval)
+        this.scanInterval = null;
+        clearInterval(this.sendInterval);
+        this.sendInterval = null;
     }
 
     handlePluginEnableDisable(state: boolean) {
