@@ -87,7 +87,7 @@ export class GenLiteSettingsPlugin {
             input.value = this.settings[key].value;
         }
 
-        input.addEventListener('change', async (event) => {
+        input.onchange = async (event) => {
             // Update the setting value when the input value changes
             if (inputType === "checkbox") {
                 if (input.checked === true && confirmationMessage !== undefined) {
@@ -118,7 +118,7 @@ export class GenLiteSettingsPlugin {
                 elementInput.disabled = !input.checked;
             }
 
-        });
+        };
 
         // Add the label and input element to the container
         const settingContainer = document.createElement('div');
@@ -135,6 +135,7 @@ export class GenLiteSettingsPlugin {
         settingContainer.appendChild(input);
         this.container.appendChild(settingContainer);
 
+        this.settings[key].DOM = settingContainer;
         return this.settings[key].value;
     }
 
@@ -153,5 +154,15 @@ export class GenLiteSettingsPlugin {
                 setting.style.display = "none";
             }
         }
+    }
+
+    /* in case you want to programatically toggle a setting */
+    toggle(key, value: boolean) {
+        if (value) {
+            (<HTMLInputElement>this.settings[key].DOM.children[1]).checked = value
+        } else {
+            (<HTMLInputElement>this.settings[key].DOM.children[1]).checked = !(<HTMLInputElement>this.settings[key].DOM.children[1]).checked
+        }
+        (<HTMLInputElement>this.settings[key].DOM.children[1]).onchange(null);
     }
 }

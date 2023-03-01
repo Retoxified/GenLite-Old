@@ -60,7 +60,6 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                         input: {},
                         output: {}
                     };
-                console.log("action:", this.isCrafting, this.isGathering)
                 return;
             }
 
@@ -112,10 +111,8 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
         if (verb == 'inventory') {
             if(this.swapped_inv){
                 this.swapped_inv = false;
-                console.log("swapped");
                 return;
             }
-            console.log(this.prevInventory);
             for (let i in this.prevInventory) {
                 /* add up the quantities of the inventory */
                 if (itemList[this.prevInventory[i].item] === undefined)
@@ -127,7 +124,6 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                     itemList[this.prevInventory[i].item] += this.prevInventory[i].quantity;
                 }
             }
-            console.log(itemList);
 
             /* subtract the new inventory */
             for (let i in payload) {
@@ -140,7 +136,6 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                     itemList[payload[i].item] -= payload[i].quantity;
                 }
             }
-            console.log(itemList);
 
             if (this.isCrafting) {
                 this.storeRecipeData(itemList);

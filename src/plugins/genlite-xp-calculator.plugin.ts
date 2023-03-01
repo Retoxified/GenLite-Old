@@ -117,14 +117,15 @@ export class GenLiteXpCalculator implements GenLitePlugin {
         let xpRate = 0;
         let timeDiff = Date.now() - skill.tsStart;
         if (skill.tsStart != 0) {
-            xpRate = Math.round((piSkill.xp - skill.startXP) / (timeDiff / 3600000) * 10) / 100;
+            xpRate = Math.round((piSkill.xp - skill.startXP) / (timeDiff / 3600000)) / 10;
         }
         let ttl = Math.round(piSkill.tnl / xpRate) / 10;
         div.innerHTML += `
-            <div>XP per Action: ${Math.round(skill.avgActionXP * 10) / 100}</div>
-            <div>Action TNL: ${skill.actionsToNext}</div>
-            <div>XP per hour: ${xpRate}</div>
-            <div>Time To Level: ${ttl}</div>`;
+            <div>XP per Action: ${(Math.round(skill.avgActionXP) / 10).toLocaleString("en-US")}</div>
+            <div>Action TNL: ${skill.actionsToNext.toLocaleString("en-US")}</div>
+            <div>XP per Hour: ${xpRate.toLocaleString("en-US")}</div>
+            <div>Time to Level: ${ttl.toLocaleString("en-US")}</div>
+            <div>XP Tracked: ${skill.startXP == 0 ? 0 : ((piSkill.xp - skill.startXP) / 10).toLocaleString("en-US")}`;
     }
 
     /* clicking on a skill with shift will reset it
@@ -191,14 +192,14 @@ export class GenLiteXpCalculator implements GenLitePlugin {
         let xpRate = 0;
         let timeDiff = Date.now() - total.tsStart;
         if (total.tsStart != 0) {
-            xpRate = Math.round(total.gainedXP / (timeDiff / 3600000) * 10) / 100;
+            xpRate = Math.round(total.gainedXP / (timeDiff / 3600000)) / 10;
         }
         div.innerHTML = `
         <div>Total</div>
         <div>Current XP: ${xp.toLocaleString("en-US")}</div>
         <div>Gained XP: ${(total.gainedXP / 10).toLocaleString("en-US")}</div>
-        <div>XP per Action: ${Math.round(total.avgActionXP * 10) / 100}</div>
-        <div>XP per hour: ${xpRate}</div>
+        <div>XP per Action: ${(Math.round(total.avgActionXP) / 10).toLocaleString("en-US")}</div>
+        <div>XP per hour: ${xpRate.toLocaleString("en-US")}</div>
         `;
         if (event) { //if its an event update he poistion of the tooltip
             div.style.left = event.clientX + 15 + "px";

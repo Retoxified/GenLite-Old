@@ -1,4 +1,4 @@
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteChatPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteChatPlugin';

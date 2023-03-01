@@ -1,4 +1,4 @@
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteInventoryPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteInventoryPlugin';
@@ -39,7 +39,7 @@ export class GenLiteInventoryPlugin implements GenLitePlugin {
         } else {
             for (const i in INVENTORY.DOM_slots) {
                 let slot = INVENTORY.DOM_slots[i];
-                slot.item_div.onmousedown = function (e) {};
+                slot.item_div.onmousedown = function (e) { };
             }
         }
     }

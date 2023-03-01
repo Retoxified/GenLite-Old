@@ -143,8 +143,7 @@ export class GenLiteHitRecorder implements GenLitePlugin {
             /* if enemy name and level is the same subtract overkill damage from stats */
             if (this.prevHitInfo.name == this.curEnemy.info.name && this.prevHitInfo.level == this.curEnemy.info.level) {
                 damage -= this.prevHitInfo.overkill;
-                console.log(this.prevHitInfo);
-                console.log(damage);
+                this.prevHitInfo.overkill = 0;
             }
             this.recordDamage(this.playerHitInfo, damage);
             this.curDpsAcc.totDam += damage;

@@ -44,10 +44,9 @@ export class GenLiteSoundNotification implements GenLitePlugin {
         */
         this.genliteSoundListener = new THREE.AudioListener();
         this.genliteSoundListener.setMasterVolume(this.overrideVolume / 100.0) //bypas setvolume so you dont have to override it 
-        this.genliteSoundListener.gain.gain.value = 0.0;
         this.genliteSFXPlayer = new SFXPlayer();
         this.genliteSFXPlayer.load();
-        this.genliteSFXPlayer.play = (key, volume) => { this.overridePlay(key, volume) }; //override the default set volume
+        this.genliteSFXPlayer.play = (key, volume = 1) => { this.overridePlay(key, volume) }; //override the default set volume
         this.playerInUse = SFX_PLAYER;
         if (this.overrideVolume)
             this.playerInUse = this.genliteSFXPlayer;

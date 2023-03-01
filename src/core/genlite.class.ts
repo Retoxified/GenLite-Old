@@ -2,7 +2,7 @@ import { GenLitePluginLoader } from "./genlite-plugin-loader.class";
 import { GenLiteNotificationPlugin } from "./plugins/genlite-notification.plugin";
 import { GenLiteSettingsPlugin } from "./plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./plugins/genlite-commands.plugin";
-import {GenLitePlugin} from './interfaces/plugin.interface';
+import { GenLitePlugin } from './interfaces/plugin.interface';
 
 export class GenLite {
     static pluginName = 'GenLite';
@@ -25,6 +25,7 @@ export class GenLite {
     async init() {
         this.installHook(Camera.prototype, 'update');
         this.installHook(Network.prototype, 'logoutOK');
+        this.installHook(Network.prototype, 'disconnect', this.hookDisconnect)
         this.installHook(PhasedLoadingManager.prototype, 'start_phase', this.hookPhased);
         this.installHook(Network.prototype, 'action');
         this.installHook(Network.prototype, 'handle');
@@ -54,6 +55,11 @@ export class GenLite {
             this.hook('loginOK', args);
         }
     }
+
+    hookDisconnect(fnName: string, ...args: Array<unknown>) {
+        this.hook('logoutOK', args);
+    }
+
 
     registerPlugin(plugin: GenLitePlugin) {
         this.pluginList.push(plugin);

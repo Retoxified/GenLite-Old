@@ -2,7 +2,7 @@ export class GenLiteCommandsPlugin {
     public static pluginName = 'GenLiteCommandsPlugin';
     public static customCommandPrefix = '//';
 
-    private commands: {[key: string]: CommandSpec} = {};
+    private commands: { [key: string]: CommandSpec } = {};
     private originalProcessInput: Function;
 
     async init() {
@@ -63,7 +63,7 @@ export class GenLiteCommandsPlugin {
         );
     }
 
-    initializeUI(){
+    initializeUI() {
         this.print("Genlite Commands Loaded type //help to see list of commands");
     }
 
@@ -98,7 +98,7 @@ export class GenLiteCommandsPlugin {
             return null;
         }
 
-        let spec : CommandSpec = null;
+        let spec: CommandSpec = null;
         if (typeof help === 'function') {
             spec = {
                 command: command,

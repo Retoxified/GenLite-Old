@@ -4,7 +4,7 @@
  Known Issues:
  */
 
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteLocationsPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteLocationsPlugin'
