@@ -123,7 +123,7 @@ class GenLiteMessageBuffer {
                     existing.message.remove();
 
                     // and remove it from CHAT's internal buffer
-                    let index = CHAT.chat_buffer.indexOf(message);
+                    let index = CHAT.chat_buffer.indexOf(existing.message);
                     if (index >= 0) {
                         CHAT.chat_buffer.splice(index, 1);
                     }
