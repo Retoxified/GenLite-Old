@@ -1,8 +1,7 @@
 name: Node.js Webpack Test
 
 on:
- workflow_dispatch:
-    branches: [ EnhancedMinimap ]
+  workflow_dispatch:
   push:
     branches: [ EnhancedMinimap ]
 
@@ -17,6 +16,7 @@ jobs:
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
+          ref: EnhancedMinimap
           node-version: ${{ matrix.node-version }}
       - run: git checkout --orphan release
       - run: sed -i "2s/GenLite/GenLite-${{github.repository_owner}}/" userscript-banner.txt
