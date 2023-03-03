@@ -8,6 +8,8 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
     // Plugin Settings
     isEnabled: boolean = false; // Enable the plugin (Enabled/Disabled by the user)
     doRender: boolean = false; // Render the plugin's UI (Enabled by LoginOK(), disabled by LogoutOK())
+    doHighlight: boolean = false; // Enable Player Highlights (Enabled/Disabled by the user)
+    doHidePlayer: boolean = false; // Hide My Character (Enabled/Disabled by the user)
 
     // Plugin Data
     trackedPlayers = {};
@@ -40,6 +42,49 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
             "checkbox",
             this.handleHidePlayerSettingChange,
             this);
+
+        // Create the UI Tab for the Plugin
+        // addTab(tab_icon: string, tab_name: string, tab_content: HTMLElement) 
+        
+        // Create HTML Element for the Tab Content
+        let tabContent = document.createElement('div');
+        // Create Form Element for the Tab Content
+        let form = document.createElement('form');
+        // Create Input Element for the Tab Content
+        let input = document.createElement('input');
+        // Set the Input Element's Type to Checkbox
+        input.type = 'checkbox';
+        // Set the Input Element's ID to 'hide-player'
+        input.id = 'hide-player';
+        // Set the Input Element's Name to 'hide-player'
+        input.name = 'hide-player';
+        // Set the Input Element's Checked State to false
+        input.checked = false;
+        // Append the Input Element to the Form Element
+        // Add another input element (checkbox) to enable/disable player highlights
+        let input2 = document.createElement('input');
+        input2.type = 'checkbox';
+        input2.id = 'player-highlights';
+        input2.name = 'player-highlights';
+        input2.checked = false;
+ 
+        // Add event listener to the checkbox
+        input2.addEventListener('change', this.handleHighlightSettingChange.bind(this));
+
+        // Add event listener to the checkbox
+        input.addEventListener('change', this.handleHidePlayerSettingChange.bind(this));
+
+
+
+
+
+        form.appendChild(input2);
+        form.appendChild(input);
+        // Append the Form Element to the Tab Content Element
+        tabContent.appendChild(form);
+        // Add the Tab to the UI
+        window.genlite.ui.addTab('https://icons.iconarchive.com/icons/dtafalonso/modern-xp/32/ModernXP-41-Settings-icon.png', 'Player Tools', tabContent);
+
     }
 
     update(dt) {
@@ -160,7 +205,8 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
 
     // Setting Callbacks
     handleHighlightSettingChange(state: boolean) {
-        if (!state) {
+        this.doHighlight = !this.doHighlight;
+        if (!this.doHighlight) {
             // Clear Tracked Players
             this.trackedPlayers = {};
 
@@ -168,11 +214,12 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
             this.PlayerTagContainer.innerHTML = "";
         }
 
-        this.isEnabled = state;
+        this.isEnabled = this.doHighlight;
     }
 
     handleHidePlayerSettingChange(state: boolean) {
-        GRAPHICS.threeScene.getObjectByName(GAME.me.id).visible = !state;
+        this.doHidePlayer = !this.doHidePlayer;
+        GRAPHICS.threeScene.getObjectByName(GAME.me.id).visible = this.doHidePlayer;
     }
 
 
