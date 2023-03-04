@@ -156,6 +156,7 @@ export class GenLiteHighscores implements GenLitePlugin {
 
         if (verb == 'xp') {
             this.updatedSkills[payload.skill] = true;
+            this.updatedSkills["Total"] = true;
         }
     }
 
@@ -165,15 +166,28 @@ export class GenLiteHighscores implements GenLitePlugin {
         this.highscores.Player = PLAYER.character.name()
 
         if (this.statsToSend.Skills) {
+            let totalLevel = 0, totalXp = 0;
             for (let key in PLAYER_INFO.skills) {
                 let skill = PLAYER_INFO.skills[key];
+                totalLevel += skill.level;
+                totalXp += skill.xp;
+
                 if (!this.updatedSkills[key])
                     continue;
+
                 this.highscores.Stats.push({
                     Stat: skill.name,
                     Data1: skill.level,
                     Data2: skill.xp
-                })
+                });
+
+            }
+            if (this.updatedSkills["Total"]) {
+                this.highscores.Stats.push({
+                    Stat: "Total",
+                    Data1: totalLevel,
+                    Data2: totalXp
+                });
             }
             this.updatedSkills = {};
         }
