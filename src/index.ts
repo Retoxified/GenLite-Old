@@ -57,14 +57,14 @@ declare global {
     }
 }
 
-const DISCLAIMER = `
-GenLite is NOT associated with Rose-Tinted Games.
-Do not talk about GenLite in the main discord.
-Do not report bugs to the devs with GenLite enabled, they will ignore you and get annoyed.
-Do disable GenLite first and test for the bug again.
-If you find a bug and are unsure post in the GenLite Server. We will help you.
-While we work to ensure compatibility, Use At Your Own Risk.
-Press Cancel to Load, Press Okay to Stop.`;
+const DISCLAIMER = [
+    "GenLite is NOT associated with Rose-Tinted Games.",
+    "DO NOT talk about GenLite in the Genfanad Discord.",
+    "DO NOT report bugs to Genfanad with GenLite enabled. They will ignore you and get annoyed.",
+    "DO disable GenLite first and test for the bug again.",
+    "If you find a bug and are unsure, post in the GenLite Discord. We will help you.",
+    "While we work to ensure compatibility, Use At Your Own Risk.",
+];
 
 const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
@@ -87,12 +87,6 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
 let isInitialized = false;
 
 (async function load() {
-    let confirmed = localStorage.getItem("GenLiteConfirms");
-    if (!confirmed && await GenLiteConfirmation.confirm(DISCLAIMER) === true)
-        return;
-    confirmed = "true";
-    localStorage.setItem("GenLiteConfirms", confirmed);
-
     async function initGenLite() {
 
         function gameObject(
@@ -271,11 +265,22 @@ let isInitialized = false;
     window.addEventListener('load', (e) => {
         document.initGenLite = initGenLite;
 
+        let confirmed = localStorage.getItem("GenLiteConfirms");
+        if (!confirmed) {
+            await GenLiteConfirmation.confirmModal(DISCLAIMER, async () => {
+                // calls back only if accepted
+                localStorage.setItem("GenLiteConfirms", "true");
+                confirmed = true;
+            });
+        }
+
         let doc = (document as any)
         doc.client.set('document.client.originalStartScene', doc.client.get('qS'));
         doc.client.set('qS', function () {
             document.client.originalStartScene();
-            setTimeout(document.initGenLite, 100);
+            if (confirmed) {
+                setTimeout(document.initGenLite, 100);
+            }
         });
     });
 
