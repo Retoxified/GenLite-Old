@@ -57,7 +57,8 @@ export class GenLiteHighscores implements GenLitePlugin {
         forging: true,
         artistry: true,
         tailoring: true,
-        whittling: true
+        whittling: true,
+        total: true
     }
     async init() {
         window.genlite.registerPlugin(this);
@@ -156,7 +157,7 @@ export class GenLiteHighscores implements GenLitePlugin {
 
         if (verb == 'xp') {
             this.updatedSkills[payload.skill] = true;
-            this.updatedSkills["Total"] = true;
+            this.updatedSkills["total"] = true;
         }
     }
 
@@ -182,7 +183,7 @@ export class GenLiteHighscores implements GenLitePlugin {
                 });
 
             }
-            if (this.updatedSkills["Total"]) {
+            if (this.updatedSkills["total"]) {
                 this.highscores.Stats.push({
                     Stat: "Total",
                     Data1: totalLevel,
