@@ -8,8 +8,6 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
     // Plugin Settings
     isEnabled: boolean = false; // Enable the plugin (Enabled/Disabled by the user)
     doRender: boolean = false; // Render the plugin's UI (Enabled by LoginOK(), disabled by LogoutOK())
-    doHighlight: boolean = false; // Enable Player Highlights (Enabled/Disabled by the user)
-    doHidePlayer: boolean = false; // Hide My Character (Enabled/Disabled by the user)
 
     // Plugin Data
     trackedPlayers = {};
@@ -43,47 +41,43 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
             this.handleHidePlayerSettingChange,
             this);
 
-        // Create the UI Tab for the Plugin
-        // addTab(tab_icon: string, tab_name: string, tab_content: HTMLElement) 
+        // Creat HTML Div Element for the Tab Content
+        let tabContentElement = document.createElement('div');
+
+        // Create a Header for the Tab
+        let tabHeader = document.createElement('h1');
+        tabHeader.innerHTML = 'Player Tools';
+        tabContentElement.appendChild(tabHeader);
+
+        // Create a Description for the Tab
+        let tabDescription = document.createElement('p');
+        tabDescription.innerHTML = 'This plugin adds a few tools to help you play the game.';
+        tabContentElement.appendChild(tabDescription);
         
-        // Create HTML Element for the Tab Content
-        let tabContent = document.createElement('div');
-        // Create Form Element for the Tab Content
-        let form = document.createElement('form');
-        // Create Input Element for the Tab Content
-        let input = document.createElement('input');
-        // Set the Input Element's Type to Checkbox
-        input.type = 'checkbox';
-        // Set the Input Element's ID to 'hide-player'
-        input.id = 'hide-player';
-        // Set the Input Element's Name to 'hide-player'
-        input.name = 'hide-player';
-        // Set the Input Element's Checked State to false
-        input.checked = false;
-        // Append the Input Element to the Form Element
-        // Add another input element (checkbox) to enable/disable player highlights
-        let input2 = document.createElement('input');
-        input2.type = 'checkbox';
-        input2.id = 'player-highlights';
-        input2.name = 'player-highlights';
-        input2.checked = false;
- 
-        // Add event listener to the checkbox
-        input2.addEventListener('change', this.handleHighlightSettingChange.bind(this));
+        // Funny Meme Image
+        let memeImage = document.createElement('img');
+        memeImage.src = 'https://ih1.redbubble.net/image.1059709803.4166/bg,f8f8f8-flat,750x,075,f-pad,750x1000,f8f8f8.jpg';
+        memeImage.style.width = '100%';
+        tabContentElement.appendChild(memeImage);
 
-        // Add event listener to the checkbox
-        input.addEventListener('change', this.handleHidePlayerSettingChange.bind(this));
+        
 
 
-
-
-
-        form.appendChild(input2);
-        form.appendChild(input);
-        // Append the Form Element to the Tab Content Element
-        tabContent.appendChild(form);
         // Add the Tab to the UI
-        window.genlite.ui.addTab('https://icons.iconarchive.com/icons/dtafalonso/modern-xp/32/ModernXP-41-Settings-icon.png', 'Player Tools', tabContent);
+        window.genlite.ui.addTab('https://icons.iconarchive.com/icons/dtafalonso/modern-xp/32/ModernXP-41-Settings-icon.png', 'Player Tools', tabContentElement);
+
+        let HidePlayer = window.genlite.ui.addSetting('Player Tools', 'Hide Player', 'checkbox', null, false);
+        let PlayerHighlightsEnabled = window.genlite.ui.addSetting('Player Tools', 'Player Highlights', 'checkbox', null, this.isEnabled);
+
+        // Bind Events
+        HidePlayer.addEventListener('change', (e) => {
+            this.handleHidePlayerSettingChange(e.target.checked);
+        });
+
+        PlayerHighlightsEnabled.addEventListener('change', (e) => {
+            this.handleHighlightSettingChange(e.target.checked);
+        });
+
 
     }
 
@@ -205,8 +199,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
 
     // Setting Callbacks
     handleHighlightSettingChange(state: boolean) {
-        this.doHighlight = !this.doHighlight;
-        if (!this.doHighlight) {
+        if (!state) {
             // Clear Tracked Players
             this.trackedPlayers = {};
 
@@ -214,12 +207,11 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
             this.PlayerTagContainer.innerHTML = "";
         }
 
-        this.isEnabled = this.doHighlight;
+        this.isEnabled = state;
     }
 
     handleHidePlayerSettingChange(state: boolean) {
-        this.doHidePlayer = !this.doHidePlayer;
-        GRAPHICS.threeScene.getObjectByName(GAME.me.id).visible = this.doHidePlayer;
+        GRAPHICS.threeScene.getObjectByName(GAME.me.id).visible = !state;
     }
 
 
