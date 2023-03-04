@@ -141,19 +141,18 @@ class GenLiteMessageBuffer {
         text: string,
         timestamp: string,
     ) {
-        let plugin = document[GenLiteChatPlugin.pluginName];
-        let db = plugin.chatDB;
-        if (db) {
-            const tx = db.transaction('chatlog', 'readwrite');
-            const store = tx.objectStore('chatlog');
-
-            store.put({
-                channel: this.channel,
-                timestamp: timestamp,
-                speaker: speaker,
-                text: text,
-            });
-        }
+        document.genlite.database.storeTx(
+            'chatlog',
+            'readwrite',
+            (store) => {
+                store.put({
+                    channel: this.channel,
+                    timestamp: timestamp,
+                    speaker: speaker,
+                    text: text,
+                });
+            }
+        );
     }
 
 }
@@ -173,8 +172,6 @@ export class GenLiteChatPlugin implements GenLitePlugin {
     bufferHooked: boolean = false;
     buffers: Record<string, GenLiteMessageBuffer> = {};
 
-    chatDB: IDBDatabase;
-
     async init() {
         document.genlite.registerPlugin(this);
         this.condenseMessages = document.genlite.settings.add(
@@ -185,6 +182,13 @@ export class GenLiteChatPlugin implements GenLitePlugin {
             this.handleCondenseMessages,
             this
         );
+        document.genlite.database.add((db) => {
+            let store = db.createObjectStore('chatlog', {
+                keyPath: 'key',
+                autoIncrement: true
+            });
+            store.createIndex('indexKey', 'key', {unique: true});
+        });
 
         this.indexedDBSupported = 'indexedDB' in window;
         if (this.indexedDBSupported) {
@@ -243,16 +247,8 @@ export class GenLiteChatPlugin implements GenLitePlugin {
 
     updateState() {
         if (this.condenseMessages || this.preserveMessages) {
-            if (!this.chatDB) {
-                this.initDB();
-            }
             this.hookBuffer();
         } else {
-            if (this.chatDB) {
-                console.log('ChatDabase: closed');
-                this.chatDB.close();
-                this.chatDB = null;
-            }
             this.unhookBuffer();
         }
 
@@ -350,25 +346,6 @@ export class GenLiteChatPlugin implements GenLitePlugin {
         );
     }
 
-    initDB() {
-        let r = window.indexedDB.open('GenLiteChatDatabase', 2);
-        r.onerror = (e) => {
-            console.log('ChatDabaseError: ' + e);
-        };
-        r.onsuccess = (e) => {
-            console.log('ChatDatabase: opened');
-            this.chatDB = r.result;
-        };
-        r.onupgradeneeded = (e: any) => {
-            let db = e.target.result;
-            let store = db.createObjectStore('chatlog', {
-                keyPath: 'key',
-                autoIncrement: true
-            });
-            store.createIndex('indexKey', 'key', {unique: true});
-        };
-    }
-
     handleCommand(args: string) {
         let end = args.indexOf(' ');
         if (end == -1) {
@@ -377,7 +354,7 @@ export class GenLiteChatPlugin implements GenLitePlugin {
         let subcommand = args.slice(0, end);
         let arg = args.slice(end + 1);
 
-        if (!this.chatDB) {
+        if (!document.genlite.database.supported) {
             document.genlite.commands.print('Chat DB not available.');
             document.genlite.commands.print('Enable "preserve chat log" in settings.');
             return;
@@ -385,13 +362,17 @@ export class GenLiteChatPlugin implements GenLitePlugin {
 
         switch (subcommand) {
             case 'size':
-                let tx = this.chatDB.transaction('chatlog', 'readonly');
-                let store = tx.objectStore('chatlog');
-                let cursor = store.openCursor(null, 'prev');
-                cursor.onsuccess = (e: any) => {
-                    let maxKey = e.target.result.value.key;
-                    document.genlite.commands.print('Chat messages saved: ' + maxKey);
-                };
+                let store = document.genlite.database.storeTx(
+                    'chatlog',
+                    'readonly',
+                    (store) => {
+                        let cursor = store.openCursor(null, 'prev');
+                        cursor.onsuccess = (e: any) => {
+                            let maxKey = e.target.result.value.key;
+                            document.genlite.commands.print('Chat messages saved: ' + maxKey);
+                        };
+                    }
+                );
                 break;
             default:
                 this.helpCommand('');

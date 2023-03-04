@@ -16,7 +16,7 @@ import { GenLiteNotificationPlugin } from "./core/plugins/genlite-notification.p
 import { GenLiteSettingsPlugin } from "./core/plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./core/plugins/genlite-commands.plugin";
 import { GenLiteConfirmation } from "./core/helpers/genlite-confirmation.class";
-
+import { GenLiteDatabasePlugin } from "./core/plugins/genlite-database.plugin";
 
 /** Official Plugins */
 import { GenLiteVersionPlugin } from "./plugins/genlite-version.plugin";
@@ -191,6 +191,7 @@ let isInitialized = false;
         genlite.notifications = await genlite.pluginLoader.addPlugin(GenLiteNotificationPlugin);
         genlite.settings = await genlite.pluginLoader.addPlugin(GenLiteSettingsPlugin);
         genlite.commands = await genlite.pluginLoader.addPlugin(GenLiteCommandsPlugin);
+        genlite.database = await genlite.pluginLoader.addPlugin(GenLiteDatabasePlugin);
 
         /** Official Plugins */
         await genlite.pluginLoader.addPlugin(GenLiteVersionPlugin);
@@ -217,6 +218,7 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteHealthRegenerationPlugin);
 
         /** post init things */
+        await document['GenLiteDatabasePlugin'].postInit();
         await document['GenLiteSettingsPlugin'].postInit();
         await document['GenLiteNPCHighlightPlugin'].postInit();
         await document['GenLiteDropRecorderPlugin'].postInit();
