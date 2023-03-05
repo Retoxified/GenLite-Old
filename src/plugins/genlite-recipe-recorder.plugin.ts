@@ -27,8 +27,8 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
             this.gatherResults = {};
         } else {
             let saved = JSON.parse(dropTableString);
-            this.recipeResults = saved.recipe;
-            this.gatherResults = saved.gathering;
+            this.recipeResults = saved.recipe ? saved.recipe : {};
+            this.gatherResults = saved.gathering ? saved.gathering : {};
         }
         this.isPluginEnabled = window.genlite.settings.add("RecipeRecorder.Enable", true, "Record Recipes", "checkbox", this.handlePluginEnableDisable, this);
     }
@@ -75,6 +75,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                     break;
                 default:
                     this.gatherTask = "";
+                    console.log(params.action, " : if you see this please let dpepls know");            
                     break;
             }
             if (this.gatherTask !== "") {
