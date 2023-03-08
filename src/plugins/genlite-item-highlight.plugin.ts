@@ -186,6 +186,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
                              <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.importantItem('${itemId}');void(0);"> &#8862;</div>`;
         div.style.transform = 'translateX(-50%)';
         div.style.pointerEvents = "none";
+        div.style.fontFamily = 'acme, times new roman, Times, serif'; // Set Font
         div.style.textShadow = '-1px -1px 0 #000,0   -1px 0 #000, 1px -1px 0 #000, 1px  0   0 #000, 1px  1px 0 #000, 0    1px 0 #000, -1px  1px 0 #000, -1px  0   0 #000';
         this.itemHighlightDiv.appendChild(div);
         let e = {

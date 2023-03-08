@@ -3,8 +3,23 @@ const webpack = require('webpack');
 const fs = require('fs');
 
 const TerserPlugin = require("terser-webpack-plugin");
+const PACKAGE = require('./package.json');
+let METADATA = fs.readFileSync('./userscript-banner.txt', 'utf8').replace('${version}', PACKAGE.version);
 
-const METADATA = fs.readFileSync('./userscript-banner.txt', 'utf8');
+// Open README.md and replace version string
+let readme = fs.readFileSync('./README.md', 'utf8');
+
+// Version String in README
+// # GenLite 0.1.28 - For GenFanad
+let versionString = readme.match(/# GenLite [0-9.]+ - For GenFanad/)[0];
+let newVersionString = versionString.replace(/([0-9.]+)/, PACKAGE.version);
+
+// Update README with latest version
+readme = readme.replace(versionString, newVersionString);
+
+// Write README.md
+fs.writeFileSync('./README.md', readme);
+
 
 module.exports = {
     mode: 'production',

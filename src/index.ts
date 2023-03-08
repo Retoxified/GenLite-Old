@@ -20,6 +20,7 @@ import { GenLiteConfirmation } from "./core/helpers/genlite-confirmation.class";
 
 
 /** Official Plugins */
+import { GenLiteVersionPlugin } from "./plugins/genlite-version.plugin";
 import { GenLiteCameraPlugin } from "./plugins/genlite-camera.plugin";
 import { GenLiteChatPlugin } from "./plugins/genlite-chat.plugin";
 import { GenLiteDropRecorderPlugin } from "./plugins/genlite-drop-recorder.plugin";
@@ -37,9 +38,8 @@ import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
 import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
 import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
 import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
+import { GenLitePlayerToolsPlugin }  from "./plugins/genlite-playertools.plugin";
 import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
-
-
 
 
 const DISCLAIMER = `
@@ -68,6 +68,7 @@ Press Cancel to Load, Press Okay to Stop.`;
     genlite.commands = await genlite.pluginLoader.addPlugin(GenLiteCommandsPlugin);
 
     /** Official Plugins */
+    await genlite.pluginLoader.addPlugin(GenLiteVersionPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteChatPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
@@ -85,8 +86,8 @@ Press Cancel to Load, Press Okay to Stop.`;
     await genlite.pluginLoader.addPlugin(GenLiteItemTooltips);
     await genlite.pluginLoader.addPlugin(GenLiteSoundNotification);
     await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
+    await genlite.pluginLoader.addPlugin(GenLitePlayerToolsPlugin);
     await genlite.pluginLoader.addPlugin(GenLiteHighscores);
-
 
     /** post init things */
     await window.GenLiteSettingsPlugin.postInit();

@@ -30,9 +30,13 @@ To install Node.JS dependencies from package.json run:
 
 `npm i`
 
-To build the project run:
+To build the project for development run:
+Development builds are slightly less minimized and do not increment the genlite version number.
+`npm run build:dev`
 
-`npm run build`
+To build the project for production run:
+Production development results in fully minimized output and increments the version number.
+`npm run build:prod`
 
 # IDE & Setup
 If you're using a well known IDE, we suggest [enabling coding assistance](https://blog.jetbrains.com/webstorm/2015/11/node-js-coding-assistance-in-webstorm-11/) for Node.JS.
