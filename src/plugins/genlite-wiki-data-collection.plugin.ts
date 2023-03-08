@@ -1,3 +1,16 @@
+/*
+    Copyright (C) 2022-2023 Retoxified, dpeGit
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
@@ -142,17 +155,16 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         // hack? Math? i dunno i though i knew how this works but i dont but for some reason it increases the accuracy of the prediction
         xpDrop += (xpDrop % 3);
         let levelDiff = (this.combatStyle == "melee" ? this.playerMeleeCL : this.playerRangedCL) - this.curEnemy.info.level;
-        levelDiff = Math.min(Math.max(levelDiff, -4), 9);
         let baseXp;
         if (levelDiff == 0) {
             baseXp = xpDrop;
-        } else if (levelDiff < 0) {
-            baseXp = xpDrop / (1 - ((1 / 20) * levelDiff));
-        } else {
-            baseXp = xpDrop / (1 - ((1 / 10) * levelDiff));
+        } else if (levelDiff == -4) {
+            baseXp = xpDrop / 1.2;
+        } else if (levelDiff == 9) {
+            baseXp = xpDrop / 0.1;
         }
         this.previously_seen[mobKey].Base_Xp = baseXp;
-        this.previously_seen[mobKey].Level_Diff_Bit = 1 << (levelDiff + 4);
+        this.previously_seen[mobKey].Level_Diff_Bit = 0;
         if (this.isRemoteEnabled && this.previously_seen[mobKey].numSeen >= 100)
             window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
     }
