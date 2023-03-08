@@ -1,3 +1,16 @@
+/*
+    Copyright (C) 2022-2023 dpeGit
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import {GenLitePlugin} from '../core/interfaces/plugin.interface';
 
 export class GenLiteXpCalculator implements GenLitePlugin {
@@ -117,14 +130,15 @@ export class GenLiteXpCalculator implements GenLitePlugin {
         let xpRate = 0;
         let timeDiff = Date.now() - skill.tsStart;
         if (skill.tsStart != 0) {
-            xpRate = Math.round((piSkill.xp - skill.startXP) / (timeDiff / 3600000) * 10) / 100;
+            xpRate = Math.round((piSkill.xp - skill.startXP) / (timeDiff / 3600000)) / 10;
         }
         let ttl = Math.round(piSkill.tnl / xpRate) / 10;
         div.innerHTML += `
-            <div>XP per Action: ${(Math.round(skill.avgActionXP * 10) / 100).toLocaleString("en-US")}</div>
+            <div>XP per Action: ${(Math.round(skill.avgActionXP) / 10).toLocaleString("en-US")}</div>
             <div>Action TNL: ${skill.actionsToNext.toLocaleString("en-US")}</div>
-            <div>XP per hour: ${xpRate.toLocaleString("en-US")}</div>
-            <div>Time To Level: ${ttl}</div>`;
+            <div>XP per Hour: ${xpRate.toLocaleString("en-US")}</div>
+            <div>Time to Level: ${ttl.toLocaleString("en-US")}</div>
+            <div>XP Tracked: ${skill.startXP == 0 ? 0 : ((piSkill.xp - skill.startXP) / 10).toLocaleString("en-US")}`;
     }
 
     /* clicking on a skill with shift will reset it
@@ -191,13 +205,13 @@ export class GenLiteXpCalculator implements GenLitePlugin {
         let xpRate = 0;
         let timeDiff = Date.now() - total.tsStart;
         if (total.tsStart != 0) {
-            xpRate = Math.round(total.gainedXP / (timeDiff / 3600000) * 10) / 100;
+            xpRate = Math.round(total.gainedXP / (timeDiff / 3600000)) / 10;
         }
         div.innerHTML = `
         <div>Total</div>
         <div>Current XP: ${xp.toLocaleString("en-US")}</div>
         <div>Gained XP: ${(total.gainedXP / 10).toLocaleString("en-US")}</div>
-        <div>XP per Action: ${(Math.round(total.avgActionXP * 10) / 100).toLocaleString("en-US")}</div>
+        <div>XP per Action: ${(Math.round(total.avgActionXP) / 10).toLocaleString("en-US")}</div>
         <div>XP per hour: ${xpRate.toLocaleString("en-US")}</div>
         `;
         if (event) { //if its an event update he poistion of the tooltip

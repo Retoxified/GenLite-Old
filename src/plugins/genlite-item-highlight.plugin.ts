@@ -1,3 +1,16 @@
+/*
+    Copyright (C) 2022-2023 Retoxified, dpeGit, snwhd
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 interface Element {
     element: HTMLElement,
     itemId: string,
@@ -37,7 +50,7 @@ interface Element {
  * to each item, modifying the left-click and right-click actions order.
 */
 
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteItemHighlightPlugin';
@@ -279,9 +292,9 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         } else if (itemPriority == 1) {
             return "genlite-priority-item";
         }
-   
+
         let itemValue = this.getItemValue(itemId);
-  
+
         if (itemValue >= 10000) {
             return 'text-ran';
         } else if (itemValue >= 5000) {
@@ -357,7 +370,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
                     priority: - 1,
                     object: item,
                     text: 'Examine',
-                    action: () =>CHAT.addGameMessage(item.examine)
+                    action: () => CHAT.addGameMessage(item.examine)
                 });
             }
             let all_keys = Object.keys(item.ids);
@@ -367,7 +380,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
                 priority: 1 + window[GenLiteItemHighlightPlugin.pluginName].getItemData(itemId) * 50,
                 object: item,
                 text: all_keys.length > 1 ? 'Take one' : 'Take',
-                action: () =>{
+                action: () => {
                     let take_id = all_keys[Math.floor(Math.random() * all_keys.length)];
                     NETWORK.action('take', {
                         item: take_id

@@ -1,20 +1,17 @@
-class MonsterData {
-    //this needs to be moved to an interface once i figure out how TS interfaces work
-    "Monster_Name" = "";
-    "Monster_Level" = 0;
-    "Monster_Pack_ID" = "";
-    "X" = 0;
-    "Y" = 0;
-    "Layer" = "";
-    "Pack_Size" = 0;
-    "Monster_HP" = 0;
-    "Base_Xp" = 0;
-    "ign_mobkey" = "";
-    "Level_Diff_Bit" = 0;
-    "Version" = 3;
-}
+/*
+    Copyright (C) 2022-2023 Retoxified, dpeGit
+*/
+/*
+    This file is part of GenLite.
 
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteWikiDataCollectionPlugin';
@@ -30,14 +27,14 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
     curEnemy = undefined;
     vitDrop = 0;
 
-    isPluginEnabled: boolean = false;
-    scanInterval;
-    sendInterval;
+    isRemoteEnabled: boolean = false;
+    scanInterval: NodeJS.Timer = null;
+    sendInterval: NodeJS.Timer = null;
 
     async init() {
         window.genlite.registerPlugin(this);
 
-        this.isPluginEnabled = window.genlite.settings.add(
+        this.isRemoteEnabled = window.genlite.settings.add(
             "WikiDataColl.Enable",
             false,
             "Wiki Data collection(REMOTE SERVER)",
@@ -51,16 +48,32 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
     }
 
     loginOK() {
-        this.scanNpcs(this);
-        this.scanInterval = setInterval(() => { this.scanNpcs(this) }, 30000);
+        this.scanNpcs();
+        if (this.scanInterval == null)
+            this.scanInterval = setInterval(() => { this.scanNpcs() }, 1000);
+        // send out a monsterdata once every 1s to lesson server load
+        if (this.isRemoteEnabled && this.sendInterval == null)
+            this.sendInterval = setInterval(() => { this.sendToServer(this) }, 1000);
+    }
+
+    logoutOK() {
+        clearInterval(this.scanInterval);
+        this.scanInterval = null;
+        clearInterval(this.sendInterval);
+        this.sendInterval = null;
     }
 
     handlePluginEnableDisable(state: boolean) {
-        this.isPluginEnabled = state;
+        this.isRemoteEnabled = state;
+        if (state) {
+            this.sendInterval = setInterval(() => { this.sendToServer(this) }, 200);
+        } else {
+            clearInterval(this.sendInterval);
+        }
     }
 
     updateSkills() {
-        if (!this.isPluginEnabled) {
+        if (!this.isRemoteEnabled) {
             return;
         }
         this.playerMeleeCL = Math.trunc((PLAYER_INFO.skills.attack.level + PLAYER_INFO.skills.defense.level + PLAYER_INFO.skills.strength.level) / 3);
@@ -82,7 +95,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
             return;
         if (this.previously_seen[mobKey].Monster_HP == 0) { // if we havent seen the monster or if we dont know its health
             this.previously_seen[mobKey].Monster_HP = update.maxhp;
-            if (this.isPluginEnabled)
+            if (this.isRemoteEnabled && this.previously_seen[mobKey].numSeen >= 100)
                 window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
         }
     }
@@ -139,35 +152,44 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
             return;
 
         let xpDrop = xp.xp + this.vitDrop;
-        // ack? Math? i dunno i though i knew how this works but i dont but for some reason it increases the accuracy of the prediction
+        // hack? Math? i dunno i though i knew how this works but i dont but for some reason it increases the accuracy of the prediction
         xpDrop += (xpDrop % 3);
         let levelDiff = (this.combatStyle == "melee" ? this.playerMeleeCL : this.playerRangedCL) - this.curEnemy.info.level;
-        levelDiff = Math.min(Math.max(levelDiff, -4), 12);
         let baseXp;
         if (levelDiff == 0) {
             baseXp = xpDrop;
-        } else if (levelDiff < 0) {
-            baseXp = xpDrop / (1 - ((1 / 20) * levelDiff));
-        } else {
-            baseXp = xpDrop / (1 - ((7 / 120) * levelDiff));
+        } else if (levelDiff == -4) {
+            baseXp = xpDrop / 1.2;
+        } else if (levelDiff == 9) {
+            baseXp = xpDrop / 0.1;
         }
         this.previously_seen[mobKey].Base_Xp = baseXp;
-        this.previously_seen[mobKey].Level_Diff_Bit = 1 << (levelDiff + 4);
-        if (this.isPluginEnabled)
+        this.previously_seen[mobKey].Level_Diff_Bit = 0;
+        if (this.isRemoteEnabled && this.previously_seen[mobKey].numSeen >= 100)
             window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
     }
 
-    scanNpcs(callback_this) {
+    scanNpcs() {
         let clustersize = 40
         let npcs = {}
+        let blackList = [];
         /* do some aggregrate stuff packSize, and add up mapsegment for averaging later */
         for (let key in GAME.npcs) {
+            let npc = GAME.npcs[key];
+            let npcX = npc.pos2.x;
+            let npcY = npc.pos2.y;
             let packId = key.split('-')[0];
+            /* if any member of the pack is above 30 tiles away ignore it because there might be more memeber out of range */
+            if (Math.abs(npcX - PLAYER.character.pos2.x) > 30 || Math.abs(npcY - PLAYER.character.pos2.y) > 30 || blackList.includes(packId)) {
+                delete npcs[packId]
+                blackList.push(packId)
+                continue;
+            }
             if (npcs[packId] === undefined)
-                npcs[packId] = { packSize: 0, mapSegX: 0, mapSegY: 0, npc: GAME.npcs[key] };
+                npcs[packId] = { packSize: 0, mapSegX: 0, mapSegY: 0, npc: npc };
             npcs[packId].packSize++;
-            npcs[packId].mapSegX += GAME.npcs[key].pos2.x;
-            npcs[packId].mapSegY += GAME.npcs[key].pos2.y;
+            npcs[packId].mapSegX += npcX
+            npcs[packId].mapSegY += npcY
         }
         /* calculate the mob key check if we need to update the server */
         for (let packId in npcs) {
@@ -178,24 +200,19 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
             let group = 'A';
             let npc = npcs[packId].npc;
             /* calculate the mob key and increment the group if the key conflicts with a prexisting entry */
-            let mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
+            let mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${npcInfo.packSize}--${PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
             while (this.previously_seen[mobKey] !== undefined && this.previously_seen[mobKey].ign_mobkey != packId) {
                 group = String.fromCharCode(group.charCodeAt(0) + 1);
-                mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
+                mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${npcInfo.packSize}--${PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
             }
-            /* if we have an existing key just ignore the above */
-            mobKey = this.packList[packId] ? this.packList[packId] : mobKey;
-            if (this.previously_seen[mobKey] !== undefined) {
-                if (!this.previously_seen[mobKey].Pack_Size ||
-                    this.previously_seen[mobKey].Pack_Size < npcInfo.packSize) { // if we have seen it before but we counted more this time update
 
-                    let monsterdata = this.previously_seen[mobKey];
-                    monsterdata.Pack_Size = npcInfo.packSize;
-                    if (this.isPluginEnabled)
-                        window.genlite.sendDataToServer("monsterdata", monsterdata);
-                }
+            if (this.previously_seen[mobKey] !== undefined) {
+                if (this.previously_seen[mobKey].numSeen == 100)
+                    this.toSend.push(this.previously_seen[mobKey]);
+                this.previously_seen[mobKey].numSeen++;
                 continue;
             }
+
             let monsterdata = {
                 "Monster_Name": npc.info.name,
                 "Monster_Level": npc.info.level ? npc.info.level : 0,
@@ -206,26 +223,31 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
                 "Pack_Size": npcInfo.packSize,
                 "Monster_HP": 0,
                 "Base_Xp": 0,
-                "ign_mobkey": packId,
                 "Level_Diff_Bit": 0,
-                "Version": 3
+                "ign_mobkey": packId,
+                "numSeen": 1,
+                "Version": 4
             };
+            /* if scanned pack is smaller ignore it and continue */
+            if (this.previously_seen[this.packList[packId]] && this.previously_seen[this.packList[packId]].Pack_Size > monsterdata.Pack_Size)
+                continue;
+            /* store key */
             this.previously_seen[mobKey] = monsterdata;
-            this.packList[packId] = mobKey;
-            if (this.isPluginEnabled)
-                this.toSend.push(monsterdata);
+            /* if pack list not set, link packId and genKey */
+            if (!this.packList[packId])
+                this.packList[packId] = mobKey;
+            /* if packId key is smaller than genKey delete old and set new */
+            if (this.previously_seen[this.packList[packId]].Pack_Size < monsterdata.Pack_Size) {
+                delete this.previously_seen[this.packList[packId]];
+                this.packList[packId] = mobKey;
+            }
         }
-        /*
-                // spread the server messages over a 20 second interval to lessen server stress
-                if (callback_this.toSend.length > 0)
-                    callback_this.sendTimeInterval = setInterval(() => { callback_this.sendToServer(callback_this) }, 20000 / callback_this.toSend.length)
-                    */
     }
 
     sendToServer(callback_this) {
+        if (callback_this.toSend.length <= 0)
+            return;
         let monsterdata = callback_this.toSend.pop();
         window.genlite.sendDataToServer("monsterdata", monsterdata);
-        if (callback_this.toSend.length == 0)
-            clearInterval(callback_this.sendTimeInterval);
     }
 }

@@ -1,3 +1,16 @@
+/*
+    Copyright (C) 2023 dpeGit
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import {GenLitePlugin} from '../core/interfaces/plugin.interface';
 
 export class GenLiteSoundNotification implements GenLitePlugin {
@@ -44,10 +57,9 @@ export class GenLiteSoundNotification implements GenLitePlugin {
         */
         this.genliteSoundListener = new THREE.AudioListener();
         this.genliteSoundListener.setMasterVolume(this.overrideVolume / 100.0) //bypas setvolume so you dont have to override it 
-        this.genliteSoundListener.gain.gain.value = 0.0;
         this.genliteSFXPlayer = new SFXPlayer();
         this.genliteSFXPlayer.load();
-        this.genliteSFXPlayer.play = (key, volume) => { this.overridePlay(key, volume) }; //override the default set volume
+        this.genliteSFXPlayer.play = (key, volume = 1) => { this.overridePlay(key, volume) }; //override the default set volume
         this.playerInUse = SFX_PLAYER;
         if (this.overrideVolume)
             this.playerInUse = this.genliteSFXPlayer;

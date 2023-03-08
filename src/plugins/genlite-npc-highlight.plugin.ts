@@ -1,10 +1,21 @@
-import { GenLiteWikiDataCollectionPlugin } from "./genlite-wiki-data-collection.plugin";
+/*
+    Copyright (C) 2022-2023 Retoxified, dpeGit
+*/
+/*
+    This file is part of GenLite.
 
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteNPCHighlightPlugin';
-    static healthListVersion = "2"
+    static healthListVersion = "3"
 
     trackedNpcs = {};
     npcData = {};
@@ -86,6 +97,8 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
             text += `
             <div class="genlite-npc-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteNPCHighlightPlugin.pluginName}.hide_item('${hpKey}');void(0);"> &#8863;</div>`;
             this.trackedNpcs[npcsToAdd[key]] = this.create_text_element(hpKey, text);
+            this.trackedNpcs[npcsToAdd[key]].hasHp = this.npcHealthList[hpKey] !== undefined;
+
         }
 
         for (let key in npcsToRemove) {
@@ -96,6 +109,13 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         for (let key in this.trackedNpcs) {
             let worldPos;
             if (GAME.npcs[key] !== undefined) {
+                /* if the health was updated but the npc tag doesnt have that set regen the tag */
+                if (!this.trackedNpcs[key].hasHp && this.npcHealthList[this.packList[key.split('-')[0]]]) {
+                    this.trackedNpcs[key].remove();
+                    delete this.trackedNpcs[key];
+                    continue;
+                }
+
                 /* if in combat grab the threeObject position (the actual current position of the sprite not the world pos)
                     mult by 0.8 which is the height of the health bar
                 */
@@ -118,7 +138,6 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
                 }
                 this.trackedNpcs[key].style.top = screenPos.y + "px";
                 this.trackedNpcs[key].style.left = screenPos.x + "px";
-
             }
         }
     }
@@ -170,11 +189,14 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         if (this.npcHealthList[hpKey] === undefined) {
             this.npcHealthList[hpKey] = update.maxhp;
             localStorage.setItem("GenliteNPCHealthList", JSON.stringify(this.npcHealthList));
-            npcsToMod = Object.keys(GAME.npcs).filter(x => GAME.npcs[x].id.split('-')[0] == object.id.split('-')[0]);
         }
+        npcsToMod = Object.keys(GAME.npcs).filter(x => GAME.npcs[x].id.split('-')[0] == object.id.split('-')[0]);
         for (let key in npcsToMod) {
             let npcid = npcsToMod[key];
+            if (this.trackedNpcs[npcid] && this.trackedNpcs[npcid].hasHp)
+                continue;
             this.trackedNpcs[npcid].innerHTML += ` HP: ${this.npcHealthList[hpKey]}`;
+            this.trackedNpcs[npcid].hasHp = true;
         }
         if (this.trackedNpcs.hasOwnProperty(object.id))
             this.trackedNpcs[object.id].innerHTML = `<div>${object.htmlName}</div><div>HP: ${update.hp}/${update.maxhp}</div>`;

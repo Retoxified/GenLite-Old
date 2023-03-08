@@ -1,8 +1,21 @@
+/*
+    Copyright (C) 2022-2023 Retoxified, FrozenReality, dpeGit
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { GenLitePluginLoader } from "./genlite-plugin-loader.class";
 import { GenLiteNotificationPlugin } from "./plugins/genlite-notification.plugin";
 import { GenLiteSettingsPlugin } from "./plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./plugins/genlite-commands.plugin";
-import {GenLitePlugin} from './interfaces/plugin.interface';
+import { GenLitePlugin } from './interfaces/plugin.interface';
 
 export class GenLite {
     static pluginName = 'GenLite';
@@ -25,6 +38,7 @@ export class GenLite {
     async init() {
         this.installHook(Camera.prototype, 'update');
         this.installHook(Network.prototype, 'logoutOK');
+        this.installHook(Network.prototype, 'disconnect', this.hookDisconnect)
         this.installHook(PhasedLoadingManager.prototype, 'start_phase', this.hookPhased);
         this.installHook(Network.prototype, 'action');
         this.installHook(Network.prototype, 'handle');
@@ -54,6 +68,11 @@ export class GenLite {
             this.hook('loginOK', args);
         }
     }
+
+    hookDisconnect(fnName: string, ...args: Array<unknown>) {
+        this.hook('logoutOK', args);
+    }
+
 
     registerPlugin(plugin: GenLitePlugin) {
         this.pluginList.push(plugin);

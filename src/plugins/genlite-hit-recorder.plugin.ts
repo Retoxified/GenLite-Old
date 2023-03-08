@@ -1,3 +1,16 @@
+/*
+    Copyright (C) 2022-2023 dpeGit
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import {GenLitePlugin} from '../core/interfaces/plugin.interface';
 
 class HitInfo {
@@ -143,8 +156,7 @@ export class GenLiteHitRecorder implements GenLitePlugin {
             /* if enemy name and level is the same subtract overkill damage from stats */
             if (this.prevHitInfo.name == this.curEnemy.info.name && this.prevHitInfo.level == this.curEnemy.info.level) {
                 damage -= this.prevHitInfo.overkill;
-                console.log(this.prevHitInfo);
-                console.log(damage);
+                this.prevHitInfo.overkill = 0;
             }
             this.recordDamage(this.playerHitInfo, damage);
             this.curDpsAcc.totDam += damage;

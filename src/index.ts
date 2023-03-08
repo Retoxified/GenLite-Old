@@ -1,8 +1,23 @@
+/*
+    Copyright (C) 2022-2023 Retoxified, dpeGit, FrozenReality
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 /** Core Features */
 import { GenLite } from "./core/genlite.class";
 import { GenLiteNotificationPlugin } from "./core/plugins/genlite-notification.plugin";
 import { GenLiteSettingsPlugin } from "./core/plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./core/plugins/genlite-commands.plugin";
+import { GenLiteConfirmation } from "./core/helpers/genlite-confirmation.class";
+
 
 /** Official Plugins */
 import { GenLiteVersionPlugin } from "./plugins/genlite-version.plugin";
@@ -24,8 +39,25 @@ import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
 import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
 import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
 import { GenLitePlayerToolsPlugin }  from "./plugins/genlite-playertools.plugin";
+import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
+
+
+const DISCLAIMER = `
+GenLite is NOT associated with Rose-Tinted Games.
+Do not talk about GenLite in the main discord.
+Do not report bugs to the devs with GenLite enabled, they will ignore you and get annoyed.
+Do disable GenLite first and test for the bug again.
+If you find a bug and are unsure post in the GenLite Server. We will help you.
+While we work to ensure compatibility, Use At Your Own Risk.
+Press Cancel to Load, Press Okay to Stop.`;
 
 (async function load() {
+    let confirmed = localStorage.getItem("GenLiteConfirms");
+    if (!confirmed && await GenLiteConfirmation.confirm(DISCLAIMER) === true)
+        return;
+    confirmed = "true";
+    localStorage.setItem("GenLiteConfirms", confirmed);
+
     const genlite = new GenLite();
     await genlite.init();
     window.genlite = genlite;
@@ -55,6 +87,7 @@ import { GenLitePlayerToolsPlugin }  from "./plugins/genlite-playertools.plugin"
     await genlite.pluginLoader.addPlugin(GenLiteSoundNotification);
     await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
     await genlite.pluginLoader.addPlugin(GenLitePlayerToolsPlugin);
+    await genlite.pluginLoader.addPlugin(GenLiteHighscores);
 
     /** post init things */
     await window.GenLiteSettingsPlugin.postInit();

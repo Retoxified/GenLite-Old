@@ -1,4 +1,17 @@
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+/*
+    Copyright (C) 2023 snwhd
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteMusicPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteMusicPlugin';
@@ -12,7 +25,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
     selectionMenu: HTMLElement;
     displayed = false;
 
-    selectionOptions: {[key: string]: HTMLElement} = {};
+    selectionOptions: { [key: string]: HTMLElement } = {};
     currentSelection: HTMLElement = null;
 
     // plugin modes
@@ -123,7 +136,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
             };
         } else {
             MUSIC_PLAYER.setNextTrack = this.originalSetTrack;
-            SETTINGS.DOM_music_text.onclick = (e) => {};
+            SETTINGS.DOM_music_text.onclick = (e) => { };
             this.hideMusicSelection();
         }
     }

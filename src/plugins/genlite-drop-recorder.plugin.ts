@@ -1,4 +1,17 @@
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+/*
+    Copyright (C) 2022-2023 dpeGit
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteDropRecorderPlugin';
@@ -10,8 +23,9 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
         layer: "",
         x: 0,
         y: 0,
+        Version: 2,
 
-        drops: []
+        Drops: []
     };
     curCombat: { [key: string]: any } = undefined;
     curEnemy = {
@@ -32,7 +46,7 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
 
     async init() {
         window.genlite.registerPlugin(this);
-        let dropTableString = localStorage.getItem("genliteDropTable")
+        let dropTableString = localStorage.getItem("genliteDropTable");
         if (dropTableString == null) {
             this.dropTable = {};
         } else {
@@ -119,20 +133,20 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
         */
         if (verb == "removeObject" && payload.id == this.curEnemy.id && this.enemyDead != Number.POSITIVE_INFINITY) {
             let drop: any = {};
-            this.monsterData.drops = [];
+            this.monsterData.Drops = [];
             for (let item in this.objectSpawns) {
                 if (this.objectSpawns[item].timestamp <= payload.timestamp && this.objectSpawns[item].timestamp >= this.enemyDead) {
                     drop.Item_Code = this.objectSpawns[item].item.item;
                     drop.Item_Quantity = this.objectSpawns[item].item.quantity === undefined ? drop.Item_Quantity = 1 : this.objectSpawns[item].item.quantity;
-                    this.monsterData.drops.push(structuredClone(drop));
+                    this.monsterData.Drops.push(structuredClone(drop));
                 }
             }
 
             /* if no drops are detected create a "nothing" drop and add that */
-            if (this.monsterData.drops.length == 0) {
+            if (this.monsterData.Drops.length == 0) {
                 drop.Item_Code = "nothing";
                 drop.Item_Quantity = 1;
-                this.monsterData.drops.push(structuredClone(drop));
+                this.monsterData.Drops.push(structuredClone(drop));
             }
             this.objectSpawns = [];
             this.enemyDead = Number.POSITIVE_INFINITY;
@@ -187,8 +201,8 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
             x: this.monsterData.x,
             y: this.monsterData.y
         });
-        for (let i in this.monsterData.drops) {
-            let drop = this.monsterData.drops[i]
+        for (let i in this.monsterData.Drops) {
+            let drop = this.monsterData.Drops[i]
             if (this.dropTable[dropKey].drops[drop.Item_Code] === undefined)
                 this.dropTable[dropKey].drops[drop.Item_Code] = 0;
             this.dropTable[dropKey].drops[drop.Item_Code] += drop.Item_Quantity;
