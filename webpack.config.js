@@ -11,7 +11,12 @@ let readme = fs.readFileSync('./README.md', 'utf8');
 
 // Version String in README
 // # GenLite 0.1.28 - For GenFanad
+// Look for match on the last set of numbers and increment by 1
 let versionString = readme.match(/# GenLite [0-9.]+ - For GenFanad/)[0];
+
+// PACKAGE.version = 0.1.28
+// Increment version by 1
+let newVersion = PACKAGE.version.split('.').map((v, i) => i === 2 ? parseInt(v) + 1 : v).join('.');
 let newVersionString = versionString.replace(/([0-9.]+)/, PACKAGE.version);
 
 // Update README with latest version
