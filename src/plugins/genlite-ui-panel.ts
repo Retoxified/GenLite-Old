@@ -4,6 +4,7 @@ export class GenLiteUIPanel implements GenLitePlugin {
     static pluginName = "GenLiteUIPanel";
 
 
+    // Important Elements
     genliteUI: HTMLDivElement;
     genliteUITitle: HTMLDivElement;
     genliteUIBody: HTMLDivElement;
@@ -11,6 +12,14 @@ export class GenLiteUIPanel implements GenLitePlugin {
     genliteUITabs: {[key:string]: {content: HTMLDivElement, settings: HTMLDivElement}} = {};
     genliteUIContentContainer: HTMLDivElement;
     genliteUIOpenButton: HTMLDivElement;
+
+    // Important Animations
+    private PanelAnimation: Animation;
+    private ButtonAnimation: Animation;
+
+
+
+    panelOpen: boolean = false;
 
 
     async init() {
@@ -34,6 +43,97 @@ export class GenLiteUIPanel implements GenLitePlugin {
         this.genliteUI.style.lineHeight = "1.5";
         this.genliteUI.style.textAlign = "left";
         this.genliteUI.style.userSelect = "none";
+
+        // When a user clicks on the left edge of the Settings Panel and drags it, resize the Settings Panel
+        let isDragging = false;
+        let showDragCursor = false;
+        this.genliteUI.addEventListener("mousedown", (e) => {
+            if (e.offsetX < 10 && !isDragging) {
+                isDragging = true;
+            }
+        });
+
+        // On Mouse Move in the body, resize the Settings Panel
+        document.body.addEventListener("mousemove", (e) => {
+            // If we are within 10px of the left edge of the Settings Panel, resize the Settings Panel
+            // Get Bounding Rect of the Settings Panel
+            let rect = this.genliteUI.getBoundingClientRect();
+            // rect structure: {x: 0, y: 0, width: 300, height: 100, top: 0, right: 300, bottom: 100, left: 0}
+            if (e.clientX < rect.left + 10 && showDragCursor) {
+                console.log("Mouse is within 10px of the left edge of the Settings Panel")
+                document.body.style.cursor = "col-resize";
+            } else {
+                console.log(rect.left + 10 && showDragCursor)
+                document.body.style.cursor = "default";
+            }
+
+            if (isDragging) {
+                // Max width of the Settings Panel is 25% of the window width
+                if (window.innerWidth - e.clientX > window.innerWidth * 0.25) {
+                    this.genliteUI.style.width = `${window.innerWidth * 0.25}px`;
+                } else if (window.innerWidth - e.clientX < 300) {
+                    // Min width of the Settings Panel is 300px
+                    this.genliteUI.style.width = "300px";
+                } else {
+                    // Resize is based on the mouse position relative to the window
+                    this.genliteUI.style.width = `${window.innerWidth - e.clientX}px`;
+                }
+
+                this.PanelAnimation = this.genliteUI.animate([
+                    { right: `-${this.genliteUI.offsetWidth}px` },
+                    { right: `0px` }
+                ], {
+                    duration: 500,
+                    easing: "ease-in-out",
+                    fill: "forwards"
+                });
+                this.genliteUI.style.right = `-${this.genliteUI.offsetWidth}px`
+                this.PanelAnimation.finish();
+
+
+                this.ButtonAnimation = this.genliteUIOpenButton.animate([
+                    { transform: "rotate(0deg)", right: "0px" },
+                    { transform: "rotate(180deg)", right: `${this.genliteUI.offsetWidth}px` }
+                ], {
+                    duration: 500,
+                    easing: "ease-in-out",
+                    fill: "forwards"
+                });
+                this.PanelAnimation.finish();
+            }
+        });
+
+
+
+        // On Mouse Up in the body, stop resizing the Settings Panel
+        document.body.addEventListener("mouseup", (e) => {
+            if (isDragging) {
+                isDragging = false;
+            }
+        });
+
+        // On Mouse Up in the Settings Panel, stop resizing the Settings Panel
+        this.genliteUI.addEventListener("mouseup", (e) => {
+            if (isDragging) {
+                isDragging = false;
+            }
+        });
+
+        // On Mouse Enter, allow tracking of mouse position
+        this.genliteUI.addEventListener("mouseenter", (e) => {
+            showDragCursor = true;
+        });
+
+        this.genliteUI.addEventListener("mouseleave", (e) => {
+            showDragCursor = false;
+        });
+
+
+        // When the genliteUI is resized, move the genliteUIOpenButton to the left edge of the genliteUI
+        this.genliteUI.addEventListener("resize", (e) => {
+            this.genliteUIOpenButton.style.right = `${this.genliteUI.offsetWidth}px`;
+        });
+
         document.body.appendChild(this.genliteUI);
 
         // Create Settings Panel Header
@@ -63,68 +163,75 @@ export class GenLiteUIPanel implements GenLitePlugin {
         this.genliteUI.appendChild(this.genliteUIBody);
 
         // Create Settings Panel Open Button
-        const genliteUIOpenButton = document.createElement("div");
-        genliteUIOpenButton.id = "genlite-genlite-ui-open-button";
-        genliteUIOpenButton.style.position = "fixed";
-        genliteUIOpenButton.style.top = "15px";
-        genliteUIOpenButton.style.right = "0px";
+        this.genliteUIOpenButton = document.createElement("div");
+        this.genliteUIOpenButton.id = "genlite-genlite-ui-open-button";
+        this.genliteUIOpenButton.style.position = "fixed";
+        this.genliteUIOpenButton.style.top = "15px";
+        this.genliteUIOpenButton.style.right = "0px";
 
         // Make Settings Panel Open Button a Square
-        genliteUIOpenButton.style.width = "20px";
-        genliteUIOpenButton.style.height = "20px";
+        this.genliteUIOpenButton.style.width = "20px";
+        this.genliteUIOpenButton.style.height = "20px";
         // Set Settings Panel Open Button Background Color
     
-        genliteUIOpenButton.style.backgroundColor = "rgba(0,0,0,0.8)";
-        genliteUIOpenButton.style.color = "white";
-        genliteUIOpenButton.style.fontFamily = "acme, times new roman, Times, serif";
-        genliteUIOpenButton.style.fontSize = "12px";
-        genliteUIOpenButton.style.lineHeight = "1";
-        genliteUIOpenButton.style.textAlign = "center";
-        genliteUIOpenButton.style.userSelect = "none";
-        genliteUIOpenButton.style.cursor = "pointer";
+        this.genliteUIOpenButton.style.backgroundColor = "rgba(0,0,0,0.8)";
+        this.genliteUIOpenButton.style.color = "white";
+        this.genliteUIOpenButton.style.fontFamily = "acme, times new roman, Times, serif";
+        this.genliteUIOpenButton.style.fontSize = "12px";
+        this.genliteUIOpenButton.style.lineHeight = "1";
+        this.genliteUIOpenButton.style.textAlign = "center";
+        this.genliteUIOpenButton.style.userSelect = "none";
+        this.genliteUIOpenButton.style.cursor = "pointer";
         // Set Settings Panel Open Button Text to a Font Awesome Icon Left Cheveron
-        genliteUIOpenButton.innerHTML = "<i class='fas fa-chevron-left'></i>";
+        this.genliteUIOpenButton.innerHTML = "<i class='fas fa-chevron-left'></i>";
 
         // Center Font Awesome Icon in Settings Panel Open Button
-        genliteUIOpenButton.style.display = "flex";
-        genliteUIOpenButton.style.justifyContent = "center";
-        genliteUIOpenButton.style.alignItems = "center";
+        this.genliteUIOpenButton.style.display = "flex";
+        this.genliteUIOpenButton.style.justifyContent = "center";
+        this.genliteUIOpenButton.style.alignItems = "center";
 
-        genliteUIOpenButton.addEventListener("click", () => {
-            // Hide Settings Panel Open Button
-            genliteUIOpenButton.style.display = "none";
-            // Do Open Animation
-            this.genliteUI.style.animation = "genlite-genlite-ui-open 0.5s ease-in-out forwards";
+
+        this.ButtonAnimation = this.genliteUIOpenButton.animate([
+            { transform: "rotate(0deg)", right: "0px" },
+            { transform: "rotate(180deg)", right: "300px" }
+        ], {
+            duration: 500,
+            easing: "ease-in-out",
+            fill: "forwards"
+        });
+        this.ButtonAnimation.pause();
+
+        this.PanelAnimation = this.genliteUI.animate([
+            { right: "-300px" },
+            { right: "0px" }
+        ], {
+            duration: 500,
+            easing: "ease-in-out",
+            fill: "forwards"
+        });
+        this.PanelAnimation.pause();
+            
+        this.genliteUIOpenButton.addEventListener("click", () => {
+            // If this.panelOpen is false, open the Settings Panel
+            if (!this.panelOpen) {
+                this.panelOpen = true;
+                this.ButtonAnimation.playbackRate = 1;
+                this.PanelAnimation.playbackRate = 1;
+                this.ButtonAnimation.currentTime = 0;
+                this.PanelAnimation.currentTime = 0;
+                this.ButtonAnimation.play();
+                this.PanelAnimation.play();
+            }
+            // If this.panelOpen is true, close the Settings Panel
+            else {
+                this.panelOpen = false;
+                this.ButtonAnimation.reverse();
+                this.PanelAnimation.reverse();
+            }
         });
 
-        this.genliteUIOpenButton = genliteUIOpenButton;
+        document.body.appendChild(this.genliteUIOpenButton);
 
-
-
-        document.body.appendChild(genliteUIOpenButton);
-
-
-        // Inject CSS Styles to the DOM for the Settings Panel Transition
-        const style = document.createElement("style");
-        style.innerHTML = `
-            @keyframes genlite-genlite-ui-open {
-                from {
-                    right: -300px;
-                }
-                to {
-                    right: 0px;
-                }
-            }
-            @keyframes genlite-genlite-ui-close {
-                from {
-                    right: 0px;
-                }
-                to {
-                    right: -300px;
-                }
-            }
-        `;
-        document.head.appendChild(style);
 
         // Tab Container which will hold all the tabs (icons stacked vertically on the right side of the settings panel)
         this.genliteUITabContainer = document.createElement("div");
@@ -157,44 +264,6 @@ export class GenLiteUIPanel implements GenLitePlugin {
         // Set Settings Panel Content Container to Overflow: Auto to allow for scrolling
         this.genliteUIContentContainer.style.overflow = "auto";
         this.genliteUIBody.appendChild(this.genliteUIContentContainer);
-
-        // Make a button to close the settings panel (this button will be placed will be the first tab)
-        const genliteUITabCloseButton = document.createElement("div");
-        genliteUITabCloseButton.id = "genlite-tab-close-button";
-        genliteUITabCloseButton.style.width = "32px";
-        genliteUITabCloseButton.style.height = "32px";
-        genliteUITabCloseButton.style.fontFamily = "acme, times new roman, Times, serif";
-        genliteUITabCloseButton.style.fontSize = "14px";
-        genliteUITabCloseButton.style.lineHeight = "1";
-        genliteUITabCloseButton.style.textAlign = "center";
-        genliteUITabCloseButton.style.userSelect = "none";
-        genliteUITabCloseButton.style.cursor = "pointer";
-        genliteUITabCloseButton.innerHTML = "<i class='fas fa-times'></i>";
-
-        // Make exit button a red rounded square with white text
-        genliteUITabCloseButton.style.backgroundColor = "rgba(255,0,0,0.8)";
-        genliteUITabCloseButton.style.borderRadius = "5px";
-        genliteUITabCloseButton.style.color = "white";
-
-        // Align the vertical center of the exit button with the center of the panel header
-        genliteUITabCloseButton.style.marginTop = "calc(50% - 16px)";
-
-
-
-        // Center Font Awesome Icon in Settings Panel Open Button
-        genliteUITabCloseButton.style.display = "flex";
-        genliteUITabCloseButton.style.justifyContent = "center";
-        genliteUITabCloseButton.style.alignItems = "center";
-            
-        genliteUITabCloseButton.addEventListener("click", () => {
-            // Do Close Animation
-            this.genliteUI.style.animation = "genlite-genlite-ui-close 0.5s ease-in-out forwards";
-            // Show Settings Panel Open Button
-            genliteUIOpenButton.style.display = "flex";
-        });
-
-        // Add the close button to the tab container
-        this.genliteUITabContainer.appendChild(genliteUITabCloseButton);
     }
 
     // Add a Tab to the Settings Panel
