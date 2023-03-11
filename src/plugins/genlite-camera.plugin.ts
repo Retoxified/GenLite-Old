@@ -48,83 +48,83 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
     async init() {
         window.genlite.registerPlugin(this);
 
-        this.originalCameraMode = WorldManager.prototype.updatePlayerTile;
+        // this.originalCameraMode = WorldManager.prototype.updatePlayerTile;
 
-        this.unlockCamera = window.genlite.settings.add("Camera.UnlockCam", true, "Unlock Camera", "checkbox", this.handleUnlockCameraToggle, this);
-        this.hideRoofs = window.genlite.settings.add("Camera.HideRoofs", true, "Hide Roofs", "checkbox", this.handleHideRoofToggle, this);
-        this.maxDistance = parseInt(window.genlite.settings.add(
-            "Camera.maxDistance",
-            "15",
-            "Max Distance: <div style=\"display: contents;\" id=\"GenLiteMaxDistanceOutput\"></div>",
-            "range",
-            this.handleMaxDistance,
-            this,
-            undefined,
-            [
-                ["min", "8"],
-                ["max", "32"],
-                ["step", "1"],
-                ["value", "15"],
-                ["class", "gen-slider"]
-            ], "Camera.UnlockCam"
-        ));
-        document.getElementById("GenLiteMaxDistanceOutput").innerHTML = this.maxDistance.toString();
-        this.minDistance = parseInt(window.genlite.settings.add(
-            "Camera.minDistance",
-            "3.14",
-            "Min Distance: <div style=\"display: contents;\" id=\"GenLiteMinDistanceOutput\"></div>",
-            "range",
-            this.handleMinDistance,
-            this,
-            undefined,
-            [
-                ["min", "0"],
-                ["max", "8"],
-                ["step", "1"],
-                ["value", "3.14"],
-                ["class", "gen-slider"]
-            ], "Camera.UnlockCam"
-        ));
-        document.getElementById("GenLiteMinDistanceOutput").innerHTML = this.minDistance.toString();
-        this.skyboxEnabled = window.genlite.settings.add("Camera.Skybox", true, "Skybox", "checkbox", this.handleSkybox, this);
-        this.distanceFog = window.genlite.settings.add("Camera.Fog", true, "Fog", "checkbox", this.handleFog, this);
-        this.fogLevel = parseFloat(window.genlite.settings.add(
-            "Camera.FogLevel",
-            GenLiteCameraPlugin.defaultFogLevel.toString(),
-            "Fog Level",
-            "range",
-            function (v) {
-                this.handleFogLevel(parseFloat(v));
-            },
-            this,
-            undefined,
-            [
-                ["min", GenLiteCameraPlugin.minFogLevel.toString()],
-                ["max", GenLiteCameraPlugin.maxFogLevel.toString()],
-                ["value", GenLiteCameraPlugin.defaultFogLevel.toString()],
-                ["class", "gen-slider"],
-                ["step", "0.05"],
-            ],
-            this.distanceFog
-        ));
-        this.renderDistance = parseFloat(window.genlite.settings.add(
-            "Camera.RenderDistance",
-            GenLiteCameraPlugin.defaultRenderDistance.toString(),
-            "Render Distance",
-            "range",
-            function (v) {
-                this.handleRenderDistance(parseFloat(v));
-            },
-            this,
-            undefined,
-            [
-                ["min", GenLiteCameraPlugin.minRenderDistance.toString()],
-                ["max", GenLiteCameraPlugin.maxRenderDistance.toString()],
-                ["value", GenLiteCameraPlugin.defaultRenderDistance.toString()],
-                ["class", "gen-slider"],
-                ["step", "5"],
-            ]
-        ));
+        // this.unlockCamera = window.genlite.settings.add("Camera.UnlockCam", true, "Unlock Camera", "checkbox", this.handleUnlockCameraToggle, this);
+        // this.hideRoofs = window.genlite.settings.add("Camera.HideRoofs", true, "Hide Roofs", "checkbox", this.handleHideRoofToggle, this);
+        // this.maxDistance = parseInt(window.genlite.settings.add(
+        //     "Camera.maxDistance",
+        //     "15",
+        //     "Max Distance: <div style=\"display: contents;\" id=\"GenLiteMaxDistanceOutput\"></div>",
+        //     "range",
+        //     this.handleMaxDistance,
+        //     this,
+        //     undefined,
+        //     [
+        //         ["min", "8"],
+        //         ["max", "32"],
+        //         ["step", "1"],
+        //         ["value", "15"],
+        //         ["class", "gen-slider"]
+        //     ], "Camera.UnlockCam"
+        // ));
+        // document.getElementById("GenLiteMaxDistanceOutput").innerHTML = this.maxDistance.toString();
+        // this.minDistance = parseInt(window.genlite.settings.add(
+        //     "Camera.minDistance",
+        //     "3.14",
+        //     "Min Distance: <div style=\"display: contents;\" id=\"GenLiteMinDistanceOutput\"></div>",
+        //     "range",
+        //     this.handleMinDistance,
+        //     this,
+        //     undefined,
+        //     [
+        //         ["min", "0"],
+        //         ["max", "8"],
+        //         ["step", "1"],
+        //         ["value", "3.14"],
+        //         ["class", "gen-slider"]
+        //     ], "Camera.UnlockCam"
+        // ));
+        // document.getElementById("GenLiteMinDistanceOutput").innerHTML = this.minDistance.toString();
+        // this.skyboxEnabled = window.genlite.settings.add("Camera.Skybox", true, "Skybox", "checkbox", this.handleSkybox, this);
+        // this.distanceFog = window.genlite.settings.add("Camera.Fog", true, "Fog", "checkbox", this.handleFog, this);
+        // this.fogLevel = parseFloat(window.genlite.settings.add(
+        //     "Camera.FogLevel",
+        //     GenLiteCameraPlugin.defaultFogLevel.toString(),
+        //     "Fog Level",
+        //     "range",
+        //     function (v) {
+        //         this.handleFogLevel(parseFloat(v));
+        //     },
+        //     this,
+        //     undefined,
+        //     [
+        //         ["min", GenLiteCameraPlugin.minFogLevel.toString()],
+        //         ["max", GenLiteCameraPlugin.maxFogLevel.toString()],
+        //         ["value", GenLiteCameraPlugin.defaultFogLevel.toString()],
+        //         ["class", "gen-slider"],
+        //         ["step", "0.05"],
+        //     ],
+        //     this.distanceFog
+        // ));
+        // this.renderDistance = parseFloat(window.genlite.settings.add(
+        //     "Camera.RenderDistance",
+        //     GenLiteCameraPlugin.defaultRenderDistance.toString(),
+        //     "Render Distance",
+        //     "range",
+        //     function (v) {
+        //         this.handleRenderDistance(parseFloat(v));
+        //     },
+        //     this,
+        //     undefined,
+        //     [
+        //         ["min", GenLiteCameraPlugin.minRenderDistance.toString()],
+        //         ["max", GenLiteCameraPlugin.maxRenderDistance.toString()],
+        //         ["value", GenLiteCameraPlugin.defaultRenderDistance.toString()],
+        //         ["class", "gen-slider"],
+        //         ["step", "5"],
+        //     ]
+        // ));
     }
 
     handleUnlockCameraToggle(state: boolean) {
@@ -150,18 +150,18 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
 
     handleRenderDistance(value: number) {
         this.renderDistance = value;
-        GRAPHICS.camera.camera.far = value;
-        GRAPHICS.camera.camera.updateProjectionMatrix();
+        window.GRAPHICS.camera.camera.far = value;
+        window.GRAPHICS.camera.camera.updateProjectionMatrix();
 
         // genfanad does a bit of it's own object pruning, so we update that
         // distance as well Then we need to iterate over every object and
         // render the newly visible ones, because by default this would only
         // occur when the player moves.
-        GRAPHICS.scene.dd2 = value * value;
-        for (let i in GRAPHICS.scene.allObjects) {
-            let o = GRAPHICS.scene.allObjects[i];
-            if (GRAPHICS.scene.checkObject(o)) {
-                GRAPHICS.scene.showObject(i);
+        window.GRAPHICS.scene.dd2 = value * value;
+        for (let i in window.GRAPHICS.scene.allObjects) {
+            let o = window.GRAPHICS.scene.allObjects[i];
+            if (window.GRAPHICS.scene.checkObject(o)) {
+                window.GRAPHICS.scene.showObject(i);
             }
         }
 
@@ -182,9 +182,9 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
                     SkyboxUriFront,
                 ]);
             }
-            GRAPHICS.scene.threeScene.background = this.skybox;
+            window.GRAPHICS.scene.threeScene.background = this.skybox;
         } else {
-            GRAPHICS.scene.threeScene.background = null;
+            window.GRAPHICS.scene.threeScene.background = null;
             this.skybox = null;
         }
 
@@ -209,9 +209,9 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
             }
             let far = this.renderDistance;
             let near = -1.0 + (far - (far * this.fogLevel));
-            GRAPHICS.scene.threeScene.fog = new THREE.Fog(color, near, far);
+            window.GRAPHICS.scene.threeScene.fog = new THREE.Fog(color, near, far);
         } else {
-            GRAPHICS.scene.threeScene.fog = null;
+            window.GRAPHICS.scene.threeScene.fog = null;
         }
     }
 
@@ -222,48 +222,48 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
     }
 
     setCameraMode() {
-        if (WORLDMANAGER !== undefined) {
-            if (this.hideRoofs === true) {
-                WORLDMANAGER.updatePlayerTile = this.noRoofCameraMode.bind(WORLDMANAGER);
-            } else {
-                WORLDMANAGER.updatePlayerTile = this.originalCameraMode.bind(WORLDMANAGER);
-            }
-            WORLDMANAGER.updatePlayerTile.call(WORLDMANAGER);
-        }
+        // if (WORLDMANAGER !== undefined) {
+        //     if (this.hideRoofs === true) {
+        //         WORLDMANAGER.updatePlayerTile = this.noRoofCameraMode.bind(WORLDMANAGER);
+        //     } else {
+        //         WORLDMANAGER.updatePlayerTile = this.originalCameraMode.bind(WORLDMANAGER);
+        //     }
+        //     WORLDMANAGER.updatePlayerTile.call(WORLDMANAGER);
+        // }
 
-        if (GRAPHICS !== undefined) {
+        if (window.GRAPHICS !== undefined) {
             if (this.unlockCamera === true) {
-                GRAPHICS.camera.controls.minDistance = this.minDistance;
-                GRAPHICS.camera.controls.maxDistance = this.maxDistance;
-                GRAPHICS.camera.controls.minPolarAngle = 0.35;
-                GRAPHICS.camera.controls.maxPolarAngle = 1.4;
+                window.GRAPHICS.camera.controls.minDistance = this.minDistance;
+                window.GRAPHICS.camera.controls.maxDistance = this.maxDistance;
+                window.GRAPHICS.camera.controls.minPolarAngle = 0.35;
+                window.GRAPHICS.camera.controls.maxPolarAngle = 1.4;
             } else {
-                GRAPHICS.camera.controls.minDistance = 8
-                GRAPHICS.camera.controls.maxDistance = 8;
-                GRAPHICS.camera.controls.minPolarAngle = THREE.Math.degToRad(45);
-                GRAPHICS.camera.controls.maxPolarAngle = THREE.Math.degToRad(57);
+                window.GRAPHICS.camera.controls.minDistance = 8
+                window.GRAPHICS.camera.controls.maxDistance = 8;
+                window.GRAPHICS.camera.controls.minPolarAngle = THREE.Math.degToRad(45);
+                window.GRAPHICS.camera.controls.maxPolarAngle = THREE.Math.degToRad(57);
             }
         }
     }
-    noRoofCameraMode() {
-        const self = (this as any);
+    // noRoofCameraMode() {
+    //     const self = (this as any);
 
-        let tile = self.loadedSegments[self.segmentKey].getTile(self.segment.lx, self.segment.ly)
-        if (!tile)
-            throw `Invalid location: ${self.segmentKey} ${self.segment.lx}, ${self.segment.ly}`
-        self.indoors = true;
-        for (let i in self.loadedSegments) {
-            self.loadedSegments[i].setIndoorStatus(self.indoors);
-        }
-        if (tile.pvp) {
-            let pvp = document.getElementById('pvp_indicator');
-            pvp.style.display = 'block';
-            pvp.innerText = "PvP Level: YES";
-            self.pvp_zone = true;
-        } else {
-            document.getElementById('pvp_indicator').style.display = 'none';
-            self.pvp_zone = false;
-        }
-        MUSIC_PLAYER.setNextTrack(tile.music);
-    }
+    //     let tile = self.loadedSegments[self.segmentKey].getTile(self.segment.lx, self.segment.ly)
+    //     if (!tile)
+    //         throw `Invalid location: ${self.segmentKey} ${self.segment.lx}, ${self.segment.ly}`
+    //     self.indoors = true;
+    //     for (let i in self.loadedSegments) {
+    //         self.loadedSegments[i].setIndoorStatus(self.indoors);
+    //     }
+    //     if (tile.pvp) {
+    //         let pvp = document.getElementById('pvp_indicator');
+    //         pvp.style.display = 'block';
+    //         pvp.innerText = "PvP Level: YES";
+    //         self.pvp_zone = true;
+    //     } else {
+    //         document.getElementById('pvp_indicator').style.display = 'none';
+    //         self.pvp_zone = false;
+    //     }
+    //     MUSIC_PLAYER.setNextTrack(tile.music);
+    // }
 }
