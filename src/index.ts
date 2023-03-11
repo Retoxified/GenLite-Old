@@ -13,6 +13,7 @@
 
 /** Core Features */
 import { GenLite } from "./core/genlite.class";
+import { GenLiteDeobfuscationPlugin } from './core/plugins/genlite-deobfuscation.plugin';
 import { GenLiteNotificationPlugin } from "./core/plugins/genlite-notification.plugin";
 import { GenLiteSettingsPlugin } from "./core/plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./core/plugins/genlite-commands.plugin";
@@ -59,6 +60,10 @@ Press Cancel to Load, Press Okay to Stop.`;
     localStorage.setItem("GenLiteConfirms", confirmed);
 
     const genlite = new GenLite();
+
+    genlite.deobfuscation = await genlite.pluginLoader.addPlugin(GenLiteDeobfuscationPlugin);
+    await genlite.deobfuscation.deobfuscationComplete;
+
     await genlite.init();
     window.genlite = genlite;
 
