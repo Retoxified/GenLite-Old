@@ -42,6 +42,11 @@ import { GenLite } from "./core/genlite.class";
 // import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
 
 declare const GM_getResourceText : (s:string) => string;
+declare global {
+    interface Document {
+        client: any;
+    }
+}
 
 const DISCLAIMER = `
 GenLite is NOT associated with Rose-Tinted Games.
@@ -54,6 +59,17 @@ Press Cancel to Load, Press Okay to Stop.`;
 
 const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
+let scriptText = GM_getResourceText('clientjs');
+scriptText = scriptText.substring(0, scriptText.length - 5)
+    + "; document.client = {};"
+    + "document.client.get = function(a) {"
+    +   "return eval(a);"
+    + "};"
+    + "document.client.set = function(a, b) {"
+    +   "eval(a + ' = ' + b);"
+    + "};"
+    + scriptText.substring(scriptText.length-5);
+
 (async function load() {
     // let confirmed = localStorage.getItem("GenLiteConfirms");
     // if (!confirmed && await GenLiteConfirmation.confirm(DISCLAIMER) === true)
@@ -61,7 +77,7 @@ const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
     // confirmed = "true";
     // localStorage.setItem("GenLiteConfirms", confirmed);
 
-    async function setupGenLite() {
+    async function initGenLite() {
         const genlite = new GenLite();
         await genlite.init();
         window.genlite = genlite;
@@ -112,21 +128,9 @@ const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
     }
 
     function hookClient() {
-
         if (document.head) {
             throw new Error('Head already exists - make sure to enable instant script injection');
         }
-
-        let scriptText = GM_getResourceText('clientjs');
-        scriptText = scriptText.substring(0, scriptText.length - 5)
-            + "; document.client = {};"
-            + "document.client.get = function(a) {"
-            +   "return eval(a);"
-            + "};"
-            + "document.client.set = function(a, b) {"
-            +   "eval(a + ' = ' + b);"
-            + "};"
-            + scriptText.substring(scriptText.length-5);
 
         if (isFirefox) {
             document.addEventListener("beforescriptexecute", firefoxOverride, true);
@@ -134,9 +138,8 @@ const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
             new MutationObserver((_, observer) => {
                 const clientjsScriptTag = document.querySelector('script[src*="client.js"]');
                 if (clientjsScriptTag) {
-                    clientjsScriptTag.remove();
-                    // clientjsScriptTag.removeAttribute('src');
-                    // clientjsScriptTag.textContent = scriptText;
+                    clientjsScriptTag.removeAttribute('src');
+                    clientjsScriptTag.textContent = scriptText;
                 }
             }).observe(document.documentElement, {
                 childList: true,
@@ -146,5 +149,14 @@ const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
     }
 
     hookClient();
+    window.addEventListener('load', (e) => {
+        let doc = (document as any)
+        doc.client.set('document.client.originalStartScene', doc.client.get('NS'));
+        doc.client.set('NS', function () {
+            console.log('init genlite');
+            document.client.originalStartScene();
+            // setTimeout(initGenLite, 100);
+        });
+    });
 
 })();
