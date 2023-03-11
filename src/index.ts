@@ -17,6 +17,7 @@ import { GenLiteNotificationPlugin } from "./core/plugins/genlite-notification.p
 import { GenLiteSettingsPlugin } from "./core/plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./core/plugins/genlite-commands.plugin";
 import { GenLiteConfirmation } from "./core/helpers/genlite-confirmation.class";
+import { GenLiteWebSocketPlugin } from './core/plugins/genlite-websocket.plugin';
 
 
 /** Official Plugins */
@@ -59,6 +60,9 @@ Press Cancel to Load, Press Okay to Stop.`;
     localStorage.setItem("GenLiteConfirms", confirmed);
 
     const genlite = new GenLite();
+    /** Exposes the most recently created WebSocket as window.genlite.socket */
+    await genlite.pluginLoader.addPlugin(GenLiteWebSocketPlugin);
+
     await genlite.init();
     window.genlite = genlite;
 
