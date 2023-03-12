@@ -1,5 +1,4 @@
 /*
-    Copyright (C) 2022-2023 Retoxified, dpeGit, FrozenReality
 */
 /*
     This file is part of GenLite.
@@ -25,10 +24,10 @@ import { GenLiteCameraPlugin } from "./plugins/genlite-camera.plugin";
 // import { GenLiteChatPlugin } from "./plugins/genlite-chat.plugin";
 // import { GenLiteDropRecorderPlugin } from "./plugins/genlite-drop-recorder.plugin";
 // import { GenLiteInventoryPlugin } from "./plugins/genlite-inventory.plugin";
-// import { GenLiteItemHighlightPlugin } from "./plugins/genlite-item-highlight.plugin";
-// import { GenLiteNPCHighlightPlugin } from "./plugins/genlite-npc-highlight.plugin";
+import { GenLiteItemHighlightPlugin } from "./plugins/genlite-item-highlight.plugin";
+import { GenLiteNPCHighlightPlugin } from "./plugins/genlite-npc-highlight.plugin";
 // import { GenLiteRecipeRecorderPlugin } from "./plugins/genlite-recipe-recorder.plugin";
-// import { GenLiteWikiDataCollectionPlugin } from "./plugins/genlite-wiki-data-collection.plugin";
+import { GenLiteWikiDataCollectionPlugin } from "./plugins/genlite-wiki-data-collection.plugin";
 // import { GenLiteXpCalculator } from "./plugins/genlite-xp-calculator.plugin";
 // import { GenLiteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
 // import { GenLiteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
@@ -90,26 +89,34 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
         }
 
         document.game = {};
+        gameObject('CHAT', 'ex');
         gameObject('Camera', 'kS');
-        gameObject('Network', 'iw');
-        gameObject('PhasedLoadingManager', 'cS');
+        gameObject('Chat', '$x');
+        gameObject('DATA', 'qy');
         gameObject('GRAPHICS', 'i.J4.graphics');
+        gameObject('Game', 'Ug');
+        gameObject('GAME', 'jg.game');
+        gameObject('Inventory', 'Ex');
+        gameObject('INVENTORY', 'Zx');
+        gameObject('ItemStack', '_w');
+        gameObject('MUSIC_PLAYER', 'Ox');
+        gameObject('Network', 'iw');
+        gameObject('NETWORK', 'aw.network');
+        gameObject('PhasedLoadingManager', 'cS');
+        gameObject('Player', 'Ag');
+        gameObject('PLAYER', 'HS.player');
+        gameObject('PlayerHUD', 'kx');
+        gameObject('PlayerInfo', 'Hw');
+        gameObject('PLAYER_INFO', 'db');
         gameObject('THREE', 'e');
         gameObject('THREE.Math', 'vi'); // TODO: is this right?
-
-        gameObject('Game', 'Ug');
-        gameObject('PlayerHUD', 'kx');
-        gameObject('Inventory', 'Ex');
-        gameObject('PlayerInfo', 'Hw');
-        gameObject('Chat', '$x');
-        gameObject('CHAT', 'ex');
-        gameObject('WorldManager', 'bS');
         gameObject('WORLDMANAGER', 'yS');
-        gameObject('MUSIC_PLAYER', 'Ox');
+        gameObject('WorldManager', 'bS');
+        gameObject('ITEM_RIGHTCLICK_LIMIT', 'Os');
 
         const genlite = new GenLite();
-        await genlite.init();
         window.genlite = genlite;
+        await genlite.init();
 
         /** Core Features */
         genlite.notifications = await genlite.pluginLoader.addPlugin(GenLiteNotificationPlugin);
@@ -120,11 +127,11 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
         // await genlite.pluginLoader.addPlugin(GenLiteVersionPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
         // await genlite.pluginLoader.addPlugin(GenLiteChatPlugin);
-        // await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
-        // await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
         // await genlite.pluginLoader.addPlugin(GenLiteInventoryPlugin);
         // await genlite.pluginLoader.addPlugin(GenLiteDropRecorderPlugin);
-        // await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollectionPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollectionPlugin);
         // await genlite.pluginLoader.addPlugin(GenLiteXpCalculator);
         // await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);
         // await genlite.pluginLoader.addPlugin(GenLiteHitRecorder);
@@ -139,8 +146,8 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
         // await genlite.pluginLoader.addPlugin(GenLiteHighscores);
 
         /** post init things */
-        // await window.GenLiteSettingsPlugin.postInit();
-        // await window.GenLiteNPCHighlightPlugin.postInit();
+        await window.GenLiteSettingsPlugin.postInit();
+        await window.GenLiteNPCHighlightPlugin.postInit();
         // await window.GenLiteDropRecorderPlugin.postInit();
     }
 

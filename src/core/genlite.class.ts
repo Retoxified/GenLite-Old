@@ -36,19 +36,19 @@ export class GenLite {
     }
 
     async init() {
-        this.installHook(document.game.Camera, 'update');
-        this.installHook(document.game.Network, 'logoutOK');
-        this.installHook(document.game.Network, 'disconnect', this.hookDisconnect)
+        this.installHook(document.game.Camera.prototype, 'update');
+        this.installHook(document.game.Network.prototype, 'logoutOK');
+        this.installHook(document.game.Network.prototype, 'disconnect', this.hookDisconnect)
         this.installHook(document.game.PhasedLoadingManager, 'start_phase', this.hookPhased);
-        this.installHook(document.game.Network, 'action');
-        this.installHook(document.game.Network, 'handle');
-        this.installHook(document.game.PlayerInfo, 'updateXP');
-        this.installHook(document.game.PlayerInfo, 'updateTooltip');
-        this.installHook(document.game.PlayerInfo, 'updateSkills');
+        this.installHook(document.game.Network.prototype, 'action');
+        this.installHook(document.game.Network.prototype, 'handle');
+        this.installHook(document.game.PlayerInfo.prototype, 'updateXP');
+        this.installHook(document.game.PlayerInfo.prototype, 'updateTooltip');
+        this.installHook(document.game.PlayerInfo.prototype, 'updateSkills');
         // this.installHook(window, 'initializeUI');
-        this.installHook(document.game.Game, 'combatUpdate');
-        this.installHook(document.game.PlayerHUD, 'setHealth');
-        this.installHook(document.game.Inventory, 'handleUpdatePacket');
+        this.installHook(document.game.Game.prototype, 'combatUpdate');
+        this.installHook(document.game.PlayerHUD.prototype, 'setHealth');
+        this.installHook(document.game.Inventory.prototype, 'handleUpdatePacket');
     }
 
     hook(fnName: string, ...args: Array<unknown>) {
