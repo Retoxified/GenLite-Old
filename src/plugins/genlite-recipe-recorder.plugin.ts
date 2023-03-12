@@ -165,7 +165,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
             if (this.gatherResults[this.gatherTask] === undefined)
                 this.gatherResults[this.gatherTask] = {};
             let gather = this.gatherResults[this.gatherTask];
-            let nodeKey = GRAPHICS.scene.allObjects[this.gatherNode].modelInfo.nick;
+            let nodeKey = document.game.GRAPHICS.scene.allObjects[this.gatherNode].modelInfo.nick;
             if (gather[nodeKey] === undefined)
                 gather[nodeKey] = {};
             let node = gather[nodeKey];
@@ -209,7 +209,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
         if (this.gatherResults[this.gatherTask] === undefined)
             this.gatherResults[this.gatherTask] = {};
         let gather = this.gatherResults[this.gatherTask];
-        let nodeKey = GRAPHICS.scene.allObjects[this.gatherNode].modelInfo.impl.params;
+        let nodeKey = document.game.GRAPHICS.scene.allObjects[this.gatherNode].modelInfo.impl.params;
         if (gather[nodeKey] === undefined)
             gather[nodeKey] = {};
         let node = gather[nodeKey];

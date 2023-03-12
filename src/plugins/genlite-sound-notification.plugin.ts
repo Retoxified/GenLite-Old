@@ -55,7 +55,7 @@ export class GenLiteSoundNotification implements GenLitePlugin {
         /* create a new SFXPlayer we will swap to this if overriding 
         this is so the games normal effects play at their correct volume
         */
-        this.genliteSoundListener = new THREE.AudioListener();
+        this.genliteSoundListener = new document.game.THREE.AudioListener();
         this.genliteSoundListener.setMasterVolume(this.overrideVolume / 100.0) //bypas setvolume so you dont have to override it 
         this.genliteSFXPlayer = new SFXPlayer();
         this.genliteSFXPlayer.load();
@@ -125,7 +125,7 @@ export class GenLiteSoundNotification implements GenLitePlugin {
 
     /* play override, currently absolutely no safety features but we shouldnt need any */
     overridePlay(key, volume = 1) {
-        let sound = new THREE.Audio(this.genliteSoundListener);
+        let sound = new document.game.THREE.Audio(this.genliteSoundListener);
         sound.setLoop(false);
         sound.setBuffer(this.genliteSFXPlayer.sounds[key]);
         sound.setVolume(volume);

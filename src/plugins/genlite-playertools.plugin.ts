@@ -133,10 +133,10 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
             // If the Player is in combat, then use the Player's Object Position
             // If the Player is not in combat, then use the Player's Position
             
-            let playerPosition = new THREE.Vector3().copy(character.position()); // Vector3
+            let playerPosition = new document.game.THREE.Vector3().copy(character.position()); // Vector3
 
             if (Object.keys(GAME.combats).some(cID => GAME.combats[cID].left.id == pID || GAME.combats[cID].right.id == pID)) {
-                playerPosition = new THREE.Vector3().copy(character.object.position()); // We are in combat, use the Player's Object Position
+                playerPosition = new document.game.THREE.Vector3().copy(character.object.position()); // We are in combat, use the Player's Object Position
             }
 
             // Offset the Player's Position by the Player's Height (This allows the Player Tag to be above the Player's Head)
@@ -182,13 +182,13 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
     }
 
     handleHidePlayerSettingChange(state: boolean) {
-        GRAPHICS.threeScene.getObjectByName(GAME.me.id).visible = !state;
+        document.game.GRAPHICS.threeScene.getObjectByName(GAME.me.id).visible = !state;
     }
 
 
     world_to_screen(pos) {
         var p = pos;
-        var screenPos = p.project(GRAPHICS.threeCamera());
+        var screenPos = p.project(document.game.GRAPHICS.threeCamera());
 
         screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
         screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight;

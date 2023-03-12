@@ -23,7 +23,7 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
     originalSceneIntersects: Function;
     originalNPCIntersects: Function;
 
-    intersect_vector = new THREE.Vector3();
+    intersect_vector = new document.game.THREE.Vector3();
     async init() {
         window.genlite.registerPlugin(this);
 

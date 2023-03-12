@@ -334,7 +334,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
 
     world_to_screen(pos, stack_count) {
         var p = pos;
-        var screenPos = p.project(GRAPHICS.threeCamera());
+        var screenPos = p.project(document.game.GRAPHICS.threeCamera());
         screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
         screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight - (stack_count * 15);
         return screenPos;
@@ -370,7 +370,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
                     priority: - 1,
                     object: item,
                     text: 'Examine',
-                    action: () => CHAT.addGameMessage(item.examine)
+                    action: () => document.game.CHAT.addGameMessage(item.examine)
                 });
             }
             let all_keys = Object.keys(item.ids);
@@ -452,7 +452,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
                     stack_counter[posKey] = 0;
                 }
 
-                let worldPos = new THREE.Vector3().copy(stack.position());
+                let worldPos = new document.game.THREE.Vector3().copy(stack.position());
                 worldPos.y += 0.5;
                 let screenPos = this.world_to_screen(worldPos, stack_counter[posKey]);
                 if (screenPos.z > 1.0) {

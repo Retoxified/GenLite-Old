@@ -13,10 +13,10 @@
 
 /** Core Features */
 import { GenLite } from "./core/genlite.class";
-// import { GenLiteNotificationPlugin } from "./core/plugins/genlite-notification.plugin";
-// import { GenLiteSettingsPlugin } from "./core/plugins/genlite-settings.plugin";
-// import { GenLiteCommandsPlugin } from "./core/plugins/genlite-commands.plugin";
-// import { GenLiteConfirmation } from "./core/helpers/genlite-confirmation.class";
+import { GenLiteNotificationPlugin } from "./core/plugins/genlite-notification.plugin";
+import { GenLiteSettingsPlugin } from "./core/plugins/genlite-settings.plugin";
+import { GenLiteCommandsPlugin } from "./core/plugins/genlite-commands.plugin";
+import { GenLiteConfirmation } from "./core/helpers/genlite-confirmation.class";
 
 
 /** Official Plugins */
@@ -73,32 +73,48 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
     + scriptText.substring(scriptText.length-5);
 
 (async function load() {
-    // let confirmed = localStorage.getItem("GenLiteConfirms");
-    // if (!confirmed && await GenLiteConfirmation.confirm(DISCLAIMER) === true)
-    //     return;
-    // confirmed = "true";
-    // localStorage.setItem("GenLiteConfirms", confirmed);
+    let confirmed = localStorage.getItem("GenLiteConfirms");
+    if (!confirmed && await GenLiteConfirmation.confirm(DISCLAIMER) === true)
+        return;
+    confirmed = "true";
+    localStorage.setItem("GenLiteConfirms", confirmed);
 
     async function initGenLite() {
 
+        function gameObject(name: string, minified: string): any {
+            var o = document.client.get(minified);
+            if (!o) {
+                console.log(`${minified} (${name}) is not defined: ${o}`);
+            }
+            document.game[name] = o;
+        }
+
         document.game = {};
-        document.game.Camera = document.client.get('kS');
-        document.game.Network = document.client.get('iw');
-        document.game.PhasedLoadingManager = document.client.get('cS');
-        document.game.GRAPHICS = document.client.get('i.J4.graphics');
-        document.game.THREE = document.client.get('e');
-        document.game.THREE.Math = document.client.get('vi'); // TODO: is this right?
-        console.log('loaded game objects');
-        console.log(document.game);
+        gameObject('Camera', 'kS');
+        gameObject('Network', 'iw');
+        gameObject('PhasedLoadingManager', 'cS');
+        gameObject('GRAPHICS', 'i.J4.graphics');
+        gameObject('THREE', 'e');
+        gameObject('THREE.Math', 'vi'); // TODO: is this right?
+
+        gameObject('Game', 'Ug');
+        gameObject('PlayerHUD', 'kx');
+        gameObject('Inventory', 'Ex');
+        gameObject('PlayerInfo', 'Hw');
+        gameObject('Chat', '$x');
+        gameObject('CHAT', 'ex');
+        gameObject('WorldManager', 'bS');
+        gameObject('WORLDMANAGER', 'yS');
+        gameObject('MUSIC_PLAYER', 'Ox');
 
         const genlite = new GenLite();
         await genlite.init();
         window.genlite = genlite;
 
         /** Core Features */
-        // genlite.notifications = await genlite.pluginLoader.addPlugin(GenLiteNotificationPlugin);
-        // genlite.settings = await genlite.pluginLoader.addPlugin(GenLiteSettingsPlugin);
-        // genlite.commands = await genlite.pluginLoader.addPlugin(GenLiteCommandsPlugin);
+        genlite.notifications = await genlite.pluginLoader.addPlugin(GenLiteNotificationPlugin);
+        genlite.settings = await genlite.pluginLoader.addPlugin(GenLiteSettingsPlugin);
+        genlite.commands = await genlite.pluginLoader.addPlugin(GenLiteCommandsPlugin);
 
         /** Official Plugins */
         // await genlite.pluginLoader.addPlugin(GenLiteVersionPlugin);

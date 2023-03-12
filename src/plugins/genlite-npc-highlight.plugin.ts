@@ -120,10 +120,10 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
                     mult by 0.8 which is the height of the health bar
                 */
                 if (key == this.curEnemy) {
-                    worldPos = new THREE.Vector3().copy(GAME.npcs[key].object.position());
+                    worldPos = new document.game.THREE.Vector3().copy(GAME.npcs[key].object.position());
                     worldPos.y += 0.8;
                 } else {
-                    worldPos = new THREE.Vector3().copy(GAME.npcs[key].position());
+                    worldPos = new document.game.THREE.Vector3().copy(GAME.npcs[key].position());
                     worldPos.y += GAME.npcs[key].height
                 }
                 let screenPos = this.world_to_screen(worldPos);
@@ -205,7 +205,7 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
 
     world_to_screen(pos) {
         var p = pos;
-        var screenPos = p.project(GRAPHICS.threeCamera());
+        var screenPos = p.project(document.game.GRAPHICS.threeCamera());
 
         screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
         screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight;

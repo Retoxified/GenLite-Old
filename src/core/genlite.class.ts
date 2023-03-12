@@ -42,13 +42,13 @@ export class GenLite {
         this.installHook(document.game.PhasedLoadingManager, 'start_phase', this.hookPhased);
         this.installHook(document.game.Network, 'action');
         this.installHook(document.game.Network, 'handle');
-        // this.installHook(PlayerInfo.prototype, 'updateXP');
-        // this.installHook(PlayerInfo.prototype, 'updateTooltip');
-        // this.installHook(PlayerInfo.prototype, 'updateSkills');
+        this.installHook(document.game.PlayerInfo, 'updateXP');
+        this.installHook(document.game.PlayerInfo, 'updateTooltip');
+        this.installHook(document.game.PlayerInfo, 'updateSkills');
         // this.installHook(window, 'initializeUI');
-        // this.installHook(Game.prototype, 'combatUpdate');
-        // this.installHook(PlayerHUD.prototype, 'setHealth');
-        // this.installHook(Inventory.prototype, 'handleUpdatePacket');
+        this.installHook(document.game.Game, 'combatUpdate');
+        this.installHook(document.game.PlayerHUD, 'setHealth');
+        this.installHook(document.game.Inventory, 'handleUpdatePacket');
     }
 
     hook(fnName: string, ...args: Array<unknown>) {
