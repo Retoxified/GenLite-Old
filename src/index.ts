@@ -45,6 +45,7 @@ declare global {
     interface Document {
         game: any;
         client: any;
+        genlite: any;
         initGenLite: () => void;
     }
 }
@@ -81,10 +82,6 @@ let isInitialized = false;
     localStorage.setItem("GenLiteConfirms", confirmed);
 
     async function initGenLite() {
-        if (isInitialized) {
-            return;
-        }
-        isInitialized = true;
 
         function gameObject(name: string, minified: string): any {
             var o = document.client.get(minified);
@@ -120,7 +117,14 @@ let isInitialized = false;
         gameObject('WorldManager', 'bS');
         gameObject('ITEM_RIGHTCLICK_LIMIT', 'Os');
 
+        if (isInitialized) {
+            document.genlite.onUIInitialized();
+            return;
+        }
+        isInitialized = true;
+
         const genlite = new GenLite();
+        document.genlite = genlite;
         window.genlite = genlite;
         await genlite.init();
 
