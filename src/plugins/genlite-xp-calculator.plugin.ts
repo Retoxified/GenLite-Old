@@ -57,9 +57,9 @@ export class GenLiteXpCalculator implements GenLitePlugin {
     isPluginEnabled: boolean = false;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
         this.resetCalculatorAll();
-        this.isPluginEnabled = window.genlite.settings.add("XPCalculator.Enable", true, "XP Calculator", "checkbox", this.handlePluginEnableDisable, this);
+        this.isPluginEnabled = document.genlite.settings.add("XPCalculator.Enable", true, "XP Calculator", "checkbox", this.handlePluginEnableDisable, this);
     }
 
     handlePluginEnableDisable(state: boolean) {

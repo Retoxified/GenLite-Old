@@ -45,15 +45,15 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     submitItemsToServer: boolean = false;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
         let dropTableString = localStorage.getItem("genliteDropTable");
         if (dropTableString == null) {
             this.dropTable = {};
         } else {
             this.dropTable = JSON.parse(dropTableString);
         }
-        this.isPluginEnabled = window.genlite.settings.add("DropRecorder.Enable", true, "Drop Recorder", "checkbox", this.handlePluginEnableDisable, this);
-        this.submitItemsToServer = window.genlite.settings.add(
+        this.isPluginEnabled = document.genlite.settings.add("DropRecorder.Enable", true, "Drop Recorder", "checkbox", this.handlePluginEnableDisable, this);
+        this.submitItemsToServer = document.genlite.settings.add(
             "DropRecorder.SubmitToServer", // Key
             false,                         // Default
             "Send Drops to Server(REMOTE SERVER)", // Name in UI
@@ -69,7 +69,7 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     }
 
     async postInit() {
-        this.packList = window.GenLiteWikiDataCollectionPlugin.packList;
+        this.packList = document['GenLiteWikiDataCollectionPlugin'].packList;
     }
 
     handlePluginEnableDisable(state: boolean) {
@@ -151,7 +151,7 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
             this.objectSpawns = [];
             this.enemyDead = Number.POSITIVE_INFINITY;
             if (this.submitItemsToServer === true)
-                window.genlite.sendDataToServer("droplogproject", this.monsterData);
+                document.genlite.sendDataToServer("droplogproject", this.monsterData);
 
             this.localDropRecording();
             return;

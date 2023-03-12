@@ -6,14 +6,14 @@ export class GenLiteCommandsPlugin {
     private originalProcessInput: Function;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
         this.originalProcessInput = document.game.Chat.processInput;
         this.register("help", function (s) {
             if (!s) {
-                let helpStr = Object.keys(window.genlite.commands.commands).join(", ");
-                window.genlite.commands.print("GenLite Commands");
-                window.genlite.commands.print(helpStr);
+                let helpStr = Object.keys(document.genlite.commands.commands).join(", ");
+                document.genlite.commands.print("GenLite Commands");
+                document.genlite.commands.print(helpStr);
                 return;
             }
 
@@ -25,20 +25,20 @@ export class GenLiteCommandsPlugin {
             let command = s.slice(0, end);
             let args = s.slice(end + 1);
 
-            if (command in window.genlite.commands.commands) {
-                let spec = window.genlite.commands.commands[command];
+            if (command in document.genlite.commands.commands) {
+                let spec = document.genlite.commands.commands[command];
                 if (spec.helpFunction) {
                     var text = spec.helpFunction(args);
                     if (text != null && text != "") {
-                        window.genlite.commands.print(text);
+                        document.genlite.commands.print(text);
                     }
                 } else if (spec.helpText) {
-                    window.genlite.commands.print(spec.helpText);
+                    document.genlite.commands.print(spec.helpText);
                 } else {
-                    window.genlite.commands.print("no help defined for this command");
+                    document.genlite.commands.print("no help defined for this command");
                 }
             } else {
-                window.genlite.commands.print("no such command");
+                document.genlite.commands.print("no such command");
             }
         }, "display help text for a command: '//help <command>'");
     }
@@ -82,7 +82,7 @@ export class GenLiteCommandsPlugin {
             }
             spec.handler(args);
         } else {
-            let helpStr = Object.keys(window.genlite.commands.commands).join(" ");
+            let helpStr = Object.keys(document.genlite.commands.commands).join(" ");
             this.print("invalid command\"" + command + "\". Options: " + helpStr);
         }
     }

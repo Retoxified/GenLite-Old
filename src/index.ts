@@ -125,7 +125,6 @@ let isInitialized = false;
 
         const genlite = new GenLite();
         document.genlite = genlite;
-        window.genlite = genlite;
         await genlite.init();
 
         /** Core Features */
@@ -156,9 +155,9 @@ let isInitialized = false;
         // await genlite.pluginLoader.addPlugin(GenLiteHighscores);
 
         /** post init things */
-        await window.GenLiteSettingsPlugin.postInit();
-        await window.GenLiteNPCHighlightPlugin.postInit();
-        // await window.GenLiteDropRecorderPlugin.postInit();
+        await document['GenLiteSettingsPlugin'].postInit();
+        await document['GenLiteNPCHighlightPlugin'].postInit();
+        // await document['GenLiteDropRecorderPlugin'].postInit();
 
         // NOTE: currently initGenlite is called after the scene has started
         //       (in minified function NS). The initializeUI function does not

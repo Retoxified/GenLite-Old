@@ -46,13 +46,13 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
     skybox: any = null;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
         this.originalCameraMode = document.game.WorldManager.updatePlayerTile;
 
-        this.unlockCamera = window.genlite.settings.add("Camera.UnlockCam", true, "Unlock Camera", "checkbox", this.handleUnlockCameraToggle, this);
-        this.hideRoofs = window.genlite.settings.add("Camera.HideRoofs", true, "Hide Roofs", "checkbox", this.handleHideRoofToggle, this);
-        this.maxDistance = parseInt(window.genlite.settings.add(
+        this.unlockCamera = document.genlite.settings.add("Camera.UnlockCam", true, "Unlock Camera", "checkbox", this.handleUnlockCameraToggle, this);
+        this.hideRoofs = document.genlite.settings.add("Camera.HideRoofs", true, "Hide Roofs", "checkbox", this.handleHideRoofToggle, this);
+        this.maxDistance = parseInt(document.genlite.settings.add(
             "Camera.maxDistance",
             "15",
             "Max Distance: <div style=\"display: contents;\" id=\"GenLiteMaxDistanceOutput\"></div>",
@@ -69,7 +69,7 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
             ], "Camera.UnlockCam"
         ));
         document.getElementById("GenLiteMaxDistanceOutput").innerHTML = this.maxDistance.toString();
-        this.minDistance = parseInt(window.genlite.settings.add(
+        this.minDistance = parseInt(document.genlite.settings.add(
             "Camera.minDistance",
             "3.14",
             "Min Distance: <div style=\"display: contents;\" id=\"GenLiteMinDistanceOutput\"></div>",
@@ -86,9 +86,9 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
             ], "Camera.UnlockCam"
         ));
         document.getElementById("GenLiteMinDistanceOutput").innerHTML = this.minDistance.toString();
-        this.skyboxEnabled = window.genlite.settings.add("Camera.Skybox", true, "Skybox", "checkbox", this.handleSkybox, this);
-        this.distanceFog = window.genlite.settings.add("Camera.Fog", true, "Fog", "checkbox", this.handleFog, this);
-        this.fogLevel = parseFloat(window.genlite.settings.add(
+        this.skyboxEnabled = document.genlite.settings.add("Camera.Skybox", true, "Skybox", "checkbox", this.handleSkybox, this);
+        this.distanceFog = document.genlite.settings.add("Camera.Fog", true, "Fog", "checkbox", this.handleFog, this);
+        this.fogLevel = parseFloat(document.genlite.settings.add(
             "Camera.FogLevel",
             GenLiteCameraPlugin.defaultFogLevel.toString(),
             "Fog Level",
@@ -107,7 +107,7 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
             ],
             this.distanceFog
         ));
-        this.renderDistance = parseFloat(window.genlite.settings.add(
+        this.renderDistance = parseFloat(document.genlite.settings.add(
             "Camera.RenderDistance",
             GenLiteCameraPlugin.defaultRenderDistance.toString(),
             "Render Distance",

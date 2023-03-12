@@ -29,11 +29,11 @@ export class GenLiteItemTooltips implements GenLitePlugin {
     isValueEnabled: boolean = false;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
-        this.isPluginEnabled = window.genlite.settings.add("ItemToolTips.Enable", true, "Tooltips", "checkbox", this.handlePluginEnableDisable, this);
-        this.isFoodEnabled = window.genlite.settings.add("FoodToolTips.Enable", true, "Food Tooltips", "checkbox", this.handleFoodEnableDisable, this, undefined, undefined, "ItemToolTips.Enable");
-        this.isValueEnabled = window.genlite.settings.add("ValueToolTips.Enable", true, "Value Tooltips", "checkbox", this.handleValueEnableDisable, this, undefined, undefined, "ItemToolTips.Enable");
+        this.isPluginEnabled = document.genlite.settings.add("ItemToolTips.Enable", true, "Tooltips", "checkbox", this.handlePluginEnableDisable, this);
+        this.isFoodEnabled = document.genlite.settings.add("FoodToolTips.Enable", true, "Food Tooltips", "checkbox", this.handleFoodEnableDisable, this, undefined, undefined, "ItemToolTips.Enable");
+        this.isValueEnabled = document.genlite.settings.add("ValueToolTips.Enable", true, "Value Tooltips", "checkbox", this.handleValueEnableDisable, this, undefined, undefined, "ItemToolTips.Enable");
 
 
     }

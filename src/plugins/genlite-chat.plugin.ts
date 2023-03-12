@@ -28,8 +28,8 @@ export class GenLiteChatPlugin implements GenLitePlugin {
     originalGameMessage: Function;
 
     async init() {
-        window.genlite.registerPlugin(this);
-        this.filterGameMessages = window.genlite.settings.add(
+        document.genlite.registerPlugin(this);
+        this.filterGameMessages = document.genlite.settings.add(
             "Chat.FilterGameMessages",
             false,
             "Filter Game Chat",

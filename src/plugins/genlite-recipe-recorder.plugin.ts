@@ -33,7 +33,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
     isPluginEnabled: boolean = false;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
         let dropTableString = localStorage.getItem("GenliteRecipeRecorder")
         if (dropTableString == null) {
             this.recipeResults = {};
@@ -43,7 +43,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
             this.recipeResults = saved.recipe ? saved.recipe : {};
             this.gatherResults = saved.gathering ? saved.gathering : {};
         }
-        this.isPluginEnabled = window.genlite.settings.add("RecipeRecorder.Enable", true, "Record Recipes", "checkbox", this.handlePluginEnableDisable, this);
+        this.isPluginEnabled = document.genlite.settings.add("RecipeRecorder.Enable", true, "Record Recipes", "checkbox", this.handlePluginEnableDisable, this);
     }
 
     handlePluginEnableDisable(state: boolean) {

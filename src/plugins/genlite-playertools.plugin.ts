@@ -27,7 +27,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
 
     // Plugin Hooks
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
         // Create and Append the Player Tag Container to the Body
         this.PlayerTagContainer = document.createElement('div');
@@ -35,7 +35,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
         document.body.appendChild(this.PlayerTagContainer);
 
         // Add Settings to the Settings Menu
-        this.isEnabled = window.genlite.settings.add(
+        this.isEnabled = document.genlite.settings.add(
             "PlayerHighlights.Enabled",
             true,
             "Enable Player Highlights",
@@ -43,7 +43,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
             this.handleHighlightSettingChange,
             this);
 
-        window.genlite.settings.add(
+        document.genlite.settings.add(
             "PlayerTools.HidePlayer",
             false,
             "Hide My Character",

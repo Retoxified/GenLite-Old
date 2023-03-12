@@ -72,13 +72,13 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     hideLables: boolean = false;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
         this.originalItemStackIntersects = document.game.ItemStack.intersects;
 
         this.loadItemList();
         this.createDiv();
 
-        this.isPluginEnabled = window.genlite.settings.add(
+        this.isPluginEnabled = document.genlite.settings.add(
             "ItemHighlight.Enable",
             true,
             "Highlight Items",
@@ -88,7 +88,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
             undefined,
             undefined
         );
-        this.hideLables = window.genlite.settings.add(
+        this.hideLables = document.genlite.settings.add(
             "HideItemLabels.Enable",
             false,
             "Hide Item Labels",
@@ -100,7 +100,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
             "ItemHighlight.Enable"
         );
 
-        let storedPriorityColor = window.genlite.settings.add("ItemHighlight.PriorityColor", "#ffa500", "Priority Item Color", "color", this.handleColorChange, this, undefined, undefined, "ItemHighlight.Enable");
+        let storedPriorityColor = document.genlite.settings.add("ItemHighlight.PriorityColor", "#ffa500", "Priority Item Color", "color", this.handleColorChange, this, undefined, undefined, "ItemHighlight.Enable");
 
         let sheet = document.styleSheets[0];
         this.styleRuleIndex = sheet.insertRule(`.genlite-priority-item { color: ${storedPriorityColor}; }`, sheet.cssRules.length);
@@ -182,8 +182,8 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         //     itemName= `${itemName}(${item.definition.quantity})`;
         // }
         div.innerHTML = `<span style="display: inline-block;">${itemName}</span>
-                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.hideItem('${itemId}');void(0);"> &#8863;</div>
-                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.importantItem('${itemId}');void(0);"> &#8862;</div>`;
+                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="document.${GenLiteItemHighlightPlugin.pluginName}.hideItem('${itemId}');void(0);"> &#8863;</div>
+                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="document.${GenLiteItemHighlightPlugin.pluginName}.importantItem('${itemId}');void(0);"> &#8862;</div>`;
         div.style.transform = 'translateX(-50%)';
         div.style.pointerEvents = "none";
         div.style.fontFamily = 'acme, times new roman, Times, serif'; // Set Font
@@ -355,13 +355,13 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         all_items.sort((a, b) => b.item.value - a.item.value);
 
         let show_examine_options = true;
-        if (all_items.length > window.game.ITEM_RIGHTCLICK_LIMIT / 2) show_examine_options = false;
+        if (all_items.length > document.game.ITEM_RIGHTCLICK_LIMIT / 2) show_examine_options = false;
 
         let options = 0;
         for (let entry of all_items) {
             let itemId = entry.id;
             let item = entry.item;
-            if (options > window.game.ITEM_RIGHTCLICK_LIMIT) break;
+            if (options > document.game.ITEM_RIGHTCLICK_LIMIT) break;
             options++;
             if (show_examine_options) {
                 list.push({
@@ -377,12 +377,12 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
             list.push({
                 color: 'red',
                 distance: i.distance,
-                priority: 1 + window[GenLiteItemHighlightPlugin.pluginName].getItemData(itemId) * 50,
+                priority: 1 + document[GenLiteItemHighlightPlugin.pluginName].getItemData(itemId) * 50,
                 object: item,
                 text: all_keys.length > 1 ? 'Take one' : 'Take',
                 action: () => {
                     let take_id = all_keys[Math.floor(Math.random() * all_keys.length)];
-                    window.game.NETWORK.action('take', {
+                    document.game.NETWORK.action('take', {
                         item: take_id
                     })
                 }
