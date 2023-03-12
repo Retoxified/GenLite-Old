@@ -24,7 +24,7 @@ export class GenLiteGeneralChatCommands implements GenLitePlugin {
     isLogged = false;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
         let playedString = localStorage.getItem("genlitePlayed")
         if (playedString == null) {
@@ -32,8 +32,8 @@ export class GenLiteGeneralChatCommands implements GenLitePlugin {
         } else {
             this.playedTime = parseInt(playedString);
         }
-        window.genlite.commands.register("played", () => { this.printPlayedTime.apply(this) }, "Prints time played.");
-        window.genlite.commands.register("logged", () => { this.printLoggedTime.apply(this) }, "Prints time logged in.");
+        document.genlite.commands.register("played", () => { this.printPlayedTime.apply(this) }, "Prints time played.");
+        document.genlite.commands.register("logged", () => { this.printLoggedTime.apply(this) }, "Prints time logged in.");
     }
 
     loginOK() {
@@ -57,11 +57,11 @@ export class GenLiteGeneralChatCommands implements GenLitePlugin {
 
     /* genlite command callbacks */
     printLoggedTime() {
-        window.genlite.commands.print(this.msToHumanTime(Date.now() - this.loginTime));
+        document.genlite.commands.print(this.msToHumanTime(Date.now() - this.loginTime));
     }
 
     printPlayedTime() {
-        window.genlite.commands.print(this.msToHumanTime(this.playedTime));
+        document.genlite.commands.print(this.msToHumanTime(this.playedTime));
     }
 
     savePlayed() {

@@ -74,8 +74,8 @@ export class GenLiteHighscores implements GenLitePlugin {
         total: true
     }
     async init() {
-        window.genlite.registerPlugin(this);
-        this.submitItemsToServer = window.genlite.settings.add(
+        document.genlite.registerPlugin(this);
+        this.submitItemsToServer = document.genlite.settings.add(
             "Highscores.SubmitToServer", // Key
             false,                         // Default
             "Send Highscores to Server(REMOTE SERVER)", // Name in UI
@@ -86,9 +86,9 @@ export class GenLiteHighscores implements GenLitePlugin {
             "Turning this setting on will send highscore data along with your IP\u00A0address to an external server.\n\n" +
             "Are you sure you want to enable this setting?"
         );
-        this.sendAll = window.genlite.settings.add(`Highscore.ToggleButton`, false, `Toggle All Settings`, "checkbox", this.toggleAll, this, undefined, undefined, "Highscores.SubmitToServer");
+        this.sendAll = document.genlite.settings.add(`Highscore.ToggleButton`, false, `Toggle All Settings`, "checkbox", this.toggleAll, this, undefined, undefined, "Highscores.SubmitToServer");
         for (let key in this.statsToSend)
-            this.statsToSend[key] = window.genlite.settings.add(`Highscore.${key}.Enable`, false, `Highscore: ${key}`, "checkbox", (state) => { this.statsToSend[key] = state }, this, undefined, undefined, "Highscores.SubmitToServer");
+            this.statsToSend[key] = document.genlite.settings.add(`Highscore.${key}.Enable`, false, `Highscore: ${key}`, "checkbox", (state) => { this.statsToSend[key] = state }, this, undefined, undefined, "Highscores.SubmitToServer");
 
         let walkStr = localStorage.getItem("Highscores.walkData")
         if (walkStr != null)
@@ -110,7 +110,7 @@ export class GenLiteHighscores implements GenLitePlugin {
     toggleAll(state) {
         this.sendAll = state;
         for (let key in this.statsToSend)
-            window.genlite.settings.toggle(`Highscore.${key}.Enable`, state);
+            document.genlite.settings.toggle(`Highscore.${key}.Enable`, state);
     }
 
     /* interval setup */
@@ -207,13 +207,13 @@ export class GenLiteHighscores implements GenLitePlugin {
         }
 
         if (this.statsToSend.Played) {
-            if (window.GenLiteGeneralChatCommands.playedTime > 31556926000) {
-                window.GenLiteGeneralChatCommands.playedTime = 0;
+            if (document['GenLiteGeneralChatCommands'].playedTime > 31556926000) {
+                document['GenLiteGeneralChatCommands'].playedTime = 0;
             } else {
                 this.highscores.Stats.push(
                     {
                         Stat: "Played Time",
-                        Data1: window.GenLiteGeneralChatCommands.playedTime
+                        Data1: document['GenLiteGeneralChatCommands'].playedTime
                     });
             }
         }
@@ -232,6 +232,6 @@ export class GenLiteHighscores implements GenLitePlugin {
     }
     sendToServer() {
         this.updateScores();
-        window.genlite.sendDataToServer("playerstats", this.highscores);
+        document.genlite.sendDataToServer("playerstats", this.highscores);
     }
 }

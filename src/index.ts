@@ -45,6 +45,7 @@ declare global {
     interface Document {
         game: any;
         client: any;
+        genlite: any;
         initGenLite: () => void;
     }
 }
@@ -70,6 +71,8 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
     +   "eval(a + ' = ' + b);"
     + "};"
     + scriptText.substring(scriptText.length-5);
+
+let isInitialized = false;
 
 (async function load() {
     let confirmed = localStorage.getItem("GenLiteConfirms");
@@ -114,8 +117,14 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
         gameObject('WorldManager', 'bS');
         gameObject('ITEM_RIGHTCLICK_LIMIT', 'Os');
 
+        if (isInitialized) {
+            document.genlite.onUIInitialized();
+            return;
+        }
+        isInitialized = true;
+
         const genlite = new GenLite();
-        window.genlite = genlite;
+        document.genlite = genlite;
         await genlite.init();
 
         /** Core Features */
@@ -146,9 +155,9 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
         // await genlite.pluginLoader.addPlugin(GenLiteHighscores);
 
         /** post init things */
-        await window.GenLiteSettingsPlugin.postInit();
-        await window.GenLiteNPCHighlightPlugin.postInit();
-        // await window.GenLiteDropRecorderPlugin.postInit();
+        await document['GenLiteSettingsPlugin'].postInit();
+        await document['GenLiteNPCHighlightPlugin'].postInit();
+        // await document['GenLiteDropRecorderPlugin'].postInit();
 
         // NOTE: currently initGenlite is called after the scene has started
         //       (in minified function NS). The initializeUI function does not

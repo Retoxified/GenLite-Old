@@ -32,9 +32,9 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
     sendInterval: NodeJS.Timer = null;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
-        this.isRemoteEnabled = window.genlite.settings.add(
+        this.isRemoteEnabled = document.genlite.settings.add(
             "WikiDataColl.Enable",
             false,
             "Wiki Data collection(REMOTE SERVER)",
@@ -100,7 +100,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         if (this.previously_seen[mobKey].Monster_HP == 0) { // if we havent seen the monster or if we dont know its health
             this.previously_seen[mobKey].Monster_HP = update.maxhp;
             if (this.isRemoteEnabled && this.previously_seen[mobKey].numSeen >= 100)
-                window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
+                document.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
         }
     }
 
@@ -170,7 +170,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         this.previously_seen[mobKey].Base_Xp = baseXp;
         this.previously_seen[mobKey].Level_Diff_Bit = 0;
         if (this.isRemoteEnabled && this.previously_seen[mobKey].numSeen >= 100)
-            window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
+            document.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
     }
 
     scanNpcs() {
@@ -252,6 +252,6 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         if (callback_this.toSend.length <= 0)
             return;
         let monsterdata = callback_this.toSend.pop();
-        window.genlite.sendDataToServer("monsterdata", monsterdata);
+        document.genlite.sendDataToServer("monsterdata", monsterdata);
     }
 }

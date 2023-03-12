@@ -19,8 +19,8 @@ export class GenLiteInventoryPlugin implements GenLitePlugin {
     disableDragOnShift: boolean = false;
 
     async init() {
-        window.genlite.registerPlugin(this);
-        this.disableDragOnShift = window.genlite.settings.add(
+        document.genlite.registerPlugin(this);
+        this.disableDragOnShift = document.genlite.settings.add(
             "Inventory.ShiftDisableDrag",
             true,
             "Disable Dragging w/ Shift",

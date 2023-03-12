@@ -37,7 +37,7 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
 
     packList;
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
         this.npc_highlight_div = document.createElement('div');
         this.npc_highlight_div.className = 'npc-indicators-list';
@@ -53,13 +53,13 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         window.addEventListener('keyup', this.keyUpHandler.bind(this));
         window.addEventListener("blur", this.blurHandler.bind(this))
 
-        this.isPluginEnabled = window.genlite.settings.add("NpcHighlight.Enable", true, "Highlight NPCs", "checkbox", this.handlePluginEnableDisable, this);
-        this.hideInvert = window.genlite.settings.add("NpcHideInvert.Enable", true, "Invert NPC Hiding", "checkbox", this.handleHideInvertEnableDisable, this, undefined, undefined, "NpcHighlight.Enable");
+        this.isPluginEnabled = document.genlite.settings.add("NpcHighlight.Enable", true, "Highlight NPCs", "checkbox", this.handlePluginEnableDisable, this);
+        this.hideInvert = document.genlite.settings.add("NpcHideInvert.Enable", true, "Invert NPC Hiding", "checkbox", this.handleHideInvertEnableDisable, this, undefined, undefined, "NpcHighlight.Enable");
 
     }
 
     async postInit() {
-        this.packList = window.GenLiteWikiDataCollectionPlugin.packList;
+        this.packList = document['GenLiteWikiDataCollectionPlugin'].packList;
     }
 
     handlePluginEnableDisable(state: boolean) {

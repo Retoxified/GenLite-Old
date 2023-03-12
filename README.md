@@ -1,9 +1,13 @@
-# GenLite 0.1.39 - For GenFanad
+# GenLite 0.1.40 - For GenFanad
 
 GenLite installation instructions
 1. Install [TamperMonkey(All Browsers)](https://www.tampermonkey.net/) in your browser of choice.
-2. Click [here](https://github.com/Retoxified/GenLite/raw/release/dist/genlite.user.js) to install GenLite
-3. Enjoy! GenLite should automatically update whenever there is a new version. We will announce new versions in our discord server.
+2. Change Tampermonkey Inject Mode
+    1. Go to Tampermonkey -> Dashboard -> Settings tab
+    2. At the top, change Config Mode to "Advanced"
+    3. At the bottom under Experimental, change Inject Mode to "Instant"
+3. Click [here](https://github.com/Retoxified/GenLite/raw/release/dist/genlite.user.js) to install GenLite
+4. Enjoy! GenLite should automatically update whenever there is a new version. We will announce new versions in our discord server.
 
 Join us on Discord: https://discord.gg/Jn7s7pArdg
 

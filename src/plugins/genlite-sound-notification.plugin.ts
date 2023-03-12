@@ -32,22 +32,22 @@ export class GenLiteSoundNotification implements GenLitePlugin {
 
 
     async init() {
-        window.genlite.registerPlugin(this);
-        this.doHealthCheck = window.genlite.settings.add("LowHealth.Enable", false, "Low Health Sound", "checkbox", this.handleDoHealthCheck, this);
+        document.genlite.registerPlugin(this);
+        this.doHealthCheck = document.genlite.settings.add("LowHealth.Enable", false, "Low Health Sound", "checkbox", this.handleDoHealthCheck, this);
         //this is a stupid ass thing but *shrug*
-        this.healthThreshold = window.genlite.settings.add("LowHealth.0", 0, "Low Health Threshold: <div style=\"display: contents;\" id=\"GenLiteHealthThresholdOutput\"></div>", "range", this.setHealthThreshold, this, undefined,
+        this.healthThreshold = document.genlite.settings.add("LowHealth.0", 0, "Low Health Threshold: <div style=\"display: contents;\" id=\"GenLiteHealthThresholdOutput\"></div>", "range", this.setHealthThreshold, this, undefined,
             [['min', '1'], ['max', '100'], ['step', '1'], ['value', '0']], "LowHealth.Enable");
         document.getElementById("GenLiteHealthThresholdOutput").innerText = ` ${this.healthThreshold}%`
 
-        this.doInvCheck = window.genlite.settings.add("InvCheck.Enable", false, "Inventory Space Sound", "checkbox", this.handleInvCheckEnableDisable, this);
+        this.doInvCheck = document.genlite.settings.add("InvCheck.Enable", false, "Inventory Space Sound", "checkbox", this.handleInvCheckEnableDisable, this);
         //this is a stupid ass thing but *shrug*
-        this.invThreshold = window.genlite.settings.add("InvThreshold.0", 0, "Inventory Threshold: <div style=\"display: contents;\" id=\"GenLiteInvThresholdOutput\"></div>", "range", this.setInvThreshold, this, undefined,
+        this.invThreshold = document.genlite.settings.add("InvThreshold.0", 0, "Inventory Threshold: <div style=\"display: contents;\" id=\"GenLiteInvThresholdOutput\"></div>", "range", this.setInvThreshold, this, undefined,
             [['min', '1'], ['max', '30'], ['step', '1'], ['value', '0']], "InvCheck.Enable");
         document.getElementById("GenLiteInvThresholdOutput").innerText = ` ${this.invThreshold}`
 
 
-        this.overrideIGNVolume = window.genlite.settings.add("overrideIGNVolume.Enable", false, "Override Game Volume", "checkbox", this.handelOverrideVolumeEnableDisable, this);
-        this.overrideVolume = window.genlite.settings.add("overrideVolume.0", 0, "Override Game Volume: <div style=\"display: contents;\" id=\"GenLiteOverrideVolumeOutput\"></div>", "range", this.setOverrideVolume, this, undefined,
+        this.overrideIGNVolume = document.genlite.settings.add("overrideIGNVolume.Enable", false, "Override Game Volume", "checkbox", this.handelOverrideVolumeEnableDisable, this);
+        this.overrideVolume = document.genlite.settings.add("overrideVolume.0", 0, "Override Game Volume: <div style=\"display: contents;\" id=\"GenLiteOverrideVolumeOutput\"></div>", "range", this.setOverrideVolume, this, undefined,
             [['min', '1'], ['max', '100'], ['step', '1'], ['value', '0']], "overrideIGNVolume.Enable");
         document.getElementById("GenLiteOverrideVolumeOutput").innerText = ` ${this.overrideVolume}%`;
 
