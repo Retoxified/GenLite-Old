@@ -28,7 +28,7 @@ import { GenLiteItemHighlightPlugin } from "./plugins/genlite-item-highlight.plu
 import { GenLiteNPCHighlightPlugin } from "./plugins/genlite-npc-highlight.plugin";
 // import { GenLiteRecipeRecorderPlugin } from "./plugins/genlite-recipe-recorder.plugin";
 import { GenLiteWikiDataCollectionPlugin } from "./plugins/genlite-wiki-data-collection.plugin";
-// import { GenLiteXpCalculator } from "./plugins/genlite-xp-calculator.plugin";
+import { GenLiteXpCalculator } from "./plugins/genlite-xp-calculator.plugin";
 // import { GenLiteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
 // import { GenLiteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
 // import { GenLiteMusicPlugin } from "./plugins/genlite-music.plugin";
@@ -132,7 +132,7 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
         // await genlite.pluginLoader.addPlugin(GenLiteInventoryPlugin);
         // await genlite.pluginLoader.addPlugin(GenLiteDropRecorderPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollectionPlugin);
-        // await genlite.pluginLoader.addPlugin(GenLiteXpCalculator);
+        await genlite.pluginLoader.addPlugin(GenLiteXpCalculator);
         // await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);
         // await genlite.pluginLoader.addPlugin(GenLiteHitRecorder);
         // await genlite.pluginLoader.addPlugin(GenLiteMenuScaler);
@@ -149,6 +149,16 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
         await window.GenLiteSettingsPlugin.postInit();
         await window.GenLiteNPCHighlightPlugin.postInit();
         // await window.GenLiteDropRecorderPlugin.postInit();
+
+        // NOTE: currently initGenlite is called after the scene has started
+        //       (in minified function NS). The initializeUI function does not
+        //       exist in genfanad and is inlined in NS. So at this point, UI
+        //       is already initialized and we update the plugins.
+        //
+        //       We should eventually move genlite to init at page start, then
+        //       this needs to move to the NS override at the bottom of this
+        //       file.
+        genlite.onUIInitialized();
     }
 
     function firefoxOverride(e) {
@@ -191,7 +201,6 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
         let doc = (document as any)
         doc.client.set('document.client.originalStartScene', doc.client.get('NS'));
         doc.client.set('NS', function () {
-            console.log('init genlite');
             document.client.originalStartScene();
             setTimeout(document.initGenLite, 100);
         });

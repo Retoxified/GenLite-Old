@@ -45,10 +45,14 @@ export class GenLite {
         this.installHook(document.game.PlayerInfo.prototype, 'updateXP');
         this.installHook(document.game.PlayerInfo.prototype, 'updateTooltip');
         this.installHook(document.game.PlayerInfo.prototype, 'updateSkills');
-        // this.installHook(window, 'initializeUI');
+        // this no longer exists in genfanad: this.installHook(window, 'initializeUI');
         this.installHook(document.game.Game.prototype, 'combatUpdate');
         this.installHook(document.game.PlayerHUD.prototype, 'setHealth');
         this.installHook(document.game.Inventory.prototype, 'handleUpdatePacket');
+    }
+
+    onUIInitialized() {
+        this.hook('initializeUI');
     }
 
     hook(fnName: string, ...args: Array<unknown>) {
