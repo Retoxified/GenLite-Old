@@ -25,8 +25,8 @@ export class GenLiteSettingsPlugin {
         let searchBox = document.createElement("input");
         searchBox.type = "text";
         searchBox.onkeyup = (event) => { this.searchSettings.call(this, event) };
-        searchBox.onfocus = () => { CHAT.focus_locked = true; }
-        searchBox.onblur = () => { CHAT.focus_locked = false; }
+        searchBox.onfocus = () => { document.game.CHAT.focus_locked = true; }
+        searchBox.onblur = () => { document.game.CHAT.focus_locked = false; }
         searchBox.placeholder = "Settings Search";
         searchBox.id = "GenliteSettingsSearch";
         this.container.appendChild(searchBox);

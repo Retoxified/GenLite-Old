@@ -40,15 +40,15 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
     minDistance: Number = Math.PI;
 
     renderDistance: number = 65;
-    distanceFog: boolean = true;
+    distanceFog: boolean = false;
     fogLevel: number = 0.5;
-    skyboxEnabled: boolean = true;
+    skyboxEnabled: boolean = false;
     skybox: any = null;
 
     async init() {
         window.genlite.registerPlugin(this);
 
-        this.originalCameraMode = WorldManager.prototype.updatePlayerTile;
+        this.originalCameraMode = document.game.WorldManager.updatePlayerTile;
 
         this.unlockCamera = window.genlite.settings.add("Camera.UnlockCam", true, "Unlock Camera", "checkbox", this.handleUnlockCameraToggle, this);
         this.hideRoofs = window.genlite.settings.add("Camera.HideRoofs", true, "Hide Roofs", "checkbox", this.handleHideRoofToggle, this);
@@ -150,18 +150,18 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
 
     handleRenderDistance(value: number) {
         this.renderDistance = value;
-        GRAPHICS.camera.camera.far = value;
-        GRAPHICS.camera.camera.updateProjectionMatrix();
+        document.game.GRAPHICS.camera.camera.far = value;
+        document.game.GRAPHICS.camera.camera.updateProjectionMatrix();
 
         // genfanad does a bit of it's own object pruning, so we update that
         // distance as well Then we need to iterate over every object and
         // render the newly visible ones, because by default this would only
         // occur when the player moves.
-        GRAPHICS.scene.dd2 = value * value;
-        for (let i in GRAPHICS.scene.allObjects) {
-            let o = GRAPHICS.scene.allObjects[i];
-            if (GRAPHICS.scene.checkObject(o)) {
-                GRAPHICS.scene.showObject(i);
+        document.game.GRAPHICS.scene.dd2 = value * value;
+        for (let i in document.game.GRAPHICS.scene.allObjects) {
+            let o = document.game.GRAPHICS.scene.allObjects[i];
+            if (document.game.GRAPHICS.scene.checkObject(o)) {
+                document.game.GRAPHICS.scene.showObject(i);
             }
         }
 
@@ -172,7 +172,7 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
         this.skyboxEnabled = value;
         if (value) {
             if (this.skybox == null) {
-                const loader = new THREE.CubeTextureLoader();
+                const loader = new document.game.THREE.CubeTextureLoader();
                 this.skybox = loader.load([
                     SkyboxUriLeft,
                     SkyboxUriRight,
@@ -182,9 +182,9 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
                     SkyboxUriFront,
                 ]);
             }
-            GRAPHICS.scene.threeScene.background = this.skybox;
+            document.game.GRAPHICS.scene.threeScene.background = this.skybox;
         } else {
-            GRAPHICS.scene.threeScene.background = null;
+            document.game.GRAPHICS.scene.threeScene.background = null;
             this.skybox = null;
         }
 
@@ -209,9 +209,9 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
             }
             let far = this.renderDistance;
             let near = -1.0 + (far - (far * this.fogLevel));
-            GRAPHICS.scene.threeScene.fog = new THREE.Fog(color, near, far);
+            document.game.GRAPHICS.scene.threeScene.fog = new document.game.THREE.Fog(color, near, far);
         } else {
-            GRAPHICS.scene.threeScene.fog = null;
+            document.game.GRAPHICS.scene.threeScene.fog = null;
         }
     }
 
@@ -222,26 +222,26 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
     }
 
     setCameraMode() {
-        if (WORLDMANAGER !== undefined) {
+        if (document.game.WORLDMANAGER !== undefined) {
             if (this.hideRoofs === true) {
-                WORLDMANAGER.updatePlayerTile = this.noRoofCameraMode.bind(WORLDMANAGER);
+                document.game.WORLDMANAGER.updatePlayerTile = this.noRoofCameraMode.bind(document.game.WORLDMANAGER);
             } else {
-                WORLDMANAGER.updatePlayerTile = this.originalCameraMode.bind(WORLDMANAGER);
+                document.game.WORLDMANAGER.updatePlayerTile = this.originalCameraMode.bind(document.game.WORLDMANAGER);
             }
-            WORLDMANAGER.updatePlayerTile.call(WORLDMANAGER);
+            document.game.WORLDMANAGER.updatePlayerTile.call(document.game.WORLDMANAGER);
         }
 
-        if (GRAPHICS !== undefined) {
+        if (document.game.GRAPHICS !== undefined) {
             if (this.unlockCamera === true) {
-                GRAPHICS.camera.controls.minDistance = this.minDistance;
-                GRAPHICS.camera.controls.maxDistance = this.maxDistance;
-                GRAPHICS.camera.controls.minPolarAngle = 0.35;
-                GRAPHICS.camera.controls.maxPolarAngle = 1.4;
+                document.game.GRAPHICS.camera.controls.minDistance = this.minDistance;
+                document.game.GRAPHICS.camera.controls.maxDistance = this.maxDistance;
+                document.game.GRAPHICS.camera.controls.minPolarAngle = 0.35;
+                document.game.GRAPHICS.camera.controls.maxPolarAngle = 1.4;
             } else {
-                GRAPHICS.camera.controls.minDistance = 8
-                GRAPHICS.camera.controls.maxDistance = 8;
-                GRAPHICS.camera.controls.minPolarAngle = THREE.Math.degToRad(45);
-                GRAPHICS.camera.controls.maxPolarAngle = THREE.Math.degToRad(57);
+                document.game.GRAPHICS.camera.controls.minDistance = 8
+                document.game.GRAPHICS.camera.controls.maxDistance = 8;
+                document.game.GRAPHICS.camera.controls.minPolarAngle = document.game.THREE.Math.degToRad(45);
+                document.game.GRAPHICS.camera.controls.maxPolarAngle = document.game.THREE.Math.degToRad(57);
             }
         }
     }
@@ -264,6 +264,6 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
             document.getElementById('pvp_indicator').style.display = 'none';
             self.pvp_zone = false;
         }
-        MUSIC_PLAYER.setNextTrack(tile.music);
+        document.game.MUSIC_PLAYER.setNextTrack(tile.music);
     }
 }

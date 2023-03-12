@@ -42,7 +42,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
 
     async init() {
         window.genlite.registerPlugin(this);
-        this.originalSetTrack = MUSIC_PLAYER.setNextTrack;
+        this.originalSetTrack = document.game.MUSIC_PLAYER.setNextTrack;
 
         this.isPluginEnabled = window.genlite.settings.add(
             "MusicPlugin.Enable",
@@ -126,7 +126,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
 
     updateMusicUI() {
         if (this.isPluginEnabled) {
-            MUSIC_PLAYER.setNextTrack = (t) => {
+            document.game.MUSIC_PLAYER.setNextTrack = (t) => {
                 if (this.musicMode == "passthrough") {
                     this.setNextTrack(t);
                 }
@@ -135,7 +135,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
                 this.toggleDisplay();
             };
         } else {
-            MUSIC_PLAYER.setNextTrack = this.originalSetTrack;
+            document.game.MUSIC_PLAYER.setNextTrack = this.originalSetTrack;
             SETTINGS.DOM_music_text.onclick = (e) => { };
             this.hideMusicSelection();
         }
@@ -199,7 +199,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
         }
 
         this.currentTrack = track;
-        this.originalSetTrack.call(MUSIC_PLAYER, track);
+        this.originalSetTrack.call(document.game.MUSIC_PLAYER, track);
     }
 
     toggleDisplay() {

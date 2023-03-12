@@ -73,7 +73,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
 
     async init() {
         window.genlite.registerPlugin(this);
-        this.originalItemStackIntersects = ItemStack.prototype.intersects;
+        this.originalItemStackIntersects = document.game.ItemStack.intersects;
 
         this.loadItemList();
         this.createDiv();
@@ -110,7 +110,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         window.addEventListener("blur", this.blurHandler.bind(this))
 
         if (this.isPluginEnabled === true) {
-            ItemStack.prototype.intersects = this.ItemStack_intersects;
+            document.game.ItemStack.intersects = this.ItemStack_intersects;
         }
     }
 
@@ -163,7 +163,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
 
     createElement(instanceId) {
         let stackable = false;
-        let itemStack = GAME.items[instanceId];
+        let itemStack = document.game.GAME.items[instanceId];
         let itemId = itemStack.item_keys[instanceId].item_id;
         let itemName = itemStack.item_info[itemId].name;
 
@@ -171,7 +171,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
             itemId = itemId.substring(7);
             stackable = true;
         } else {
-            stackable = DATA.items[itemId].stackable ?? false;
+            stackable = document.game.DATA.items[itemId].stackable ?? false;
         }
 
         let div = document.createElement('div');
@@ -251,9 +251,9 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         // when disabling the plugin clear the current list of items
         if (state === false) {
             this.clearTracked();
-            ItemStack.prototype.intersects = this.originalItemStackIntersects;
+            document.game.ItemStack.intersects = this.originalItemStackIntersects;
         } else {
-            ItemStack.prototype.intersects = this.ItemStack_intersects;
+            document.game.ItemStack.intersects = this.ItemStack_intersects;
         }
 
         this.isPluginEnabled = state;
@@ -281,7 +281,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     }
 
     getItemValue(itemId) {
-        let gameValue = DATA.items[itemId].value ?? 1;
+        let gameValue = document.game.DATA.items[itemId].value ?? 1;
         return gameValue;
     }
 
@@ -334,7 +334,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
 
     world_to_screen(pos, stack_count) {
         var p = pos;
-        var screenPos = p.project(GRAPHICS.threeCamera());
+        var screenPos = p.project(document.game.GRAPHICS.threeCamera());
         screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
         screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight - (stack_count * 15);
         return screenPos;
@@ -355,13 +355,13 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         all_items.sort((a, b) => b.item.value - a.item.value);
 
         let show_examine_options = true;
-        if (all_items.length > ITEM_RIGHTCLICK_LIMIT / 2) show_examine_options = false;
+        if (all_items.length > window.game.ITEM_RIGHTCLICK_LIMIT / 2) show_examine_options = false;
 
         let options = 0;
         for (let entry of all_items) {
             let itemId = entry.id;
             let item = entry.item;
-            if (options > ITEM_RIGHTCLICK_LIMIT) break;
+            if (options > window.game.ITEM_RIGHTCLICK_LIMIT) break;
             options++;
             if (show_examine_options) {
                 list.push({
@@ -370,7 +370,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
                     priority: - 1,
                     object: item,
                     text: 'Examine',
-                    action: () => CHAT.addGameMessage(item.examine)
+                    action: () => document.game.CHAT.addGameMessage(item.examine)
                 });
             }
             let all_keys = Object.keys(item.ids);
@@ -382,7 +382,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
                 text: all_keys.length > 1 ? 'Take one' : 'Take',
                 action: () => {
                     let take_id = all_keys[Math.floor(Math.random() * all_keys.length)];
-                    NETWORK.action('take', {
+                    window.game.NETWORK.action('take', {
                         item: take_id
                     })
                 }
@@ -402,7 +402,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     }
 
     updateTrackedStacks() {
-        let itemStacks = GAME.items;
+        let itemStacks = document.game.GAME.items;
         let itemKeys = Object.keys(itemStacks);
         let keysToAdd = itemKeys.filter(k => !this.trackedStacks.includes(k));
         let keysToRemove = this.trackedStacks.filter(k => !itemKeys.includes(k));
@@ -426,7 +426,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
 
         for (let instanceId in this.itemElements) {
             let element = this.itemElements[instanceId];
-            let stack = GAME.items[element.instanceId];
+            let stack = document.game.GAME.items[element.instanceId];
             let itemId = element.itemId;
             if (stack !== undefined) {
                 if ((this.getItemData(itemId) == -1 || this.hideLables) && !this.isAltDown) {
@@ -452,7 +452,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
                     stack_counter[posKey] = 0;
                 }
 
-                let worldPos = new THREE.Vector3().copy(stack.position());
+                let worldPos = new document.game.THREE.Vector3().copy(stack.position());
                 worldPos.y += 0.5;
                 let screenPos = this.world_to_screen(worldPos, stack_counter[posKey]);
                 if (screenPos.z > 1.0) {

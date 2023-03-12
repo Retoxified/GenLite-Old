@@ -40,7 +40,7 @@ export class GenLiteChatPlugin implements GenLitePlugin {
     }
 
     public loginOK() {
-        this.originalGameMessage = CHAT.addGameMessage;
+        this.originalGameMessage = document.game.CHAT.addGameMessage;
         this.updateState();
     }
 
@@ -51,12 +51,12 @@ export class GenLiteChatPlugin implements GenLitePlugin {
 
     updateState() {
         if (this.filterGameMessages) {
-            CHAT.addGameMessage = this.newGameMessage.bind(
-                CHAT,
+            document.game.CHAT.addGameMessage = this.newGameMessage.bind(
+                document.game.CHAT,
                 this.originalGameMessage
             );
         } else {
-            CHAT.addGameMessage = this.originalGameMessage;
+            document.game.CHAT.addGameMessage = this.originalGameMessage;
         }
     }
 

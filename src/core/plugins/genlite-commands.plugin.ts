@@ -8,7 +8,7 @@ export class GenLiteCommandsPlugin {
     async init() {
         window.genlite.registerPlugin(this);
 
-        this.originalProcessInput = Chat.prototype.processInput;
+        this.originalProcessInput = document.game.Chat.processInput;
         this.register("help", function (s) {
             if (!s) {
                 let helpStr = Object.keys(window.genlite.commands.commands).join(", ");
@@ -56,8 +56,8 @@ export class GenLiteCommandsPlugin {
     }
 
     public loginOK() {
-        CHAT.processInput = this.processInput.bind(
-            CHAT,
+        document.game.CHAT.processInput = this.processInput.bind(
+            document.game.CHAT,
             this,
             this.originalProcessInput,
         );
@@ -138,11 +138,11 @@ export class GenLiteCommandsPlugin {
     }
 
     public print(text: string) {
-        // CHAT.addGameMessage assigns directly to innerHTML. To avoid any
+        // document.game.CHAT.addGameMessage assigns directly to innerHTML. To avoid any
         // possible code injection, let text area do our string escaping.
         let e = document.createElement('textarea');
         e.textContent = text;
-        CHAT.addGameMessage(e.innerHTML);
+        document.game.Chat.addGameMessage(e.innerHTML);
     }
 
 }

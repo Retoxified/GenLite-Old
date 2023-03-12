@@ -41,8 +41,8 @@ export class GenLiteInventoryPlugin implements GenLitePlugin {
 
     updateState() {
         if (this.disableDragOnShift) {
-            for (const i in INVENTORY.DOM_slots) {
-                let slot = INVENTORY.DOM_slots[i];
+            for (const i in document.game.INVENTORY.DOM_slots) {
+                let slot = document.game.INVENTORY.DOM_slots[i];
                 slot.item_div.onmousedown = function (e) {
                     if (e.shiftKey) {
                         e.preventDefault();
@@ -50,8 +50,8 @@ export class GenLiteInventoryPlugin implements GenLitePlugin {
                 }
             }
         } else {
-            for (const i in INVENTORY.DOM_slots) {
-                let slot = INVENTORY.DOM_slots[i];
+            for (const i in document.game.INVENTORY.DOM_slots) {
+                let slot = document.game.INVENTORY.DOM_slots[i];
                 slot.item_div.onmousedown = function (e) { };
             }
         }
