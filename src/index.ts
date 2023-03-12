@@ -21,7 +21,7 @@ import { GenLite } from "./core/genlite.class";
 
 /** Official Plugins */
 // import { GenLiteVersionPlugin } from "./plugins/genlite-version.plugin";
-// import { GenLiteCameraPlugin } from "./plugins/genlite-camera.plugin";
+import { GenLiteCameraPlugin } from "./plugins/genlite-camera.plugin";
 // import { GenLiteChatPlugin } from "./plugins/genlite-chat.plugin";
 // import { GenLiteDropRecorderPlugin } from "./plugins/genlite-drop-recorder.plugin";
 // import { GenLiteInventoryPlugin } from "./plugins/genlite-inventory.plugin";
@@ -44,7 +44,9 @@ import { GenLite } from "./core/genlite.class";
 declare const GM_getResourceText : (s:string) => string;
 declare global {
     interface Document {
+        game: any;
         client: any;
+        initGenLite: () => void;
     }
 }
 
@@ -78,6 +80,17 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
     // localStorage.setItem("GenLiteConfirms", confirmed);
 
     async function initGenLite() {
+
+        document.game = {};
+        document.game.Camera = document.client.get('kS');
+        document.game.Network = document.client.get('iw');
+        document.game.PhasedLoadingManager = document.client.get('cS');
+        document.game.GRAPHICS = document.client.get('i.J4.graphics');
+        document.game.THREE = document.client.get('e');
+        document.game.THREE.Math = document.client.get('vi'); // TODO: is this right?
+        console.log('loaded game objects');
+        console.log(document.game);
+
         const genlite = new GenLite();
         await genlite.init();
         window.genlite = genlite;
@@ -89,7 +102,7 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
 
         /** Official Plugins */
         // await genlite.pluginLoader.addPlugin(GenLiteVersionPlugin);
-        // await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
         // await genlite.pluginLoader.addPlugin(GenLiteChatPlugin);
         // await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
         // await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
@@ -150,12 +163,14 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
 
     hookClient();
     window.addEventListener('load', (e) => {
+        document.initGenLite = initGenLite;
+
         let doc = (document as any)
         doc.client.set('document.client.originalStartScene', doc.client.get('NS'));
         doc.client.set('NS', function () {
             console.log('init genlite');
             document.client.originalStartScene();
-            // setTimeout(initGenLite, 100);
+            setTimeout(document.initGenLite, 100);
         });
     });
 

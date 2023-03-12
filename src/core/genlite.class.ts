@@ -36,16 +36,16 @@ export class GenLite {
     }
 
     async init() {
-        // this.installHook(Camera.prototype, 'update');
-        // this.installHook(Network.prototype, 'logoutOK');
-        // this.installHook(Network.prototype, 'disconnect', this.hookDisconnect)
-        // this.installHook(PhasedLoadingManager.prototype, 'start_phase', this.hookPhased);
-        // this.installHook(Network.prototype, 'action');
-        // this.installHook(Network.prototype, 'handle');
+        this.installHook(document.game.Camera, 'update');
+        this.installHook(document.game.Network, 'logoutOK');
+        this.installHook(document.game.Network, 'disconnect', this.hookDisconnect)
+        this.installHook(document.game.PhasedLoadingManager, 'start_phase', this.hookPhased);
+        this.installHook(document.game.Network, 'action');
+        this.installHook(document.game.Network, 'handle');
         // this.installHook(PlayerInfo.prototype, 'updateXP');
         // this.installHook(PlayerInfo.prototype, 'updateTooltip');
         // this.installHook(PlayerInfo.prototype, 'updateSkills');
-        this.installHook(window, 'initializeUI');
+        // this.installHook(window, 'initializeUI');
         // this.installHook(Game.prototype, 'combatUpdate');
         // this.installHook(PlayerHUD.prototype, 'setHealth');
         // this.installHook(Inventory.prototype, 'handleUpdatePacket');

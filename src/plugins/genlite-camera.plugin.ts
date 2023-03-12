@@ -34,8 +34,8 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
 
     originalCameraMode: Function;
 
-    unlockCamera: boolean = false;
-    hideRoofs: boolean = false;
+    unlockCamera: boolean = true;
+    hideRoofs: boolean = true;
     maxDistance: Number = 15;
     minDistance: Number = Math.PI;
 
@@ -150,18 +150,18 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
 
     handleRenderDistance(value: number) {
         this.renderDistance = value;
-        window.GRAPHICS.camera.camera.far = value;
-        window.GRAPHICS.camera.camera.updateProjectionMatrix();
+        document.game.GRAPHICS.camera.camera.far = value;
+        document.game.GRAPHICS.camera.camera.updateProjectionMatrix();
 
         // genfanad does a bit of it's own object pruning, so we update that
         // distance as well Then we need to iterate over every object and
         // render the newly visible ones, because by default this would only
         // occur when the player moves.
-        window.GRAPHICS.scene.dd2 = value * value;
-        for (let i in window.GRAPHICS.scene.allObjects) {
-            let o = window.GRAPHICS.scene.allObjects[i];
-            if (window.GRAPHICS.scene.checkObject(o)) {
-                window.GRAPHICS.scene.showObject(i);
+        document.game.GRAPHICS.scene.dd2 = value * value;
+        for (let i in document.game.GRAPHICS.scene.allObjects) {
+            let o = document.game.GRAPHICS.scene.allObjects[i];
+            if (document.game.GRAPHICS.scene.checkObject(o)) {
+                document.game.GRAPHICS.scene.showObject(i);
             }
         }
 
@@ -172,7 +172,7 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
         this.skyboxEnabled = value;
         if (value) {
             if (this.skybox == null) {
-                const loader = new THREE.CubeTextureLoader();
+                const loader = new document.game.THREE.CubeTextureLoader();
                 this.skybox = loader.load([
                     SkyboxUriLeft,
                     SkyboxUriRight,
@@ -182,9 +182,9 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
                     SkyboxUriFront,
                 ]);
             }
-            window.GRAPHICS.scene.threeScene.background = this.skybox;
+            document.game.GRAPHICS.scene.threeScene.background = this.skybox;
         } else {
-            window.GRAPHICS.scene.threeScene.background = null;
+            document.game.GRAPHICS.scene.threeScene.background = null;
             this.skybox = null;
         }
 
@@ -209,9 +209,9 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
             }
             let far = this.renderDistance;
             let near = -1.0 + (far - (far * this.fogLevel));
-            window.GRAPHICS.scene.threeScene.fog = new THREE.Fog(color, near, far);
+            document.game.GRAPHICS.scene.threeScene.fog = new document.game.THREE.Fog(color, near, far);
         } else {
-            window.GRAPHICS.scene.threeScene.fog = null;
+            document.game.GRAPHICS.scene.threeScene.fog = null;
         }
     }
 
@@ -231,17 +231,17 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
         //     WORLDMANAGER.updatePlayerTile.call(WORLDMANAGER);
         // }
 
-        if (window.GRAPHICS !== undefined) {
+        if (document.game.GRAPHICS !== undefined) {
             if (this.unlockCamera === true) {
-                window.GRAPHICS.camera.controls.minDistance = this.minDistance;
-                window.GRAPHICS.camera.controls.maxDistance = this.maxDistance;
-                window.GRAPHICS.camera.controls.minPolarAngle = 0.35;
-                window.GRAPHICS.camera.controls.maxPolarAngle = 1.4;
+                document.game.GRAPHICS.camera.controls.minDistance = this.minDistance;
+                document.game.GRAPHICS.camera.controls.maxDistance = this.maxDistance;
+                document.game.GRAPHICS.camera.controls.minPolarAngle = 0.35;
+                document.game.GRAPHICS.camera.controls.maxPolarAngle = 1.4;
             } else {
-                window.GRAPHICS.camera.controls.minDistance = 8
-                window.GRAPHICS.camera.controls.maxDistance = 8;
-                window.GRAPHICS.camera.controls.minPolarAngle = THREE.Math.degToRad(45);
-                window.GRAPHICS.camera.controls.maxPolarAngle = THREE.Math.degToRad(57);
+                document.game.GRAPHICS.camera.controls.minDistance = 8
+                document.game.GRAPHICS.camera.controls.maxDistance = 8;
+                document.game.GRAPHICS.camera.controls.minPolarAngle = document.game.THREE.Math.degToRad(45);
+                document.game.GRAPHICS.camera.controls.maxPolarAngle = document.game.THREE.Math.degToRad(57);
             }
         }
     }
