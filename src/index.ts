@@ -71,6 +71,8 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
     + "};"
     + scriptText.substring(scriptText.length-5);
 
+let isInitialized = false;
+
 (async function load() {
     let confirmed = localStorage.getItem("GenLiteConfirms");
     if (!confirmed && await GenLiteConfirmation.confirm(DISCLAIMER) === true)
@@ -79,6 +81,10 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
     localStorage.setItem("GenLiteConfirms", confirmed);
 
     async function initGenLite() {
+        if (isInitialized) {
+            return;
+        }
+        isInitialized = true;
 
         function gameObject(name: string, minified: string): any {
             var o = document.client.get(minified);
