@@ -62,6 +62,10 @@ Press Cancel to Load, Press Okay to Stop.`;
 const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
 let scriptText = GM_getResourceText('clientjs');
+scriptText = scriptText.replace(
+    /import.meta.url/g,
+    '("https://play.genfanad.com/play/js/client.js")'
+);
 scriptText = scriptText.substring(0, scriptText.length - 5)
     + "; document.client = {};"
     + "document.client.get = function(a) {"
