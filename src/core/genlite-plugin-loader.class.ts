@@ -24,7 +24,7 @@ export class GenLitePluginLoader {
     /**
      * Instantiates an instance of pluginClass,
      * Runs its async init() function
-     * Adds a window field for the instance matching pluginClass.name
+     * Adds a document field for the instance matching pluginClass.name
      * The plugin instance will then also appear in this.plugins[]
      * @param pluginClass
      * @returns {Promise<boolean>}
@@ -42,7 +42,7 @@ export class GenLitePluginLoader {
             const pluginInstance = new pluginClass();
             await pluginInstance.init();
 
-            window[pluginClass.pluginName] = pluginInstance;
+            document[pluginClass.pluginName] = pluginInstance;
 
             this.plugins.push(pluginInstance);
             console.log(`[GenLitePluginLoader]: Loaded plugin ${pluginClass.pluginName}`);

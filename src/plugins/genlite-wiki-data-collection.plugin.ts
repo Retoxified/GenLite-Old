@@ -32,9 +32,9 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
     sendInterval: NodeJS.Timer = null;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
-        this.isRemoteEnabled = window.genlite.settings.add(
+        this.isRemoteEnabled = document.genlite.settings.add(
             "WikiDataColl.Enable",
             false,
             "Wiki Data collection(REMOTE SERVER)",
@@ -76,14 +76,18 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         if (!this.isRemoteEnabled) {
             return;
         }
-        this.playerMeleeCL = Math.trunc((PLAYER_INFO.skills.attack.level + PLAYER_INFO.skills.defense.level + PLAYER_INFO.skills.strength.level) / 3);
-        this.playerRangedCL = PLAYER_INFO.skills.ranged.level;
+        this.playerMeleeCL = Math.trunc((
+            document.game.PLAYER_INFO.skills.attack.level +
+            document.game.PLAYER_INFO.skills.defense.level +
+            document.game.PLAYER_INFO.skills.strength.level
+        ) / 3);
+        this.playerRangedCL = document.game.PLAYER_INFO.skills.ranged.level;
     }
 
     combatUpdate(update) {
-        let object = GAME.objectById(update.id);
+        let object = document.game.GAME.objectById(update.id);
 
-        if (update.id == PLAYER.id || GAME.players[update.id] !== undefined)
+        if (update.id == document.game.PLAYER.id || document.game.GAME.players[update.id] !== undefined)
             return;
 
         if (!object || !object.object)
@@ -96,7 +100,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         if (this.previously_seen[mobKey].Monster_HP == 0) { // if we havent seen the monster or if we dont know its health
             this.previously_seen[mobKey].Monster_HP = update.maxhp;
             if (this.isRemoteEnabled && this.previously_seen[mobKey].numSeen >= 100)
-                window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
+                document.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
         }
     }
 
@@ -104,9 +108,9 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
 
         /* look for start of combat set the curEnemy and record data */
         if (verb == "spawnObject" && payload.type == "combat" &&
-            (payload.participant1 == PLAYER.id || payload.participant2 == PLAYER.id)) {
-            this.curCombat = GAME.combats[payload.id];
-            if (this.curCombat.left.id != PLAYER.id) {
+            (payload.participant1 == document.game.PLAYER.id || payload.participant2 == document.game.PLAYER.id)) {
+            this.curCombat = document.game.GAME.combats[payload.id];
+            if (this.curCombat.left.id != document.game.PLAYER.id) {
                 this.curEnemy = this.curCombat.left;
             } else {
                 this.curEnemy = this.curCombat.right;
@@ -114,8 +118,8 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         }
 
         /* if ranging look for projectiles */
-        if (verb == "projectile" && payload.source == PLAYER.id) {
-            this.curEnemy = GAME.npcs[payload.target];
+        if (verb == "projectile" && payload.source == document.game.PLAYER.id) {
+            this.curEnemy = document.game.GAME.npcs[payload.target];
         }
 
         if (verb == "combatUI") {
@@ -138,8 +142,8 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
 
     updateXP(xp) {
         if (xp.levelUp) {
-            this.playerMeleeCL = Math.trunc((PLAYER_INFO.skills.attack.level + PLAYER_INFO.skills.defense.level + PLAYER_INFO.skills.strength.level) / 3);
-            this.playerRangedCL = PLAYER_INFO.skills.ranged.level;
+            this.playerMeleeCL = Math.trunc((document.game.PLAYER_INFO.skills.attack.level + document.game.PLAYER_INFO.skills.defense.level + document.game.PLAYER_INFO.skills.strength.level) / 3);
+            this.playerRangedCL = document.game.PLAYER_INFO.skills.ranged.level;
         }
         if (this.curEnemy === undefined)
             return;
@@ -166,7 +170,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         this.previously_seen[mobKey].Base_Xp = baseXp;
         this.previously_seen[mobKey].Level_Diff_Bit = 0;
         if (this.isRemoteEnabled && this.previously_seen[mobKey].numSeen >= 100)
-            window.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
+            document.genlite.sendDataToServer("monsterdata", this.previously_seen[mobKey]);
     }
 
     scanNpcs() {
@@ -174,13 +178,13 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         let npcs = {}
         let blackList = [];
         /* do some aggregrate stuff packSize, and add up mapsegment for averaging later */
-        for (let key in GAME.npcs) {
-            let npc = GAME.npcs[key];
+        for (let key in document.game.GAME.npcs) {
+            let npc = document.game.GAME.npcs[key];
             let npcX = npc.pos2.x;
             let npcY = npc.pos2.y;
             let packId = key.split('-')[0];
             /* if any member of the pack is above 30 tiles away ignore it because there might be more memeber out of range */
-            if (Math.abs(npcX - PLAYER.character.pos2.x) > 30 || Math.abs(npcY - PLAYER.character.pos2.y) > 30 || blackList.includes(packId)) {
+            if (Math.abs(npcX - document.game.PLAYER.character.pos2.x) > 30 || Math.abs(npcY - document.game.PLAYER.character.pos2.y) > 30 || blackList.includes(packId)) {
                 delete npcs[packId]
                 blackList.push(packId)
                 continue;
@@ -200,10 +204,10 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
             let group = 'A';
             let npc = npcs[packId].npc;
             /* calculate the mob key and increment the group if the key conflicts with a prexisting entry */
-            let mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${npcInfo.packSize}--${PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
+            let mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${npcInfo.packSize}--${document.game.PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
             while (this.previously_seen[mobKey] !== undefined && this.previously_seen[mobKey].ign_mobkey != packId) {
                 group = String.fromCharCode(group.charCodeAt(0) + 1);
-                mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${npcInfo.packSize}--${PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
+                mobKey = `${npc.info.name}-${npc.info.level ? npc.info.level : 0}--${npcInfo.packSize}--${document.game.PLAYER.location.layer}:${mapSegX}:${mapSegY}-${group}`;
             }
 
             if (this.previously_seen[mobKey] !== undefined) {
@@ -219,7 +223,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
                 "Monster_Pack_ID": mobKey,
                 "X": npcInfo.mapSegX / npcInfo.packSize,
                 "Y": npcInfo.mapSegY / npcInfo.packSize,
-                "Layer": PLAYER.location.layer,
+                "Layer": document.game.PLAYER.location.layer,
                 "Pack_Size": npcInfo.packSize,
                 "Monster_HP": 0,
                 "Base_Xp": 0,
@@ -248,6 +252,6 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         if (callback_this.toSend.length <= 0)
             return;
         let monsterdata = callback_this.toSend.pop();
-        window.genlite.sendDataToServer("monsterdata", monsterdata);
+        document.genlite.sendDataToServer("monsterdata", monsterdata);
     }
 }

@@ -27,7 +27,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
 
     // Plugin Hooks
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
         // Create and Append the Player Tag Container to the Body
         this.PlayerTagContainer = document.createElement('div');
@@ -35,7 +35,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
         document.body.appendChild(this.PlayerTagContainer);
 
         // Add Settings to the Settings Menu
-        this.isEnabled = window.genlite.settings.add(
+        this.isEnabled = document.genlite.settings.add(
             "PlayerHighlights.Enabled",
             true,
             "Enable Player Highlights",
@@ -43,7 +43,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
             this.handleHighlightSettingChange,
             this);
 
-        window.genlite.settings.add(
+        document.genlite.settings.add(
             "PlayerTools.HidePlayer",
             false,
             "Hide My Character",
@@ -60,7 +60,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
         if (!this.isEnabled || !this.doRender) return;
 
         // Get World Players
-        const worldPlayers = GAME.players;
+        const worldPlayers = document.game.GAME.players;
 
         // Determine Players to Add to Tracking
         let newPlayers = Object.keys(worldPlayers).filter(pID => !Object.keys(this.trackedPlayers).includes(pID));
@@ -133,10 +133,10 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
             // If the Player is in combat, then use the Player's Object Position
             // If the Player is not in combat, then use the Player's Position
             
-            let playerPosition = new THREE.Vector3().copy(character.position()); // Vector3
+            let playerPosition = new document.game.THREE.Vector3().copy(character.position()); // Vector3
 
-            if (Object.keys(GAME.combats).some(cID => GAME.combats[cID].left.id == pID || GAME.combats[cID].right.id == pID)) {
-                playerPosition = new THREE.Vector3().copy(character.object.position()); // We are in combat, use the Player's Object Position
+            if (Object.keys(document.game.GAME.combats).some(cID => document.game.GAME.combats[cID].left.id == pID || document.game.GAME.combats[cID].right.id == pID)) {
+                playerPosition = new document.game.THREE.Vector3().copy(character.object.position()); // We are in combat, use the Player's Object Position
             }
 
             // Offset the Player's Position by the Player's Height (This allows the Player Tag to be above the Player's Head)
@@ -182,13 +182,13 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
     }
 
     handleHidePlayerSettingChange(state: boolean) {
-        GRAPHICS.threeScene.getObjectByName(GAME.me.id).visible = !state;
+        document.game.GRAPHICS.threeScene.getObjectByName(document.game.GAME.me.id).visible = !state;
     }
 
 
     world_to_screen(pos) {
         var p = pos;
-        var screenPos = p.project(GRAPHICS.threeCamera());
+        var screenPos = p.project(document.game.GRAPHICS.threeCamera());
 
         screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
         screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight;

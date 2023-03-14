@@ -28,7 +28,7 @@ export class GenLiteVersionPlugin implements GenLitePlugin {
 
     // Plugin Hooks
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
         // Create and Append the Version Container to the Body
         this.versionContainer = document.createElement('p');

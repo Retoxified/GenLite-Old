@@ -33,7 +33,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
     isPluginEnabled: boolean = false;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
         let dropTableString = localStorage.getItem("GenliteRecipeRecorder")
         if (dropTableString == null) {
             this.recipeResults = {};
@@ -43,7 +43,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
             this.recipeResults = saved.recipe ? saved.recipe : {};
             this.gatherResults = saved.gathering ? saved.gathering : {};
         }
-        this.isPluginEnabled = window.genlite.settings.add("RecipeRecorder.Enable", true, "Record Recipes", "checkbox", this.handlePluginEnableDisable, this);
+        this.isPluginEnabled = document.genlite.settings.add("RecipeRecorder.Enable", true, "Record Recipes", "checkbox", this.handlePluginEnableDisable, this);
     }
 
     handlePluginEnableDisable(state: boolean) {
@@ -64,7 +64,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                 this.isCrafting = true;
                 this.isGathering = false;
                 this.recipe = params.action.recipe;
-                this.prevInventory = INVENTORY.items;
+                this.prevInventory = document.game.INVENTORY.items;
                 this.recipeName = params.action.recipe;
                 for (let i in params.action.params) // if params is set here then record a complex recipe name
                     this.recipeName = this.recipeName.concat("__", i, params.action.params[i]);
@@ -95,7 +95,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                 this.isGathering = true;
                 this.isCrafting = false;
                 this.gatherNode = params.id;
-                this.prevInventory = INVENTORY.items;
+                this.prevInventory = document.game.INVENTORY.items;
             }
             return;
         }
@@ -165,7 +165,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
             if (this.gatherResults[this.gatherTask] === undefined)
                 this.gatherResults[this.gatherTask] = {};
             let gather = this.gatherResults[this.gatherTask];
-            let nodeKey = GRAPHICS.scene.allObjects[this.gatherNode].modelInfo.nick;
+            let nodeKey = document.game.GRAPHICS.scene.allObjects[this.gatherNode].modelInfo.nick;
             if (gather[nodeKey] === undefined)
                 gather[nodeKey] = {};
             let node = gather[nodeKey];
@@ -209,7 +209,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
         if (this.gatherResults[this.gatherTask] === undefined)
             this.gatherResults[this.gatherTask] = {};
         let gather = this.gatherResults[this.gatherTask];
-        let nodeKey = GRAPHICS.scene.allObjects[this.gatherNode].modelInfo.impl.params;
+        let nodeKey = document.game.GRAPHICS.scene.allObjects[this.gatherNode].modelInfo.impl.params;
         if (gather[nodeKey] === undefined)
             gather[nodeKey] = {};
         let node = gather[nodeKey];

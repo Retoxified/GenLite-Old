@@ -45,15 +45,15 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     submitItemsToServer: boolean = false;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
         let dropTableString = localStorage.getItem("genliteDropTable");
         if (dropTableString == null) {
             this.dropTable = {};
         } else {
             this.dropTable = JSON.parse(dropTableString);
         }
-        this.isPluginEnabled = window.genlite.settings.add("DropRecorder.Enable", true, "Drop Recorder", "checkbox", this.handlePluginEnableDisable, this);
-        this.submitItemsToServer = window.genlite.settings.add(
+        this.isPluginEnabled = document.genlite.settings.add("DropRecorder.Enable", true, "Drop Recorder", "checkbox", this.handlePluginEnableDisable, this);
+        this.submitItemsToServer = document.genlite.settings.add(
             "DropRecorder.SubmitToServer", // Key
             false,                         // Default
             "Send Drops to Server(REMOTE SERVER)", // Name in UI
@@ -69,7 +69,7 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     }
 
     async postInit() {
-        this.packList = window.GenLiteWikiDataCollectionPlugin.packList;
+        this.packList = document['GenLiteWikiDataCollectionPlugin'].packList;
     }
 
     handlePluginEnableDisable(state: boolean) {
@@ -82,23 +82,23 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     }
 
     handle(verb: string, payload: { [key: string]: any }) {
-        if (this.isPluginEnabled === false || NETWORK.loggedIn === false) {
+        if (this.isPluginEnabled === false || document.game.NETWORK.loggedIn === false) {
             return;
         }
 
         /* look for start of combat set the curEnemy and record data */
         if (verb == "spawnObject" && payload.type == "combat" &&
-            (payload.participant1 == PLAYER.id || payload.participant2 == PLAYER.id)) {
+            (payload.participant1 == document.game.PLAYER.id || payload.participant2 == document.game.PLAYER.id)) {
 
-            this.curCombat = GAME.combats[payload.id];
-            this.curEnemy = this.curCombat.left.id == PLAYER.id ? this.curCombat.right : this.curCombat.left;
+            this.curCombat = document.game.GAME.combats[payload.id];
+            this.curEnemy = this.curCombat.left.id == document.game.PLAYER.id ? this.curCombat.right : this.curCombat.left;
             this.setMonsterData();
             return;
         }
 
         /* if ranging look for projectiles */
-        if (verb == "projectile" && payload.source == PLAYER.id) {
-            this.curEnemy = GAME.npcs[payload.target];
+        if (verb == "projectile" && payload.source == document.game.PLAYER.id) {
+            this.curEnemy = document.game.GAME.npcs[payload.target];
             this.setMonsterData();
             return;
         }
@@ -151,7 +151,7 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
             this.objectSpawns = [];
             this.enemyDead = Number.POSITIVE_INFINITY;
             if (this.submitItemsToServer === true)
-                window.genlite.sendDataToServer("droplogproject", this.monsterData);
+                document.genlite.sendDataToServer("droplogproject", this.monsterData);
 
             this.localDropRecording();
             return;
@@ -160,12 +160,12 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     /* on login scan for combats as some times you can spawn in to a combat
     */
     loginOK() {
-        for (let i in GAME.combats) {
-            let combat = GAME.combats[i];
-            if (combat.left.id == PLAYER.id) {
+        for (let i in document.game.GAME.combats) {
+            let combat = document.game.GAME.combats[i];
+            if (combat.left.id == document.game.PLAYER.id) {
                 this.curCombat = combat;
                 this.curEnemy = combat.right;
-            } else if (combat.right.id == PLAYER.id) {
+            } else if (combat.right.id == document.game.PLAYER.id) {
                 this.curCombat = combat;
                 this.curEnemy = combat.left;
             }
@@ -176,7 +176,7 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     }
 
     setMonsterData() {
-        this.monsterData.layer = this.monsterData.layer = PLAYER.location.layer
+        this.monsterData.layer = this.monsterData.layer = document.game.PLAYER.location.layer
         this.monsterData.x = this.curEnemy.pos2.x;
         this.monsterData.y = this.curEnemy.pos2.y;
         this.monsterData.Monster_Name = this.curEnemy.info.name;

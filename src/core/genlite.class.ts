@@ -36,19 +36,23 @@ export class GenLite {
     }
 
     async init() {
-        this.installHook(Camera.prototype, 'update');
-        this.installHook(Network.prototype, 'logoutOK');
-        this.installHook(Network.prototype, 'disconnect', this.hookDisconnect)
-        this.installHook(PhasedLoadingManager.prototype, 'start_phase', this.hookPhased);
-        this.installHook(Network.prototype, 'action');
-        this.installHook(Network.prototype, 'handle');
-        this.installHook(PlayerInfo.prototype, 'updateXP');
-        this.installHook(PlayerInfo.prototype, 'updateTooltip');
-        this.installHook(PlayerInfo.prototype, 'updateSkills');
-        this.installHook(window, 'initializeUI');
-        this.installHook(Game.prototype, 'combatUpdate');
-        this.installHook(PlayerHUD.prototype, 'setHealth');
-        this.installHook(Inventory.prototype, 'handleUpdatePacket');
+        this.installHook(document.game.Camera.prototype, 'update');
+        this.installHook(document.game.Network.prototype, 'logoutOK');
+        this.installHook(document.game.Network.prototype, 'disconnect', this.hookDisconnect)
+        this.installHook(document.game.PhasedLoadingManager, 'start_phase', this.hookPhased);
+        this.installHook(document.game.Network.prototype, 'action');
+        this.installHook(document.game.Network.prototype, 'handle');
+        this.installHook(document.game.PlayerInfo.prototype, 'updateXP');
+        this.installHook(document.game.PlayerInfo.prototype, 'updateTooltip');
+        this.installHook(document.game.PlayerInfo.prototype, 'updateSkills');
+        // this no longer exists in genfanad: this.installHook(window, 'initializeUI');
+        this.installHook(document.game.Game.prototype, 'combatUpdate');
+        this.installHook(document.game.PlayerHUD.prototype, 'setHealth');
+        this.installHook(document.game.Inventory.prototype, 'handleUpdatePacket');
+    }
+
+    onUIInitialized() {
+        this.hook('initializeUI');
     }
 
     hook(fnName: string, ...args: Array<unknown>) {

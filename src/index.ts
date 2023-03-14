@@ -1,5 +1,4 @@
 /*
-    Copyright (C) 2022-2023 Retoxified, dpeGit, FrozenReality
 */
 /*
     This file is part of GenLite.
@@ -36,11 +35,20 @@ import { GenLiteMusicPlugin } from "./plugins/genlite-music.plugin";
 import { GenLiteLocationsPlugin } from "./plugins/genlite-locations.plugin";
 import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
 import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
-import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
+// import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
 import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
 import { GenLitePlayerToolsPlugin }  from "./plugins/genlite-playertools.plugin";
 import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
 
+declare const GM_getResourceText : (s:string) => string;
+declare global {
+    interface Document {
+        game: any;
+        client: any;
+        genlite: any;
+        initGenLite: () => void;
+    }
+}
 
 const DISCLAIMER = `
 GenLite is NOT associated with Rose-Tinted Games.
@@ -51,6 +59,25 @@ If you find a bug and are unsure post in the GenLite Server. We will help you.
 While we work to ensure compatibility, Use At Your Own Risk.
 Press Cancel to Load, Press Okay to Stop.`;
 
+const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
+let scriptText = GM_getResourceText('clientjs');
+scriptText = scriptText.replace(
+    /import.meta.url/g,
+    '("https://play.genfanad.com/play/js/client.js")'
+);
+scriptText = scriptText.substring(0, scriptText.length - 5)
+    + "; document.client = {};"
+    + "document.client.get = function(a) {"
+    +   "return eval(a);"
+    + "};"
+    + "document.client.set = function(a, b) {"
+    +   "eval(a + ' = ' + b);"
+    + "};"
+    + scriptText.substring(scriptText.length-5);
+
+let isInitialized = false;
+
 (async function load() {
     let confirmed = localStorage.getItem("GenLiteConfirms");
     if (!confirmed && await GenLiteConfirmation.confirm(DISCLAIMER) === true)
@@ -58,42 +85,155 @@ Press Cancel to Load, Press Okay to Stop.`;
     confirmed = "true";
     localStorage.setItem("GenLiteConfirms", confirmed);
 
-    const genlite = new GenLite();
-    await genlite.init();
-    window.genlite = genlite;
+    async function initGenLite() {
 
-    /** Core Features */
-    genlite.notifications = await genlite.pluginLoader.addPlugin(GenLiteNotificationPlugin);
-    genlite.settings = await genlite.pluginLoader.addPlugin(GenLiteSettingsPlugin);
-    genlite.commands = await genlite.pluginLoader.addPlugin(GenLiteCommandsPlugin);
+        function gameObject(
+            name: string,
+            minified: string,
+            parent: Object = null
+        ): any {
+            var o = document.client.get(minified);
+            if (!o) {
+                console.log(`${minified} (${name}) is not defined: ${o}`);
+            }
 
-    /** Official Plugins */
-    await genlite.pluginLoader.addPlugin(GenLiteVersionPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteChatPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteInventoryPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteDropRecorderPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollectionPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteXpCalculator);
-    await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteHitRecorder);
-    await genlite.pluginLoader.addPlugin(GenLiteMenuScaler);
-    await genlite.pluginLoader.addPlugin(GenLiteMusicPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteLocationsPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteMenuSwapperPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteItemTooltips);
-    await genlite.pluginLoader.addPlugin(GenLiteSoundNotification);
-    await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
-    await genlite.pluginLoader.addPlugin(GenLitePlayerToolsPlugin);
-    await genlite.pluginLoader.addPlugin(GenLiteHighscores);
+            if (!parent) {
+                parent = document.game;
+            }
+            parent[name] = o;
+        }
 
-    /** post init things */
-    await window.GenLiteSettingsPlugin.postInit();
-    await window.GenLiteNPCHighlightPlugin.postInit();
-    await window.GenLiteDropRecorderPlugin.postInit();
+        document.game = {};
+        gameObject('BANK', 'Zx');
+        gameObject('Bank', 'Kw');
+        gameObject('CHAT', '$x');
+        gameObject('Camera', 'kS');
+        gameObject('Chat', 'ex');
+        gameObject('DATA', 'qy');
+        gameObject('GAME', 'jg.game');
+        gameObject('GRAPHICS', 'i.J4.graphics');
+        gameObject('Game', 'Ug');
+        gameObject('INVENTORY', 'ob');
+        gameObject('ITEM_RIGHTCLICK_LIMIT', 'Os');
+        gameObject('Inventory', 'Ex');
+        gameObject('ItemStack', '_w');
+        gameObject('KEYBOARD', 'US');
+        gameObject('MUSIC_PLAYER', 'Ox');
+        gameObject('MUSIC_TRACK_NAMES', 'Cx')
+        gameObject('NETWORK', 'aw.network');
+        gameObject('NPC', 'Mg');
+        gameObject('Network', 'iw');
+        gameObject('OptimizedScene', 'AS');
+        gameObject('PLAYER', 'HS.player');
+        gameObject('PLAYER_INFO', 'db');
+        gameObject('PhasedLoadingManager', 'cS');
+        gameObject('Player', 'Ag');
+        gameObject('PlayerHUD', 'kx');
+        gameObject('PlayerInfo', 'Hw');
+        gameObject('SETTINGS', '_b');
+        gameObject('SFXPlayer', 'Mb');
+        gameObject('SFX_PLAYER', 'Tb');
+        gameObject('THREE', 'e');
+        gameObject('Math', 'vi', document.game.THREE); // TODO: is this right?
+        gameObject('WORLDMANAGER', 'yS');
+        gameObject('WorldManager', 'bS');
 
-}
-)();
+        if (isInitialized) {
+            document.genlite.onUIInitialized();
+            return;
+        }
+        isInitialized = true;
 
+        const genlite = new GenLite();
+        document.genlite = genlite;
+        await genlite.init();
+
+        /** Core Features */
+        genlite.notifications = await genlite.pluginLoader.addPlugin(GenLiteNotificationPlugin);
+        genlite.settings = await genlite.pluginLoader.addPlugin(GenLiteSettingsPlugin);
+        genlite.commands = await genlite.pluginLoader.addPlugin(GenLiteCommandsPlugin);
+
+        /** Official Plugins */
+        await genlite.pluginLoader.addPlugin(GenLiteVersionPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteChatPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteInventoryPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteDropRecorderPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollectionPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteXpCalculator);
+        await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteHitRecorder);
+        await genlite.pluginLoader.addPlugin(GenLiteMenuScaler);
+        await genlite.pluginLoader.addPlugin(GenLiteMusicPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteLocationsPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteMenuSwapperPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteItemTooltips);
+        // await genlite.pluginLoader.addPlugin(GenLiteSoundNotification);
+        await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
+        await genlite.pluginLoader.addPlugin(GenLitePlayerToolsPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteHighscores);
+
+        /** post init things */
+        await document['GenLiteSettingsPlugin'].postInit();
+        await document['GenLiteNPCHighlightPlugin'].postInit();
+        await document['GenLiteDropRecorderPlugin'].postInit();
+
+        // NOTE: currently initGenlite is called after the scene has started
+        //       (in minified function NS). The initializeUI function does not
+        //       exist in genfanad and is inlined in NS. So at this point, UI
+        //       is already initialized and we update the plugins.
+        //
+        //       We should eventually move genlite to init at page start, then
+        //       this needs to move to the NS override at the bottom of this
+        //       file.
+        genlite.onUIInitialized();
+    }
+
+    function firefoxOverride(e) {
+        let src = e.target.src;
+        if (src === 'https://play.genfanad.com/play/js/client.js') {
+            e.preventDefault(); // do not load
+            e.stopPropagation();
+            var script = document.createElement('script');
+            script.textContent = scriptText;
+            script.type = 'module';
+            (document.head||document.documentElement).appendChild(script);
+        }
+    }
+
+    function hookClient() {
+        if (document.head) {
+            throw new Error('Head already exists - make sure to enable instant script injection');
+        }
+
+        if (isFirefox) {
+            document.addEventListener("beforescriptexecute", firefoxOverride, true);
+        } else {
+            new MutationObserver((_, observer) => {
+                const clientjsScriptTag = document.querySelector('script[src*="client.js"]');
+                if (clientjsScriptTag) {
+                    clientjsScriptTag.removeAttribute('src');
+                    clientjsScriptTag.textContent = scriptText;
+                }
+            }).observe(document.documentElement, {
+                childList: true,
+                subtree: true
+            });
+        }
+    }
+
+    hookClient();
+    window.addEventListener('load', (e) => {
+        document.initGenLite = initGenLite;
+
+        let doc = (document as any)
+        doc.client.set('document.client.originalStartScene', doc.client.get('NS'));
+        doc.client.set('NS', function () {
+            document.client.originalStartScene();
+            setTimeout(document.initGenLite, 100);
+        });
+    });
+
+})();
