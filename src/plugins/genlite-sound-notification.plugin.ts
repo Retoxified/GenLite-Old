@@ -57,10 +57,11 @@ export class GenLiteSoundNotification implements GenLitePlugin {
         */
         this.genliteSoundListener = new document.game.THREE.AudioListener();
         this.genliteSoundListener.setMasterVolume(this.overrideVolume / 100.0) //bypas setvolume so you dont have to override it 
-        this.genliteSFXPlayer = new SFXPlayer();
+        // TODO(v0.119): document.game.SFXPlayer is no longer a constructor
+        this.genliteSFXPlayer = new document.game.SFXPlayer();
         this.genliteSFXPlayer.load();
         this.genliteSFXPlayer.play = (key, volume = 1) => { this.overridePlay(key, volume) }; //override the default set volume
-        this.playerInUse = SFX_PLAYER;
+        this.playerInUse = document.game.SFX_PLAYER;
         if (this.overrideVolume)
             this.playerInUse = this.genliteSFXPlayer;
 
@@ -80,7 +81,7 @@ export class GenLiteSoundNotification implements GenLitePlugin {
         if (state) {
             this.playerInUse = this.genliteSFXPlayer;
         } else {
-            this.playerInUse = SFX_PLAYER;
+            this.playerInUse = document.game.SFX_PLAYER;
         }
     }
 
@@ -104,7 +105,7 @@ export class GenLiteSoundNotification implements GenLitePlugin {
     }
 
     combatUpdate(update) {
-        if (update.id != PLAYER.id)
+        if (update.id != document.game.PLAYER.id)
             return;
         if ((update.hp / update.maxhp) <= (this.healthThreshold / 100) && this.doHealthCheck)
             this.playerInUse.play('spell-failure');
@@ -113,7 +114,7 @@ export class GenLiteSoundNotification implements GenLitePlugin {
     handleUpdatePacket(packet) {
         if (!this.doInvCheck)
             return;
-        let inUse = Object.keys(INVENTORY.items).length;
+        let inUse = Object.keys(document.game.INVENTORY.items).length;
         if (this.prevSlotsUsed == null) {
             this.prevSlotsUsed = inUse;
         }

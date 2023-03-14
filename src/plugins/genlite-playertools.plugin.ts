@@ -60,7 +60,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
         if (!this.isEnabled || !this.doRender) return;
 
         // Get World Players
-        const worldPlayers = GAME.players;
+        const worldPlayers = document.game.GAME.players;
 
         // Determine Players to Add to Tracking
         let newPlayers = Object.keys(worldPlayers).filter(pID => !Object.keys(this.trackedPlayers).includes(pID));
@@ -135,7 +135,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
             
             let playerPosition = new document.game.THREE.Vector3().copy(character.position()); // Vector3
 
-            if (Object.keys(GAME.combats).some(cID => GAME.combats[cID].left.id == pID || GAME.combats[cID].right.id == pID)) {
+            if (Object.keys(document.game.GAME.combats).some(cID => document.game.GAME.combats[cID].left.id == pID || document.game.GAME.combats[cID].right.id == pID)) {
                 playerPosition = new document.game.THREE.Vector3().copy(character.object.position()); // We are in combat, use the Player's Object Position
             }
 
@@ -182,7 +182,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
     }
 
     handleHidePlayerSettingChange(state: boolean) {
-        document.game.GRAPHICS.threeScene.getObjectByName(GAME.me.id).visible = !state;
+        document.game.GRAPHICS.threeScene.getObjectByName(document.game.GAME.me.id).visible = !state;
     }
 
 

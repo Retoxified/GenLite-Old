@@ -6,7 +6,7 @@
 
     GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    GenLite is distributed in the hope that it will be useful, but wITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
@@ -130,7 +130,7 @@ export class GenLiteHighscores implements GenLitePlugin {
 
     handle(verb, payload) {
         /* count steps */
-        if (verb == "move" && PLAYER && payload.id == PLAYER.id) {
+        if (verb == "move" && document.game.PLAYER && payload.id == document.game.PLAYER.id) {
             switch (payload.direction) {
                 case 0:
                     this.walkStats.e++;
@@ -177,12 +177,12 @@ export class GenLiteHighscores implements GenLitePlugin {
     /* update the high scores object */
     updateScores() {
         this.highscores = new Highscore();
-        this.highscores.Player = PLAYER.character.name()
+        this.highscores.Player = document.game.PLAYER.character.name()
 
         if (this.statsToSend.Skills) {
             let totalLevel = 0, totalXp = 0;
-            for (let key in PLAYER_INFO.skills) {
-                let skill = PLAYER_INFO.skills[key];
+            for (let key in document.game.PLAYER_INFO.skills) {
+                let skill = document.game.PLAYER_INFO.skills[key];
                 totalLevel += skill.level;
                 totalXp += skill.xp;
 
