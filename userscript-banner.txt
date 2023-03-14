@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         GenLite
+// @name         GenLite - KKonaOG
 // @namespace    GenLite
 // @version      ${version}
 // @description  try to take over the world!
