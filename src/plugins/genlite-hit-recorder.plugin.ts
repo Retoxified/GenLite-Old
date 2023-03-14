@@ -115,12 +115,12 @@ export class GenLiteHitRecorder implements GenLitePlugin {
         }
         /* look for start of combat set the curEnemy and record data */
         if (verb == "spawnObject" && payload.type == "combat" &&
-            (payload.participant1 == PLAYER.id || payload.participant2 == PLAYER.id)) {
+            (payload.participant1 == document.game.PLAYER.id || payload.participant2 == document.game.PLAYER.id)) {
             let enemy;
-            if (GAME.combats[payload.id].left.id != PLAYER.id) {
-                enemy = GAME.combats[payload.id].left;
+            if (document.game.GAME.combats[payload.id].left.id != document.game.PLAYER.id) {
+                enemy = document.game.GAME.combats[payload.id].left;
             } else {
-                enemy = GAME.combats[payload.id].right;
+                enemy = document.game.GAME.combats[payload.id].right;
             }
             let enemyid = this.curEnemy ? this.curEnemy.id : 0;
             if (enemyid != enemy.id) { //if new enemy reset otherwise keep the same dps tracker
@@ -134,7 +134,7 @@ export class GenLiteHitRecorder implements GenLitePlugin {
             return;
         }
 
-        if (verb == "projectile" && payload.source == PLAYER.id) {
+        if (verb == "projectile" && payload.source == document.game.PLAYER.id) {
             let enemyid = this.curEnemy ? this.curEnemy.id : 0;
             /* if we switch enemys reset the dps counter for the currently enemy */
             if (enemyid != payload.target) {
@@ -144,7 +144,7 @@ export class GenLiteHitRecorder implements GenLitePlugin {
                 if (this.cumDpsAcc.timeStart == 0)
                     this.cumDpsAcc.timeStart = this.curDpsAcc.timeStart;
             }
-            this.curEnemy = GAME.npcs[payload.target];
+            this.curEnemy = document.game.GAME.npcs[payload.target];
             this.recordDamage(this.playerHitInfo, payload.damage);
             this.curDpsAcc.totDam += payload.damage;
             this.cumDpsAcc.totDam += payload.damage;
@@ -169,7 +169,7 @@ export class GenLiteHitRecorder implements GenLitePlugin {
 
         }
 
-        if (verb == "damage" && this.curEnemy != undefined && payload.id == PLAYER.id) {
+        if (verb == "damage" && this.curEnemy != undefined && payload.id == document.game.PLAYER.id) {
             this.recordDamage(this.enemyHitInfo, payload.amount);
             return;
         }
@@ -181,11 +181,11 @@ export class GenLiteHitRecorder implements GenLitePlugin {
 
 
         if (verb == "combatUI") {
-            if (PLAYER_INFO !== undefined) {
-                this.statsList.attack = PLAYER_INFO.skills.attack.level;
-                this.statsList.strength = PLAYER_INFO.skills.strength.level;
-                this.statsList.ranged = PLAYER_INFO.skills.ranged.level;
-                this.statsList.defense = PLAYER_INFO.skills.defense.level;
+            if (document.game.PLAYER_INFO !== undefined) {
+                this.statsList.attack = document.game.PLAYER_INFO.skills.attack.level;
+                this.statsList.strength = document.game.PLAYER_INFO.skills.strength.level;
+                this.statsList.ranged = document.game.PLAYER_INFO.skills.ranged.level;
+                this.statsList.defense = document.game.PLAYER_INFO.skills.defense.level;
             }
             this.statsList.aim = payload.equipment.stats.aim ?? payload.equipment.stats.ranged_aim;
             this.statsList.power = payload.equipment.stats.power ?? payload.equipment.stats.ranged_power;
@@ -222,9 +222,9 @@ export class GenLiteHitRecorder implements GenLitePlugin {
         if (!this.isPluginEnabled) {
             return;
         }
-        this.statsList.attack = PLAYER_INFO.skills.attack.level;
-        this.statsList.strength = PLAYER_INFO.skills.strength.level;
-        this.statsList.ranged = PLAYER_INFO.skills.ranged.level;
+        this.statsList.attack = document.game.PLAYER_INFO.skills.attack.level;
+        this.statsList.strength = document.game.PLAYER_INFO.skills.strength.level;
+        this.statsList.ranged = document.game.PLAYER_INFO.skills.ranged.level;
 
         this.initDpsElements();
     }

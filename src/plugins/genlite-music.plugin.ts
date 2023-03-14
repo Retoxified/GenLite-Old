@@ -84,11 +84,11 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
         container.style.width = "100%";
         this.selectionMenu.appendChild(container);
 
-        for (const track in MUSIC_TRACK_NAMES) {
+        for (const track in document.game.MUSIC_TRACK_NAMES) {
             if (GenLiteMusicPlugin.missingTracks.includes(track)) {
                 continue;
             }
-            let name = MUSIC_TRACK_NAMES[track];
+            let name = document.game.MUSIC_TRACK_NAMES[track];
             let b = <HTMLElement>document.createElement("div");
             b.style.backgroundColor = '#461400';
             b.style.width = "100%";
@@ -100,7 +100,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
                     this.shuffleTimeout = window.setTimeout(this.nextShuffle.bind(this), 3 * 60 * 1000);
                 }
 
-                SETTINGS.setMusicTrackText("Transitioning...");
+                document.game.SETTINGS.setMusicTrackText("Transitioning...");
                 this.setNextTrack(track);
             };
 
@@ -131,12 +131,12 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
                     this.setNextTrack(t);
                 }
             };
-            SETTINGS.DOM_music_text.onclick = (e) => {
+            document.game.SETTINGS.DOM_music_text.onclick = (e) => {
                 this.toggleDisplay();
             };
         } else {
             document.game.MUSIC_PLAYER.setNextTrack = this.originalSetTrack;
-            SETTINGS.DOM_music_text.onclick = (e) => { };
+            document.game.SETTINGS.DOM_music_text.onclick = (e) => { };
             this.hideMusicSelection();
         }
     }

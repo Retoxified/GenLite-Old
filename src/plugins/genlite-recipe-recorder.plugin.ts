@@ -64,7 +64,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                 this.isCrafting = true;
                 this.isGathering = false;
                 this.recipe = params.action.recipe;
-                this.prevInventory = INVENTORY.items;
+                this.prevInventory = document.game.INVENTORY.items;
                 this.recipeName = params.action.recipe;
                 for (let i in params.action.params) // if params is set here then record a complex recipe name
                     this.recipeName = this.recipeName.concat("__", i, params.action.params[i]);
@@ -95,7 +95,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                 this.isGathering = true;
                 this.isCrafting = false;
                 this.gatherNode = params.id;
-                this.prevInventory = INVENTORY.items;
+                this.prevInventory = document.game.INVENTORY.items;
             }
             return;
         }

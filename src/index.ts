@@ -19,26 +19,26 @@ import { GenLiteConfirmation } from "./core/helpers/genlite-confirmation.class";
 
 
 /** Official Plugins */
-// import { GenLiteVersionPlugin } from "./plugins/genlite-version.plugin";
+import { GenLiteVersionPlugin } from "./plugins/genlite-version.plugin";
 import { GenLiteCameraPlugin } from "./plugins/genlite-camera.plugin";
-// import { GenLiteChatPlugin } from "./plugins/genlite-chat.plugin";
-// import { GenLiteDropRecorderPlugin } from "./plugins/genlite-drop-recorder.plugin";
-// import { GenLiteInventoryPlugin } from "./plugins/genlite-inventory.plugin";
+import { GenLiteChatPlugin } from "./plugins/genlite-chat.plugin";
+import { GenLiteDropRecorderPlugin } from "./plugins/genlite-drop-recorder.plugin";
+import { GenLiteInventoryPlugin } from "./plugins/genlite-inventory.plugin";
 import { GenLiteItemHighlightPlugin } from "./plugins/genlite-item-highlight.plugin";
 import { GenLiteNPCHighlightPlugin } from "./plugins/genlite-npc-highlight.plugin";
-// import { GenLiteRecipeRecorderPlugin } from "./plugins/genlite-recipe-recorder.plugin";
+import { GenLiteRecipeRecorderPlugin } from "./plugins/genlite-recipe-recorder.plugin";
 import { GenLiteWikiDataCollectionPlugin } from "./plugins/genlite-wiki-data-collection.plugin";
 import { GenLiteXpCalculator } from "./plugins/genlite-xp-calculator.plugin";
-// import { GenLiteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
-// import { GenLiteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
-// import { GenLiteMusicPlugin } from "./plugins/genlite-music.plugin";
-// import { GenLiteLocationsPlugin } from "./plugins/genlite-locations.plugin";
-// import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
-// import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
+import { GenLiteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
+import { GenLiteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
+import { GenLiteMusicPlugin } from "./plugins/genlite-music.plugin";
+import { GenLiteLocationsPlugin } from "./plugins/genlite-locations.plugin";
+import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
+import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
 // import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
-// import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
-// import { GenLitePlayerToolsPlugin }  from "./plugins/genlite-playertools.plugin";
-// import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
+import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
+import { GenLitePlayerToolsPlugin }  from "./plugins/genlite-playertools.plugin";
+import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
 
 declare const GM_getResourceText : (s:string) => string;
 declare global {
@@ -87,39 +87,59 @@ let isInitialized = false;
 
     async function initGenLite() {
 
-        function gameObject(name: string, minified: string): any {
+        function gameObject(
+            name: string,
+            minified: string,
+            parent: Object = null
+        ): any {
             var o = document.client.get(minified);
             if (!o) {
                 console.log(`${minified} (${name}) is not defined: ${o}`);
             }
-            document.game[name] = o;
+
+            if (!parent) {
+                parent = document.game;
+            }
+            parent[name] = o;
         }
 
         document.game = {};
-        gameObject('CHAT', 'ex');
+        gameObject('BANK', 'Zx');
+        gameObject('Bank', 'Kw');
+        gameObject('CHAT', '$x');
         gameObject('Camera', 'kS');
-        gameObject('Chat', '$x');
+        gameObject('Chat', 'ex');
         gameObject('DATA', 'qy');
+        gameObject('GAME', 'jg.game');
         gameObject('GRAPHICS', 'i.J4.graphics');
         gameObject('Game', 'Ug');
-        gameObject('GAME', 'jg.game');
-        gameObject('Inventory', 'Ex');
         gameObject('INVENTORY', 'Zx');
+        gameObject('INVENTORY', 'ob');
+        gameObject('ITEM_RIGHTCLICK_LIMIT', 'Os');
+        gameObject('ITEM_RIGHTCLICK_LIMIT', 'Os');
+        gameObject('Inventory', 'Ex');
         gameObject('ItemStack', '_w');
+        gameObject('KEYBOARD', 'US');
         gameObject('MUSIC_PLAYER', 'Ox');
-        gameObject('Network', 'iw');
+        gameObject('MUSIC_TRACK_NAMES', 'Cx')
         gameObject('NETWORK', 'aw.network');
+        gameObject('NPC', 'Mg');
+        gameObject('Network', 'iw');
+        gameObject('OptimizedScene', 'AS');
+        gameObject('PLAYER', 'HS.player');
+        gameObject('PLAYER_INFO', 'db');
         gameObject('PhasedLoadingManager', 'cS');
         gameObject('Player', 'Ag');
-        gameObject('PLAYER', 'HS.player');
         gameObject('PlayerHUD', 'kx');
         gameObject('PlayerInfo', 'Hw');
-        gameObject('PLAYER_INFO', 'db');
+        gameObject('PlayerInfo', 'Hw');
+        gameObject('SETTINGS', '_b');
+        gameObject('SFXPlayer', 'Mb');
+        gameObject('SFX_PLAYER', 'Tb');
         gameObject('THREE', 'e');
-        gameObject('THREE.Math', 'vi'); // TODO: is this right?
+        gameObject('Math', 'vi', document.game.THREE); // TODO: is this right?
         gameObject('WORLDMANAGER', 'yS');
         gameObject('WorldManager', 'bS');
-        gameObject('ITEM_RIGHTCLICK_LIMIT', 'Os');
 
         if (isInitialized) {
             document.genlite.onUIInitialized();
@@ -137,31 +157,31 @@ let isInitialized = false;
         genlite.commands = await genlite.pluginLoader.addPlugin(GenLiteCommandsPlugin);
 
         /** Official Plugins */
-        // await genlite.pluginLoader.addPlugin(GenLiteVersionPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteVersionPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
-        // await genlite.pluginLoader.addPlugin(GenLiteChatPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteChatPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteItemHighlightPlugin);
-        // await genlite.pluginLoader.addPlugin(GenLiteInventoryPlugin);
-        // await genlite.pluginLoader.addPlugin(GenLiteDropRecorderPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteInventoryPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteDropRecorderPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteWikiDataCollectionPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteXpCalculator);
-        // await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);
-        // await genlite.pluginLoader.addPlugin(GenLiteHitRecorder);
-        // await genlite.pluginLoader.addPlugin(GenLiteMenuScaler);
-        // await genlite.pluginLoader.addPlugin(GenLiteMusicPlugin);
-        // await genlite.pluginLoader.addPlugin(GenLiteLocationsPlugin);
-        // await genlite.pluginLoader.addPlugin(GenLiteMenuSwapperPlugin);
-        // await genlite.pluginLoader.addPlugin(GenLiteItemTooltips);
+        await genlite.pluginLoader.addPlugin(GenLiteRecipeRecorderPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteHitRecorder);
+        await genlite.pluginLoader.addPlugin(GenLiteMenuScaler);
+        await genlite.pluginLoader.addPlugin(GenLiteMusicPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteLocationsPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteMenuSwapperPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteItemTooltips);
         // await genlite.pluginLoader.addPlugin(GenLiteSoundNotification);
-        // await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
-        // await genlite.pluginLoader.addPlugin(GenLitePlayerToolsPlugin);
-        // await genlite.pluginLoader.addPlugin(GenLiteHighscores);
+        await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
+        await genlite.pluginLoader.addPlugin(GenLitePlayerToolsPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteHighscores);
 
         /** post init things */
         await document['GenLiteSettingsPlugin'].postInit();
         await document['GenLiteNPCHighlightPlugin'].postInit();
-        // await document['GenLiteDropRecorderPlugin'].postInit();
+        await document['GenLiteDropRecorderPlugin'].postInit();
 
         // NOTE: currently initGenlite is called after the scene has started
         //       (in minified function NS). The initializeUI function does not

@@ -205,11 +205,11 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
         this.locationCheck()
     }
     private updateMapIframeSrc(): void {
-        let layer = PLAYER.location.layer.includes("world") ?
-            PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
+        let layer = document.game.PLAYER.location.layer.includes("world") ?
+            document.game.PLAYER.location.layer.replace("world", '') : document.game.PLAYER.location.layer
         //Zoom Logic Goes here?
 
-        this.mapIframe.src = `https://genfamap.com/${layer}?location=true#${PLAYER.character.pos2.x + .5}_${PLAYER.character.pos2.y - .5}_${this.mapZoom}`
+        this.mapIframe.src = `https://genfamap.com/${layer}?location=true#${document.game.PLAYER.character.pos2.x + .5}_${document.game.PLAYER.character.pos2.y - .5}_${this.mapZoom}`
     }
     private toggleTranslucentMap(): void {
         this.mapTranslucent = !this.mapTranslucent
@@ -245,19 +245,19 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
         this.mapIframe.classList.remove("map-iframe-translucent")
     }
     openMap() {
-        let layer = PLAYER.location.layer.includes("world") ?
-            PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
+        let layer = document.game.PLAYER.location.layer.includes("world") ?
+            document.game.PLAYER.location.layer.replace("world", '') : document.game.PLAYER.location.layer
 
-        this.popupMap = window.open(`https://genfamap.com/${layer}?location=true#${PLAYER.character.pos2.x}_${PLAYER.character.pos2.y}_0.67`, "genfanad-map", 'width=800,height=600')
+        this.popupMap = window.open(`https://genfamap.com/${layer}?location=true#${document.game.PLAYER.character.pos2.x}_${document.game.PLAYER.character.pos2.y}_0.67`, "genfanad-map", 'width=800,height=600')
     }
     private setLocationLabelUnknown(): void {
         this.showCoordinates ?
-            this.locationLabel.innerText = `(${GAME.world.x},${GAME.world.y})` :
+            this.locationLabel.innerText = `(${document.game.GAME.world.x},${document.game.GAME.world.y})` :
             this.locationLabel.innerText = ``
     }
     private setLocationLabel(value: string): void {
         this.showCoordinates ?
-            this.locationLabel.innerText = `${value} (${GAME.world.x},${GAME.world.y})` :
+            this.locationLabel.innerText = `${value} (${document.game.GAME.world.x},${document.game.GAME.world.y})` :
             this.locationLabel.innerText = `${value}`
     }
     private checkSubLocation(subLocations: object, currentPosition: number[]): boolean {
@@ -311,7 +311,7 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
 
             //TODO re-add check previous location here and skip the switch if still in region.
             let found: boolean
-            switch (PLAYER.location.layer) {
+            switch (document.game.PLAYER.location.layer) {
                 case "dungeon":
                     found = this.checkLocations(this.dungeonLocations, currentPosition)
                     break;
@@ -334,7 +334,7 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
     }
 
     private locationCheck() {
-        let currentPosition: number[] = [PLAYER.character.pos2.x, PLAYER.character.pos2.y]
+        let currentPosition: number[] = [document.game.PLAYER.character.pos2.x, document.game.PLAYER.character.pos2.y]
         this.startLocationCheck(currentPosition, this.lastPosition)
 
         this.updateMapIframeSrc()
@@ -472,14 +472,14 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
     private disableLocationLabels() {
         this.locationLabel.style.display = "none"
         this.locationLabel.style.visibility = "hidden"
-        Object.defineProperty(PLAYER.character, "movement_animation", {
+        Object.defineProperty(document.game.PLAYER.character, "movement_animation", {
             set: (animation) => { }
         })
     }
     private enableLocationLabels() {
         this.locationLabel.style.display = "block"
         this.locationLabel.style.visibility = "visible"
-        Object.defineProperty(PLAYER.character, "movement_animation", {
+        Object.defineProperty(document.game.PLAYER.character, "movement_animation", {
             set: (animation) => {
                 this.animationDetector(animation)
             }

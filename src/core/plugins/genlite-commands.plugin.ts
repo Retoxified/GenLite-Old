@@ -8,7 +8,7 @@ export class GenLiteCommandsPlugin {
     async init() {
         document.genlite.registerPlugin(this);
 
-        this.originalProcessInput = document.game.Chat.processInput;
+        this.originalProcessInput = document.game.Chat.prototype.processInput;
         this.register("help", function (s) {
             if (!s) {
                 let helpStr = Object.keys(document.genlite.commands.commands).join(", ");
@@ -142,7 +142,7 @@ export class GenLiteCommandsPlugin {
         // possible code injection, let text area do our string escaping.
         let e = document.createElement('textarea');
         e.textContent = text;
-        document.game.Chat.addGameMessage(e.innerHTML);
+        document.game.CHAT.addGameMessage(e.innerHTML);
     }
 
 }

@@ -34,7 +34,7 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
 
     originalCameraMode: Function;
 
-    unlockCamera: boolean = false;
+    unlockCamera: boolean = true;
     hideRoofs: boolean = false;
     maxDistance: Number = 15;
     minDistance: Number = Math.PI;
