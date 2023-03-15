@@ -1,6 +1,6 @@
 name: Node.js CI Manual
 
-on: [workflow-dispatch]
+on: workflow_dispatch
 
 jobs:
   build:
