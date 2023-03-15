@@ -88,7 +88,6 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                     break;
                 default:
                     this.gatherTask = "";
-                    console.log(params.action, " : if you see this please let dpepls know");            
                     break;
             }
             if (this.gatherTask !== "") {
@@ -96,12 +95,10 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                 this.isCrafting = false;
                 this.gatherNode = params.id;
                 this.prevInventory = document.game.INVENTORY.items;
+            } else {
+                this.isGathering = false;
+                this.isCrafting = false;
             }
-            return;
-        }
-        if (verb == "walk") {
-            this.isGathering = false;
-            this.isCrafting = false;
             return;
         }
 
@@ -109,6 +106,14 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
             this.swapped_inv = true;
             return;
         }
+
+        /* if we get here check the white listed (non interupting) verbs and return otherwise set crafting and gathering to false */
+        let whitelistverbs = ["request_sync", "p", "chat_private", "change_combat_stance", "conversation", "load_complete"];
+        if(whitelistverbs.includes(verb)){
+            return;
+        }
+        this.isGathering = false;
+        this.isCrafting = false;
     }
 
     handle(verb, payload) {
