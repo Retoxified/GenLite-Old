@@ -43,6 +43,7 @@ import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
 declare const GM_getResourceText : (s:string) => string;
 declare global {
     interface Document {
+        fonts: any;
         game: any;
         client: any;
         genlite: any;
@@ -62,10 +63,10 @@ Press Cancel to Load, Press Okay to Stop.`;
 const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
 let scriptText = GM_getResourceText('clientjs');
-scriptText = scriptText.replace(
-    /import.meta.url/g,
-    '("https://play.genfanad.com/play/js/client.js")'
-);
+
+const acmeFont = new FontFace('Acme', 'url(https://play.genfanad.com/play/js/f6db4c5c3282b4e95e85.ttf)');
+acmeFont.load().then(() => document.fonts.add(acmeFont));
+
 scriptText = scriptText.substring(0, scriptText.length - 5)
     + "; document.client = {};"
     + "document.client.get = function(a) {"
