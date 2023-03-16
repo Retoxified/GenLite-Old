@@ -75,7 +75,8 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
     + "document.client.set = function(a, b) {"
     +   "eval(a + ' = ' + b);"
     + "};"
-    + scriptText.substring(scriptText.length-5);
+    + scriptText.substring(scriptText.length-5)
+    + "//# sourceURL=client.js";
 
 let isInitialized = false;
 
