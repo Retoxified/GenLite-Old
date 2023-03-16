@@ -95,7 +95,7 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
             if (this.npcHealthList[hpKey] !== undefined)
                 text += ` HP: ${this.npcHealthList[hpKey]}`
             text += `
-            <div class="genlite-npc-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteNPCHighlightPlugin.pluginName}.hide_item('${hpKey}');void(0);"> &#8863;</div>`;
+            <div class="genlite-npc-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="document.${GenLiteNPCHighlightPlugin.pluginName}.hide_npc('${hpKey}');void(0);"> &#8863;</div>`;
             this.trackedNpcs[npcsToAdd[key]] = this.create_text_element(hpKey, text);
             this.trackedNpcs[npcsToAdd[key]].hasHp = this.npcHealthList[hpKey] !== undefined;
 
@@ -233,7 +233,7 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         return element;
     }
 
-    hide_item(packId) {
+    hide_npc(packId) {
         if (!this.npcData.hasOwnProperty(packId))
             this.npcData[packId] = 0;
 
