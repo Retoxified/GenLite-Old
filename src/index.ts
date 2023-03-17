@@ -106,39 +106,65 @@ let isInitialized = false;
         }
 
         document.game = {};
-        gameObject('BANK', 'Zx');
-        gameObject('Bank', 'Kw');
-        gameObject('CHAT', '$x');
-        gameObject('Camera', 'kS');
-        gameObject('Chat', 'ex');
-        gameObject('DATA', 'qy');
-        gameObject('GAME', 'jg.game');
-        gameObject('GRAPHICS', 'i.J4.graphics');
-        gameObject('Game', 'Ug');
-        gameObject('INVENTORY', 'ob');
-        gameObject('ITEM_RIGHTCLICK_LIMIT', 'Os');
-        gameObject('Inventory', 'Ex');
-        gameObject('ItemStack', '_w');
-        gameObject('KEYBOARD', 'US');
-        gameObject('MUSIC_PLAYER', 'Ox');
-        gameObject('MUSIC_TRACK_NAMES', 'Cx')
-        gameObject('NETWORK', 'aw.network');
-        gameObject('NPC', 'Mg');
-        gameObject('Network', 'iw');
-        gameObject('OptimizedScene', 'AS');
-        gameObject('PLAYER', 'HS.player');
-        gameObject('PLAYER_INFO', 'db');
-        gameObject('PhasedLoadingManager', 'cS');
-        gameObject('Player', 'Ag');
-        gameObject('PlayerHUD', 'kx');
-        gameObject('PlayerInfo', 'Hw');
-        gameObject('SETTINGS', '_b');
-        gameObject('SFXPlayer', 'Mb');
-        gameObject('SFX_PLAYER', 'Tb');
+        document.game.ITEM_RIGHTCLICK_LIMIT = 20; // TODO: Is this equivalent? It seems to no longer be included in client.js
+
+        // Classes
+        gameObject('Bank', 'tv');
+        gameObject('Chat', 'rv');
+        gameObject('Actor', 'Dg');
+        gameObject('Animation', 'h_');
+        gameObject('Camera', 'DS');
+        gameObject('Character', 'A_');
+        gameObject('DeduplicatingCachedLoader', 'wS');
+        gameObject('FadeAnimation', 'd_');
+        gameObject('FrozenEffect', 'Gg');
+        gameObject('Game', 'X_');
+        gameObject('Graphics', 'NS');
+        gameObject('HumanCharacter', 'jg');
+        gameObject('Inventory', 'Cv');
+        gameObject('ItemStack', 'Lg');
+        gameObject('MinimapRenderer', 'j_');
+        gameObject('ModelProjectileAnimation', 'g_');
+        gameObject('MonsterCharacter', 'Hg');
+        gameObject('Network', 'ug');
+        gameObject('NewSegmentLoader', 'yS');
+        gameObject('OptimizedScene', 'PS');
+        gameObject('PassThroughSpineTexture', 'Pg');
+        gameObject('PhasedLoadingManager', 'gS');
+        gameObject('Player', 'O_');
+        gameObject('PlayerHUD', 'zv');
+        gameObject('PlayerInfo', 'Xg');
+        gameObject('Seed', 'z_');
+        gameObject('Segment', 'B_');
+        gameObject('ShrinkForBoatAnimation', 'p_');
+        gameObject('SpriteAnimation', '__');
+        gameObject('SpriteProjectileAnimation', 'f_');
+        gameObject('TeleportAnimation', 'u_');
+        gameObject('TemporaryScenery', 'H_');
+        gameObject('WorldManager', 'IS');
+        gameObject('WorldObject', 'E_');
+        gameObject('Math', 'xi', document.game.THREE);
+        gameObject('SFXPlayer', '$m');
+
+        // Objects
+        gameObject('BANK', 'ew');
+        gameObject('CHAT', 'nw');
+        gameObject('DATA', 'Qy');
+        gameObject('FRIENDS', 'dw');
+        gameObject('GAME', 'K_.game');
+        gameObject('GRAPHICS', 'KS.graphics');
+        gameObject('INVENTORY', 'uw');
+        gameObject('KEYBOARD', 'XS');
+        gameObject('NETWORK', 'pg.network');
+        gameObject('PHASEDLOADINGMANAGER', 'gS');
+        gameObject('PLAYER', '$S.player');
+        gameObject('SFX_PLAYER', 'Jm');
+        gameObject('WORLDMANAGER', 'IS');
+        gameObject('MUSIC_PLAYER', 'Nv');
+        gameObject('MUSIC_TRACK_NAMES', 'Pv');
+        gameObject('SETTINGS', 'Uv');
         gameObject('THREE', 'e');
-        gameObject('Math', 'vi', document.game.THREE); // TODO: is this right?
-        gameObject('WORLDMANAGER', 'yS');
-        gameObject('WorldManager', 'bS');
+        gameObject('PLAYER_INFO', 'g_');
 
         if (isInitialized) {
             document.genlite.onUIInitialized();
