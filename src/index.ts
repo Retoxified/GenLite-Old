@@ -140,6 +140,10 @@ let isInitialized = false;
         gameObject('WorldObject', 'E_');
         gameObject('Math', 'xi', document.game.THREE);
         gameObject('SFXPlayer', '$m');
+        gameObject('PlayerHUD', 'zv');
+        gameObject('PlayerInfo', 'Xg');
+        gameObject('Inventory', 'Cv');
+        gameObject('PhasedLoadingManager', 'gS');
 
         // Objects
         gameObject('BANK', 'ew');
@@ -157,9 +161,10 @@ let isInitialized = false;
         gameObject('WORLDMANAGER', 'IS');
         gameObject('MUSIC_PLAYER', 'Nv');
         gameObject('MUSIC_TRACK_NAMES', 'Pv');
-        gameObject('SETTINGS', 'Uv');
+        gameObject('SETTINGS', 'bw');
         gameObject('THREE', 'e');
-        gameObject('PLAYER_INFO', 'g_');
+        gameObject('PLAYER_INFO', 'fw');
+        gameObject('NPC', 'I_');
 
         if (isInitialized) {
             document.genlite.onUIInitialized();
@@ -204,12 +209,12 @@ let isInitialized = false;
         await document['GenLiteDropRecorderPlugin'].postInit();
 
         // NOTE: currently initGenlite is called after the scene has started
-        //       (in minified function NS). The initializeUI function does not
-        //       exist in genfanad and is inlined in NS. So at this point, UI
+        //       (in minified function qS). The initializeUI function does not
+        //       exist in genfanad and is inlined in qS. So at this point, UI
         //       is already initialized and we update the plugins.
         //
         //       We should eventually move genlite to init at page start, then
-        //       this needs to move to the NS override at the bottom of this
+        //       this needs to move to the qS override at the bottom of this
         //       file.
         genlite.onUIInitialized();
     }
