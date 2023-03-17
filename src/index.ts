@@ -128,6 +128,7 @@ let isInitialized = false;
         gameObject('MonsterCharacter', 'Hg');
         gameObject('Network', 'ug');
         gameObject('NewSegmentLoader', 'yS');
+        gameObject('NPC', 'I_');
         gameObject('OptimizedScene', 'PS');
         gameObject('PassThroughSpineTexture', 'Pg');
         gameObject('PhasedLoadingManager', 'gS');
@@ -162,9 +163,9 @@ let isInitialized = false;
         gameObject('WORLDMANAGER', 'IS');
         gameObject('MUSIC_PLAYER', 'Nv');
         gameObject('MUSIC_TRACK_NAMES', 'Pv');
-        gameObject('SETTINGS', 'Uv');
+        gameObject('SETTINGS', 'bw');
         gameObject('THREE', 'e');
-        gameObject('PLAYER_INFO', 'g_');
+        gameObject('PLAYER_INFO', 'fw');
 
         if (isInitialized) {
             document.genlite.onUIInitialized();
@@ -257,8 +258,8 @@ let isInitialized = false;
         document.initGenLite = initGenLite;
 
         let doc = (document as any)
-        doc.client.set('document.client.originalStartScene', doc.client.get('NS'));
-        doc.client.set('NS', function () {
+        doc.client.set('document.client.originalStartScene', doc.client.get('qS'));
+        doc.client.set('qS', function () {
             document.client.originalStartScene();
             setTimeout(document.initGenLite, 100);
         });
