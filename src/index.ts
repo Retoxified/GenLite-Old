@@ -37,13 +37,12 @@ import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
 import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
 import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
 import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
-import { GenLitePlayerToolsPlugin }  from "./plugins/genlite-playertools.plugin";
+import { GenLitePlayerToolsPlugin } from "./plugins/genlite-playertools.plugin";
 import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
 
-declare const GM_getResourceText : (s:string) => string;
+declare const GM_getResourceText: (s: string) => string;
 declare global {
     interface Document {
-        fonts: any;
         game: any;
         client: any;
         genlite: any;
@@ -63,19 +62,19 @@ Press Cancel to Load, Press Okay to Stop.`;
 const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
 let scriptText = GM_getResourceText('clientjs');
-
-const acmeFont = new FontFace('Acme', 'url(https://play.genfanad.com/play/js/f6db4c5c3282b4e95e85.ttf)');
-acmeFont.load().then(() => document.fonts.add(acmeFont));
-
+scriptText = scriptText.replace(
+    /import.meta.url/g,
+    '("https://play.genfanad.com/play/js/client.js")'
+);
 scriptText = scriptText.substring(0, scriptText.length - 5)
     + "; document.client = {};"
     + "document.client.get = function(a) {"
-    +   "return eval(a);"
+    + "return eval(a);"
     + "};"
     + "document.client.set = function(a, b) {"
-    +   "eval(a + ' = ' + b);"
+    + "eval(a + ' = ' + b);"
     + "};"
-    + scriptText.substring(scriptText.length-5);
+    + scriptText.substring(scriptText.length - 5);
 
 let isInitialized = false;
 
@@ -105,39 +104,62 @@ let isInitialized = false;
         }
 
         document.game = {};
-        gameObject('BANK', 'Zx');
-        gameObject('Bank', 'Kw');
-        gameObject('CHAT', '$x');
-        gameObject('Camera', 'kS');
-        gameObject('Chat', 'ex');
-        gameObject('DATA', 'qy');
-        gameObject('GAME', 'jg.game');
-        gameObject('GRAPHICS', 'i.J4.graphics');
-        gameObject('Game', 'Ug');
-        gameObject('INVENTORY', 'ob');
-        gameObject('ITEM_RIGHTCLICK_LIMIT', 'Os');
-        gameObject('Inventory', 'Ex');
-        gameObject('ItemStack', '_w');
-        gameObject('KEYBOARD', 'US');
-        gameObject('MUSIC_PLAYER', 'Ox');
-        gameObject('MUSIC_TRACK_NAMES', 'Cx')
-        gameObject('NETWORK', 'aw.network');
-        gameObject('NPC', 'Mg');
-        gameObject('Network', 'iw');
-        gameObject('OptimizedScene', 'AS');
-        gameObject('PLAYER', 'HS.player');
-        gameObject('PLAYER_INFO', 'db');
-        gameObject('PhasedLoadingManager', 'cS');
-        gameObject('Player', 'Ag');
-        gameObject('PlayerHUD', 'kx');
-        gameObject('PlayerInfo', 'Hw');
-        gameObject('SETTINGS', '_b');
-        gameObject('SFXPlayer', 'Mb');
-        gameObject('SFX_PLAYER', 'Tb');
+        document.game.ITEM_RIGHTCLICK_LIMIT = 20; // TODO: Is this equivalent? It seems to no longer be included in client.js
+
+
+        // Classes
+        gameObject('Bank', 'tv');
+        gameObject('Chat', 'rv');
+        gameObject('Actor', 'Dg');
+        gameObject('Animation', 'h_');
+        gameObject('Camera', 'DS');
+        gameObject('Character', 'A_');
+        gameObject('DeduplicatingCachedLoader', 'wS');
+        gameObject('FadeAnimation', 'd_');
+        gameObject('FrozenEffect', 'Gg');
+        gameObject('Game', 'X_');
+        gameObject('Graphics', 'NS');
+        gameObject('HumanCharacter', 'jg');
+        gameObject('ItemStack', 'Lg');
+        gameObject('MinimapRenderer', 'j_');
+        gameObject('ModelProjectileAnimation', 'g_');
+        gameObject('MonsterCharacter', 'Hg');
+        gameObject('Network', 'ug');
+        gameObject('NewSegmentLoader', 'yS');
+        gameObject('OptimizedScene', 'PS');
+        gameObject('PassThroughSpineTexture', 'Pg');
+        gameObject('Player', 'O_');
+        gameObject('Seed', 'z_');
+        gameObject('Segment', 'B_');
+        gameObject('ShrinkForBoatAnimation', 'p_');
+        gameObject('SpriteAnimation', '__');
+        gameObject('SpriteProjectileAnimation', 'f_');
+        gameObject('TeleportAnimation', 'u_');
+        gameObject('TemporaryScenery', 'H_');
+        gameObject('WorldManager', 'IS');
+        gameObject('WorldObject', 'E_');
+        gameObject('Math', 'xi', document.game.THREE);
+        gameObject('SFXPlayer', '$m');
+
+        // Objects
+        gameObject('BANK', 'ew');
+        gameObject('CHAT', 'nw');
+        gameObject('DATA', 'Qy');
+        gameObject('FRIENDS', 'dw');
+        gameObject('GAME', 'K_.game');
+        gameObject('GRAPHICS', 'KS.graphics');
+        gameObject('INVENTORY', 'uw');
+        gameObject('KEYBOARD', 'XS');
+        gameObject('NETWORK', 'pg.network');
+        gameObject('PHASEDLOADINGMANAGER', 'gS');
+        gameObject('PLAYER', '$S.player');
+        gameObject('SFX_PLAYER', 'Jm');
+        gameObject('WORLDMANAGER', 'IS');
+        gameObject('MUSIC_PLAYER', 'Nv');
+        gameObject('MUSIC_TRACK_NAMES', 'Pv');
+        gameObject('SETTINGS', 'Uv');
         gameObject('THREE', 'e');
-        gameObject('Math', 'vi', document.game.THREE); // TODO: is this right?
-        gameObject('WORLDMANAGER', 'yS');
-        gameObject('WorldManager', 'bS');
+        gameObject('PLAYER_INFO', 'g_');
 
         if (isInitialized) {
             document.genlite.onUIInitialized();
@@ -200,7 +222,7 @@ let isInitialized = false;
             var script = document.createElement('script');
             script.textContent = scriptText;
             script.type = 'module';
-            (document.head||document.documentElement).appendChild(script);
+            (document.head || document.documentElement).appendChild(script);
         }
     }
 
@@ -230,8 +252,8 @@ let isInitialized = false;
         document.initGenLite = initGenLite;
 
         let doc = (document as any)
-        doc.client.set('document.client.originalStartScene', doc.client.get('NS'));
-        doc.client.set('NS', function () {
+        doc.client.set('document.client.originalStartScene', doc.client.get('qS'));
+        doc.client.set('qS', function () {
             document.client.originalStartScene();
             setTimeout(document.initGenLite, 100);
         });
