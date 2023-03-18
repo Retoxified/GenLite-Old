@@ -9,11 +9,31 @@ export class GenLiteHealthRegenerationPlugin implements GenLitePlugin {
     healthRegenAudio = new Audio('https://furious.no/downloads/genfanad/ping.wav');
     healthBarText: HTMLElement = this.getHealthBarText();
     oldHealth = -Infinity;
+    isPluginEnabled: boolean = false;
 
     static healthRegenerationIntervalMilliseconds = 100;
 
     async init() {
-        this.start();
+        this.isPluginEnabled = document.genlite.settings.add(
+          "HealthRegenerationAudioNotify.Enable",
+          false,
+          "Health Regeneration Audio Notification",
+          "checkbox",
+          this.handlePluginToggled,
+          this
+        );
+
+        this.handlePluginToggled(this.isPluginEnabled);
+    }
+
+    handlePluginToggled(state: boolean) {
+        this.isPluginEnabled = state;
+
+        if (state) {
+          this.start();
+        } else {
+          this.stop();
+        }
     }
 
     public stop() {
