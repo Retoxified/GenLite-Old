@@ -40,13 +40,19 @@ import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand
 import { GenLitePlayerToolsPlugin } from "./plugins/genlite-playertools.plugin";
 import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
 import {GenLiteItemDisplays} from "./plugins/genlite-itemdisplay.plugin";
+import { GenLiteHealthRegenerationPlugin } from './plugins/genlite-health-regeneration.plugin';
 
 declare const GM_getResourceText: (s: string) => string;
+
+// TODO: use globals.ts?
 declare global {
     interface Document {
         game: any;
         client: any;
-        genlite: any;
+        genlite: {
+          [key: string]: any,
+          settings: GenLiteSettingsPlugin,
+        };
         initGenLite: () => void;
     }
 }
@@ -207,6 +213,7 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLitePlayerToolsPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteHighscores);
         await genlite.pluginLoader.addPlugin(GenLiteItemDisplays);
+        await genlite.pluginLoader.addPlugin(GenLiteHealthRegenerationPlugin);
 
         /** post init things */
         await document['GenLiteSettingsPlugin'].postInit();
