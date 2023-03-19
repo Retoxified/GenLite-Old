@@ -49,6 +49,11 @@ export class GenLite {
         this.installHook(document.game.Game.prototype, 'combatUpdate');
         this.installHook(document.game.PlayerHUD.prototype, 'setHealth');
         this.installHook(document.game.Inventory.prototype, 'handleUpdatePacket');
+        this.installHook(document.game.Bank.prototype, 'handlePacket');
+        this.installHook(document.game.Bank.prototype, '_showQualityPopup');
+        this.installHook(document.game.Trade.prototype, 'handlePacket', this.hookTrade_handlePacket);
+
+
     }
 
     onUIInitialized() {
@@ -75,6 +80,11 @@ export class GenLite {
 
     hookDisconnect(fnName: string, ...args: Array<unknown>) {
         this.hook('logoutOK', args);
+    }
+
+    /* because Bank and Trade have the same function name */
+    hookTrade_handlePacket(fnName: string, ...args: Array<unknown>){
+        this.hook('Trade_handlePacket', args)
     }
 
 
