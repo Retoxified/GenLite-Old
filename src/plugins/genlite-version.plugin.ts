@@ -1,3 +1,13 @@
+/*
+    Copyright (C) 2022-2023 KKonaOG 
+*/
+/*
+    This file is part of GenLite.
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 // This plugin is designed to insert an HTML element into the game's UI that displays the current version of GenLite next to the Client Version
 
 // Import Plugin Interface
@@ -18,7 +28,7 @@ export class GenLiteVersionPlugin implements GenLitePlugin {
 
     // Plugin Hooks
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
         // Create and Append the Version Container to the Body
         this.versionContainer = document.createElement('p');

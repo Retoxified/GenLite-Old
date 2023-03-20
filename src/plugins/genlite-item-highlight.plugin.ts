@@ -1,3 +1,16 @@
+/*
+    Copyright (C) 2022-2023 Retoxified, dpeGit, snwhd
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 interface Element {
     element: HTMLElement,
     itemId: string,
@@ -37,7 +50,7 @@ interface Element {
  * to each item, modifying the left-click and right-click actions order.
 */
 
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteItemHighlightPlugin';
@@ -59,13 +72,13 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     hideLables: boolean = false;
 
     async init() {
-        window.genlite.registerPlugin(this);
-        this.originalItemStackIntersects = ItemStack.prototype.intersects;
+        document.genlite.registerPlugin(this);
+        this.originalItemStackIntersects = document.game.ItemStack.prototype.intersects;
 
         this.loadItemList();
         this.createDiv();
 
-        this.isPluginEnabled = window.genlite.settings.add(
+        this.isPluginEnabled = document.genlite.settings.add(
             "ItemHighlight.Enable",
             true,
             "Highlight Items",
@@ -75,7 +88,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
             undefined,
             undefined
         );
-        this.hideLables = window.genlite.settings.add(
+        this.hideLables = document.genlite.settings.add(
             "HideItemLabels.Enable",
             false,
             "Hide Item Labels",
@@ -87,7 +100,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
             "ItemHighlight.Enable"
         );
 
-        let storedPriorityColor = window.genlite.settings.add("ItemHighlight.PriorityColor", "#ffa500", "Priority Item Color", "color", this.handleColorChange, this, undefined, undefined, "ItemHighlight.Enable");
+        let storedPriorityColor = document.genlite.settings.add("ItemHighlight.PriorityColor", "#ffa500", "Priority Item Color", "color", this.handleColorChange, this, undefined, undefined, "ItemHighlight.Enable");
 
         let sheet = document.styleSheets[0];
         this.styleRuleIndex = sheet.insertRule(`.genlite-priority-item { color: ${storedPriorityColor}; }`, sheet.cssRules.length);
@@ -97,7 +110,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         window.addEventListener("blur", this.blurHandler.bind(this))
 
         if (this.isPluginEnabled === true) {
-            ItemStack.prototype.intersects = this.ItemStack_intersects;
+            document.game.ItemStack.prototype.intersects = this.ItemStack_intersects;
         }
     }
 
@@ -150,7 +163,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
 
     createElement(instanceId) {
         let stackable = false;
-        let itemStack = GAME.items[instanceId];
+        let itemStack = document.game.GAME.items[instanceId];
         let itemId = itemStack.item_keys[instanceId].item_id;
         let itemName = itemStack.item_info[itemId].name;
 
@@ -158,7 +171,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
             itemId = itemId.substring(7);
             stackable = true;
         } else {
-            stackable = DATA.items[itemId].stackable ?? false;
+            stackable = document.game.DATA.items[itemId].stackable ?? false;
         }
 
         let div = document.createElement('div');
@@ -169,8 +182,8 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         //     itemName= `${itemName}(${item.definition.quantity})`;
         // }
         div.innerHTML = `<span style="display: inline-block;">${itemName}</span>
-                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.hideItem('${itemId}');void(0);"> &#8863;</div>
-                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteItemHighlightPlugin.pluginName}.importantItem('${itemId}');void(0);"> &#8862;</div>`;
+                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="document.${GenLiteItemHighlightPlugin.pluginName}.hideItem('${itemId}');void(0);"> &#8863;</div>
+                             <div class="genlite-item-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="document.${GenLiteItemHighlightPlugin.pluginName}.importantItem('${itemId}');void(0);"> &#8862;</div>`;
         div.style.transform = 'translateX(-50%)';
         div.style.pointerEvents = "none";
         div.style.fontFamily = 'acme, times new roman, Times, serif'; // Set Font
@@ -238,9 +251,9 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         // when disabling the plugin clear the current list of items
         if (state === false) {
             this.clearTracked();
-            ItemStack.prototype.intersects = this.originalItemStackIntersects;
+            document.game.ItemStack.intersects = this.originalItemStackIntersects;
         } else {
-            ItemStack.prototype.intersects = this.ItemStack_intersects;
+            document.game.ItemStack.intersects = this.ItemStack_intersects;
         }
 
         this.isPluginEnabled = state;
@@ -268,7 +281,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     }
 
     getItemValue(itemId) {
-        let gameValue = DATA.items[itemId].value ?? 1;
+        let gameValue = document.game.DATA.items[itemId].value ?? 1;
         return gameValue;
     }
 
@@ -279,9 +292,9 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         } else if (itemPriority == 1) {
             return "genlite-priority-item";
         }
-   
+
         let itemValue = this.getItemValue(itemId);
-  
+
         if (itemValue >= 10000) {
             return 'text-ran';
         } else if (itemValue >= 5000) {
@@ -321,7 +334,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
 
     world_to_screen(pos, stack_count) {
         var p = pos;
-        var screenPos = p.project(GRAPHICS.threeCamera());
+        var screenPos = p.project(document.game.GRAPHICS.threeCamera());
         screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
         screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight - (stack_count * 15);
         return screenPos;
@@ -342,13 +355,13 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         all_items.sort((a, b) => b.item.value - a.item.value);
 
         let show_examine_options = true;
-        if (all_items.length > ITEM_RIGHTCLICK_LIMIT / 2) show_examine_options = false;
+        if (all_items.length > document.game.ITEM_RIGHTCLICK_LIMIT / 2) show_examine_options = false;
 
         let options = 0;
         for (let entry of all_items) {
             let itemId = entry.id;
             let item = entry.item;
-            if (options > ITEM_RIGHTCLICK_LIMIT) break;
+            if (options > document.game.ITEM_RIGHTCLICK_LIMIT) break;
             options++;
             if (show_examine_options) {
                 list.push({
@@ -357,19 +370,19 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
                     priority: - 1,
                     object: item,
                     text: 'Examine',
-                    action: () =>CHAT.addGameMessage(item.examine)
+                    action: () => document.game.CHAT.addGameMessage(item.examine)
                 });
             }
             let all_keys = Object.keys(item.ids);
             list.push({
                 color: 'red',
                 distance: i.distance,
-                priority: 1 + window[GenLiteItemHighlightPlugin.pluginName].getItemData(itemId) * 50,
+                priority: 1 + document[GenLiteItemHighlightPlugin.pluginName].getItemData(itemId) * 50,
                 object: item,
                 text: all_keys.length > 1 ? 'Take one' : 'Take',
-                action: () =>{
+                action: () => {
                     let take_id = all_keys[Math.floor(Math.random() * all_keys.length)];
-                    NETWORK.action('take', {
+                    document.game.NETWORK.action('take', {
                         item: take_id
                     })
                 }
@@ -389,7 +402,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     }
 
     updateTrackedStacks() {
-        let itemStacks = GAME.items;
+        let itemStacks = document.game.GAME.items;
         let itemKeys = Object.keys(itemStacks);
         let keysToAdd = itemKeys.filter(k => !this.trackedStacks.includes(k));
         let keysToRemove = this.trackedStacks.filter(k => !itemKeys.includes(k));
@@ -413,7 +426,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
 
         for (let instanceId in this.itemElements) {
             let element = this.itemElements[instanceId];
-            let stack = GAME.items[element.instanceId];
+            let stack = document.game.GAME.items[element.instanceId];
             let itemId = element.itemId;
             if (stack !== undefined) {
                 if ((this.getItemData(itemId) == -1 || this.hideLables) && !this.isAltDown) {
@@ -439,7 +452,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
                     stack_counter[posKey] = 0;
                 }
 
-                let worldPos = new THREE.Vector3().copy(stack.position());
+                let worldPos = new document.game.THREE.Vector3().copy(stack.position());
                 worldPos.y += 0.5;
                 let screenPos = this.world_to_screen(worldPos, stack_counter[posKey]);
                 if (screenPos.z > 1.0) {

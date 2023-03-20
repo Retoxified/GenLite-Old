@@ -1,10 +1,21 @@
-import { GenLiteWikiDataCollectionPlugin } from "./genlite-wiki-data-collection.plugin";
+/*
+    Copyright (C) 2022-2023 Retoxified, dpeGit
+*/
+/*
+    This file is part of GenLite.
 
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteNPCHighlightPlugin';
-    static healthListVersion = "2"
+    static healthListVersion = "3"
 
     trackedNpcs = {};
     npcData = {};
@@ -26,7 +37,7 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
 
     packList;
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
         this.npc_highlight_div = document.createElement('div');
         this.npc_highlight_div.className = 'npc-indicators-list';
@@ -42,13 +53,13 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         window.addEventListener('keyup', this.keyUpHandler.bind(this));
         window.addEventListener("blur", this.blurHandler.bind(this))
 
-        this.isPluginEnabled = window.genlite.settings.add("NpcHighlight.Enable", true, "Highlight NPCs", "checkbox", this.handlePluginEnableDisable, this);
-        this.hideInvert = window.genlite.settings.add("NpcHideInvert.Enable", true, "Invert NPC Hiding", "checkbox", this.handleHideInvertEnableDisable, this, undefined, undefined, "NpcHighlight.Enable");
+        this.isPluginEnabled = document.genlite.settings.add("NpcHighlight.Enable", true, "Highlight NPCs", "checkbox", this.handlePluginEnableDisable, this);
+        this.hideInvert = document.genlite.settings.add("NpcHideInvert.Enable", true, "Invert NPC Hiding", "checkbox", this.handleHideInvertEnableDisable, this, undefined, undefined, "NpcHighlight.Enable");
 
     }
 
     async postInit() {
-        this.packList = window.GenLiteWikiDataCollectionPlugin.packList;
+        this.packList = document['GenLiteWikiDataCollectionPlugin'].packList;
     }
 
     handlePluginEnableDisable(state: boolean) {
@@ -74,18 +85,20 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
             return;
         }
 
-        let npcsToAdd = Object.keys(GAME.npcs).filter(x => !Object.keys(this.trackedNpcs).includes(x));
-        let npcsToRemove = Object.keys(this.trackedNpcs).filter(x => !Object.keys(GAME.npcs).includes(x));
+        let npcsToAdd = Object.keys(document.game.GAME.npcs).filter(x => !Object.keys(this.trackedNpcs).includes(x));
+        let npcsToRemove = Object.keys(this.trackedNpcs).filter(x => !Object.keys(document.game.GAME.npcs).includes(x));
 
         for (let key in npcsToAdd) {
-            let npc = GAME.npcs[npcsToAdd[key]]
+            let npc = document.game.GAME.npcs[npcsToAdd[key]]
             let hpKey = this.packList[npc.id.split('-')[0]]
             let text = npc.htmlName;
             if (this.npcHealthList[hpKey] !== undefined)
                 text += ` HP: ${this.npcHealthList[hpKey]}`
             text += `
-            <div class="genlite-npc-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="window.${GenLiteNPCHighlightPlugin.pluginName}.hide_item('${hpKey}');void(0);"> &#8863;</div>`;
+            <div class="genlite-npc-setting" style="display: ${this.isAltDown ? "inline-block" : "none"}; pointer-events: auto;" onclick="document.${GenLiteNPCHighlightPlugin.pluginName}.hide_npc('${hpKey}');void(0);"> &#8863;</div>`;
             this.trackedNpcs[npcsToAdd[key]] = this.create_text_element(hpKey, text);
+            this.trackedNpcs[npcsToAdd[key]].hasHp = this.npcHealthList[hpKey] !== undefined;
+
         }
 
         for (let key in npcsToRemove) {
@@ -95,16 +108,23 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
 
         for (let key in this.trackedNpcs) {
             let worldPos;
-            if (GAME.npcs[key] !== undefined) {
+            if (document.game.GAME.npcs[key] !== undefined) {
+                /* if the health was updated but the npc tag doesnt have that set regen the tag */
+                if (!this.trackedNpcs[key].hasHp && this.npcHealthList[this.packList[key.split('-')[0]]]) {
+                    this.trackedNpcs[key].remove();
+                    delete this.trackedNpcs[key];
+                    continue;
+                }
+
                 /* if in combat grab the threeObject position (the actual current position of the sprite not the world pos)
                     mult by 0.8 which is the height of the health bar
                 */
                 if (key == this.curEnemy) {
-                    worldPos = new THREE.Vector3().copy(GAME.npcs[key].object.position());
+                    worldPos = new document.game.THREE.Vector3().copy(document.game.GAME.npcs[key].object.position());
                     worldPos.y += 0.8;
                 } else {
-                    worldPos = new THREE.Vector3().copy(GAME.npcs[key].position());
-                    worldPos.y += GAME.npcs[key].height
+                    worldPos = new document.game.THREE.Vector3().copy(document.game.GAME.npcs[key].position());
+                    worldPos.y += document.game.GAME.npcs[key].height
                 }
                 let screenPos = this.world_to_screen(worldPos);
                 if (key == this.curEnemy)
@@ -118,7 +138,6 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
                 }
                 this.trackedNpcs[key].style.top = screenPos.y + "px";
                 this.trackedNpcs[key].style.left = screenPos.x + "px";
-
             }
         }
     }
@@ -135,16 +154,16 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
 
     /* figure out which npc we are fighting and when that combat ends */
     handle(verb, payload) {
-        if (this.isPluginEnabled === false || NETWORK.loggedIn === false) {
+        if (this.isPluginEnabled === false || document.game.NETWORK.loggedIn === false) {
             return;
         }
 
         /* look for start of combat set the curEnemy and record data */
         if (verb == "spawnObject" && payload.type == "combat" &&
-            (payload.participant1 == PLAYER.id || payload.participant2 == PLAYER.id)) {
+            (payload.participant1 == document.game.PLAYER.id || payload.participant2 == document.game.PLAYER.id)) {
             this.curCombat = payload.id;
-            let curCombat = GAME.combats[payload.id];
-            this.curEnemy = curCombat.left.id == PLAYER.id ? curCombat.right.id : curCombat.left.id;
+            let curCombat = document.game.GAME.combats[payload.id];
+            this.curEnemy = curCombat.left.id == document.game.PLAYER.id ? curCombat.right.id : curCombat.left.id;
             return;
         }
         if (verb == "removeObject" && payload.type == "combat" && payload.id == this.curCombat) {
@@ -158,8 +177,8 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         if (this.isPluginEnabled === false) {
             return;
         }
-        let object = GAME.objectById(update.id);
-        if (update.id == PLAYER.id || GAME.players[update.id] !== undefined || object === undefined)
+        let object = document.game.GAME.objectById(update.id);
+        if (update.id == document.game.PLAYER.id || document.game.GAME.players[update.id] !== undefined || object === undefined)
             return;
 
         let hpKey = this.packList[object.id.split('-')[0]];
@@ -170,11 +189,14 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         if (this.npcHealthList[hpKey] === undefined) {
             this.npcHealthList[hpKey] = update.maxhp;
             localStorage.setItem("GenliteNPCHealthList", JSON.stringify(this.npcHealthList));
-            npcsToMod = Object.keys(GAME.npcs).filter(x => GAME.npcs[x].id.split('-')[0] == object.id.split('-')[0]);
         }
+        npcsToMod = Object.keys(document.game.GAME.npcs).filter(x => document.game.GAME.npcs[x].id.split('-')[0] == object.id.split('-')[0]);
         for (let key in npcsToMod) {
             let npcid = npcsToMod[key];
+            if (this.trackedNpcs[npcid] && this.trackedNpcs[npcid].hasHp)
+                continue;
             this.trackedNpcs[npcid].innerHTML += ` HP: ${this.npcHealthList[hpKey]}`;
+            this.trackedNpcs[npcid].hasHp = true;
         }
         if (this.trackedNpcs.hasOwnProperty(object.id))
             this.trackedNpcs[object.id].innerHTML = `<div>${object.htmlName}</div><div>HP: ${update.hp}/${update.maxhp}</div>`;
@@ -183,7 +205,7 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
 
     world_to_screen(pos) {
         var p = pos;
-        var screenPos = p.project(GRAPHICS.threeCamera());
+        var screenPos = p.project(document.game.GRAPHICS.threeCamera());
 
         screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
         screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight;
@@ -211,7 +233,7 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         return element;
     }
 
-    hide_item(packId) {
+    hide_npc(packId) {
         if (!this.npcData.hasOwnProperty(packId))
             this.npcData[packId] = 0;
 

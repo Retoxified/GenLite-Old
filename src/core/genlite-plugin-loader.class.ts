@@ -1,3 +1,16 @@
+/*
+    Copyright (C) 2022-2023 Retoxified, FrozenReality
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { ExamplePlugin } from "./help/example-plugin.class";
 import {GenLitePlugin} from './interfaces/plugin.interface';
 
@@ -11,7 +24,7 @@ export class GenLitePluginLoader {
     /**
      * Instantiates an instance of pluginClass,
      * Runs its async init() function
-     * Adds a window field for the instance matching pluginClass.name
+     * Adds a document field for the instance matching pluginClass.name
      * The plugin instance will then also appear in this.plugins[]
      * @param pluginClass
      * @returns {Promise<boolean>}
@@ -29,7 +42,7 @@ export class GenLitePluginLoader {
             const pluginInstance = new pluginClass();
             await pluginInstance.init();
 
-            window[pluginClass.pluginName] = pluginInstance;
+            document[pluginClass.pluginName] = pluginInstance;
 
             this.plugins.push(pluginInstance);
             console.log(`[GenLitePluginLoader]: Loaded plugin ${pluginClass.pluginName}`);

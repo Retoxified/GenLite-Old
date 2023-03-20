@@ -1,3 +1,16 @@
+/*
+    Copyright (C) 2023 dpeGit
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import {GenLitePlugin} from '../core/interfaces/plugin.interface';
 
 export class GenLiteItemTooltips implements GenLitePlugin {
@@ -16,11 +29,11 @@ export class GenLiteItemTooltips implements GenLitePlugin {
     isValueEnabled: boolean = false;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
-        this.isPluginEnabled = window.genlite.settings.add("ItemToolTips.Enable", true, "Tooltips", "checkbox", this.handlePluginEnableDisable, this);
-        this.isFoodEnabled = window.genlite.settings.add("FoodToolTips.Enable", true, "Food Tooltips", "checkbox", this.handleFoodEnableDisable, this, undefined, undefined, "ItemToolTips.Enable");
-        this.isValueEnabled = window.genlite.settings.add("ValueToolTips.Enable", true, "Value Tooltips", "checkbox", this.handleValueEnableDisable, this, undefined, undefined, "ItemToolTips.Enable");
+        this.isPluginEnabled = document.genlite.settings.add("ItemToolTips.Enable", true, "Tooltips", "checkbox", this.handlePluginEnableDisable, this);
+        this.isFoodEnabled = document.genlite.settings.add("FoodToolTips.Enable", true, "Food Tooltips", "checkbox", this.handleFoodEnableDisable, this, undefined, undefined, "ItemToolTips.Enable");
+        this.isValueEnabled = document.genlite.settings.add("ValueToolTips.Enable", true, "Value Tooltips", "checkbox", this.handleValueEnableDisable, this, undefined, undefined, "ItemToolTips.Enable");
 
 
     }
@@ -53,8 +66,9 @@ export class GenLiteItemTooltips implements GenLitePlugin {
     /* inits the tooltip and other elements
     */
     initToolTip() {
-        for (let slot in INVENTORY.DOM_slots) {
-            let DOM_slot = INVENTORY.DOM_slots[slot].item_div;
+        let slots = document.game.INVENTORY.DOM_slots;
+        for (const slotIndex in slots) {
+            let DOM_slot = slots[slotIndex].item_div;
             DOM_slot.onmouseenter = this.installEventHook(DOM_slot.onmouseenter, this.onmouseenter, this);
             DOM_slot.onmousemove = this.installEventHook(DOM_slot.onmousemove, this.onmousemove, this);
             DOM_slot.onmouseleave = this.installEventHook(DOM_slot.onmouseleave, this.onmouseleave, this);
@@ -97,13 +111,13 @@ export class GenLiteItemTooltips implements GenLitePlugin {
 
     /* figure out which npc we are fighting and when that combat ends */
     handle(verb, payload) {
-        if (this.isPluginEnabled === false || NETWORK.loggedIn === false) {
+        if (this.isPluginEnabled === false || document.game.NETWORK.loggedIn === false) {
             return;
         }
 
         /* look for start of combat set the curEnemy and record data */
         if (verb == "spawnObject" && payload.type == "combat" &&
-            (payload.participant1 == PLAYER.id || payload.participant2 == PLAYER.id)) {
+            (payload.participant1 == document.game.PLAYER.id || payload.participant2 == document.game.PLAYER.id)) {
             this.curCombat = payload.id;
             this.pacifistTime = Number.POSITIVE_INFINITY;
             return;
@@ -114,7 +128,7 @@ export class GenLiteItemTooltips implements GenLitePlugin {
             return;
         }
 
-        if (verb == "move" && PLAYER && payload.id == PLAYER.id) {
+        if (verb == "move" && document.game.PLAYER && payload.id == document.game.PLAYER.id) {
             this.stepCount++;
             return;
         }
@@ -134,7 +148,7 @@ export class GenLiteItemTooltips implements GenLitePlugin {
             callback_this.itemToolTip.style.left = `${event.clientX + 15}px`
         }
 
-        let itemData = DATA.items[INVENTORY.items[slot].item];
+        let itemData = document.game.DATA.items[document.game.INVENTORY.items[slot].item];
         callback_this.itemToolTip.innerHTML = "";
         if (callback_this.isFoodEnabled && itemData.consumable && itemData.consumable.vitality)
             callback_this.foodTooltip(itemData, callback_this);
@@ -175,7 +189,7 @@ export class GenLiteItemTooltips implements GenLitePlugin {
         } else {
             slot = event.target.offsetParent.offsetParent.slot_number;
         }
-        let itemData = DATA.items[INVENTORY.items[slot].item];
+        let itemData = document.game.DATA.items[document.game.INVENTORY.items[slot].item];
         if (callback_this.isFoodEnabled && itemData.consumable
             && itemData.consumable.condition && itemData.consumable.condition.params.threshold_steps)
             callback_this.stepCount = 0;
@@ -196,8 +210,8 @@ export class GenLiteItemTooltips implements GenLitePlugin {
     */
     foodTooltip(itemData, callback_this) {
         let healing = itemData.consumable.vitality;
-        let totalHealth = PLAYER_INFO.skills.vitality.level;
-        let curHealth = PLAYER_INFO.skills.vitality.current;
+        let totalHealth = document.game.PLAYER_INFO.skills.vitality.level;
+        let curHealth = document.game.PLAYER_INFO.skills.vitality.current;
         let healedHealth = Math.min(totalHealth, curHealth + healing);
         let healingAmount = Math.min(healedHealth - curHealth, healing)
         let textColor = (curHealth + healing > totalHealth) ? "red" : "LimeGreen";
@@ -218,7 +232,7 @@ export class GenLiteItemTooltips implements GenLitePlugin {
             case "skill_below_threshold_%":
                 switch (condition.params.skill) {
                     case "vitality":
-                        dummyItem.consumable.vitality = PLAYER_INFO.skills.vitality.current < PLAYER_INFO.skills.vitality.level * condition.params.threshold_rate
+                        dummyItem.consumable.vitality = document.game.PLAYER_INFO.skills.vitality.current < document.game.PLAYER_INFO.skills.vitality.level * condition.params.threshold_rate
                             ? condition.true.vitality : condition.false.vitality;
                         break;
                 }
@@ -226,11 +240,11 @@ export class GenLiteItemTooltips implements GenLitePlugin {
             case "skill_compare_greater":
                 let skillA = condition.params.skill_a;
                 let skillB = condition.params.skill_b;
-                dummyItem.consumable.vitality = PLAYER_INFO.skills[skillA].level > PLAYER_INFO.skills[skillB].level
+                dummyItem.consumable.vitality = document.game.PLAYER_INFO.skills[skillA].level > document.game.PLAYER_INFO.skills[skillB].level
                     ? condition.true.vitality : condition.false.vitality;
                 break;
             case "location_layer":
-                dummyItem.consumable.vitality = PLAYER_INFO.location.layer == condition.params.layer
+                dummyItem.consumable.vitality = document.game.PLAYER_INFO.location.layer == condition.params.layer
                     ? condition.true.vitality : condition.false.vitality;
                 break;
             case "pacifist":

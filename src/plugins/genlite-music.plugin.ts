@@ -1,4 +1,17 @@
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+/*
+    Copyright (C) 2023 snwhd
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteMusicPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteMusicPlugin';
@@ -12,7 +25,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
     selectionMenu: HTMLElement;
     displayed = false;
 
-    selectionOptions: {[key: string]: HTMLElement} = {};
+    selectionOptions: { [key: string]: HTMLElement } = {};
     currentSelection: HTMLElement = null;
 
     // plugin modes
@@ -28,10 +41,10 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
     currentTrack = "";
 
     async init() {
-        window.genlite.registerPlugin(this);
-        this.originalSetTrack = MUSIC_PLAYER.setNextTrack;
+        document.genlite.registerPlugin(this);
+        this.originalSetTrack = document.game.MUSIC_PLAYER.setNextTrack;
 
-        this.isPluginEnabled = window.genlite.settings.add(
+        this.isPluginEnabled = document.genlite.settings.add(
             "MusicPlugin.Enable",
             false,
             "Music Selection",
@@ -71,11 +84,11 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
         container.style.width = "100%";
         this.selectionMenu.appendChild(container);
 
-        for (const track in MUSIC_TRACK_NAMES) {
+        for (const track in document.game.MUSIC_TRACK_NAMES) {
             if (GenLiteMusicPlugin.missingTracks.includes(track)) {
                 continue;
             }
-            let name = MUSIC_TRACK_NAMES[track];
+            let name = document.game.MUSIC_TRACK_NAMES[track];
             let b = <HTMLElement>document.createElement("div");
             b.style.backgroundColor = '#461400';
             b.style.width = "100%";
@@ -87,7 +100,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
                     this.shuffleTimeout = window.setTimeout(this.nextShuffle.bind(this), 3 * 60 * 1000);
                 }
 
-                SETTINGS.setMusicTrackText("Transitioning...");
+                document.game.SETTINGS.setMusicTrackText("Transitioning...");
                 this.setNextTrack(track);
             };
 
@@ -95,7 +108,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
             this.selectionOptions[track] = b;
         }
 
-        window.genlite.commands.register(
+        document.genlite.commands.register(
             "music",
             this.handleCommand.bind(this),
             this.helpCommand.bind(this)
@@ -113,17 +126,17 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
 
     updateMusicUI() {
         if (this.isPluginEnabled) {
-            MUSIC_PLAYER.setNextTrack = (t) => {
+            document.game.MUSIC_PLAYER.setNextTrack = (t) => {
                 if (this.musicMode == "passthrough") {
                     this.setNextTrack(t);
                 }
             };
-            SETTINGS.DOM_music_text.onclick = (e) => {
+            document.game.SETTINGS.DOM_music_text.onclick = (e) => {
                 this.toggleDisplay();
             };
         } else {
-            MUSIC_PLAYER.setNextTrack = this.originalSetTrack;
-            SETTINGS.DOM_music_text.onclick = (e) => {};
+            document.game.MUSIC_PLAYER.setNextTrack = this.originalSetTrack;
+            document.game.SETTINGS.DOM_music_text.onclick = (e) => { };
             this.hideMusicSelection();
         }
     }
@@ -186,7 +199,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
         }
 
         this.currentTrack = track;
-        this.originalSetTrack.call(MUSIC_PLAYER, track);
+        this.originalSetTrack.call(document.game.MUSIC_PLAYER, track);
     }
 
     toggleDisplay() {
@@ -216,20 +229,20 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
 
         switch (subcommand) {
             case "list":
-                window.genlite.commands.print("List available tracks.");
+                document.genlite.commands.print("List available tracks.");
                 break;
             case "play":
-                window.genlite.commands.print("Play a track; e.g. '//music play Genfanad Theme'");
+                document.genlite.commands.print("Play a track; e.g. '//music play Genfanad Theme'");
                 break;
             case "shuffle":
-                window.genlite.commands.print("Enable or disable shuffle; e.g. '//music shuffle off'");
+                document.genlite.commands.print("Enable or disable shuffle; e.g. '//music shuffle off'");
                 break;
             case "default":
-                window.genlite.commands.print("Restore to default Genfanad music");
+                document.genlite.commands.print("Restore to default Genfanad music");
                 break;
             default:
-                window.genlite.commands.print("Controls music player.");
-                window.genlite.commands.print("subcommands: list, play, shuffle, default");
+                document.genlite.commands.print("Controls music player.");
+                document.genlite.commands.print("subcommands: list, play, shuffle, default");
                 break;
         }
     }
@@ -248,7 +261,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
                 for (const track in this.selectionOptions) {
                     names.push(this.selectionOptions[track].innerText);
                 }
-                window.genlite.commands.print(names.join(", "));
+                document.genlite.commands.print(names.join(", "));
                 break;
             case "play":
                 let song = arg;
@@ -257,7 +270,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
                     if (this.selectionOptions[song]) {
                         this.setManual();
                         this.setNextTrack(song);
-                        window.genlite.commands.print("playing: " + song);
+                        document.genlite.commands.print("playing: " + song);
                         return;
                     }
 
@@ -273,16 +286,16 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
                     }
 
                     if (matches.length == 0) {
-                        window.genlite.commands.print("no such song");
+                        document.genlite.commands.print("no such song");
                     } else if (matches.length == 1) {
                         this.setManual();
                         this.setNextTrack(tracks[0]);
-                        window.genlite.commands.print("playing: " + matches[0]);
+                        document.genlite.commands.print("playing: " + matches[0]);
                     } else {
-                        window.genlite.commands.print("be more specific: " + matches.join(", "));
+                        document.genlite.commands.print("be more specific: " + matches.join(", "));
                     }
                 } else {
-                    window.genlite.commands.print("specify a track to play");
+                    document.genlite.commands.print("specify a track to play");
                     this.helpCommand("play");
                 }
                 break;

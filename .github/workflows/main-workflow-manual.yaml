@@ -1,8 +1,6 @@
-name: Node.js CI
+name: Node.js CI Manual
 
-on:
-  push:
-    branches: [ main ]
+on: workflow_dispatch
 
 jobs:
   build:
@@ -16,6 +14,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+      - run: npm version patch --no-git-tag-version --force
+      - run: git add --all
+      - run: git config user.email "noreply@github.com"
+      - run: git config user.name "GitHub Workflow"
+      - run: git commit --allow-empty -m "Version Bump"
+      - run: git push origin main -f
       - run: git checkout --orphan release
       - run: sed -i "2s/GenLite/GenLite-${{github.repository_owner}}/" userscript-banner.txt
       - run: sed -i "3s/GenLite/GenLite-${{github.repository_owner}}/" userscript-banner.txt
@@ -23,7 +27,5 @@ jobs:
       - run: npm i
       - run: npm run build:nopatch --if-present
       - run: git add dist -f
-      - run: git config user.email "noreply@github.com"
-      - run: git config user.name "GitHub Workflow"
       - run: git commit --allow-empty -m "New Release"
       - run: git push origin release -f

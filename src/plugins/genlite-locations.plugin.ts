@@ -1,10 +1,24 @@
 /*
+    Copyright (C) 2022-2023 BonesdogNardwe, dpeGit
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+
+/*
  GenLiteLocationsPlugin
  Description: Location Labels, Coordinates, and Detailed Map
  Known Issues:
  */
 
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteLocationsPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteLocationsPlugin'
@@ -130,17 +144,17 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
         document.body.appendChild(this.mapIframe)
     }
     async init() {
-        window.genlite.registerPlugin(this)
+        document.genlite.registerPlugin(this)
 
 
 
-        this.locationLabels = window.genlite.settings.add("LocationLabels.Enable", true, "Location Labels", "checkbox", this.handleLocationLabelsEnableDisable, this)
-        this.showCoordinates = window.genlite.settings.add("Coordinates.Enable", true, "Coordinates", "checkbox", this.handleShowCoordinatesDisable, this, undefined, undefined, "LocationLabels.Enable")
-        this.compassMap = window.genlite.settings.add("CompassMap.Enable", true, "Compass Map", "checkbox", this.handleCompassMapEnableDisable, this)
+        this.locationLabels = document.genlite.settings.add("LocationLabels.Enable", true, "Location Labels", "checkbox", this.handleLocationLabelsEnableDisable, this)
+        this.showCoordinates = document.genlite.settings.add("Coordinates.Enable", true, "Coordinates", "checkbox", this.handleShowCoordinatesDisable, this, undefined, undefined, "LocationLabels.Enable")
+        this.compassMap = document.genlite.settings.add("CompassMap.Enable", true, "Compass Map", "checkbox", this.handleCompassMapEnableDisable, this)
 
         //Decide how to handle initial setting grab as right now only returns true/false
         this.translucentScale = 0.5
-        window.genlite.settings.add("CompassMapTranslucentScale", true, "Compass Map Translucent Scale", "range", this.handleCompassMapTranslucentSlider, this, undefined,
+        document.genlite.settings.add("CompassMapTranslucentScale", true, "Compass Map Translucent Scale", "range", this.handleCompassMapTranslucentSlider, this, undefined,
             [['min', '0.01'], ['max', '1'], ['step', '0.01'], ['value', '0.5'], ['class', 'gen-slider']], "CompassMap.Enable");
 
         this.addStylesheet()
@@ -191,11 +205,11 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
         this.locationCheck()
     }
     private updateMapIframeSrc(): void {
-        let layer = PLAYER.location.layer.includes("world") ?
-            PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
+        let layer = document.game.PLAYER.location.layer.includes("world") ?
+            document.game.PLAYER.location.layer.replace("world", '') : document.game.PLAYER.location.layer
         //Zoom Logic Goes here?
 
-        this.mapIframe.src = `https://genfamap.com/${layer}?location=true#${PLAYER.character.pos2.x + .5}_${PLAYER.character.pos2.y - .5}_${this.mapZoom}`
+        this.mapIframe.src = `https://genfamap.com/${layer}?location=true#${document.game.PLAYER.character.pos2.x + .5}_${document.game.PLAYER.character.pos2.y - .5}_${this.mapZoom}`
     }
     private toggleTranslucentMap(): void {
         this.mapTranslucent = !this.mapTranslucent
@@ -231,19 +245,19 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
         this.mapIframe.classList.remove("map-iframe-translucent")
     }
     openMap() {
-        let layer = PLAYER.location.layer.includes("world") ?
-            PLAYER.location.layer.replace("world", '') : PLAYER.location.layer
+        let layer = document.game.PLAYER.location.layer.includes("world") ?
+            document.game.PLAYER.location.layer.replace("world", '') : document.game.PLAYER.location.layer
 
-        this.popupMap = window.open(`https://genfamap.com/${layer}?location=true#${PLAYER.character.pos2.x}_${PLAYER.character.pos2.y}_0.67`, "genfanad-map", 'width=800,height=600')
+        this.popupMap = window.open(`https://genfamap.com/${layer}?location=true#${document.game.PLAYER.character.pos2.x}_${document.game.PLAYER.character.pos2.y}_0.67`, "genfanad-map", 'width=800,height=600')
     }
     private setLocationLabelUnknown(): void {
         this.showCoordinates ?
-            this.locationLabel.innerText = `(${GAME.world.x},${GAME.world.y})` :
+            this.locationLabel.innerText = `(${document.game.GAME.world.x},${document.game.GAME.world.y})` :
             this.locationLabel.innerText = ``
     }
     private setLocationLabel(value: string): void {
         this.showCoordinates ?
-            this.locationLabel.innerText = `${value} (${GAME.world.x},${GAME.world.y})` :
+            this.locationLabel.innerText = `${value} (${document.game.GAME.world.x},${document.game.GAME.world.y})` :
             this.locationLabel.innerText = `${value}`
     }
     private checkSubLocation(subLocations: object, currentPosition: number[]): boolean {
@@ -297,7 +311,7 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
 
             //TODO re-add check previous location here and skip the switch if still in region.
             let found: boolean
-            switch (PLAYER.location.layer) {
+            switch (document.game.PLAYER.location.layer) {
                 case "dungeon":
                     found = this.checkLocations(this.dungeonLocations, currentPosition)
                     break;
@@ -320,7 +334,7 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
     }
 
     private locationCheck() {
-        let currentPosition: number[] = [PLAYER.character.pos2.x, PLAYER.character.pos2.y]
+        let currentPosition: number[] = [document.game.PLAYER.character.pos2.x, document.game.PLAYER.character.pos2.y]
         this.startLocationCheck(currentPosition, this.lastPosition)
 
         this.updateMapIframeSrc()
@@ -458,14 +472,14 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
     private disableLocationLabels() {
         this.locationLabel.style.display = "none"
         this.locationLabel.style.visibility = "hidden"
-        Object.defineProperty(PLAYER.character, "movement_animation", {
+        Object.defineProperty(document.game.PLAYER.character, "movement_animation", {
             set: (animation) => { }
         })
     }
     private enableLocationLabels() {
         this.locationLabel.style.display = "block"
         this.locationLabel.style.visibility = "visible"
-        Object.defineProperty(PLAYER.character, "movement_animation", {
+        Object.defineProperty(document.game.PLAYER.character, "movement_animation", {
             set: (animation) => {
                 this.animationDetector(animation)
             }

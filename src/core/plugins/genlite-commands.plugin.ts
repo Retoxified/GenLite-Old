@@ -2,18 +2,18 @@ export class GenLiteCommandsPlugin {
     public static pluginName = 'GenLiteCommandsPlugin';
     public static customCommandPrefix = '//';
 
-    private commands: {[key: string]: CommandSpec} = {};
+    private commands: { [key: string]: CommandSpec } = {};
     private originalProcessInput: Function;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
-        this.originalProcessInput = Chat.prototype.processInput;
+        this.originalProcessInput = document.game.Chat.prototype.processInput;
         this.register("help", function (s) {
             if (!s) {
-                let helpStr = Object.keys(window.genlite.commands.commands).join(", ");
-                window.genlite.commands.print("GenLite Commands");
-                window.genlite.commands.print(helpStr);
+                let helpStr = Object.keys(document.genlite.commands.commands).join(", ");
+                document.genlite.commands.print("GenLite Commands");
+                document.genlite.commands.print(helpStr);
                 return;
             }
 
@@ -25,20 +25,20 @@ export class GenLiteCommandsPlugin {
             let command = s.slice(0, end);
             let args = s.slice(end + 1);
 
-            if (command in window.genlite.commands.commands) {
-                let spec = window.genlite.commands.commands[command];
+            if (command in document.genlite.commands.commands) {
+                let spec = document.genlite.commands.commands[command];
                 if (spec.helpFunction) {
                     var text = spec.helpFunction(args);
                     if (text != null && text != "") {
-                        window.genlite.commands.print(text);
+                        document.genlite.commands.print(text);
                     }
                 } else if (spec.helpText) {
-                    window.genlite.commands.print(spec.helpText);
+                    document.genlite.commands.print(spec.helpText);
                 } else {
-                    window.genlite.commands.print("no help defined for this command");
+                    document.genlite.commands.print("no help defined for this command");
                 }
             } else {
-                window.genlite.commands.print("no such command");
+                document.genlite.commands.print("no such command");
             }
         }, "display help text for a command: '//help <command>'");
     }
@@ -56,14 +56,14 @@ export class GenLiteCommandsPlugin {
     }
 
     public loginOK() {
-        CHAT.processInput = this.processInput.bind(
-            CHAT,
+        document.game.CHAT.processInput = this.processInput.bind(
+            document.game.CHAT,
             this,
             this.originalProcessInput,
         );
     }
 
-    initializeUI(){
+    initializeUI() {
         this.print("Genlite Commands Loaded type //help to see list of commands");
     }
 
@@ -82,7 +82,7 @@ export class GenLiteCommandsPlugin {
             }
             spec.handler(args);
         } else {
-            let helpStr = Object.keys(window.genlite.commands.commands).join(" ");
+            let helpStr = Object.keys(document.genlite.commands.commands).join(" ");
             this.print("invalid command\"" + command + "\". Options: " + helpStr);
         }
     }
@@ -98,7 +98,7 @@ export class GenLiteCommandsPlugin {
             return null;
         }
 
-        let spec : CommandSpec = null;
+        let spec: CommandSpec = null;
         if (typeof help === 'function') {
             spec = {
                 command: command,
@@ -138,11 +138,11 @@ export class GenLiteCommandsPlugin {
     }
 
     public print(text: string) {
-        // CHAT.addGameMessage assigns directly to innerHTML. To avoid any
+        // document.game.CHAT.addGameMessage assigns directly to innerHTML. To avoid any
         // possible code injection, let text area do our string escaping.
         let e = document.createElement('textarea');
         e.textContent = text;
-        CHAT.addGameMessage(e.innerHTML);
+        document.game.CHAT.addGameMessage(e.innerHTML);
     }
 
 }

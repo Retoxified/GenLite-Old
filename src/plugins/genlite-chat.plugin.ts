@@ -1,4 +1,17 @@
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+/*
+    Copyright (C) 2023 snwhd
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteChatPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteChatPlugin';
@@ -15,8 +28,8 @@ export class GenLiteChatPlugin implements GenLitePlugin {
     originalGameMessage: Function;
 
     async init() {
-        window.genlite.registerPlugin(this);
-        this.filterGameMessages = window.genlite.settings.add(
+        document.genlite.registerPlugin(this);
+        this.filterGameMessages = document.genlite.settings.add(
             "Chat.FilterGameMessages",
             false,
             "Filter Game Chat",
@@ -27,7 +40,7 @@ export class GenLiteChatPlugin implements GenLitePlugin {
     }
 
     public loginOK() {
-        this.originalGameMessage = CHAT.addGameMessage;
+        this.originalGameMessage = document.game.CHAT.addGameMessage;
         this.updateState();
     }
 
@@ -38,12 +51,12 @@ export class GenLiteChatPlugin implements GenLitePlugin {
 
     updateState() {
         if (this.filterGameMessages) {
-            CHAT.addGameMessage = this.newGameMessage.bind(
-                CHAT,
+            document.game.CHAT.addGameMessage = this.newGameMessage.bind(
+                document.game.CHAT,
                 this.originalGameMessage
             );
         } else {
-            CHAT.addGameMessage = this.originalGameMessage;
+            document.game.CHAT.addGameMessage = this.originalGameMessage;
         }
     }
 

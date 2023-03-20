@@ -1,3 +1,16 @@
+/*
+    Copyright (C) 2022-2023 Retoxified, dpeGit, snwhd
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import {GenLitePlugin} from '../core/interfaces/plugin.interface';
 
 export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
@@ -10,30 +23,30 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
     originalSceneIntersects: Function;
     originalNPCIntersects: Function;
 
-    intersect_vector = new THREE.Vector3();
+    intersect_vector = new document.game.THREE.Vector3();
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
 
-        this.useOneClickBank = window.genlite.settings.add("NPCMenuSwapper.LeftClickBank", true, "Left Click Bank", "checkbox", this.handleLeftClickBankToggle, this);
-        this.useOneClickTrade = window.genlite.settings.add("NPCMenuSwapper.LeftClickTrade", true, "Left Click Trade", "checkbox", this.handleLeftClickTradeToggle, this);
-        this.hideStairs = window.genlite.settings.add("NPCMenuSwapper.hideStairs", false, "Hide Stairs", "checkbox", this.handleHideStairsToggle, this);
+        this.useOneClickBank = document.genlite.settings.add("NPCMenuSwapper.LeftClickBank", true, "Left Click Bank", "checkbox", this.handleLeftClickBankToggle, this);
+        this.useOneClickTrade = document.genlite.settings.add("NPCMenuSwapper.LeftClickTrade", true, "Left Click Trade", "checkbox", this.handleLeftClickTradeToggle, this);
+        this.hideStairs = document.genlite.settings.add("NPCMenuSwapper.hideStairs", false, "Hide Stairs", "checkbox", this.handleHideStairsToggle, this);
 
-        this.originalSceneIntersects = OptimizedScene.prototype.intersects;
-        this.originalNPCIntersects = NPC.prototype.intersects;
+        this.originalSceneIntersects = document.game.OptimizedScene.prototype.intersects;
+        this.originalNPCIntersects = document.game.NPC.prototype.intersects;
         this.updateState();
     }
 
     updateState() {
         if (this.hideStairs) {
-            OptimizedScene.prototype.intersects = this.sceneryIntersects;
+            document.game.OptimizedScene.prototype.intersects = this.sceneryIntersects;
         } else {
-            OptimizedScene.prototype.intersects = this.originalSceneIntersects;
+            document.game.OptimizedScene.prototype.intersects = this.originalSceneIntersects;
         }
 
         if (this.useOneClickBank || this.useOneClickTrade) {
-            NPC.prototype.intersects = this.leftClickBankIntersects;
+            document.game.NPC.prototype.intersects = this.leftClickBankIntersects;
         } else {
-            NPC.prototype.intersects = this.originalNPCIntersects;
+            document.game.NPC.prototype.intersects = this.originalNPCIntersects;
         }
     }
 
@@ -66,7 +79,7 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
             text: "Examine",
             action: () => self.examine()
         });
-        let priority = (self.levelDifference <= 10 && !PLAYER.character.combat) ? 2 : -2;
+        let priority = (self.levelDifference <= 10 && !document.game.PLAYER.character.combat) ? 2 : -2;
         if (self.info.attackable)
             list.push({
                 color: 'red',
@@ -89,7 +102,7 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
             list.push({
                 color: 'red',
                 distance: i.distance,
-                priority: window[GenLiteMenuSwapperPlugin.pluginName].useOneClickTrade ? 15 : 1,
+                priority: document[GenLiteMenuSwapperPlugin.pluginName].useOneClickTrade ? 15 : 1,
                 object: this,
                 text: "Trade with",
                 action: () => self.trade()
@@ -98,7 +111,7 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
             list.push({
                 color: 'red',
                 distance: i.distance,
-                priority: window[GenLiteMenuSwapperPlugin.pluginName].useOneClickBank ? 15 : 1,
+                priority: document[GenLiteMenuSwapperPlugin.pluginName].useOneClickBank ? 15 : 1,
                 object: this,
                 text: "Bank with",
                 action: () => self.bank()
@@ -116,7 +129,7 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
 
             let oi;
             if (o.bounding_box) {
-                let point = ray.ray.intersectBox(o.bounding_box, window[GenLiteMenuSwapperPlugin.pluginName].intersect_vector);
+                let point = ray.ray.intersectBox(o.bounding_box, document[GenLiteMenuSwapperPlugin.pluginName].intersect_vector);
                 oi = point ? [point] : [];
             } else {
                 oi = ray.intersectObject(o.mesh, true);
@@ -126,7 +139,7 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
                 let actions = thing.actions();
                 for (let i in actions) {
                     /* if stairs or ladder depo if setting checked */
-                    if (window[GenLiteMenuSwapperPlugin.pluginName].hideStairs && !KEYBOARD['16']) { //its conveint genfanad keeps track of all keyboard keys
+                    if (document[GenLiteMenuSwapperPlugin.pluginName].hideStairs && !document.game.KEYBOARD['16']) { //its conveint genfanad keeps track of all keyboard keys
                         switch (actions[i].text) {
                             case "Climb up":
                             case "Climb down":

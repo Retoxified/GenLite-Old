@@ -1,3 +1,16 @@
+/*
+    Copyright (C) 2022-2023 dpeGit
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import {GenLitePlugin} from '../core/interfaces/plugin.interface';
 
 export class GenLiteXpCalculator implements GenLitePlugin {
@@ -44,9 +57,9 @@ export class GenLiteXpCalculator implements GenLitePlugin {
     isPluginEnabled: boolean = false;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
         this.resetCalculatorAll();
-        this.isPluginEnabled = window.genlite.settings.add("XPCalculator.Enable", true, "XP Calculator", "checkbox", this.handlePluginEnableDisable, this);
+        this.isPluginEnabled = document.genlite.settings.add("XPCalculator.Enable", true, "XP Calculator", "checkbox", this.handlePluginEnableDisable, this);
     }
 
     handlePluginEnableDisable(state: boolean) {
@@ -96,11 +109,11 @@ export class GenLiteXpCalculator implements GenLitePlugin {
             if (element == "total")
                 skill.gainedXP += xp.xp;
             if (element != "total")
-                skill.actionsToNext = Math.ceil(PLAYER_INFO.skills[element].tnl / skill.avgActionXP);
+                skill.actionsToNext = Math.ceil(document.game.PLAYER_INFO.skills[element].tnl / skill.avgActionXP);
             if (skill.tsStart == 0) {
                 skill.tsStart = Date.now();
                 if (element != "total")
-                    skill.startXP = PLAYER_INFO.skills[element].xp - xp.xp;
+                    skill.startXP = document.game.PLAYER_INFO.skills[element].xp - xp.xp;
             }
         });
     }
@@ -110,21 +123,22 @@ export class GenLiteXpCalculator implements GenLitePlugin {
         if (!callback_this.isPluginEnabled) {
             return;
         }
-        callback_this.tracking_skill = PLAYER_INFO.tracking_skill.id;
+        callback_this.tracking_skill = document.game.PLAYER_INFO.tracking_skill.id;
         let div = <HTMLElement>document.getElementById("skill_status_popup");
-        let piSkill = PLAYER_INFO.skills[PLAYER_INFO.tracking_skill.id];
-        let skill = callback_this.skillsList[PLAYER_INFO.tracking_skill.id];
+        let piSkill = document.game.PLAYER_INFO.skills[document.game.PLAYER_INFO.tracking_skill.id];
+        let skill = callback_this.skillsList[document.game.PLAYER_INFO.tracking_skill.id];
         let xpRate = 0;
         let timeDiff = Date.now() - skill.tsStart;
         if (skill.tsStart != 0) {
-            xpRate = Math.round((piSkill.xp - skill.startXP) / (timeDiff / 3600000) * 10) / 100;
+            xpRate = Math.round((piSkill.xp - skill.startXP) / (timeDiff / 3600000)) / 10;
         }
         let ttl = Math.round(piSkill.tnl / xpRate) / 10;
         div.innerHTML += `
-            <div>XP per Action: ${(Math.round(skill.avgActionXP * 10) / 100).toLocaleString("en-US")}</div>
+            <div>XP per Action: ${(Math.round(skill.avgActionXP) / 10).toLocaleString("en-US")}</div>
             <div>Action TNL: ${skill.actionsToNext.toLocaleString("en-US")}</div>
-            <div>XP per hour: ${xpRate.toLocaleString("en-US")}</div>
-            <div>Time To Level: ${ttl}</div>`;
+            <div>XP per Hour: ${xpRate.toLocaleString("en-US")}</div>
+            <div>Time to Level: ${ttl.toLocaleString("en-US")}</div>
+            <div>XP Tracked: ${skill.startXP == 0 ? 0 : ((piSkill.xp - skill.startXP) / 10).toLocaleString("en-US")}`;
     }
 
     /* clicking on a skill with shift will reset it
@@ -147,9 +161,9 @@ export class GenLiteXpCalculator implements GenLitePlugin {
         if (!this.isPluginEnabled) {
             return;
         }
-        if (PLAYER_INFO.tracking && this.tracking_skill != "total") {
+        if (document.game.PLAYER_INFO.tracking && this.tracking_skill != "total") {
             this.onmouseenter(null, this);
-        } else if (PLAYER_INFO.tracking && this.tracking_skill == "total") {
+        } else if (document.game.PLAYER_INFO.tracking && this.tracking_skill == "total") {
             this.totalLevelCalc(null, this);
         }
     }
@@ -164,7 +178,7 @@ export class GenLiteXpCalculator implements GenLitePlugin {
         for (let i in this.skillsList) {
             if (i == "total")
                 continue;
-            this.skillsList.total.startXP += PLAYER_INFO.skills[i].xp;
+            this.skillsList.total.startXP += document.game.PLAYER_INFO.skills[i].xp;
         }
     }
 
@@ -183,7 +197,7 @@ export class GenLiteXpCalculator implements GenLitePlugin {
     totalLevelCalc(event, callback_this) {
         if (!callback_this.isPluginEnabled)
             return;
-        PLAYER_INFO.tracking = true;
+        document.game.PLAYER_INFO.tracking = true;
         callback_this.tracking_skill = "total"
         let total = callback_this.skillsList.total;
         let div = document.getElementById("skill_status_popup");
@@ -191,13 +205,13 @@ export class GenLiteXpCalculator implements GenLitePlugin {
         let xpRate = 0;
         let timeDiff = Date.now() - total.tsStart;
         if (total.tsStart != 0) {
-            xpRate = Math.round(total.gainedXP / (timeDiff / 3600000) * 10) / 100;
+            xpRate = Math.round(total.gainedXP / (timeDiff / 3600000)) / 10;
         }
         div.innerHTML = `
         <div>Total</div>
         <div>Current XP: ${xp.toLocaleString("en-US")}</div>
         <div>Gained XP: ${(total.gainedXP / 10).toLocaleString("en-US")}</div>
-        <div>XP per Action: ${(Math.round(total.avgActionXP * 10) / 100).toLocaleString("en-US")}</div>
+        <div>XP per Action: ${(Math.round(total.avgActionXP) / 10).toLocaleString("en-US")}</div>
         <div>XP per hour: ${xpRate.toLocaleString("en-US")}</div>
         `;
         if (event) { //if its an event update he poistion of the tooltip
@@ -229,7 +243,7 @@ export class GenLiteXpCalculator implements GenLitePlugin {
         delete temp.gainedXP;
         this.skillsList[skill] = temp;
         if (this.isHookInstalled)
-            PLAYER_INFO.updateTooltip();
+            document.game.PLAYER_INFO.updateTooltip();
     }
 
     resetCalculatorAll(event = null) {

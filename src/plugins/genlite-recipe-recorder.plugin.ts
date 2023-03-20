@@ -1,3 +1,16 @@
+/*
+    Copyright (C) 2022-2023 dpeGit
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import {GenLitePlugin} from '../core/interfaces/plugin.interface';
 
 export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
@@ -20,17 +33,17 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
     isPluginEnabled: boolean = false;
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
         let dropTableString = localStorage.getItem("GenliteRecipeRecorder")
         if (dropTableString == null) {
             this.recipeResults = {};
             this.gatherResults = {};
         } else {
             let saved = JSON.parse(dropTableString);
-            this.recipeResults = saved.recipe;
-            this.gatherResults = saved.gathering;
+            this.recipeResults = saved.recipe ? saved.recipe : {};
+            this.gatherResults = saved.gathering ? saved.gathering : {};
         }
-        this.isPluginEnabled = window.genlite.settings.add("RecipeRecorder.Enable", true, "Record Recipes", "checkbox", this.handlePluginEnableDisable, this);
+        this.isPluginEnabled = document.genlite.settings.add("RecipeRecorder.Enable", true, "Record Recipes", "checkbox", this.handlePluginEnableDisable, this);
     }
 
     handlePluginEnableDisable(state: boolean) {
@@ -51,16 +64,20 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                 this.isCrafting = true;
                 this.isGathering = false;
                 this.recipe = params.action.recipe;
-                this.prevInventory = INVENTORY.items;
+                this.prevInventory = document.game.INVENTORY.items;
                 this.recipeName = params.action.recipe;
-                for (let i in params.action.params) // if params is set here then record a complex recipe name
+                let mats;
+                if(params.action.params){
+                    mats = Object.keys(params.action.params);
+                    mats = mats.sort();
+                }
+                for (let i of mats) // if params is set here then record a complex recipe name
                     this.recipeName = this.recipeName.concat("__", i, params.action.params[i]);
                 if (this.recipeResults[this.recipeName] === undefined)
                     this.recipeResults[this.recipeName] = {
                         input: {},
                         output: {}
                     };
-                console.log("action:", this.isCrafting, this.isGathering)
                 return;
             }
 
@@ -82,13 +99,11 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                 this.isGathering = true;
                 this.isCrafting = false;
                 this.gatherNode = params.id;
-                this.prevInventory = INVENTORY.items;
+                this.prevInventory = document.game.INVENTORY.items;
+            } else {
+                this.isGathering = false;
+                this.isCrafting = false;
             }
-            return;
-        }
-        if (verb == "walk") {
-            this.isGathering = false;
-            this.isCrafting = false;
             return;
         }
 
@@ -96,6 +111,14 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
             this.swapped_inv = true;
             return;
         }
+
+        /* if we get here check the white listed (non interupting) verbs and return otherwise set crafting and gathering to false */
+        let whitelistverbs = ["request_sync", "p", "chat_private", "change_combat_stance", "conversation", "load_complete"];
+        if(whitelistverbs.includes(verb)){
+            return;
+        }
+        this.isGathering = false;
+        this.isCrafting = false;
     }
 
     handle(verb, payload) {
@@ -112,10 +135,8 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
         if (verb == 'inventory') {
             if(this.swapped_inv){
                 this.swapped_inv = false;
-                console.log("swapped");
                 return;
             }
-            console.log(this.prevInventory);
             for (let i in this.prevInventory) {
                 /* add up the quantities of the inventory */
                 if (itemList[this.prevInventory[i].item] === undefined)
@@ -127,7 +148,6 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                     itemList[this.prevInventory[i].item] += this.prevInventory[i].quantity;
                 }
             }
-            console.log(itemList);
 
             /* subtract the new inventory */
             for (let i in payload) {
@@ -140,7 +160,6 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                     itemList[payload[i].item] -= payload[i].quantity;
                 }
             }
-            console.log(itemList);
 
             if (this.isCrafting) {
                 this.storeRecipeData(itemList);
@@ -156,7 +175,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
             if (this.gatherResults[this.gatherTask] === undefined)
                 this.gatherResults[this.gatherTask] = {};
             let gather = this.gatherResults[this.gatherTask];
-            let nodeKey = GRAPHICS.scene.allObjects[this.gatherNode].modelInfo.nick;
+            let nodeKey = document.game.GRAPHICS.scene.allObjects[this.gatherNode].modelInfo.nick;
             if (gather[nodeKey] === undefined)
                 gather[nodeKey] = {};
             let node = gather[nodeKey];
@@ -200,7 +219,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
         if (this.gatherResults[this.gatherTask] === undefined)
             this.gatherResults[this.gatherTask] = {};
         let gather = this.gatherResults[this.gatherTask];
-        let nodeKey = GRAPHICS.scene.allObjects[this.gatherNode].modelInfo.impl.params;
+        let nodeKey = document.game.GRAPHICS.scene.allObjects[this.gatherNode].modelInfo.impl.params;
         if (gather[nodeKey] === undefined)
             gather[nodeKey] = {};
         let node = gather[nodeKey];

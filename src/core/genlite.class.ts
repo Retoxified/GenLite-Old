@@ -1,9 +1,22 @@
+/*
+    Copyright (C) 2022-2023 Retoxified, FrozenReality, dpeGit
+*/
+/*
+    This file is part of GenLite.
+
+    GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+    GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { GenLitePluginLoader } from "./genlite-plugin-loader.class";
 import { GenLiteNotificationPlugin } from "./plugins/genlite-notification.plugin";
 import { GenLiteSettingsPlugin } from "./plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./plugins/genlite-commands.plugin";
 import { GenLiteUIPanel } from "../plugins/genlite-ui-panel";
-import {GenLitePlugin} from './interfaces/plugin.interface';
+import { GenLitePlugin} from './interfaces/plugin.interface';
 
 export class GenLite {
     static pluginName = 'GenLite';
@@ -25,18 +38,28 @@ export class GenLite {
     }
 
     async init() {
-        this.installHook(Camera.prototype, 'update');
-        this.installHook(Network.prototype, 'logoutOK');
-        this.installHook(PhasedLoadingManager.prototype, 'start_phase', this.hookPhased);
-        this.installHook(Network.prototype, 'action');
-        this.installHook(Network.prototype, 'handle');
-        this.installHook(PlayerInfo.prototype, 'updateXP');
-        this.installHook(PlayerInfo.prototype, 'updateTooltip');
-        this.installHook(PlayerInfo.prototype, 'updateSkills');
-        this.installHook(window, 'initializeUI');
-        this.installHook(Game.prototype, 'combatUpdate');
-        this.installHook(PlayerHUD.prototype, 'setHealth');
-        this.installHook(Inventory.prototype, 'handleUpdatePacket');
+        this.installHook(document.game.Camera.prototype, 'update');
+        this.installHook(document.game.Network.prototype, 'logoutOK');
+        this.installHook(document.game.Network.prototype, 'disconnect', this.hookDisconnect)
+        this.installHook(document.game.PhasedLoadingManager, 'start_phase', this.hookPhased);
+        this.installHook(document.game.Network.prototype, 'action');
+        this.installHook(document.game.Network.prototype, 'handle');
+        this.installHook(document.game.PlayerInfo.prototype, 'updateXP');
+        this.installHook(document.game.PlayerInfo.prototype, 'updateTooltip');
+        this.installHook(document.game.PlayerInfo.prototype, 'updateSkills');
+        // this no longer exists in genfanad: this.installHook(window, 'initializeUI');
+        this.installHook(document.game.Game.prototype, 'combatUpdate');
+        this.installHook(document.game.PlayerHUD.prototype, 'setHealth');
+        this.installHook(document.game.Inventory.prototype, 'handleUpdatePacket');
+        this.installHook(document.game.Bank.prototype, 'handlePacket');
+        this.installHook(document.game.Bank.prototype, '_showQualityPopup');
+        this.installHook(document.game.Trade.prototype, 'handlePacket', this.hookTrade_handlePacket);
+
+
+    }
+
+    onUIInitialized() {
+        this.hook('initializeUI');
     }
 
     hook(fnName: string, ...args: Array<unknown>) {
@@ -56,6 +79,16 @@ export class GenLite {
             this.hook('loginOK', args);
         }
     }
+
+    hookDisconnect(fnName: string, ...args: Array<unknown>) {
+        this.hook('logoutOK', args);
+    }
+
+    /* because Bank and Trade have the same function name */
+    hookTrade_handlePacket(fnName: string, ...args: Array<unknown>){
+        this.hook('Trade_handlePacket', args)
+    }
+
 
     registerPlugin(plugin: GenLitePlugin) {
         this.pluginList.push(plugin);
