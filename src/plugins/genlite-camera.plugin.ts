@@ -35,7 +35,6 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
     originalCameraMode: Function;
 
     unlockCamera: boolean = true;
-    hideRoofs: boolean = false;
     maxDistance: Number = 15;
     minDistance: Number = Math.PI;
 
@@ -51,7 +50,6 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
         this.originalCameraMode = document.game.WorldManager.updatePlayerTile;
 
         this.unlockCamera = document.genlite.settings.add("Camera.UnlockCam", true, "Unlock Camera", "checkbox", this.handleUnlockCameraToggle, this);
-        this.hideRoofs = document.genlite.settings.add("Camera.HideRoofs", true, "Hide Roofs", "checkbox", this.handleHideRoofToggle, this);
         this.maxDistance = parseInt(document.genlite.settings.add(
             "Camera.maxDistance",
             "15",
@@ -129,10 +127,6 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
 
     handleUnlockCameraToggle(state: boolean) {
         this.unlockCamera = state;
-        this.setCameraMode();
-    }
-    handleHideRoofToggle(state: boolean) {
-        this.hideRoofs = state;
         this.setCameraMode();
     }
 
@@ -223,11 +217,6 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
 
     setCameraMode() {
         if (document.game.WORLDMANAGER !== undefined) {
-            if (this.hideRoofs === true) {
-                document.game.WORLDMANAGER.updatePlayerTile = this.noRoofCameraMode.bind(document.game.WORLDMANAGER);
-            } else {
-                document.game.WORLDMANAGER.updatePlayerTile = this.originalCameraMode.bind(document.game.WORLDMANAGER);
-            }
             document.game.WORLDMANAGER.updatePlayerTile.call(document.game.WORLDMANAGER);
         }
 
@@ -244,26 +233,5 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
                 document.game.GRAPHICS.camera.controls.maxPolarAngle = document.game.THREE.Math.degToRad(57);
             }
         }
-    }
-    noRoofCameraMode() {
-        const self = (this as any);
-
-        let tile = self.loadedSegments[self.segmentKey].getTile(self.segment.lx, self.segment.ly)
-        if (!tile)
-            throw `Invalid location: ${self.segmentKey} ${self.segment.lx}, ${self.segment.ly}`
-        self.indoors = true;
-        for (let i in self.loadedSegments) {
-            self.loadedSegments[i].setIndoorStatus(self.indoors);
-        }
-        if (tile.pvp) {
-            let pvp = document.getElementById('pvp_indicator');
-            pvp.style.display = 'block';
-            pvp.innerText = "PvP Level: YES";
-            self.pvp_zone = true;
-        } else {
-            document.getElementById('pvp_indicator').style.display = 'none';
-            self.pvp_zone = false;
-        }
-        document.game.MUSIC_PLAYER.setNextTrack(tile.music);
     }
 }

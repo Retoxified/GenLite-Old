@@ -37,16 +37,22 @@ import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
 import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
 import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
 import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
-import { GenLitePlayerToolsPlugin }  from "./plugins/genlite-playertools.plugin";
+import { GenLitePlayerToolsPlugin } from "./plugins/genlite-playertools.plugin";
 import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
+import {GenLiteItemDisplays} from "./plugins/genlite-itemdisplay.plugin";
+import { GenLiteHealthRegenerationPlugin } from './plugins/genlite-health-regeneration.plugin';
 
-declare const GM_getResourceText : (s:string) => string;
+declare const GM_getResourceText: (s: string) => string;
+
+// TODO: use globals.ts?
 declare global {
     interface Document {
-        fonts: any;
         game: any;
         client: any;
-        genlite: any;
+        genlite: {
+          [key: string]: any,
+          settings: GenLiteSettingsPlugin,
+        };
         initGenLite: () => void;
     }
 }
@@ -63,19 +69,19 @@ Press Cancel to Load, Press Okay to Stop.`;
 const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
 let scriptText = GM_getResourceText('clientjs');
-
-const acmeFont = new FontFace('Acme', 'url(https://play.genfanad.com/play/js/f6db4c5c3282b4e95e85.ttf)');
-acmeFont.load().then(() => document.fonts.add(acmeFont));
-
+scriptText = scriptText.replace(
+    /import.meta.url/g,
+    '("https://play.genfanad.com/play/js/client.js")'
+);
 scriptText = scriptText.substring(0, scriptText.length - 5)
     + "; document.client = {};"
     + "document.client.get = function(a) {"
-    +   "return eval(a);"
+    + "return eval(a);"
     + "};"
     + "document.client.set = function(a, b) {"
-    +   "eval(a + ' = ' + b);"
+    + "eval(a + ' = ' + b);"
     + "};"
-    + scriptText.substring(scriptText.length-5)
+    + scriptText.substring(scriptText.length - 5)
     + "//# sourceURL=client.js";
 
 let isInitialized = false;
@@ -108,6 +114,7 @@ let isInitialized = false;
         document.game = {};
         document.game.ITEM_RIGHTCLICK_LIMIT = 20; // TODO: Is this equivalent? It seems to no longer be included in client.js
 
+
         // Classes
         gameObject('Bank', 'tv');
         gameObject('Chat', 'rv');
@@ -121,20 +128,15 @@ let isInitialized = false;
         gameObject('Game', 'X_');
         gameObject('Graphics', 'NS');
         gameObject('HumanCharacter', 'jg');
-        gameObject('Inventory', 'Cv');
         gameObject('ItemStack', 'Lg');
         gameObject('MinimapRenderer', 'j_');
         gameObject('ModelProjectileAnimation', 'g_');
         gameObject('MonsterCharacter', 'Hg');
         gameObject('Network', 'ug');
         gameObject('NewSegmentLoader', 'yS');
-        gameObject('NPC', 'I_');
         gameObject('OptimizedScene', 'PS');
         gameObject('PassThroughSpineTexture', 'Pg');
-        gameObject('PhasedLoadingManager', 'gS');
         gameObject('Player', 'O_');
-        gameObject('PlayerHUD', 'zv');
-        gameObject('PlayerInfo', 'Xg');
         gameObject('Seed', 'z_');
         gameObject('Segment', 'B_');
         gameObject('ShrinkForBoatAnimation', 'p_');
@@ -146,6 +148,12 @@ let isInitialized = false;
         gameObject('WorldObject', 'E_');
         gameObject('Math', 'xi', document.game.THREE);
         gameObject('SFXPlayer', '$m');
+        gameObject('PlayerHUD', 'zv');
+        gameObject('PlayerInfo', 'Xg');
+        gameObject('Inventory', 'Cv');
+        gameObject('PhasedLoadingManager', 'gS');
+        gameObject('Trade', 'Hv');
+
 
         // Objects
         gameObject('BANK', 'ew');
@@ -166,6 +174,8 @@ let isInitialized = false;
         gameObject('SETTINGS', 'bw');
         gameObject('THREE', 'e');
         gameObject('PLAYER_INFO', 'fw');
+        gameObject('NPC', 'I_');
+        gameObject('TRADE', 'Mw');
 
         if (isInitialized) {
             document.genlite.onUIInitialized();
@@ -203,6 +213,8 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
         await genlite.pluginLoader.addPlugin(GenLitePlayerToolsPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteHighscores);
+        await genlite.pluginLoader.addPlugin(GenLiteItemDisplays);
+        await genlite.pluginLoader.addPlugin(GenLiteHealthRegenerationPlugin);
 
         /** post init things */
         await document['GenLiteSettingsPlugin'].postInit();
@@ -210,12 +222,12 @@ let isInitialized = false;
         await document['GenLiteDropRecorderPlugin'].postInit();
 
         // NOTE: currently initGenlite is called after the scene has started
-        //       (in minified function NS). The initializeUI function does not
-        //       exist in genfanad and is inlined in NS. So at this point, UI
+        //       (in minified function qS). The initializeUI function does not
+        //       exist in genfanad and is inlined in qS. So at this point, UI
         //       is already initialized and we update the plugins.
         //
         //       We should eventually move genlite to init at page start, then
-        //       this needs to move to the NS override at the bottom of this
+        //       this needs to move to the qS override at the bottom of this
         //       file.
         genlite.onUIInitialized();
     }
@@ -228,7 +240,7 @@ let isInitialized = false;
             var script = document.createElement('script');
             script.textContent = scriptText;
             script.type = 'module';
-            (document.head||document.documentElement).appendChild(script);
+            (document.head || document.documentElement).appendChild(script);
         }
     }
 

@@ -11,6 +11,8 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
+
+/* note if copying change import to `../core/interfaces/plugin.interface` */
 import {GenLitePlugin} from '../interfaces/plugin.interface';
 
 export class ExamplePlugin implements GenLitePlugin {

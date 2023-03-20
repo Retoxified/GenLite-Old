@@ -73,7 +73,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
-        this.originalItemStackIntersects = document.game.ItemStack.intersects;
+        this.originalItemStackIntersects = document.game.ItemStack.prototype.intersects;
 
         this.loadItemList();
         this.createDiv();
@@ -110,7 +110,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         window.addEventListener("blur", this.blurHandler.bind(this))
 
         if (this.isPluginEnabled === true) {
-            document.game.ItemStack.intersects = this.ItemStack_intersects;
+            document.game.ItemStack.prototype.intersects = this.ItemStack_intersects;
         }
     }
 
