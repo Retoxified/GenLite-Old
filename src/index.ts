@@ -39,6 +39,7 @@ import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.p
 import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
 import { GenLitePlayerToolsPlugin } from "./plugins/genlite-playertools.plugin";
 import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
+import {GenLiteItemDisplays} from "./plugins/genlite-itemdisplay.plugin";
 import { GenLiteHealthRegenerationPlugin } from './plugins/genlite-health-regeneration.plugin';
 
 declare const GM_getResourceText: (s: string) => string;
@@ -150,6 +151,8 @@ let isInitialized = false;
         gameObject('PlayerInfo', 'Xg');
         gameObject('Inventory', 'Cv');
         gameObject('PhasedLoadingManager', 'gS');
+        gameObject('Trade', 'Hv');
+
 
         // Objects
         gameObject('BANK', 'ew');
@@ -171,6 +174,7 @@ let isInitialized = false;
         gameObject('THREE', 'e');
         gameObject('PLAYER_INFO', 'fw');
         gameObject('NPC', 'I_');
+        gameObject('TRADE', 'Mw');
 
         if (isInitialized) {
             document.genlite.onUIInitialized();
@@ -208,6 +212,7 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
         await genlite.pluginLoader.addPlugin(GenLitePlayerToolsPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteHighscores);
+        await genlite.pluginLoader.addPlugin(GenLiteItemDisplays);
         await genlite.pluginLoader.addPlugin(GenLiteHealthRegenerationPlugin);
 
         /** post init things */

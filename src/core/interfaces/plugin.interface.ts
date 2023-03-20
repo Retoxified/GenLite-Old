@@ -25,4 +25,8 @@ export interface GenLitePlugin {
     combatUpdate?: (update: any) => void,
     setHealth?: (current: number, max: number) => void,
     handleUpdatePacket?: (packet: any) => void,
+    handlePacket?: (packet: any) => void,
+    _showQualityPopup?: (packet: any) => void,
+    Trade_handlePacket?: (packet: any) => void,
+
 }

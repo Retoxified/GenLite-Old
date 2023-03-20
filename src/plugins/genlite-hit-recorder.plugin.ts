@@ -342,6 +342,9 @@ export class GenLiteHitRecorder implements GenLitePlugin {
 
     /* doing html and css soley though JS sucks */
     initDpsElements() {
+        if(this.isUIinit)
+            return;
+            
         //setup container;
         let style = this.dpsOverlayContainer.style;
         style.setProperty("--left", "1.3");
