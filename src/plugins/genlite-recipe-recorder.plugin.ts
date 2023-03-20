@@ -66,7 +66,12 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                 this.recipe = params.action.recipe;
                 this.prevInventory = document.game.INVENTORY.items;
                 this.recipeName = params.action.recipe;
-                for (let i in params.action.params) // if params is set here then record a complex recipe name
+                let mats;
+                if(params.action.params){
+                    mats = Object.keys(params.action.params);
+                    mats = mats.sort();
+                }
+                for (let i of mats) // if params is set here then record a complex recipe name
                     this.recipeName = this.recipeName.concat("__", i, params.action.params[i]);
                 if (this.recipeResults[this.recipeName] === undefined)
                     this.recipeResults[this.recipeName] = {

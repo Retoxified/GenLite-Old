@@ -82,109 +82,45 @@ export class GenLiteItemDisplays implements GenLitePlugin {
     handleUpdatePacket(payload) {
         if (!this.isPluginEnabled)
             return;
-       
-        for (let key in payload) {
-            let item = payload[key];
-            if (!item.item)
-                continue;
-            let extraStr = "";
-            if (item.item.includes("lean")) {
-                extraStr = "L";
-            } else if (item.item.includes("fatty")) {
-                extraStr = "F";
-            } else if (item.item.includes("+1")) {
-                extraStr = "+1";
-            } else if (item.item.includes("+2")) {
-                extraStr = "+2";
-            }
-            document.game.INVENTORY.DOM_slots[key].item_extra.children[0].innerHTML = extraStr;
-        }
+        this.itemExtraUpdate(payload, document.game.INVENTORY.DOM_slots);
     }
 
     handlePacket(payload: any) {
         if (!this.isPluginEnabled)
         return;
-       
-        let slots = payload.bank_contents;
-        for (let key in slots) {
-            let item = slots[key];
-            if (!item.item)
-                continue;
-            let extraStr = "";
-            if (item.item.includes("lean")) {
-                extraStr = "L";
-            } else if (item.item.includes("fatty")) {
-                extraStr = "F";
-            } else if (item.item.includes("+1")) {
-                extraStr = "+1";
-            } else if (item.item.includes("+2")) {
-                extraStr = "+2";
-            }
-            document.game.BANK.DOM_slots[key].item_extra.children[0].innerHTML = extraStr;
-        }
+        this.itemExtraUpdate(payload.bank_contents, document.game.BANK.DOM_slots);
+
     }
 
     _showQualityPopup(payload: any) {
         if (!this.isPluginEnabled)
         return;
-       
-        let slots = document.game.BANK.quality_slots;
-        for (let key in slots) {
-            let item = slots[key];
-            if (!item.item)
-                continue;
-            let extraStr = "";
-            if (item.item.includes("lean")) {
-                extraStr = "L";
-            } else if (item.item.includes("fatty")) {
-                extraStr = "F";
-            } else if (item.item.includes("+1")) {
-                extraStr = "+1";
-            } else if (item.item.includes("+2")) {
-                extraStr = "+2";
-            }
-            document.game.BANK.quality_DOM_slots[key].item_extra.children[0].innerHTML = extraStr;
-        }
+        this.itemExtraUpdate(document.game.BANK.quality_slots, document.game.BANK.quality_DOM_slots);
     }
 
     Trade_handlePacket(payload) {
         if (!this.isPluginEnabled)
         return;
-       
-        let slots = payload[0].contents.myOffer;
-        for (let key in slots) {
-            let item = slots[key];
-            if (!item.item)
-                continue;
-            let extraStr = "";
-            if (item.item.includes("lean")) {
-                extraStr = "L";
-            } else if (item.item.includes("fatty")) {
-                extraStr = "F";
-            } else if (item.item.includes("+1")) {
-                extraStr = "+1";
-            } else if (item.item.includes("+2")) {
-                extraStr = "+2";
-            }
-            document.game.TRADE.DOM_your_slots[key].item_extra.children[0].innerHTML = extraStr;
-        }
-        slots = payload[0].contents.theirOffer;
-        for (let key in slots) {
-            let item = slots[key];
-            if (!item.item)
-                continue;
-            let extraStr = "";
-            if (item.item.includes("lean")) {
-                extraStr = "L";
-            } else if (item.item.includes("fatty")) {
-                extraStr = "F";
-            } else if (item.item.includes("+1")) {
-                extraStr = "+1";
-            } else if (item.item.includes("+2")) {
-                extraStr = "+2";
-            }
-            document.game.TRADE.DOM_their_slots[key].item_extra.children[0].innerHTML = extraStr;
-        }
+        this.itemExtraUpdate(payload[0].contents.myOffer, document.game.TRADE.DOM_your_slots);
+        this.itemExtraUpdate(payload[0].contents.theirOffer, document.game.TRADE.DOM_their_slots);
     }
 
+    itemExtraUpdate(slots, doms){
+        for (let key in slots) {
+            let item = slots[key];
+            if (!item.item)
+                continue;
+            let extraStr = "";
+            if (item.item.includes("lean")) {
+                extraStr = "L";
+            } else if (item.item.includes("fatty")) {
+                extraStr = "F";
+            } else if (item.item.includes("+1")) {
+                extraStr = "+1";
+            } else if (item.item.includes("+2")) {
+                extraStr = "+2";
+            }
+            doms[key].item_extra.children[0].innerHTML = extraStr;
+        }
+    }
 }
