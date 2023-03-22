@@ -20,7 +20,7 @@ export class GenLiteItemDisplays implements GenLitePlugin {
     isUIInit: boolean = false;
     async init() {
         document.genlite.registerPlugin(this);
-        this.isPluginEnabled = document.genlite.settings.add("ItemDisplays.Enable", true, "Additional Item Info", "checkbox", this.handlePluginEnableDisable, this);
+        document.genlite.ui.registerPlugin("Additional Item Info", this.handlePluginEnableDisable, {}, this);
     }
 
     handlePluginEnableDisable(state: boolean) {

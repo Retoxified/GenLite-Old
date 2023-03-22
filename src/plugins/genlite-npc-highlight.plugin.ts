@@ -15,7 +15,16 @@ import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteNPCHighlightPlugin';
-    static healthListVersion = "3"
+    static healthListVersion = "3";
+
+    pluginSettings = {
+        checkbox: {
+            type: "checkbox",
+            label: "Invert Hiding",
+            value: true,
+            stateHandler: this.handleHideInvertEnableDisable
+        },
+    };
 
     trackedNpcs = {};
     npcData = {};
@@ -38,6 +47,7 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
     packList;
     async init() {
         document.genlite.registerPlugin(this);
+        document.genlite.ui.registerPlugin("NPC Highlights", this.handlePluginEnableDisable, this.pluginSettings, this);
 
         this.npc_highlight_div = document.createElement('div');
         this.npc_highlight_div.className = 'npc-indicators-list';
@@ -52,10 +62,6 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         window.addEventListener('keydown', this.keyDownHandler.bind(this));
         window.addEventListener('keyup', this.keyUpHandler.bind(this));
         window.addEventListener("blur", this.blurHandler.bind(this))
-
-        this.isPluginEnabled = document.genlite.settings.add("NpcHighlight.Enable", true, "Highlight NPCs", "checkbox", this.handlePluginEnableDisable, this);
-        this.hideInvert = document.genlite.settings.add("NpcHideInvert.Enable", true, "Invert NPC Hiding", "checkbox", this.handleHideInvertEnableDisable, this, undefined, undefined, "NpcHighlight.Enable");
-
     }
 
     async postInit() {

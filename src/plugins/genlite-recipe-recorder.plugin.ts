@@ -43,7 +43,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
             this.recipeResults = saved.recipe ? saved.recipe : {};
             this.gatherResults = saved.gathering ? saved.gathering : {};
         }
-        this.isPluginEnabled = document.genlite.settings.add("RecipeRecorder.Enable", true, "Record Recipes", "checkbox", this.handlePluginEnableDisable, this);
+        document.genlite.ui.registerPlugin("Recipe Recorder", this.handlePluginEnableDisable, {}, this);
     }
 
     handlePluginEnableDisable(state: boolean) {

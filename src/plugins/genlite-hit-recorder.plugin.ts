@@ -87,7 +87,7 @@ export class GenLiteHitRecorder implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
-        this.isPluginEnabled = document.genlite.settings.add("HitRecorder.Enable", true, "Hit Recorder", "checkbox", this.handlePluginEnableDisable, this);
+        document.genlite.ui.registerPlugin("Hit Recorder", this.handlePluginEnableDisable, {}, this);
         this.dpsOverlayContainer.appendChild(this.dpsOverlay);
     }
 

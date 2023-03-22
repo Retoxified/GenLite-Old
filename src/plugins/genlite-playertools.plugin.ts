@@ -24,6 +24,17 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
 
     // Plugin UI
     PlayerTagContainer: HTMLDivElement;
+    
+    pluginSettings = {
+        // Checkbox Example
+        checkbox: {
+            label: 'Hide Character',
+            type: 'checkbox',
+            value: false,
+            stateHandler: this.handleHidePlayerSettingChange
+        }
+    };
+    
 
     // Plugin Hooks
     async init() {
@@ -34,61 +45,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
         this.PlayerTagContainer.className = 'player-tag-container';
         document.body.appendChild(this.PlayerTagContainer);
 
-        // Add Settings to the Settings Menu
-        this.isEnabled = document.genlite.settings.add(
-            "PlayerHighlights.Enabled",
-            true,
-            "Enable Player Highlights",
-            "checkbox",
-            this.handleHighlightSettingChange,
-            this);
-
-        document.genlite.settings.add(
-            "PlayerTools.HidePlayer",
-            false,
-            "Hide My Character",
-            "checkbox",
-            this.handleHidePlayerSettingChange,
-            this);
-
-        // Creat HTML Div Element for the Tab Content
-        let tabContentElement = document.createElement('div');
-
-        // Create a Header for the Tab
-        let tabHeader = document.createElement('h1');
-        tabHeader.innerHTML = 'Player Tools';
-        tabContentElement.appendChild(tabHeader);
-
-        // Create a Description for the Tab
-        let tabDescription = document.createElement('p');
-        tabDescription.innerHTML = 'This plugin adds a few tools to help you play the game.';
-        tabContentElement.appendChild(tabDescription);
-        
-        // Funny Meme Image
-        let memeImage = document.createElement('img');
-        memeImage.src = 'https://ih1.redbubble.net/image.1059709803.4166/bg,f8f8f8-flat,750x,075,f-pad,750x1000,f8f8f8.jpg';
-        memeImage.style.width = '100%';
-        tabContentElement.appendChild(memeImage);
-
-        
-
-
-        // Add the Tab to the UI
-        window.genlite.ui.addTab('https://icons.iconarchive.com/icons/dtafalonso/modern-xp/32/ModernXP-41-Settings-icon.png', 'Player Tools', tabContentElement);
-
-        let HidePlayer = window.genlite.ui.addSetting('Player Tools', 'Hide Player', 'checkbox', null, false);
-        let PlayerHighlightsEnabled = window.genlite.ui.addSetting('Player Tools', 'Player Highlights', 'checkbox', null, this.isEnabled);
-
-        // Bind Events
-        HidePlayer.addEventListener('change', (e) => {
-            this.handleHidePlayerSettingChange(e.target.checked);
-        });
-
-        PlayerHighlightsEnabled.addEventListener('change', (e) => {
-            this.handleHighlightSettingChange(e.target.checked);
-        });
-
-
+        document.genlite.ui.registerPlugin("Player Tools", this.handleHighlightSettingChange, this.pluginSettings, this);
     }
 
     update(dt) {

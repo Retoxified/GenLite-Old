@@ -37,7 +37,7 @@ import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
 import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
 import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
 import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
-import { GenLiteUIPanel } from "./plugins/genlite-ui-panel";
+import { GenLiteUIPlugin } from "./core/plugins/genlite-ui-plugin";
 import { GenLitePlayerToolsPlugin } from "./plugins/genlite-playertools.plugin";
 import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
 import {GenLiteItemDisplays} from "./plugins/genlite-itemdisplay.plugin";
@@ -191,6 +191,7 @@ let isInitialized = false;
         genlite.notifications = await genlite.pluginLoader.addPlugin(GenLiteNotificationPlugin);
         genlite.settings = await genlite.pluginLoader.addPlugin(GenLiteSettingsPlugin);
         genlite.commands = await genlite.pluginLoader.addPlugin(GenLiteCommandsPlugin);
+        genlite.ui = await genlite.pluginLoader.addPlugin(GenLiteUIPlugin);
 
         /** Official Plugins */
         await genlite.pluginLoader.addPlugin(GenLiteVersionPlugin);

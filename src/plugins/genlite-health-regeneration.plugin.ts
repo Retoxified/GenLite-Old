@@ -14,14 +14,7 @@ export class GenLiteHealthRegenerationPlugin implements GenLitePlugin {
     static healthRegenerationIntervalMilliseconds = 100;
 
     async init() {
-        this.isPluginEnabled = document.genlite.settings.add(
-          "HealthRegenerationAudioNotify.Enable",
-          false,
-          "Health Regeneration Audio Notification",
-          "checkbox",
-          this.handlePluginToggled,
-          this
-        );
+        document.genlite.ui.registerPlugin("Health Regen Alert", this.handlePluginToggled, {}, this);
 
         this.handlePluginToggled(this.isPluginEnabled);
     }

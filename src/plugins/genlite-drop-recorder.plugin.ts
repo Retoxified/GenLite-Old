@@ -44,28 +44,26 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     isPluginEnabled: boolean = false;
     submitItemsToServer: boolean = false;
 
+    pluginSettings = {
+        checkbox: {
+            label: "Send Drops to Wiki",
+            type: "checkbox",
+            value: this.submitItemsToServer,
+            handler: this.handleSubmitToServer
+        }
+    };
+            
+
     async init() {
         document.genlite.registerPlugin(this);
+        document.genlite.ui.registerPlugin("Drop Recorder", this.handlePluginEnableDisable, this.pluginSettings, this);
+
         let dropTableString = localStorage.getItem("genliteDropTable");
         if (dropTableString == null) {
             this.dropTable = {};
         } else {
             this.dropTable = JSON.parse(dropTableString);
         }
-        this.isPluginEnabled = document.genlite.settings.add("DropRecorder.Enable", true, "Drop Recorder", "checkbox", this.handlePluginEnableDisable, this);
-        this.submitItemsToServer = document.genlite.settings.add(
-            "DropRecorder.SubmitToServer", // Key
-            false,                         // Default
-            "Send Drops to Server(REMOTE SERVER)", // Name in UI
-            "checkbox", // Type
-            this.handleSubmitToServer, // handler function
-            this,  // context for handler
-            "Warning!\n" + // Warning
-            "Turning this setting on will send monster drop data along with your IP\u00A0address to an external server.\n\n" +
-            "Are you sure you want to enable this setting?",
-            undefined,
-            "DropRecorder.Enable"
-        );
     }
 
     async postInit() {

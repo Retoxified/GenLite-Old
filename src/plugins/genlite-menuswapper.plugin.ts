@@ -16,6 +16,7 @@ import {GenLitePlugin} from '../core/interfaces/plugin.interface';
 export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteMenuSwapperPlugin';
 
+    isEnabled: boolean = false;
     useOneClickBank: boolean = false;
     useOneClickTrade: boolean = false;
     hideStairs: boolean = false;
@@ -23,27 +24,55 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
     originalSceneIntersects: Function;
     originalNPCIntersects: Function;
 
+    pluginSettings = {
+        // Checkbox Example
+        checkbox: {
+            label: 'One-Click Bank',
+            type: 'checkbox',
+            value: this.useOneClickBank,
+            stateHandler: this.handleLeftClickBankToggle
+        },
+        checkbox2: {
+            label: 'One-Click Trade',
+            type: 'checkbox',
+            value: this.useOneClickTrade,
+            stateHandler: this.handleLeftClickTradeToggle
+        },
+        checkbox3: {
+            label: 'Hide Stairs',
+            type: 'checkbox',
+            value: this.hideStairs,
+            stateHandler: this.handleHideStairsToggle
+        }
+    };
+
     intersect_vector = new document.game.THREE.Vector3();
     async init() {
         document.genlite.registerPlugin(this);
+        document.genlite.ui.registerPlugin("Menu Swapper", this.handlePluginDisableEnable, this.pluginSettings, this);
 
-        this.useOneClickBank = document.genlite.settings.add("NPCMenuSwapper.LeftClickBank", true, "Left Click Bank", "checkbox", this.handleLeftClickBankToggle, this);
-        this.useOneClickTrade = document.genlite.settings.add("NPCMenuSwapper.LeftClickTrade", true, "Left Click Trade", "checkbox", this.handleLeftClickTradeToggle, this);
-        this.hideStairs = document.genlite.settings.add("NPCMenuSwapper.hideStairs", false, "Hide Stairs", "checkbox", this.handleHideStairsToggle, this);
+        // this.useOneClickBank = document.genlite.settings.add("NPCMenuSwapper.LeftClickBank", true, "Left Click Bank", "checkbox", this.handleLeftClickBankToggle, this);
+        // this.useOneClickTrade = document.genlite.settings.add("NPCMenuSwapper.LeftClickTrade", true, "Left Click Trade", "checkbox", this.handleLeftClickTradeToggle, this);
+        // this.hideStairs = document.genlite.settings.add("NPCMenuSwapper.hideStairs", false, "Hide Stairs", "checkbox", this.handleHideStairsToggle, this);
 
         this.originalSceneIntersects = document.game.OptimizedScene.prototype.intersects;
         this.originalNPCIntersects = document.game.NPC.prototype.intersects;
         this.updateState();
     }
 
+    handlePluginDisableEnable(state: boolean) {
+        this.isEnabled = state;
+        this.updateState();
+    }
+
     updateState() {
-        if (this.hideStairs) {
+        if (this.hideStairs && this.isEnabled) {
             document.game.OptimizedScene.prototype.intersects = this.sceneryIntersects;
         } else {
             document.game.OptimizedScene.prototype.intersects = this.originalSceneIntersects;
         }
 
-        if (this.useOneClickBank || this.useOneClickTrade) {
+        if ((this.useOneClickBank || this.useOneClickTrade) && this.isEnabled) {
             document.game.NPC.prototype.intersects = this.leftClickBankIntersects;
         } else {
             document.game.NPC.prototype.intersects = this.originalNPCIntersects;

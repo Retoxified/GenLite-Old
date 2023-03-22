@@ -29,14 +29,7 @@ export class GenLiteChatPlugin implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
-        this.filterGameMessages = document.genlite.settings.add(
-            "Chat.FilterGameMessages",
-            false,
-            "Filter Game Chat",
-            "checkbox",
-            this.handleFilterGameMessages,
-            this
-        );
+        document.genlite.ui.registerPlugin("Filter Game Messages", this.handleFilterGameMessages, {}, this);
     }
 
     public loginOK() {

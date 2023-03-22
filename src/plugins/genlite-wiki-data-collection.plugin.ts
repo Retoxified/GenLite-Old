@@ -33,18 +33,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
-
-        this.isRemoteEnabled = document.genlite.settings.add(
-            "WikiDataColl.Enable",
-            false,
-            "Wiki Data collection(REMOTE SERVER)",
-            "checkbox",
-            this.handlePluginEnableDisable,
-            this,
-            "Warning!\n" + // Warning
-            "Turning this setting on will send various pieces of data that benefit the wiki along with your IP\u00A0address to an external server.\n\n" +
-            "Are you sure you want to enable this setting?"
-        );
+        document.genlite.ui.registerPlugin("Wiki Data Collection", this.handlePluginEnableDisable, {}, this);
     }
 
     loginOK() {
