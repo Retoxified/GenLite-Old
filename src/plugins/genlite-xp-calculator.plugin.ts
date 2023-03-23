@@ -69,7 +69,9 @@ export class GenLiteXpCalculator implements GenLitePlugin {
 
     handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
+
         this.resetCalculatorAll();
+
         /* if toggle on mid way through we have to run the init code */
         if (state) {
             this.initializeUI();
@@ -247,7 +249,7 @@ export class GenLiteXpCalculator implements GenLitePlugin {
         }
         delete temp.gainedXP;
         this.skillsList[skill] = temp;
-        if (this.isHookInstalled)
+        if (this.isHookInstalled && document.game.PLAYER_INFO.tracking_skill != undefined)
             document.game.PLAYER_INFO.updateTooltip();
     }
 

@@ -9,6 +9,13 @@
 */
 export class GenLiteUIPlugin {
     public static pluginName = 'GenLiteUIPlugin';
+    
+    // Read Only Public Property
+    private _hasInitialized: boolean = false;
+    public get hasInitialized(): boolean {
+        return this._hasInitialized;
+    }
+    
 
     private sidePanel: HTMLElement;
     private tabBar: HTMLElement;
@@ -138,6 +145,10 @@ export class GenLiteUIPlugin {
 
         // Set Initial View
         this.showTab('Plugins');
+    }
+
+    async postInit() {
+        this._hasInitialized = true;
     }
 
     handlePluginState(state: boolean): void {

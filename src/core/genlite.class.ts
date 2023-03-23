@@ -58,7 +58,6 @@ export class GenLite {
 
     onUIInitialized() {
         this.hook('initializeUI');
-        this.pluginLoader.postInit();
     }
 
     hook(fnName: string, ...args: Array<unknown>) {
@@ -76,6 +75,12 @@ export class GenLite {
     hookPhased(fnName: string, ...args: Array<unknown>) {
         if (args[0] === "game_loaded") {
             this.hook('loginOK', args);
+            console.log("GenLite: loginOK hook fired")
+
+            if (!this.ui.hasInitialized) {
+                this.pluginLoader.postInit();
+                console.log("GenLite: postInit hook fired");
+            }
         }
     }
 
