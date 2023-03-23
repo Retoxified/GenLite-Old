@@ -39,7 +39,7 @@ import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.p
 import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
 import { GenLitePlayerToolsPlugin } from "./plugins/genlite-playertools.plugin";
 import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
-import {GenLiteItemDisplays} from "./plugins/genlite-itemdisplay.plugin";
+import { GenLiteItemDisplays } from "./plugins/genlite-itemdisplay.plugin";
 import { GenLiteHealthRegenerationPlugin } from './plugins/genlite-health-regeneration.plugin';
 
 declare const GM_getResourceText: (s: string) => string;
