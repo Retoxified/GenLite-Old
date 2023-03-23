@@ -39,14 +39,14 @@ export class GenLiteConfirmation {
 
         let header = document.createElement('div');
         header.id = 'genlite-confirm-header';
-        header.style.backgroundImage = 'url("https://genfanad-static.s3.us-east-2.amazonaws.com/versioned/0.118/data_client/img/new_ux/login_screen_images/generic_modal_top.png")';
+        header.style.backgroundImage = 'url("https://genfanad-static.s3.us-east-2.amazonaws.com/versioned/0.120/data_client/img/new_ux/login_screen_images/generic_modal_top.png")';
         header.style.backgroundSize = '100%, 100%';
         header.style.width = '100%';
         header.style.aspectRatio = '2106/310'; // background png size
         modal.appendChild(header);
 
         let title = document.createElement('div');
-        title.style.backgroundImage = 'url("https://genfanad-static.s3.us-east-2.amazonaws.com/versioned/0.118/data_client/img/new_ux/login_screen_images/modal_title.png")';
+        title.style.backgroundImage = 'url("https://genfanad-static.s3.us-east-2.amazonaws.com/versioned/0.120/data_client/img/new_ux/login_screen_images/modal_title.png")';
         title.style.position = 'fixed';
         title.style.width = '40%';
         title.style.aspectRatio = '632/120';
@@ -71,7 +71,7 @@ export class GenLiteConfirmation {
 
         let body = document.createElement('div');
         body.id = 'genlite-confirm-body';
-        body.style.backgroundImage = 'url("https://genfanad-static.s3.us-east-2.amazonaws.com/versioned/0.118/data_client/img/new_ux/login_screen_images/generic_modal_mid_and_bottom.png")';
+        body.style.backgroundImage = 'url("https://genfanad-static.s3.us-east-2.amazonaws.com/versioned/0.120/data_client/img/new_ux/login_screen_images/generic_modal_mid_and_bottom.png")';
         body.style.backgroundSize = '100%, 100%';
         body.style.width = '100%';
         body.style.aspectRatio = '2104/1316'; // background png size
@@ -114,7 +114,7 @@ export class GenLiteConfirmation {
 
         // okay button actually cancels genlite
         let okayButton = document.createElement('div');
-        okayButton.style.backgroundImage = 'url("https://genfanad-static.s3.us-east-2.amazonaws.com/versioned/0.118/data_client/img/new_ux/login_screen_images/return_button.png")';
+        okayButton.style.backgroundImage = 'url("https://genfanad-static.s3.us-east-2.amazonaws.com/versioned/0.120/data_client/img/new_ux/login_screen_images/return_button.png")';
         okayButton.style.backgroundSize = '100%, 100%';
         okayButton.style.width = '15%';
         okayButton.style.aspectRatio = '131/52'; // background png size
@@ -136,7 +136,7 @@ export class GenLiteConfirmation {
 
         // cancel button is actually the accept button
         let cancelButton = document.createElement('div');
-        cancelButton.style.backgroundImage = 'url("https://genfanad-static.s3.us-east-2.amazonaws.com/versioned/0.118/data_client/img/new_ux/crafting/crafting_2/make_all.png")';
+        cancelButton.style.backgroundImage = 'url("https://genfanad-static.s3.us-east-2.amazonaws.com/versioned/0.120/data_client/img/new_ux/crafting/crafting_2/make_all.png")';
         cancelButton.style.backgroundSize = '100%, 100%';
         cancelButton.style.width = '15%';
         cancelButton.style.aspectRatio = '188/72'; // background png size
