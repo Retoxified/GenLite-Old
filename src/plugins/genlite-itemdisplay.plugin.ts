@@ -31,8 +31,8 @@ export class GenLiteItemDisplays implements GenLitePlugin {
             this.handlePacket(document.game.BANK.slots);
         } else {
             let spans = document.getElementsByClassName("genlite_item_extras");
-            for(let span in spans) {
-                if(spans[span].innerHTML)
+            for (let span in spans) {
+                if (spans[span].innerHTML)
                     spans[span].innerHTML = "";
             }
         }
@@ -87,33 +87,33 @@ export class GenLiteItemDisplays implements GenLitePlugin {
 
     handlePacket(payload: any) {
         if (!this.isPluginEnabled)
-        return;
+            return;
         this.itemExtraUpdate(payload.bank_contents, document.game.BANK.DOM_slots);
 
     }
 
     _showQualityPopup(payload: any) {
         if (!this.isPluginEnabled)
-        return;
+            return;
         this.itemExtraUpdate(document.game.BANK.quality_slots, document.game.BANK.quality_DOM_slots);
     }
 
     Trade_handlePacket(payload) {
         if (!this.isPluginEnabled)
-        return;
+            return;
         this.itemExtraUpdate(payload[0].contents.myOffer, document.game.TRADE.DOM_your_slots);
         this.itemExtraUpdate(payload[0].contents.theirOffer, document.game.TRADE.DOM_their_slots);
     }
 
-    itemExtraUpdate(slots, doms){
+    itemExtraUpdate(slots, doms) {
         for (let key in slots) {
             let item = slots[key];
             if (!item.item)
                 continue;
             let extraStr = "";
-            if (item.item.includes("lean")) {
+            if (item.item.includes("lean") || item.item.includes("conditional-defense")) {
                 extraStr = "L";
-            } else if (item.item.includes("fatty")) {
+            } else if (item.item.includes("fatty") || item.item.includes("conditional-strength")) {
                 extraStr = "F";
             } else if (item.item.includes("+1")) {
                 extraStr = "+1";
