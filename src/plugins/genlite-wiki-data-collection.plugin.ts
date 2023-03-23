@@ -33,7 +33,19 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
-        document.genlite.ui.registerPlugin("Wiki Data Collection", this.handlePluginEnableDisable, {}, this);
+    }
+
+    async postInit() {
+        document.genlite.ui.registerPlugin("Wiki Data Collection", this.handlePluginState.bind(this), {}, true, "Warning: This plugin will send data to the wiki (a third party). Only enable this plugin if you trust the wiki.");
+    }
+
+    handlePluginState(state: boolean): void {
+        this.isRemoteEnabled = state;
+        if (state) {
+            this.sendInterval = setInterval(() => { this.sendToServer(this) }, 200);
+        } else {
+            clearInterval(this.sendInterval);
+        }
     }
 
     loginOK() {
@@ -50,15 +62,6 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         this.scanInterval = null;
         clearInterval(this.sendInterval);
         this.sendInterval = null;
-    }
-
-    handlePluginEnableDisable(state: boolean) {
-        this.isRemoteEnabled = state;
-        if (state) {
-            this.sendInterval = setInterval(() => { this.sendToServer(this) }, 200);
-        } else {
-            clearInterval(this.sendInterval);
-        }
     }
 
     updateSkills() {

@@ -24,21 +24,22 @@ export class GenLiteChatPlugin implements GenLitePlugin {
         "The rock is out of ore.",
     ]);
 
+    isReady: boolean = false;
     filterGameMessages: boolean = false;
     originalGameMessage: Function;
 
     async init() {
         document.genlite.registerPlugin(this);
-        document.genlite.ui.registerPlugin("Filter Game Messages", this.handleFilterGameMessages, {}, this);
+    }
+
+    handlePluginState(state: boolean): void {
+        this.filterGameMessages = state;
+        this.updateState();
     }
 
     public loginOK() {
         this.originalGameMessage = document.game.CHAT.addGameMessage;
-        this.updateState();
-    }
-
-    handleFilterGameMessages(state: boolean) {
-        this.filterGameMessages = state;
+        document.genlite.ui.registerPlugin("Filter Game Messages", this.handlePluginState.bind(this)); // Unique case where we need to register the plugin after loginOK (this prevents handlePluginState from being called before loginOK)
         this.updateState();
     }
 

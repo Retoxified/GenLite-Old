@@ -28,29 +28,28 @@ export class GenLiteItemTooltips implements GenLitePlugin {
     isFoodEnabled: boolean = false;
     isValueEnabled: boolean = false;
 
-    pluginSettings = {
-        checkbox: {
-            label: "Food Tooltips",
+    pluginSettings : Settings = {
+        "Food Tooltips": {
             type: "checkbox",
             value: this.isFoodEnabled,
-            handler: this.handleFoodEnableDisable
+            stateHandler: this.handleFoodEnableDisable.bind(this)
         },
-        checkbox2: {
-            label: "Value Tooltips",
+        "Value Tooltips": {
             type: "checkbox",
             value: this.isValueEnabled,
-            handler: this.handleValueEnableDisable
+            stateHandler: this.handleValueEnableDisable.bind(this)
         }
     };
-
-
-
+    
     async init() {
         document.genlite.registerPlugin(this);
-        document.genlite.ui.registerPlugin("Item Tooltips", this.handlePluginEnableDisable, this.pluginSettings, this);
     }
 
-    handlePluginEnableDisable(state: boolean) {
+    async postInit() {
+        document.genlite.ui.registerPlugin("Item Tooltips", this.handlePluginState.bind(this), this.pluginSettings);
+    }
+
+    handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
         if (state) {
             if (!this.isUiInit) // if non inited run
@@ -190,6 +189,10 @@ export class GenLiteItemTooltips implements GenLitePlugin {
 
     /* disable all the stuff */
     onmouseleave(event, callback_this) {
+        // Verify that itemToolTip is not null
+        if (callback_this.itemToolTip == null || callback_this.itemToolTip == undefined) return;
+
+
         callback_this.itemToolTip.style.display = "none";
         callback_this.healthBarHealing.style.width = "0%";
     }

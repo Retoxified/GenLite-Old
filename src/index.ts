@@ -217,11 +217,6 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteItemDisplays);
         await genlite.pluginLoader.addPlugin(GenLiteHealthRegenerationPlugin);
 
-        /** post init things */
-        await document['GenLiteSettingsPlugin'].postInit();
-        await document['GenLiteNPCHighlightPlugin'].postInit();
-        await document['GenLiteDropRecorderPlugin'].postInit();
-
         // NOTE: currently initGenlite is called after the scene has started
         //       (in minified function qS). The initializeUI function does not
         //       exist in genfanad and is inlined in qS. So at this point, UI
@@ -230,6 +225,9 @@ let isInitialized = false;
         //       We should eventually move genlite to init at page start, then
         //       this needs to move to the qS override at the bottom of this
         //       file.
+        // NOTE 2: This is now also used to call postInit on plugins through GenLitePluginLoader
+        //         The GenLiteUIPlugin.registerPlugin function requires being present in the postInit for a function
+        //         as it calls various things involving settings that may not be ready until after init.
         genlite.onUIInitialized();
     }
 

@@ -23,3 +23,28 @@ declare interface CommandSpec {
     helpText: string,
     echo: boolean,
 }
+
+declare type Settings = {
+    [key: string]: {
+        type: string,
+        value: any,
+        stateHandler: Function,
+
+        // Any Children that are enabled/disabled when this setting is enabled/disabled
+        children?: Settings,
+
+        // If a popup message is needed when the setting is enabled then enter the message here
+        alert?: string
+
+        // Ranges
+        min?: number,
+        max?: number,
+        step?: number
+
+        // Select
+        options?: any[],
+
+        // Tooltips
+        description?: string,
+    }
+}

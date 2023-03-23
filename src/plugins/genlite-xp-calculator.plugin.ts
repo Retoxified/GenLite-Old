@@ -58,12 +58,16 @@ export class GenLiteXpCalculator implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
-        document.genlite.ui.registerPlugin("XP Calculator", this.handlePluginEnableDisable, {}, this);
+
         this.resetCalculatorAll();
         // THIS IS A PRIME TARGET FOR NEW UI TABS
     }
 
-    handlePluginEnableDisable(state: boolean) {
+    async postInit() {
+        document.genlite.ui.registerPlugin("XP Calculator", this.handlePluginState.bind(this));
+    }
+
+    handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
         this.resetCalculatorAll();
         /* if toggle on mid way through we have to run the init code */

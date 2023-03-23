@@ -52,6 +52,16 @@ export class GenLitePluginLoader {
         }
     }
 
+    async postInit() {
+        for (const plugin of this.plugins) {
+            // If the plugin has a postInit function, run it
+            if (plugin.postInit) {
+                plugin.postInit();
+            }
+        }
+    }
+
+
     /**
      * Throws errors if pluginClass is missing specific fields, such as init
      * @param pluginClass
@@ -67,6 +77,14 @@ export class GenLitePluginLoader {
 
         if (!pluginClass.pluginName) {
             throw new Error(`Plugin class ${pluginClass} does not define a pluginName`);
+        }
+
+        if (!pluginClass.prototype.handlePluginState) {
+            throw new Error(`Plugin class ${pluginClass} does not define a handlePluginState function.`);
+        }
+
+        if (typeof(pluginClass.prototype.handlePluginState) !== 'function') {
+            throw new Error(`Plugin class ${pluginClass}.handlePluginState was not defined as a function`);
         }
     }
 

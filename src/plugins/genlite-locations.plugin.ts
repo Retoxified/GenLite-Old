@@ -160,6 +160,9 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
         this.addStylesheet()
         //
     }
+    handlePluginState(state: boolean): void {
+        // TODO: Implement
+    }
     private handleCompassMapTranslucentSlider(value) {
         this.translucentScale = value
         this.addGlobalStylesheet(`

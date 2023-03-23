@@ -20,17 +20,21 @@ export class GenLiteInventoryPlugin implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
-        document.genlite.registerPlugin("Inventory Drag-On-Shift", this.handleDisableDrag, {}, this);
+    }
+
+    async postInit() {
+        document.genlite.registerPlugin("Inventory Drag-On-Shift", this.handlePluginState.bind(this));
     }
 
     public loginOK() {
         this.updateState();
     }
 
-    handleDisableDrag(state: boolean) {
+    handlePluginState(state: boolean): void {
         this.disableDragOnShift = state;
         this.updateState();
     }
+
 
     updateState() {
         if (this.disableDragOnShift) {
@@ -49,5 +53,4 @@ export class GenLiteInventoryPlugin implements GenLitePlugin {
             }
         }
     }
-
 }

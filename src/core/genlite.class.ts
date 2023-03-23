@@ -54,12 +54,11 @@ export class GenLite {
         this.installHook(document.game.Bank.prototype, 'handlePacket');
         this.installHook(document.game.Bank.prototype, '_showQualityPopup');
         this.installHook(document.game.Trade.prototype, 'handlePacket', this.hookTrade_handlePacket);
-
-
     }
 
     onUIInitialized() {
         this.hook('initializeUI');
+        this.pluginLoader.postInit();
     }
 
     hook(fnName: string, ...args: Array<unknown>) {

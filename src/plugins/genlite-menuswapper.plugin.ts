@@ -24,43 +24,38 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
     originalSceneIntersects: Function;
     originalNPCIntersects: Function;
 
-    pluginSettings = {
+    pluginSettings : Settings = {
         // Checkbox Example
-        checkbox: {
-            label: 'One-Click Bank',
+        "One-Click Bank": {
             type: 'checkbox',
             value: this.useOneClickBank,
-            stateHandler: this.handleLeftClickBankToggle
+            stateHandler: this.handleLeftClickBankToggle.bind(this)
         },
-        checkbox2: {
-            label: 'One-Click Trade',
+        "One-Click Trade": {
             type: 'checkbox',
             value: this.useOneClickTrade,
-            stateHandler: this.handleLeftClickTradeToggle
+            stateHandler: this.handleLeftClickTradeToggle.bind(this)
         },
-        checkbox3: {
-            label: 'Hide Stairs',
+        "Hide Stairs": {
             type: 'checkbox',
             value: this.hideStairs,
-            stateHandler: this.handleHideStairsToggle
+            stateHandler: this.handleHideStairsToggle.bind(this)
         }
     };
 
     intersect_vector = new document.game.THREE.Vector3();
     async init() {
         document.genlite.registerPlugin(this);
-        document.genlite.ui.registerPlugin("Menu Swapper", this.handlePluginDisableEnable, this.pluginSettings, this);
-
-        // this.useOneClickBank = document.genlite.settings.add("NPCMenuSwapper.LeftClickBank", true, "Left Click Bank", "checkbox", this.handleLeftClickBankToggle, this);
-        // this.useOneClickTrade = document.genlite.settings.add("NPCMenuSwapper.LeftClickTrade", true, "Left Click Trade", "checkbox", this.handleLeftClickTradeToggle, this);
-        // this.hideStairs = document.genlite.settings.add("NPCMenuSwapper.hideStairs", false, "Hide Stairs", "checkbox", this.handleHideStairsToggle, this);
 
         this.originalSceneIntersects = document.game.OptimizedScene.prototype.intersects;
         this.originalNPCIntersects = document.game.NPC.prototype.intersects;
-        this.updateState();
     }
 
-    handlePluginDisableEnable(state: boolean) {
+    async postInit() {
+        document.genlite.ui.registerPlugin("Menu Swapper", this.handlePluginState.bind(this), this.pluginSettings);
+    }
+
+    handlePluginState(state: boolean): void {
         this.isEnabled = state;
         this.updateState();
     }

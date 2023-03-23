@@ -17,12 +17,11 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteNPCHighlightPlugin';
     static healthListVersion = "3";
 
-    pluginSettings = {
-        checkbox: {
+    pluginSettings : Settings = {
+        "Invert Hiding": {
             type: "checkbox",
-            label: "Invert Hiding",
             value: true,
-            stateHandler: this.handleHideInvertEnableDisable
+            stateHandler: this.handleHideInvertEnableDisable.bind(this)
         },
     };
 
@@ -47,7 +46,6 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
     packList;
     async init() {
         document.genlite.registerPlugin(this);
-        document.genlite.ui.registerPlugin("NPC Highlights", this.handlePluginEnableDisable, this.pluginSettings, this);
 
         this.npc_highlight_div = document.createElement('div');
         this.npc_highlight_div.className = 'npc-indicators-list';
@@ -61,14 +59,15 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
 
         window.addEventListener('keydown', this.keyDownHandler.bind(this));
         window.addEventListener('keyup', this.keyUpHandler.bind(this));
-        window.addEventListener("blur", this.blurHandler.bind(this))
+        window.addEventListener("blur", this.blurHandler.bind(this));
     }
 
     async postInit() {
         this.packList = document['GenLiteWikiDataCollectionPlugin'].packList;
+        document.genlite.ui.registerPlugin("NPC Highlights", this.handlePluginState.bind(this), this.pluginSettings);
     }
 
-    handlePluginEnableDisable(state: boolean) {
+    handlePluginState(state: boolean): void {
         // when disabling the plugin clear the current list of npcs
         if (state === false) {
             this.npc_highlight_div.innerHTML = '';

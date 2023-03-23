@@ -71,6 +71,19 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     isPluginEnabled: boolean = false;
     hideLables: boolean = false;
 
+    pluginSettings : Settings = {
+        "Highlight Items": {
+            type: "checkbox",
+            value: this.hideLables,
+            stateHandler: this.handleHideLabelsEnableDisable.bind(this),
+        },
+        "Priority Item Color": {
+            value: "#ffa500",
+            type: "color",
+            stateHandler: this.handleColorChange.bind(this),
+        },
+    }
+
     async init() {
         document.genlite.registerPlugin(this);
         this.originalItemStackIntersects = document.game.ItemStack.prototype.intersects;
@@ -78,32 +91,8 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         this.loadItemList();
         this.createDiv();
 
-        this.isPluginEnabled = document.genlite.settings.add(
-            "ItemHighlight.Enable",
-            true,
-            "Highlight Items",
-            "checkbox",
-            this.handlePluginEnableDisable,
-            this,
-            undefined,
-            undefined
-        );
-        this.hideLables = document.genlite.settings.add(
-            "HideItemLabels.Enable",
-            false,
-            "Hide Item Labels",
-            "checkbox",
-            this.handleHideLabelsEnableDisable,
-            this,
-            undefined,
-            undefined,
-            "ItemHighlight.Enable"
-        );
-
-        let storedPriorityColor = document.genlite.settings.add("ItemHighlight.PriorityColor", "#ffa500", "Priority Item Color", "color", this.handleColorChange, this, undefined, undefined, "ItemHighlight.Enable");
-
         let sheet = document.styleSheets[0];
-        this.styleRuleIndex = sheet.insertRule(`.genlite-priority-item { color: ${storedPriorityColor}; }`, sheet.cssRules.length);
+        this.styleRuleIndex = sheet.insertRule(".genlite-priority-item { color: ${#ffa500}; }", sheet.cssRules.length);
 
         window.addEventListener('keydown', this.keyDownHandler.bind(this));
         window.addEventListener('keyup', this.keyUpHandler.bind(this));
@@ -112,6 +101,10 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         if (this.isPluginEnabled === true) {
             document.game.ItemStack.prototype.intersects = this.ItemStack_intersects;
         }
+    }
+
+    async postInit() {
+        document.genlite.ui.registerPlugin("Item Highlights", this.handlePluginState.bind(this), this.pluginSettings);
     }
 
     //
@@ -247,22 +240,10 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     // settings handling
     //
 
-    handlePluginEnableDisable(state: boolean) {
-        // when disabling the plugin clear the current list of items
-        if (state === false) {
-            this.clearTracked();
-            document.game.ItemStack.intersects = this.originalItemStackIntersects;
-        } else {
-            document.game.ItemStack.intersects = this.ItemStack_intersects;
-        }
-
-        this.isPluginEnabled = state;
-    }
-
     handleHideLabelsEnableDisable(state: boolean) {
         // no matter what clear the current items to refresh the display
         this.clearTracked();
-        this.hideLables = state;
+        this.hideLables = !state;
     }
 
     handleColorChange(value: string) {
@@ -388,6 +369,18 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
                 }
             });
         }
+    }
+
+    handlePluginState(state: boolean): void {
+        // when disabling the plugin clear the current list of items
+        if (state === false) {
+            this.clearTracked();
+            document.game.ItemStack.intersects = this.originalItemStackIntersects;
+        } else {
+            document.game.ItemStack.intersects = this.ItemStack_intersects;
+        }
+
+        this.isPluginEnabled = state;
     }
 
     //

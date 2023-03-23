@@ -44,19 +44,18 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     isPluginEnabled: boolean = false;
     submitItemsToServer: boolean = false;
 
-    pluginSettings = {
-        checkbox: {
-            label: "Send Drops to Wiki",
+    pluginSettings : Settings = {
+        "Send Drops to Wiki": {
             type: "checkbox",
             value: this.submitItemsToServer,
-            handler: this.handleSubmitToServer
+            stateHandler: this.handleSubmitToServer.bind(this),
+            alert: "This will send your drops to the wiki (a third party), please only enable this if you are comfortable with this."
         }
     };
             
 
     async init() {
         document.genlite.registerPlugin(this);
-        document.genlite.ui.registerPlugin("Drop Recorder", this.handlePluginEnableDisable, this.pluginSettings, this);
 
         let dropTableString = localStorage.getItem("genliteDropTable");
         if (dropTableString == null) {
@@ -68,11 +67,11 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
 
     async postInit() {
         this.packList = document['GenLiteWikiDataCollectionPlugin'].packList;
+        document.genlite.ui.registerPlugin("Drop Recorder", this.handlePluginState.bind(this), this.pluginSettings);
     }
 
-    handlePluginEnableDisable(state: boolean) {
+    handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
-
     }
 
     handleSubmitToServer(state: boolean) {

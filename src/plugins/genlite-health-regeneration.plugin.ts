@@ -14,19 +14,22 @@ export class GenLiteHealthRegenerationPlugin implements GenLitePlugin {
     static healthRegenerationIntervalMilliseconds = 100;
 
     async init() {
-        document.genlite.ui.registerPlugin("Health Regen Alert", this.handlePluginToggled, {}, this);
+        document.genlite.registerPlugin(this);
 
-        this.handlePluginToggled(this.isPluginEnabled);
     }
 
-    handlePluginToggled(state: boolean) {
-        this.isPluginEnabled = state;
+    async postInit() {
+      document.genlite.ui.registerPlugin("Health Regen Alert", this.handlePluginState.bind(this));
+    }
 
-        if (state) {
-          this.start();
-        } else {
-          this.stop();
-        }
+    handlePluginState(state: boolean): void {
+      this.isPluginEnabled = state;
+
+      if (state) {
+        this.start();
+      } else {
+        this.stop();
+      }
     }
 
     public stop() {

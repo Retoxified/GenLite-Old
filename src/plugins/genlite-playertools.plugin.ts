@@ -25,13 +25,12 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
     // Plugin UI
     PlayerTagContainer: HTMLDivElement;
     
-    pluginSettings = {
+    pluginSettings : Settings = {
         // Checkbox Example
-        checkbox: {
-            label: 'Hide Character',
+        "Hide Character": {
             type: 'checkbox',
             value: false,
-            stateHandler: this.handleHidePlayerSettingChange
+            stateHandler: this.handleHidePlayerSettingChange.bind(this)
         }
     };
     
@@ -44,8 +43,22 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
         this.PlayerTagContainer = document.createElement('div');
         this.PlayerTagContainer.className = 'player-tag-container';
         document.body.appendChild(this.PlayerTagContainer);
+    }
 
-        document.genlite.ui.registerPlugin("Player Tools", this.handleHighlightSettingChange, this.pluginSettings, this);
+    async postInit() {
+        this.pluginSettings = document.genlite.ui.registerPlugin("Player Tools", this.handlePluginState.bind(this), this.pluginSettings);
+    }
+
+    handlePluginState(state: boolean): void {
+        if (!state) {
+            // Clear Tracked Players
+            this.trackedPlayers = {};
+
+            // Empty the Player Tag Container
+            this.PlayerTagContainer.innerHTML = "";
+        }
+
+        this.isEnabled = state;
     }
 
     update(dt) {
@@ -164,20 +177,8 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
         this.PlayerTagContainer.innerHTML = "";
     }
 
-    // Setting Callbacks
-    handleHighlightSettingChange(state: boolean) {
-        if (!state) {
-            // Clear Tracked Players
-            this.trackedPlayers = {};
-
-            // Empty the Player Tag Container
-            this.PlayerTagContainer.innerHTML = "";
-        }
-
-        this.isEnabled = state;
-    }
-
     handleHidePlayerSettingChange(state: boolean) {
+        if ( document.game.GRAPHICS.threeScene.getObjectByName(document.game.GAME.me.id) === undefined) return;
         document.game.GRAPHICS.threeScene.getObjectByName(document.game.GAME.me.id).visible = !state;
     }
 

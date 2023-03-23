@@ -20,15 +20,28 @@ export class GenLiteMenuScaler implements GenLitePlugin {
 
     isPluginEnabled: boolean = false;
 
+    pluginSettings : Settings = {
+        "Right Click Menu": {
+            type: "range",
+            value: 1,
+            min: 0.1,
+            max: 4,
+            step: 0.1,
+            stateHandler: this.scaleRightClick.bind(this)
+        }
+    }
+
+
     async init() {
         document.genlite.registerPlugin(this);
         this.scaleList = {};
-        this.isPluginEnabled = document.genlite.settings.add("MenuScaler.Enable", true, "MenuScaler", "checkbox", this.handlePluginEnableDisable, this);
-        this.scaleList.rightClick = document.genlite.settings.add("MenuScalerRightCLick.1", true, "Scale Right Click Menu", "range", this.scaleRightClick, this, undefined,
-            [['min', '0.1'], ['max', '4'], ['step', '0.1'], ['value', '1']], "MenuScaler.Enable");
     }
 
-    handlePluginEnableDisable(state: boolean) {
+    async postInit() {
+        document.genlite.ui.registerPlugin("Menu Scaler", this.handlePluginState.bind(this), this.pluginSettings);
+    }
+
+    handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
         let menu = <HTMLDivElement>document.getElementById("new_ux-contextual-menu-modal");
         if (state) {

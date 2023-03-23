@@ -17,40 +17,69 @@ export class GenLiteSoundNotification implements GenLitePlugin {
     static pluginName = 'GenLiteSoundNotification';
 
     doHealthCheck: boolean = false;
-    healthThreshold;
+    healthThreshold : number = 1;
 
     doInvCheck: boolean = false;
-    invThreshold;
+    invThreshold : number = 1;
     prevSlotsUsed = null;
 
     overrideIGNVolume: boolean = false;
-    overrideVolume;
+    initialIGNVolumeSet: boolean = true; // Sorry I know this is jank but I'm tired and couldn't think of a better way to do it
+    overrideVolume : number = 1;
 
     genliteSoundListener;
     genliteSFXPlayer;
     playerInUse;
 
 
+    // Plugin Settings
+    pluginSettings : Settings = {
+        "Low Health Sound": {
+            type: "checkbox",
+            value: this.doHealthCheck,
+            stateHandler: this.handleDoHealthCheck.bind(this),
+            children: {
+                "Health Threshold": {
+                    type: "range",
+                    value: this.healthThreshold,
+                    stateHandler: this.setHealthThreshold.bind(this),
+                    min: 1,
+                    max: 100
+                }
+            }
+        },
+        "Inventory Space Sound": {
+            type: "checkbox",
+            value: this.doInvCheck,
+            stateHandler: this.handleInvCheckEnableDisable.bind(this),
+            children : {
+                "Inventory Threshold": {
+                    type: "range",
+                    value: this.invThreshold,
+                    stateHandler: this.setInvThreshold.bind(this),
+                    min: 1,
+                    max: 30
+                }
+            }
+        },
+        "Override Game Volume": {
+            type: "checkbox",
+            value: this.overrideIGNVolume,
+            stateHandler: this.handelOverrideVolumeEnableDisable.bind(this),
+            children: {
+                "Override Volume": {
+                    type: "range",
+                    value: this.overrideVolume,
+                    stateHandler: this.setOverrideVolume.bind(this),
+                    min: 1,
+                    max: 100
+                }
+            }
+        },
+    };
+
     async init() {
         document.genlite.registerPlugin(this);
-        this.doHealthCheck = document.genlite.settings.add("LowHealth.Enable", false, "Low Health Sound", "checkbox", this.handleDoHealthCheck, this);
-        //this is a stupid ass thing but *shrug*
-        this.healthThreshold = document.genlite.settings.add("LowHealth.0", 0, "Low Health Threshold: <div style=\"display: contents;\" id=\"GenLiteHealthThresholdOutput\"></div>", "range", this.setHealthThreshold, this, undefined,
-            [['min', '1'], ['max', '100'], ['step', '1'], ['value', '0']], "LowHealth.Enable");
-        document.getElementById("GenLiteHealthThresholdOutput").innerText = ` ${this.healthThreshold}%`
-
-        this.doInvCheck = document.genlite.settings.add("InvCheck.Enable", false, "Inventory Space Sound", "checkbox", this.handleInvCheckEnableDisable, this);
-        //this is a stupid ass thing but *shrug*
-        this.invThreshold = document.genlite.settings.add("InvThreshold.0", 0, "Inventory Threshold: <div style=\"display: contents;\" id=\"GenLiteInvThresholdOutput\"></div>", "range", this.setInvThreshold, this, undefined,
-            [['min', '1'], ['max', '30'], ['step', '1'], ['value', '0']], "InvCheck.Enable");
-        document.getElementById("GenLiteInvThresholdOutput").innerText = ` ${this.invThreshold}`
-
-
-        this.overrideIGNVolume = document.genlite.settings.add("overrideIGNVolume.Enable", false, "Override Game Volume", "checkbox", this.handelOverrideVolumeEnableDisable, this);
-        this.overrideVolume = document.genlite.settings.add("overrideVolume.0", 0, "Override Game Volume: <div style=\"display: contents;\" id=\"GenLiteOverrideVolumeOutput\"></div>", "range", this.setOverrideVolume, this, undefined,
-            [['min', '1'], ['max', '100'], ['step', '1'], ['value', '0']], "overrideIGNVolume.Enable");
-        document.getElementById("GenLiteOverrideVolumeOutput").innerText = ` ${this.overrideVolume}%`;
-
 
         /* create a new SFXPlayer we will swap to this if overriding 
         this is so the games normal effects play at their correct volume
@@ -64,6 +93,16 @@ export class GenLiteSoundNotification implements GenLitePlugin {
         if (this.overrideVolume)
             this.playerInUse = this.genliteSFXPlayer;
 
+    }
+
+    async postInit() {
+        document.genlite.ui.registerPlugin("Sound Notifications", this.handlePluginState.bind(this), this.pluginSettings);
+    }
+
+    handlePluginState(state: boolean): void {
+        // TODO: Implement
+        // Display Yellow Console Message Stating the plugin needs to implement this
+        console.log(`%c[GenLite] %c${this.constructor.name} %cneeds to implement handlePluginState()`, "color: #ff0", "color: #fff", "color: #f00");
     }
 
     handleDoHealthCheck(state: boolean) {
@@ -87,20 +126,19 @@ export class GenLiteSoundNotification implements GenLitePlugin {
     /* sets volume and plays a test sound on change */
     setOverrideVolume(threshold: number) {
         this.overrideVolume = threshold;
-        document.getElementById("GenLiteOverrideVolumeOutput").innerText = ` ${this.overrideVolume}%`
         this.genliteSoundListener.setMasterVolume(this.overrideVolume / 100.0)
-        if (!this.playerInUse.muted)
+        // Added a check to see if this is the first time we are setting the volume so we dont play the sound on load-in (via UI-call)
+        if (!this.playerInUse.muted && !this.initialIGNVolumeSet)
             this.playerInUse.play('spell-failure')
+        this.initialIGNVolumeSet = false;
     }
 
     setHealthThreshold(threshold: number) {
         this.healthThreshold = threshold;
-        document.getElementById("GenLiteHealthThresholdOutput").innerText = ` ${this.healthThreshold}%`
     }
 
     setInvThreshold(threshold: number) {
         this.invThreshold = threshold;
-        document.getElementById("GenLiteInvThresholdOutput").innerText = ` ${this.invThreshold}`
     }
 
     combatUpdate(update) {

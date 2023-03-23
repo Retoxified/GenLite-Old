@@ -95,6 +95,10 @@ export class GenLiteHighscores implements GenLitePlugin {
             this.walkStats = JSON.parse(walkStr)
     }
 
+    handlePluginState(state: boolean): void {
+        // TODO: Implement
+    }
+
     handleSubmitToServer(state) {
         this.submitItemsToServer = state;
         if (state) {

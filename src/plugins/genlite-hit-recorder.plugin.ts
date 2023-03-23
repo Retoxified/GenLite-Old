@@ -87,12 +87,14 @@ export class GenLiteHitRecorder implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
-        document.genlite.ui.registerPlugin("Hit Recorder", this.handlePluginEnableDisable, {}, this);
         this.dpsOverlayContainer.appendChild(this.dpsOverlay);
     }
 
-    /* toggles plugin stat and either inits or shuts down plugin if needed */
-    handlePluginEnableDisable(state: boolean) {
+    async postInit() {
+        document.genlite.ui.registerPlugin("Hit Recorder", this.handlePluginState.bind(this));
+    }
+
+    handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
         if (state) {
             if (!this.isUIinit)

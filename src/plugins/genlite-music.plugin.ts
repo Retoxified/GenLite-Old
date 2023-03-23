@@ -20,7 +20,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
     ];
 
     isPluginEnabled: boolean = false;
-    uiTabRef: HTMLElement = null;
+    uiTab: HTMLElement = null;
     originalSetTrack: Function;
 
     selectionMenu: HTMLElement;
@@ -43,7 +43,6 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
-        document.genlite.ui.registerPlugin("Music Selection", this.handlePluginEnableDisable, {}, this);
 
         this.originalSetTrack = document.game.MUSIC_PLAYER.setNextTrack;
 
@@ -134,7 +133,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
 
 
 
-        this.uiTabRef = document.genlite.ui.addTab("music", "Music Selection", this.selectionMenu, this.isPluginEnabled);
+        this.uiTab = document.genlite.ui.addTab("music", "Music Selection", this.selectionMenu, this.isPluginEnabled);
 
         document.genlite.commands.register(
             "music",
@@ -143,12 +142,17 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
         );
     }
 
-    handlePluginEnableDisable(state: boolean) {
+    async postInit() {
+        document.genlite.ui.registerPlugin("Music Selection", this.handlePluginState.bind(this));
+    }
+
+    handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
         this.updateMusicUI();
-        // Hide uiTabRef if plugin is disabled
-        if (this.uiTabRef) {
-            this.uiTabRef.style.display = state ? "flex" : "none";
+        
+        // Hide uiTab if plugin is disabled
+        if (this.uiTab) {
+            this.uiTab.style.display = state ? "flex" : "none";
         }
     }
 

@@ -7,6 +7,10 @@ export class GenLiteNotificationPlugin {
         await this.askPermission();
     }
 
+    handlePluginState(state: boolean): void {
+        // TODO: Implement
+    }
+
     /** Should always be awaited before you use notifications. */
     askPermission() {
         return this.hasPermission();
