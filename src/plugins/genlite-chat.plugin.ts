@@ -123,9 +123,9 @@ class GenLiteMessageBuffer {
                     existing.message.remove();
 
                     // and remove it from CHAT's internal buffer
-                    let index = CHAT.chat_buffer.indexOf(existing.message);
+                    let index = document.game.CHAT.chat_buffer.indexOf(existing.message);
                     if (index >= 0) {
-                        CHAT.chat_buffer.splice(index, 1);
+                        document.game.CHAT.chat_buffer.splice(index, 1);
                     }
 
                     break;
@@ -264,8 +264,8 @@ export class GenLiteChatPlugin implements GenLitePlugin {
 
     hookBuffer() {
         if (!this.bufferHooked) {
-            for (const channel in CHAT.filter_buttons) {
-                let buffer = CHAT.filter_buttons[channel].buffer;
+            for (const channel in document.game.CHAT.filter_buttons) {
+                let buffer = document.game.CHAT.filter_buttons[channel].buffer;
                 let glbuffer = new GenLiteMessageBuffer(channel, buffer);
                 this.buffers[channel] = glbuffer;
                 glbuffer.hook();

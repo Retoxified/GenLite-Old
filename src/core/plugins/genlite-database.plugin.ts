@@ -11,7 +11,7 @@ export class GenLiteDatabasePlugin {
     stores: Array<{callback: DatabaseCallback}> = [];
 
     async init() {
-        window.genlite.registerPlugin(this);
+        document.genlite.registerPlugin(this);
     }
 
     public add(callback: DatabaseCallback) {

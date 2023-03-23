@@ -261,27 +261,32 @@ let isInitialized = false;
         }
     }
 
+    function hookStartScene() {
+        if (localStorage.getItem("GenLiteConfirms") === "true") {
+            let doc = (document as any);
+            doc.client.set('document.client.originalStartScene', doc.client.get('qS'));
+            doc.client.set('qS', function () {
+                document.client.originalStartScene();
+                setTimeout(document.initGenLite, 100);
+            });
+        }
+    }
+
     hookClient();
     window.addEventListener('load', (e) => {
         document.initGenLite = initGenLite;
 
         let confirmed = localStorage.getItem("GenLiteConfirms");
-        if (!confirmed) {
-            await GenLiteConfirmation.confirmModal(DISCLAIMER, async () => {
+        if (confirmed === "true") {
+            hookStartScene();
+        } else {
+            GenLiteConfirmation.confirmModal(DISCLAIMER, async () => {
                 // calls back only if accepted
                 localStorage.setItem("GenLiteConfirms", "true");
-                confirmed = true;
+                hookStartScene();
             });
         }
 
-        let doc = (document as any)
-        doc.client.set('document.client.originalStartScene', doc.client.get('qS'));
-        doc.client.set('qS', function () {
-            document.client.originalStartScene();
-            if (confirmed) {
-                setTimeout(document.initGenLite, 100);
-            }
-        });
     });
 
 })();

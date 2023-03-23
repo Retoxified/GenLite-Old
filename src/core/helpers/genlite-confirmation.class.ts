@@ -16,7 +16,7 @@ export class GenLiteConfirmation {
         return window.confirm(message);
     }
 
-    static async confirmModal(message: string[], callback: () => void) {
+    static confirmModal(message: string[], callback: () => void) {
         let bg = document.createElement('div');
         bg.style.height = '100%';
         bg.style.width = '100%';
@@ -84,8 +84,9 @@ export class GenLiteConfirmation {
         modal.appendChild(body);
 
         let scrollBox = document.createElement('div');
-        scrollBox.style.width = '100%';
+        scrollBox.style.width = '90%';
         scrollBox.style.height = '75%';
+        scrollBox.style.margin = 'auto';
         scrollBox.style.overflowY = 'scroll';
         body.appendChild(scrollBox);
 
