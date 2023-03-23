@@ -198,8 +198,10 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         npcsToMod = Object.keys(document.game.GAME.npcs).filter(x => document.game.GAME.npcs[x].id.split('-')[0] == object.id.split('-')[0]);
         for (let key in npcsToMod) {
             let npcid = npcsToMod[key];
-            if ((this.trackedNpcs[npcid] && this.trackedNpcs[npcid].hasHp) || this.trackedNpcs[npcid] === undefined)
+
+            if (this.trackedNpcs[npcid] === undefined || this.trackedNpcs[npcid].hasHp) {
                 continue;
+            }
 
             this.trackedNpcs[npcid].innerHTML += ` HP: ${this.npcHealthList[hpKey]}`;
             this.trackedNpcs[npcid].hasHp = true;
