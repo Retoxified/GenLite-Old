@@ -28,7 +28,7 @@ export class GenLiteFPSCounter implements GenLitePlugin {
     async init() {
         document.genlite.registerPlugin(this);
 
-        this.isPluginEnabled = document.genlite.settings.add("FPSCounter.Enable", true, "FPS Counter", "checkbox", this.handlePluginEnableDisable, this);
+        this.isPluginEnabled = document.genlite.settings.add("FPSCounter.Enable", false, "FPS Counter", "checkbox", this.handlePluginEnableDisable, this);
         this.stats = Stats({
             fps: {
                 fg: '#eb8c39',
@@ -77,6 +77,7 @@ export class GenLiteFPSCounter implements GenLitePlugin {
 
         this.stats.dom.style.display = 'block';
         this.stats.dom.style.position = 'absolute';
+        this.stats.dom.style.right = '0px';
         document.body.appendChild(this.stats.dom);
         this.isInit = true;
     }
