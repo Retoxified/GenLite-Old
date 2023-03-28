@@ -41,6 +41,7 @@ import { GenLitePlayerToolsPlugin } from "./plugins/genlite-playertools.plugin";
 import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
 import {GenLiteItemDisplays} from "./plugins/genlite-itemdisplay.plugin";
 import { GenLiteHealthRegenerationPlugin } from './plugins/genlite-health-regeneration.plugin';
+import { GenLiteFPSCounter } from "./plugins/genlite-fps.plugin";
 
 declare const GM_getResourceText: (s: string) => string;
 
@@ -215,6 +216,7 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteHighscores);
         await genlite.pluginLoader.addPlugin(GenLiteItemDisplays);
         await genlite.pluginLoader.addPlugin(GenLiteHealthRegenerationPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteFPSCounter);
 
         /** post init things */
         await document['GenLiteSettingsPlugin'].postInit();
