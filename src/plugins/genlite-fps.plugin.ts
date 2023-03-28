@@ -20,8 +20,6 @@ export class GenLiteFPSCounter implements GenLitePlugin {
 
     stats;
 
-    oldRequestAnimiationFrame;
-
     isPluginEnabled: boolean;
     isInit: boolean = false;
     doUpdateFPS: boolean;
@@ -55,6 +53,7 @@ export class GenLiteFPSCounter implements GenLitePlugin {
         }
     }
 
+    /* start tracking fps */
     loginOK() {
         if (!this.isPluginEnabled)
             return;
@@ -64,11 +63,13 @@ export class GenLiteFPSCounter implements GenLitePlugin {
         this.fpsCounter();
     }
 
+    /* stop tracking fps */
     logoutOK() {
         this.doUpdateFPS = false;
         this.stats.dom.style.display = 'none';
     }
 
+    /* setup element */
     initializeUI() {
         if (!this.isPluginEnabled)
             return;
@@ -82,6 +83,7 @@ export class GenLiteFPSCounter implements GenLitePlugin {
         this.isInit = true;
     }
 
+    /* loops on request animation for for some reason shows the overall frame rate of the webpage i guess */
     fpsCounter() {
         if (!(this.doUpdateFPS && this.isPluginEnabled))
             return
