@@ -15,6 +15,7 @@ import { GenLitePluginLoader } from "./genlite-plugin-loader.class";
 import { GenLiteNotificationPlugin } from "./plugins/genlite-notification.plugin";
 import { GenLiteSettingsPlugin } from "./plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./plugins/genlite-commands.plugin";
+import { GenLiteDatabasePlugin } from "./plugins/genlite-database.plugin";
 import { GenLitePlugin } from './interfaces/plugin.interface';
 
 export class GenLite {
@@ -27,6 +28,7 @@ export class GenLite {
     notifications: GenLiteNotificationPlugin;
     settings: GenLiteSettingsPlugin;
     commands: GenLiteCommandsPlugin;
+    database: GenLiteDatabasePlugin;
 
     /** We allow setting "any field, to anything" in order to load core features such as genlite.notifications */
     [key: string]: any;
