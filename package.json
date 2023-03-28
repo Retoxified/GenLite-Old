@@ -8,6 +8,7 @@
     "docs": "jsdoc -r ./src/"
   },
   "dependencies": {
+    "@types/stats.js": "^0.17.0",
     "robust-point-in-polygon": "^1.0.3",
     "stats.js": "^0.17.0"
   },

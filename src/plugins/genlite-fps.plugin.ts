@@ -13,43 +13,76 @@
 
 import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
+import Stats from '../../thirdPartyModules/Stats.js/build/stats.module';
+
 export class GenLiteFPSCounter implements GenLitePlugin {
     static pluginName = 'GenLiteFPSCounter';
 
-    statsPlugin = require("stats.js");
-    stats = new this.statsPlugin()
+    stats;
 
     oldRequestAnimiationFrame;
 
     isPluginEnabled: boolean;
+    isInit: boolean = false;
+    doUpdateFPS: boolean;
     async init() {
         document.genlite.registerPlugin(this);
 
         this.isPluginEnabled = document.genlite.settings.add("FPSCounter.Enable", true, "FPS Counter", "checkbox", this.handlePluginEnableDisable, this);
+        this.stats = Stats({
+            fps: {
+                fg: '#eb8c39',
+                bg: '#5d2309'
+            },
+            ms: {
+                fg: '#eb8c39',
+                bg: '#5d2309'
+            },
+            mb: {
+                fg: '#eb8c39',
+                bg: '#5d2309'
+            }
+        });
     }
 
     handlePluginEnableDisable(state: boolean) {
         this.isPluginEnabled = state;
         if (state) {
-            this.stats.dom.style.display = 'block';
-            this.fpsCounter();
+            this.loginOK();
+            this.initializeUI();
         } else {
-            this.stats.dom.style.display = 'none';
+            this.logoutOK();
         }
+    }
+
+    loginOK() {
+        if (!this.isPluginEnabled)
+            return;
+
+        this.doUpdateFPS = true;
+        this.stats.dom.style.display = 'block';
+        this.fpsCounter();
+    }
+
+    logoutOK() {
+        this.doUpdateFPS = false;
+        this.stats.dom.style.display = 'none';
     }
 
     initializeUI() {
         if (!this.isPluginEnabled)
             return;
+        if (this.isInit)
+            return;
 
         this.stats.dom.style.display = 'block';
         this.stats.dom.style.position = 'absolute';
         document.body.appendChild(this.stats.dom);
-        requestAnimationFrame(this.fpsCounter.bind(this));
+        this.isInit = true;
     }
 
-    fpsCounter(){
-        if (!this.isPluginEnabled)
+    fpsCounter() {
+        if (!(this.doUpdateFPS && this.isPluginEnabled))
             return
         this.stats.update();
         requestAnimationFrame(this.fpsCounter.bind(this))
