@@ -73,22 +73,24 @@ export class GenLiteHighscores implements GenLitePlugin {
         whittling: true,
         total: true
     }
+
+    pluginSettings: Settings = {}
+
     async init() {
         document.genlite.registerPlugin(this);
-        this.submitItemsToServer = document.genlite.settings.add(
-            "Highscores.SubmitToServer", // Key
-            false,                         // Default
-            "Send Highscores to Server(REMOTE SERVER)", // Name in UI
-            "checkbox", // Type
-            this.handleSubmitToServer, // handler function
-            this,  // context for handler
-            "Warning!\n" + // Warning
-            "Turning this setting on will send highscore data along with your IP\u00A0address to an external server.\n\n" +
-            "Are you sure you want to enable this setting?"
-        );
-        this.sendAll = document.genlite.settings.add(`Highscore.ToggleButton`, false, `Toggle All Settings`, "checkbox", this.toggleAll, this, undefined, undefined, "Highscores.SubmitToServer");
-        for (let key in this.statsToSend)
-            this.statsToSend[key] = document.genlite.settings.add(`Highscore.${key}.Enable`, false, `Highscore: ${key}`, "checkbox", (state) => { this.statsToSend[key] = state }, this, undefined, undefined, "Highscores.SubmitToServer");
+        console.log(`%c[GenLite] TODO: %c${this.constructor.name} %c need an implementation for Toggle All`, "color: #ff0", "color: #fff", "color: #f00");
+        // this.sendAll = document.genlite.settings.add(`Highscore.ToggleButton`, false, `Toggle All Settings`, "checkbox", this.toggleAll, this, undefined, undefined, "Highscores.SubmitToServer");
+        
+        for (let key in this.statsToSend) {
+            this.pluginSettings[key] = {
+                type: "checkbox",
+                oldKey: `GenLite.Highscores.${key}.Enable`,
+                value: false,
+                stateHandler: (state) => { this.statsToSend[key] = state },
+            }
+        }
+        
+        // this.statsToSend[key] = document.genlite.settings.add(`Highscore.${key}.Enable`, false, `Highscore: ${key}`, "checkbox", (state) => { this.statsToSend[key] = state }, this, undefined, undefined, "Highscores.SubmitToServer");
 
         let walkStr = localStorage.getItem("Highscores.walkData")
         if (walkStr != null)
@@ -96,7 +98,11 @@ export class GenLiteHighscores implements GenLitePlugin {
     }
 
     handlePluginState(state: boolean): void {
-        // TODO: Implement
+        this.handleSubmitToServer(state);
+    }
+
+    async postInit() {
+        document.genlite.ui.registerPlugin("Highscores", "GenLite.Highscores.SubmitToServer", this.handlePluginState.bind(this), this.pluginSettings, true, "Warning! Turning this setting on will send highscore data along with your IP address to an external server. Are you sure you want to enable this setting?")
     }
 
     handleSubmitToServer(state) {

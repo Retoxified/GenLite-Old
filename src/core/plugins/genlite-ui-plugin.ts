@@ -143,12 +143,31 @@ export class GenLiteUIPlugin {
         // Add the side panel to the body
         document.body.appendChild(this.sidePanel);
 
+        // Hide the side panel
+        this.sidePanel.style.visibility = 'hidden';
+
         // Set Initial View
         this.showTab('Plugins');
     }
 
     async postInit() {
         this._hasInitialized = true;
+        this.sidePanel.style.visibility = 'visible';
+    }
+
+    loginOK() {
+        // Show the show button
+        this.sidePanel.style.visibility = 'visible';
+    }
+
+    logoutOK() {
+        // If the side panel is open, close it
+        if (this.sidePanel.style.right === '0') {
+            document.getElementById('genlite-ui-close-button').click();
+        }
+
+        // Hide the panel
+        this.sidePanel.style.visibility = 'hidden';
     }
 
     handlePluginState(state: boolean): void {
@@ -381,7 +400,7 @@ export class GenLiteUIPlugin {
 
         // Store the Plugin Name and State into Local Storage // MYQUICKREFTAG
         // Determine if there is an old key
-        if (oldKey !== '') {
+        if (oldKey !== null && oldKey !== undefined && oldKey !== '') {
             // Get the old key
             const oldKeyState = this.getKeyRaw(oldKey);
 
@@ -503,15 +522,20 @@ export class GenLiteUIPlugin {
             // The setting value is managed by getKey(), this function will return the value of the setting if it exists, otherwise it will create the setting and then return the default value (the value passed to the function)
 
             // If the setting has an oldKey, we need to migrate the setting
-            if (settings[setting].oldKey) {
+            if (settings[setting].oldKey !== null && settings[setting].oldKey !== undefined && settings[setting].oldKey !== '') {
                 // Get the old key
                 const oldKey = settings[setting].oldKey;
 
                 // Get the old key value
                 const oldKeyValue = this.getKeyRaw(oldKey);
 
-                // Set the new key value to the old key value
-                this.setKey(plugin + "." + setting, oldKeyValue);
+                if (oldKeyValue !== null && oldKeyValue !== undefined) {
+                    // Set the new key value to the old key value
+                    this.setKey(plugin + "." + setting, oldKeyValue);
+
+                    // Delete the old key
+                    this.deleteKey(oldKey);
+                }
             }
 
             settings[setting].value = this.getKey(plugin + "." + setting, defaultValue);
@@ -624,6 +648,10 @@ export class GenLiteUIPlugin {
                     settingInput.min = settings[setting].min;
                     settingInput.max = settings[setting].max;
                     settingInput.value = settings[setting].value as Number;
+                    if (settings[setting].step !== undefined) {
+                        settingInput.step = settings[setting].step;
+                    }
+
                     settingInput.style.width = '80%';
 
                     // If there is a parent, we need to add an event listener to the parent to hide/show the setting when the parent is toggled
@@ -654,10 +682,15 @@ export class GenLiteUIPlugin {
                     // Add the event listener to the input
                     settingInput.addEventListener('change', () => {
                         // Call the plugin state handler
-                        settings[setting].stateHandler(settingInput.value);
+                        
+                        // Get the value as a number
+                        let value = parseFloat(settingInput.value);
+
+
+                        settings[setting].stateHandler(value);
                         valueLabel.innerHTML = settingInput.value;
 
-                        this.setKey(plugin + "." + setting, settingInput.value);
+                        this.setKey(plugin + "." + setting, value);
                     });
 
                     sliderRow.appendChild(settingInput);
@@ -798,4 +831,10 @@ export class GenLiteUIPlugin {
         // Set the setting in local storage
         localStorage.setItem("GenLite." + setting, value);
     }
+
+    deleteKey(setting: string) {
+        // Delete the setting from local storage
+        localStorage.removeItem(setting);
+    }
+
 };
