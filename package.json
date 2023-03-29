@@ -1,6 +1,6 @@
 {
-  "name": "GenLite",
-  "version": "0.1.53",
+  "name": "genlite",
+  "version": "0.1.54",
   "scripts": {
     "build:nopatch": "npx webpack --mode production",
     "build:prod": "npm version patch --no-git-tag-version --force && npx webpack --mode production",
@@ -8,7 +8,9 @@
     "docs": "jsdoc -r ./src/"
   },
   "dependencies": {
-    "robust-point-in-polygon": "^1.0.3"
+    "@types/stats.js": "^0.17.0",
+    "robust-point-in-polygon": "^1.0.3",
+    "stats.js": "^0.17.0"
   },
   "devDependencies": {
     "jsdoc": "^4.0.0",
