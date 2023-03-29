@@ -26,9 +26,7 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
     intersect_vector = new document.game.THREE.Vector3();
     async init() {
         document.genlite.registerPlugin(this);
-
-        this.useOneClickBank = document.genlite.settings.add("NPCMenuSwapper.LeftClickBank", true, "Left Click Bank", "checkbox", this.handleLeftClickBankToggle, this);
-        this.useOneClickTrade = document.genlite.settings.add("NPCMenuSwapper.LeftClickTrade", true, "Left Click Trade", "checkbox", this.handleLeftClickTradeToggle, this);
+        
         this.hideStairs = document.genlite.settings.add("NPCMenuSwapper.hideStairs", false, "Hide Stairs", "checkbox", this.handleHideStairsToggle, this);
 
         this.originalSceneIntersects = document.game.OptimizedScene.prototype.intersects;
@@ -42,28 +40,13 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
         } else {
             document.game.OptimizedScene.prototype.intersects = this.originalSceneIntersects;
         }
-
-        if (this.useOneClickBank || this.useOneClickTrade) {
-            document.game.NPC.prototype.intersects = this.leftClickBankIntersects;
-        } else {
-            document.game.NPC.prototype.intersects = this.originalNPCIntersects;
-        }
-    }
-
-    handleLeftClickBankToggle(state: boolean) {
-        this.useOneClickBank = state;
-        this.updateState();
-    }
-
-    handleLeftClickTradeToggle(state: boolean) {
-        this.useOneClickTrade = state;
-        this.updateState();
     }
 
     handleHideStairsToggle(state: boolean) {
         this.hideStairs = state;
         this.updateState();
     }
+/* leaviing this in as example code but its not needed any more 
 
     leftClickBankIntersects(ray, list) {
         const self = (this as any);
@@ -117,6 +100,8 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
                 action: () => self.bank()
             });
     }
+
+    */
 
     /* clone of the original function with toggle for stairs */
     sceneryIntersects(ray, list) {
