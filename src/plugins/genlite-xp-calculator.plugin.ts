@@ -64,7 +64,7 @@ export class GenLiteXpCalculator implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.ui.registerPlugin("XP Calculator", this.handlePluginState.bind(this));
+        document.genlite.ui.registerPlugin("XP Calculator", null, this.handlePluginState.bind(this));
     }
 
     handlePluginState(state: boolean): void {
@@ -230,6 +230,7 @@ export class GenLiteXpCalculator implements GenLitePlugin {
 
     /* resets calculator without requiring a reload */
     resetCalculator(skill, event = null) {
+        console.log("Resetting Calc for " + skill);
         let temp = {
             numActions: 0,
             avgActionXP: 0,
@@ -238,6 +239,7 @@ export class GenLiteXpCalculator implements GenLitePlugin {
             startXP: 0,
             gainedXP: 0
         }
+        console.log("Pre Total Lev Calc:" + document.game.PLAYER_INFO.tracking_skill)
         if (skill == "total") {
             delete temp.actionsToNext;
             let xp = this.skillsList.total.startXP + this.skillsList.total.gainedXP;
@@ -247,9 +249,12 @@ export class GenLiteXpCalculator implements GenLitePlugin {
             this.totalLevelCalc(event, this);
             return;
         }
+        console.log("Post Lev Calc:" + document.game.PLAYER_INFO.tracking_skill)
         delete temp.gainedXP;
         this.skillsList[skill] = temp;
-        if (this.isHookInstalled && document.game.PLAYER_INFO.tracking_skill != undefined)
+
+
+        if (this.isHookInstalled && document.game.PLAYER_INFO.tracking_skill && document.game.PLAYER_INFO.tracking_skill.group)
             document.game.PLAYER_INFO.updateTooltip();
     }
 

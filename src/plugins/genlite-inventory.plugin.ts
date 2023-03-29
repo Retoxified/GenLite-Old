@@ -23,7 +23,7 @@ export class GenLiteInventoryPlugin implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.registerPlugin("Inventory Drag-On-Shift", this.handlePluginState.bind(this));
+        document.genlite.registerPlugin("Inventory Drag-On-Shift", null, this.handlePluginState.bind(this));
     }
 
     public loginOK() {

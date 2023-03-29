@@ -20,6 +20,7 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
     pluginSettings : Settings = {
         "Invert Hiding": {
             type: "checkbox",
+            oldKey: "GenLite.NpcHideInvert.Enable",
             value: true,
             stateHandler: this.handleHideInvertEnableDisable.bind(this)
         },
@@ -64,7 +65,7 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
 
     async postInit() {
         this.packList = document['GenLiteWikiDataCollectionPlugin'].packList;
-        document.genlite.ui.registerPlugin("NPC Highlights", this.handlePluginState.bind(this), this.pluginSettings);
+        document.genlite.ui.registerPlugin("NPC Highlights", "GenLite.NpcHighlight.Enable", this.handlePluginState.bind(this), this.pluginSettings);
     }
 
     handlePluginState(state: boolean): void {

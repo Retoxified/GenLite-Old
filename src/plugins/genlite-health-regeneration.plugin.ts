@@ -19,7 +19,7 @@ export class GenLiteHealthRegenerationPlugin implements GenLitePlugin {
     }
 
     async postInit() {
-      document.genlite.ui.registerPlugin("Health Regen Alert", this.handlePluginState.bind(this));
+      document.genlite.ui.registerPlugin("Health Regen Alert", null, this.handlePluginState.bind(this));
     }
 
     handlePluginState(state: boolean): void {

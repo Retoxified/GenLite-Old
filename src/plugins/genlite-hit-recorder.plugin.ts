@@ -91,7 +91,7 @@ export class GenLiteHitRecorder implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.ui.registerPlugin("Hit Recorder", this.handlePluginState.bind(this));
+        document.genlite.ui.registerPlugin("Hit Recorder", null, this.handlePluginState.bind(this));
     }
 
     handlePluginState(state: boolean): void {

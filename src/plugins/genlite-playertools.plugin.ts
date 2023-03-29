@@ -46,7 +46,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
     }
 
     async postInit() {
-        this.pluginSettings = document.genlite.ui.registerPlugin("Player Tools", this.handlePluginState.bind(this), this.pluginSettings);
+        this.pluginSettings = document.genlite.ui.registerPlugin("Player Tools", null, this.handlePluginState.bind(this), this.pluginSettings);
     }
 
     handlePluginState(state: boolean): void {

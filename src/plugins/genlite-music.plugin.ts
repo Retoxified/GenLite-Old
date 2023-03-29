@@ -143,7 +143,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.ui.registerPlugin("Music Selection", this.handlePluginState.bind(this));
+        document.genlite.ui.registerPlugin("Music Selection", null,  this.handlePluginState.bind(this));
     }
 
     handlePluginState(state: boolean): void {

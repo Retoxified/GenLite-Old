@@ -67,7 +67,7 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
 
     async postInit() {
         this.packList = document['GenLiteWikiDataCollectionPlugin'].packList;
-        document.genlite.ui.registerPlugin("Drop Recorder", this.handlePluginState.bind(this), this.pluginSettings);
+        document.genlite.ui.registerPlugin("Drop Recorder", null, this.handlePluginState.bind(this), this.pluginSettings);
     }
 
     handlePluginState(state: boolean): void {

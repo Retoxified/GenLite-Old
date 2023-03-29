@@ -46,7 +46,7 @@ export class GenLiteItemTooltips implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.ui.registerPlugin("Item Tooltips", this.handlePluginState.bind(this), this.pluginSettings);
+        document.genlite.ui.registerPlugin("Item Tooltips", null, this.handlePluginState.bind(this), this.pluginSettings);
     }
 
     handlePluginState(state: boolean): void {

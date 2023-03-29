@@ -36,7 +36,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.ui.registerPlugin("Wiki Data Collection", this.handlePluginState.bind(this), {}, true, "Warning: This plugin will send data to the wiki (a third party). Only enable this plugin if you trust the wiki.");
+        document.genlite.ui.registerPlugin("Wiki Data Collection", null, this.handlePluginState.bind(this), {}, true, "Warning: This plugin will send data to the wiki (a third party). Only enable this plugin if you trust the wiki.");
     }
 
     handlePluginState(state: boolean): void {

@@ -96,7 +96,7 @@ export class GenLiteSoundNotification implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.ui.registerPlugin("Sound Notifications", this.handlePluginState.bind(this), this.pluginSettings);
+        document.genlite.ui.registerPlugin("Sound Notifications", null, this.handlePluginState.bind(this), this.pluginSettings);
     }
 
     handlePluginState(state: boolean): void {

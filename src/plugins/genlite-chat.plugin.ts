@@ -33,7 +33,7 @@ export class GenLiteChatPlugin implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.ui.registerPlugin("Filter Game Messages", this.handlePluginState.bind(this)); // Unique case where we need to register the plugin after loginOK (this prevents handlePluginState from being called before loginOK)
+        document.genlite.ui.registerPlugin("Filter Game Messages", null, this.handlePluginState.bind(this)); // Unique case where we need to register the plugin after loginOK (this prevents handlePluginState from being called before loginOK)
     }
 
     handlePluginState(state: boolean): void {

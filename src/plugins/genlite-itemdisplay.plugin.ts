@@ -23,7 +23,7 @@ export class GenLiteItemDisplays implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.ui.registerPlugin("Additional Item Info", this.handlePluginState.bind(this));
+        document.genlite.ui.registerPlugin("Additional Item Info", null, this.handlePluginState.bind(this));
     }
 
     handlePluginState(state: boolean): void {

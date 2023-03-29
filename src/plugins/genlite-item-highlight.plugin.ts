@@ -104,7 +104,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.ui.registerPlugin("Item Highlights", this.handlePluginState.bind(this), this.pluginSettings);
+        document.genlite.ui.registerPlugin("Item Highlights", null, this.handlePluginState.bind(this), this.pluginSettings);
     }
 
     //

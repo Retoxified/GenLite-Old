@@ -47,7 +47,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.ui.registerPlugin("Recipe Recorder", this.handlePluginState.bind(this));
+        document.genlite.ui.registerPlugin("Recipe Recorder", null, this.handlePluginState.bind(this));
     }
 
     handlePluginState(state: boolean): void {

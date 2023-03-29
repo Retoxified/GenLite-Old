@@ -38,7 +38,7 @@ export class GenLiteMenuScaler implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.ui.registerPlugin("Menu Scaler", this.handlePluginState.bind(this), this.pluginSettings);
+        document.genlite.ui.registerPlugin("Menu Scaler", null, this.handlePluginState.bind(this), this.pluginSettings);
     }
 
     handlePluginState(state: boolean): void {

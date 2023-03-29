@@ -9,13 +9,13 @@
 */
 export class GenLiteUIPlugin {
     public static pluginName = 'GenLiteUIPlugin';
-    
+
     // Read Only Public Property
     private _hasInitialized: boolean = false;
     public get hasInitialized(): boolean {
         return this._hasInitialized;
     }
-    
+
 
     private sidePanel: HTMLElement;
     private tabBar: HTMLElement;
@@ -25,7 +25,7 @@ export class GenLiteUIPlugin {
     private alertHolder: HTMLElement;
 
     private pluginTabs = {};
-    private pluginSettings : Map<string, HTMLElement> = new Map<string, HTMLElement>();
+    private pluginSettings: Map<string, HTMLElement> = new Map<string, HTMLElement>();
 
 
 
@@ -165,9 +165,9 @@ export class GenLiteUIPlugin {
         tabButton.style.borderBottom = '1px solid rgba(66, 66, 66, 1)';
 
         // If this is the first tab, set the border to none
-        if (Object.keys(this.pluginTabs).length === 0) { 
+        if (Object.keys(this.pluginTabs).length === 0) {
             tabButton.style.borderTop = 'none';
-        } else { 
+        } else {
             tabButton.style.borderTop = '1px solid rgba(0, 0, 0, 1)';
         }
         tabButton.style.cursor = 'pointer';
@@ -264,7 +264,7 @@ export class GenLiteUIPlugin {
         // Display the alert holder
         this.alertHolder.style.display = 'flex';
     }
-   
+
 
     showTab(tabName: string) {
         // Update the tab content header
@@ -277,7 +277,7 @@ export class GenLiteUIPlugin {
         this.tabContentHolder.appendChild(this.pluginTabs[tabName]);
     }
 
-    registerPlugin(plugin: string, pluginStateHandler: Function, settings: Settings = {}, enableAlert: boolean = false, alertMessage: string = '') {
+    registerPlugin(plugin: string, oldKey: string, pluginStateHandler: Function, settings: Settings = {}, enableAlert: boolean = false, alertMessage: string = '') {
         // Add a Plugin Row
         const pluginRow = document.createElement('div');
         pluginRow.style.width = '100%';
@@ -378,8 +378,18 @@ export class GenLiteUIPlugin {
         pluginCogAndCheckbox.appendChild(pluginCog);
         pluginCogAndCheckbox.appendChild(pluginCheckbox);
 
-        
+
         // Store the Plugin Name and State into Local Storage // MYQUICKREFTAG
+        // Determine if there is an old key
+        if (oldKey !== '') {
+            // Get the old key
+            const oldKeyState = this.getKeyRaw(oldKey);
+
+            if (oldKeyState !== null || oldKeyState !== undefined) {
+                // Set the new key
+                this.setKey(plugin, oldKeyState);
+            }
+        };
         let pluginState = this.getKey(plugin, false);
 
         // Convert plugin state to boolean
@@ -407,7 +417,7 @@ export class GenLiteUIPlugin {
 
         this.settingsTab.appendChild(pluginRow);
 
- 
+
         // Create the Settings HTML Div
         const pluginSettingsDiv = document.createElement('div');
         pluginSettingsDiv.id = `genlite-ui-plugin-${plugin}-settings`;
@@ -432,7 +442,7 @@ export class GenLiteUIPlugin {
 
         // Add the back to plugin list button to the plugin settings div
         pluginSettingsDiv.appendChild(backToPluginListButton);
-                
+
         // Container for the plugin settings
         const pluginSettingsContainer = document.createElement('div');
         pluginSettingsContainer.style.position = 'absolute';
@@ -459,292 +469,305 @@ export class GenLiteUIPlugin {
     };
 
     // Add Settings
-    addSettings(plugin:string, pluginSettingsContainer: HTMLDivElement, settings: Settings, parent = null) {
+    addSettings(plugin: string, pluginSettingsContainer: HTMLDivElement, settings: Settings, parent = null) {
         // Parse the pluginSettings object and add the settings to the settings tab
         for (const setting in settings) {
-        // Add a Settings Row
-        const settingsRow = document.createElement('div');
-        settingsRow.style.width = '100%';
-        settingsRow.style.height = '25px';
-        settingsRow.style.flexDirection = 'row';
-        settingsRow.style.borderBottom = '1px solid rgba(66, 66, 66, 1)';
+            // Add a Settings Row
+            const settingsRow = document.createElement('div');
+            settingsRow.style.width = '100%';
+            settingsRow.style.height = '25px';
+            settingsRow.style.flexDirection = 'row';
+            settingsRow.style.borderBottom = '1px solid rgba(66, 66, 66, 1)';
 
-        // If this is the first setting, do not add a top border
-        if (setting !== Object.keys(settings)[0]) {
-            settingsRow.style.borderTop = '1px solid rgba(0, 0, 0, 1)';
-        }
+            // If this is the first setting, do not add a top border
+            if (setting !== Object.keys(settings)[0]) {
+                settingsRow.style.borderTop = '1px solid rgba(0, 0, 0, 1)';
+            }
 
-        settingsRow.style.display = 'flex';
-        settingsRow.style.alignItems = 'center';
+            settingsRow.style.display = 'flex';
+            settingsRow.style.alignItems = 'center';
 
-        // Add the Setting Name
-        const settingName = document.createElement('div');
-        settingName.style.width = '100%';
-        settingName.style.height = '100%';
-        settingName.style.display = 'flex';
-        settingName.style.justifyContent = 'flex-start';
-        settingName.style.alignItems = 'center';
-        settingName.style.paddingLeft = '10px';
-        settingName.innerHTML = setting;
-        settingsRow.appendChild(settingName);
+            // Add the Setting Name
+            const settingName = document.createElement('div');
+            settingName.style.width = '100%';
+            settingName.style.height = '100%';
+            settingName.style.display = 'flex';
+            settingName.style.justifyContent = 'flex-start';
+            settingName.style.alignItems = 'center';
+            settingName.style.paddingLeft = '10px';
+            settingName.innerHTML = setting;
+            settingsRow.appendChild(settingName);
 
-        const defaultValue = settings[setting].value;
+            const defaultValue = settings[setting].value;
 
-        // The setting value is managed by getKey(), this function will return the value of the setting if it exists, otherwise it will create the setting and then return the default value (the value passed to the function)
-        settings[setting].value = this.getKey(plugin + "." + setting, defaultValue);
+            // The setting value is managed by getKey(), this function will return the value of the setting if it exists, otherwise it will create the setting and then return the default value (the value passed to the function)
 
-        // Get the setting value in its correct type
-        switch (settings[setting].type) {
-            case 'checkbox':
-                settings[setting].value = settings[setting].value === 'true' ? true : false;
-                break;
-            case 'number':
-                settings[setting].value = parseInt(settings[setting].value);
-                break;
-            case 'text':
-                settings[setting].value = settings[setting].value.toString();
-                break;
-            case 'select':
-                settings[setting].value = settings[setting].value.toString();
-                break;
-            case 'color':
-                settings[setting].value = settings[setting].value.toString();
-                break;
-            case 'range':
-                settings[setting].value = parseInt(settings[setting].value);
-                break;
-            default:
-                console.error(`Invalid setting type for ${setting} in ${plugin}`);
-                break;
-        }
+            // If the setting has an oldKey, we need to migrate the setting
+            if (settings[setting].oldKey) {
+                // Get the old key
+                const oldKey = settings[setting].oldKey;
 
-        // Call the state handler for the setting
-        settings[setting].stateHandler(settings[setting].value);
+                // Get the old key value
+                const oldKeyValue = this.getKeyRaw(oldKey);
 
-        // Create the setting input (based off the type, this changes)
-        let settingInput;
-        switch (settings[setting].type) {
-            case 'checkbox':
-                // Create the checkbox
-                settingInput = document.createElement('input');
-                settingInput.style.cursor = 'pointer';
-                settingInput.style.backgroundColor = 'rgba(42, 40, 40, 0.75)';
-                settingInput.style.border = '1px solid rgba(0, 0, 0, 1)';
-                settingInput.style.borderLeft = 'none';
-                settingInput.style.borderBottom = 'none';
-                settingInput.style.borderRadius = '0px 0px 0px 5px';
-                settingInput.type = settings[setting].type;
-                settingInput.checked = settings[setting].value as boolean;
+                // Set the new key value to the old key value
+                this.setKey(plugin + "." + setting, oldKeyValue);
+            }
 
-                // Add the event listener to the input
-                // If the setting has an alert, then add a different event listener
-                if (settings[setting].alert !== undefined) {
-                    settingInput.addEventListener('change', () => {
-                        // Call the plugin state handler
-                        if (settingInput.checked) {
-                            this.showAlert(settings[setting].alert, () => {
-                                settings[setting].stateHandler(settingInput.checked);
-                            }, () => {
-                                settingInput.checked = false;
-                            });
-                        } else {
-                            settings[setting].stateHandler(settingInput.checked);
-                        }
-                    });
-                } else {
-                    settingInput.addEventListener('change', () => {
-                        // Call the plugin state handler
-                        settings[setting].stateHandler(settingInput.checked);
-                    });
-                }
+            settings[setting].value = this.getKey(plugin + "." + setting, defaultValue);
 
-                break;
-            case 'dropdown':
-                // Create the dropdown
-                settingInput = document.createElement('select');
-                for (const option of settings[setting].options) {
-                    const optionElement = document.createElement('option');
-                    optionElement.value = option.value;
-                    optionElement.innerHTML = option.label;
-                    settingInput.appendChild(optionElement);
-                }
-                settingInput.value = settings[setting].value;
-                settingInput.style.cursor = 'pointer';
-                settingInput.style.backgroundColor = 'rgba(42, 40, 40, 0.75)';
-                settingInput.style.border = '1px solid rgba(0, 0, 0, 1)';
-                settingInput.style.borderLeft = 'none';
-                settingInput.style.borderBottom = 'none';
-                settingInput.style.borderRadius = '0px 0px 0px 5px';
-                // Add the event listener to the input
-                settingInput.addEventListener('change', () => {
-                    // Call the plugin state handler
-                    
-                    settings[setting].stateHandler(settingInput.value);
-                });
-                break;
-            case 'range':
-                // Create the slider (range input), this needs to exist on a separate line because of the way the slider works
-                let sliderRow = document.createElement('div');
-                sliderRow.style.height = '25px';
-                sliderRow.style.flexDirection = 'row';
-                sliderRow.style.display = 'flex';
-                sliderRow.style.alignItems = 'center';
-                sliderRow.style.justifyContent = 'space-between';
-                sliderRow.style.paddingLeft = '10px';
-                sliderRow.style.justifyContent = 'flex-start';
-                settingsRow.appendChild(sliderRow);
+            // Get the setting value in its correct type
+            switch (settings[setting].type) {
+                case 'checkbox':
+                    settings[setting].value = settings[setting].value === 'true' ? true : false;
+                    break;
+                case 'number':
+                    settings[setting].value = parseInt(settings[setting].value);
+                    break;
+                case 'text':
+                    settings[setting].value = settings[setting].value.toString();
+                    break;
+                case 'select':
+                    settings[setting].value = settings[setting].value.toString();
+                    break;
+                case 'color':
+                    settings[setting].value = settings[setting].value.toString();
+                    break;
+                case 'range':
+                    settings[setting].value = parseInt(settings[setting].value);
+                    break;
+                default:
+                    console.error(`Invalid setting type for ${setting} in ${plugin}`);
+                    break;
+            }
 
-                
-                // Create the slider
-                settingInput = document.createElement('input');
-                settingInput.type = 'range';
-                settingInput.min = settings[setting].min;
-                settingInput.max = settings[setting].max;
-                settingInput.value = settings[setting].value as Number;
-                settingInput.style.width = '80%';
+            // Call the state handler for the setting
+            settings[setting].stateHandler(settings[setting].value);
 
-                // If there is a parent, we need to add an event listener to the parent to hide/show the setting when the parent is toggled
-                if (parent !== null) {
-                    parent.addEventListener('change', () => {
-                        // Verify that the plugin is a checkbox
-                        if (parent.type === 'checkbox') {
-                            // If the plugin is checked, show the setting
-                            if (parent.checked) {
-                                sliderRow.style.display = 'flex';
-                                settingsRow.style.display = 'flex';
+            // Create the setting input (based off the type, this changes)
+            let settingInput;
+            switch (settings[setting].type) {
+                case 'checkbox':
+                    // Create the checkbox
+                    settingInput = document.createElement('input');
+                    settingInput.style.cursor = 'pointer';
+                    settingInput.style.backgroundColor = 'rgba(42, 40, 40, 0.75)';
+                    settingInput.style.border = '1px solid rgba(0, 0, 0, 1)';
+                    settingInput.style.borderLeft = 'none';
+                    settingInput.style.borderBottom = 'none';
+                    settingInput.style.borderRadius = '0px 0px 0px 5px';
+                    settingInput.type = settings[setting].type;
+                    settingInput.checked = settings[setting].value as boolean;
+
+                    // Add the event listener to the input
+                    // If the setting has an alert, then add a different event listener
+                    if (settings[setting].alert !== undefined) {
+                        settingInput.addEventListener('change', () => {
+                            // Call the plugin state handler
+                            if (settingInput.checked) {
+                                this.showAlert(settings[setting].alert, () => {
+                                    settings[setting].stateHandler(settingInput.checked);
+                                }, () => {
+                                    settingInput.checked = false;
+                                });
                             } else {
-                                sliderRow.style.display = 'none';
-                                settingsRow.style.display = 'none';
+                                settings[setting].stateHandler(settingInput.checked);
                             }
+                        });
+                    } else {
+                        settingInput.addEventListener('change', () => {
+                            // Call the plugin state handler
+                            settings[setting].stateHandler(settingInput.checked);
+                        });
+                    }
+
+                    break;
+                case 'dropdown':
+                    // Create the dropdown
+                    settingInput = document.createElement('select');
+                    for (const option of settings[setting].options) {
+                        const optionElement = document.createElement('option');
+                        optionElement.value = option.value;
+                        optionElement.innerHTML = option.label;
+                        settingInput.appendChild(optionElement);
+                    }
+                    settingInput.value = settings[setting].value;
+                    settingInput.style.cursor = 'pointer';
+                    settingInput.style.backgroundColor = 'rgba(42, 40, 40, 0.75)';
+                    settingInput.style.border = '1px solid rgba(0, 0, 0, 1)';
+                    settingInput.style.borderLeft = 'none';
+                    settingInput.style.borderBottom = 'none';
+                    settingInput.style.borderRadius = '0px 0px 0px 5px';
+                    // Add the event listener to the input
+                    settingInput.addEventListener('change', () => {
+                        // Call the plugin state handler
+
+                        settings[setting].stateHandler(settingInput.value);
+                    });
+                    break;
+                case 'range':
+                    // Create the slider (range input), this needs to exist on a separate line because of the way the slider works
+                    let sliderRow = document.createElement('div');
+                    sliderRow.style.height = '25px';
+                    sliderRow.style.flexDirection = 'row';
+                    sliderRow.style.display = 'flex';
+                    sliderRow.style.alignItems = 'center';
+                    sliderRow.style.justifyContent = 'space-between';
+                    sliderRow.style.paddingLeft = '10px';
+                    sliderRow.style.justifyContent = 'flex-start';
+                    settingsRow.appendChild(sliderRow);
+
+
+                    // Create the slider
+                    settingInput = document.createElement('input');
+                    settingInput.type = 'range';
+                    settingInput.min = settings[setting].min;
+                    settingInput.max = settings[setting].max;
+                    settingInput.value = settings[setting].value as Number;
+                    settingInput.style.width = '80%';
+
+                    // If there is a parent, we need to add an event listener to the parent to hide/show the setting when the parent is toggled
+                    if (parent !== null) {
+                        parent.addEventListener('change', () => {
+                            // Verify that the plugin is a checkbox
+                            if (parent.type === 'checkbox') {
+                                // If the plugin is checked, show the setting
+                                if (parent.checked) {
+                                    sliderRow.style.display = 'flex';
+                                    settingsRow.style.display = 'flex';
+                                } else {
+                                    sliderRow.style.display = 'none';
+                                    settingsRow.style.display = 'none';
+                                }
+                            }
+                        });
+
+                        if (parent.checked) {
+                            sliderRow.style.display = 'flex';
+                            settingsRow.style.display = 'flex';
+                        } else {
+                            sliderRow.style.display = 'none';
+                            settingsRow.style.display = 'none';
                         }
+                    }
+
+                    // Add the event listener to the input
+                    settingInput.addEventListener('change', () => {
+                        // Call the plugin state handler
+                        settings[setting].stateHandler(settingInput.value);
+                        valueLabel.innerHTML = settingInput.value;
+
+                        this.setKey(plugin + "." + setting, settingInput.value);
                     });
 
-                    if (parent.checked) {
-                        sliderRow.style.display = 'flex';
-                        settingsRow.style.display = 'flex';
-                    } else {
-                        sliderRow.style.display = 'none';
-                        settingsRow.style.display = 'none';
-                    }
-                }
+                    sliderRow.appendChild(settingInput);
 
-                // Add the event listener to the input
-                settingInput.addEventListener('change', () => {
-                    // Call the plugin state handler
-                    settings[setting].stateHandler(settingInput.value);
+                    // Remove bottom border from settings row
+                    settingsRow.style.borderBottom = 'none';
+
+                    // Apply the bottom border to the slider row
+                    sliderRow.style.borderBottom = '1px solid rgba(66, 66, 66, 1)';
+
+                    // Center the label
+                    settingsRow.style.justifyContent = 'center';
+
+                    // Add a value label to the sliderRow   
+                    let valueLabel = document.createElement('label');
+                    valueLabel.style.width = '20%';
+                    valueLabel.style.textAlign = 'right';
+                    valueLabel.style.paddingRight = '10px';
                     valueLabel.innerHTML = settingInput.value;
-
-                    this.setKey(plugin + "." + setting, settingInput.value);
-                });
-
-                sliderRow.appendChild(settingInput);
-
-                // Remove bottom border from settings row
-                settingsRow.style.borderBottom = 'none';
-
-                // Apply the bottom border to the slider row
-                sliderRow.style.borderBottom = '1px solid rgba(66, 66, 66, 1)';
-
-                // Center the label
-                settingsRow.style.justifyContent = 'center';
-
-                // Add a value label to the sliderRow   
-                let valueLabel = document.createElement('label');
-                valueLabel.style.width = '20%';
-                valueLabel.style.textAlign = 'right';
-                valueLabel.style.paddingRight = '10px';
-                valueLabel.innerHTML = settingInput.value;
-                sliderRow.appendChild(valueLabel);
-                    
+                    sliderRow.appendChild(valueLabel);
 
 
-                pluginSettingsContainer.appendChild(settingsRow);
-                pluginSettingsContainer.appendChild(sliderRow);
-                break;
-            case 'color':
-                // Create the color picker
-                settingInput = document.createElement('input');
-                settingInput.type = 'color';
-                settingInput.value = settings[setting].value;
-                // Add the event listener to the input
-                settingInput.addEventListener('change', () => {
-                    // Call the plugin state handler
-                    settings[setting].stateHandler(settingInput.value);
-                });
-                break;
-            default:
-                // Create the input
-                settingInput = document.createElement('input');
-                settingInput.type = settings[setting].type;
-                settingInput.value = settings[setting].value;
-                // Add the event listener to the input
-                settingInput.addEventListener('change', () => {
-                    // Call the plugin state handler
-                    settings[setting].stateHandler(settingInput.value);
-                });
-                break;
-        }
+
+                    pluginSettingsContainer.appendChild(settingsRow);
+                    pluginSettingsContainer.appendChild(sliderRow);
+                    break;
+                case 'color':
+                    // Create the color picker
+                    settingInput = document.createElement('input');
+                    settingInput.type = 'color';
+                    settingInput.value = settings[setting].value;
+                    // Add the event listener to the input
+                    settingInput.addEventListener('change', () => {
+                        // Call the plugin state handler
+                        settings[setting].stateHandler(settingInput.value);
+                    });
+                    break;
+                default:
+                    // Create the input
+                    settingInput = document.createElement('input');
+                    settingInput.type = settings[setting].type;
+                    settingInput.value = settings[setting].value;
+                    // Add the event listener to the input
+                    settingInput.addEventListener('change', () => {
+                        // Call the plugin state handler
+                        settings[setting].stateHandler(settingInput.value);
+                    });
+                    break;
+            }
 
 
-        // The range input is a special case, so we handle it in a different way, so here we do nothing if it is a range
-        if (settings[setting].type === 'range') {
-            continue;
-        }
+            // The range input is a special case, so we handle it in a different way, so here we do nothing if it is a range
+            if (settings[setting].type === 'range') {
+                continue;
+            }
 
-        // If there is a parent, we need to add an event listener to the parent to hide/show the setting when the parent is toggled
-        if (parent !== null) {
-            parent.addEventListener('change', () => {
-                // Verify that the plugin is a checkbox
-                if (parent.type === 'checkbox') {
-                    // If the plugin is checked, show the setting
-                    if (parent.checked) {
-                        settingsRow.style.display = 'flex';
-                    } else {
-                        settingsRow.style.display = 'none';
+            // If there is a parent, we need to add an event listener to the parent to hide/show the setting when the parent is toggled
+            if (parent !== null) {
+                parent.addEventListener('change', () => {
+                    // Verify that the plugin is a checkbox
+                    if (parent.type === 'checkbox') {
+                        // If the plugin is checked, show the setting
+                        if (parent.checked) {
+                            settingsRow.style.display = 'flex';
+                        } else {
+                            settingsRow.style.display = 'none';
+                        }
                     }
+                });
+
+                if (parent.checked) {
+                    settingsRow.style.display = 'flex';
+                } else {
+                    settingsRow.style.display = 'none';
                 }
+            }
+
+            // Add an additional event listener for the input to save the setting to local storage
+            settingInput.addEventListener('change', () => {
+                // Save the setting to local storage
+                settingInput.type === 'checkbox' ? this.setKey(plugin + "." + setting, settingInput.checked) : this.setKey(plugin + "." + setting, settingInput.value);
             });
 
-            if (parent.checked) {
-                settingsRow.style.display = 'flex';
-            } else {
-                settingsRow.style.display = 'none';
+            // Add the setting input to the label
+            settingsRow.appendChild(settingInput);
+
+
+            // Add the setting label to the settings div
+            pluginSettingsContainer.appendChild(settingsRow);
+
+            // If the setting has children, call the function again
+            if (settings[setting].children !== undefined) {
+                this.addSettings(plugin, pluginSettingsContainer, settings[setting].children, settingInput);
             }
         }
-
-        // Add an additional event listener for the input to save the setting to local storage
-        settingInput.addEventListener('change', () => {
-            // Save the setting to local storage
-            settingInput.type === 'checkbox' ? this.setKey(plugin + "." + setting, settingInput.checked) : this.setKey(plugin + "." + setting, settingInput.value);
-        });
-
-        // Add the setting input to the label
-        settingsRow.appendChild(settingInput);
-
-
-        // Add the setting label to the settings div
-        pluginSettingsContainer.appendChild(settingsRow);
-
-        // If the setting has children, call the function again
-        if (settings[setting].children !== undefined) {
-            this.addSettings(plugin, pluginSettingsContainer, settings[setting].children, settingInput);
-        }
     }
-}
-    
+
 
     // Local Storage Functions
-    getKey(setting : string, defaultValue: any) {
+    getKey(setting: string, defaultValue: any) {
         // Remove all Spaces from the setting
         setting = setting.replace(/\s/g, '');
 
         // Camel Case the setting
-        setting = setting.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) {
+        setting = setting.replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
             return index == 0 ? word.toLowerCase() : word.toUpperCase();
         }).replace(/\s+/g, '');
 
         // Check if setting exists in local storage
-        let keyValue : string | number | boolean = localStorage.getItem("GenLite." + setting);
+        let keyValue: string | number | boolean = localStorage.getItem("GenLite." + setting);
 
         // If it doesn't exist, set it to the default value
         if (keyValue === null || keyValue === undefined) {
@@ -759,12 +782,16 @@ export class GenLiteUIPlugin {
         return keyValue;
     }
 
-    setKey(setting : string, value : any) {
+    getKeyRaw(key: string) {
+        return localStorage.getItem(key);
+    }
+
+    setKey(setting: string, value: any) {
         // Remove all Spaces from the setting
         setting = setting.replace(/\s/g, '');
 
         // Camel Case the setting
-        setting = setting.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) {
+        setting = setting.replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
             return index == 0 ? word.toLowerCase() : word.toUpperCase();
         }).replace(/\s+/g, '');
 
