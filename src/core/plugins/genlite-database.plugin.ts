@@ -97,5 +97,9 @@ export class GenLiteDatabasePlugin {
             };
         }
     }
+    
+    handlePluginState(state: boolean): void {
+        // TODO: Implement
+    }
 
 }

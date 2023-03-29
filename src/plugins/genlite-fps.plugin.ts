@@ -52,6 +52,12 @@ export class GenLiteFPSCounter implements GenLitePlugin {
             this.logoutOK();
         }
     }
+    
+    handlePluginState(state: boolean): void {
+        // TODO: Implement
+        // Display Yellow Console Message Stating the plugin needs to implement this
+        console.log(`%c[GenLite] %c${this.constructor.name} %cneeds to implement handlePluginState()`, "color: #ff0", "color: #fff", "color: #f00");
+    }
 
     /* start tracking fps */
     loginOK() {
