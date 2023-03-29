@@ -16,7 +16,7 @@ import { GenLiteNotificationPlugin } from "./core/plugins/genlite-notification.p
 import { GenLiteSettingsPlugin } from "./core/plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./core/plugins/genlite-commands.plugin";
 import { GenLiteConfirmation } from "./core/helpers/genlite-confirmation.class";
-
+import { GenLiteDatabasePlugin } from "./core/plugins/genlite-database.plugin";
 
 /** Official Plugins */
 import { GenLiteVersionPlugin } from "./plugins/genlite-version.plugin";
@@ -40,8 +40,9 @@ import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand
 import { GenLiteUIPlugin } from "./core/plugins/genlite-ui-plugin";
 import { GenLitePlayerToolsPlugin } from "./plugins/genlite-playertools.plugin";
 import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
-import {GenLiteItemDisplays} from "./plugins/genlite-itemdisplay.plugin";
+import { GenLiteItemDisplays } from "./plugins/genlite-itemdisplay.plugin";
 import { GenLiteHealthRegenerationPlugin } from './plugins/genlite-health-regeneration.plugin';
+import { GenLiteFPSCounter } from "./plugins/genlite-fps.plugin";
 
 declare const GM_getResourceText: (s: string) => string;
 
@@ -58,14 +59,14 @@ declare global {
     }
 }
 
-const DISCLAIMER = `
-GenLite is NOT associated with Rose-Tinted Games.
-Do not talk about GenLite in the main discord.
-Do not report bugs to the devs with GenLite enabled, they will ignore you and get annoyed.
-Do disable GenLite first and test for the bug again.
-If you find a bug and are unsure post in the GenLite Server. We will help you.
-While we work to ensure compatibility, Use At Your Own Risk.
-Press Cancel to Load, Press Okay to Stop.`;
+const DISCLAIMER = [
+    "GenLite is NOT associated with Rose-Tinted Games.",
+    "DO NOT talk about GenLite in the Genfanad Discord.",
+    "DO NOT report bugs to Genfanad with GenLite enabled. They will ignore you and get annoyed.",
+    "DO disable GenLite first and test for the bug again.",
+    "If you find a bug and are unsure, post in the GenLite Discord. We will help you.",
+    "While we work to ensure compatibility, Use At Your Own Risk.",
+];
 
 const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
@@ -82,17 +83,12 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
     + "document.client.set = function(a, b) {"
     + "eval(a + ' = ' + b);"
     + "};"
-    + scriptText.substring(scriptText.length - 5);
+    + scriptText.substring(scriptText.length - 5)
+    + "//# sourceURL=client.js";
 
 let isInitialized = false;
 
 (async function load() {
-    let confirmed = localStorage.getItem("GenLiteConfirms");
-    if (!confirmed && await GenLiteConfirmation.confirm(DISCLAIMER) === true)
-        return;
-    confirmed = "true";
-    localStorage.setItem("GenLiteConfirms", confirmed);
-
     async function initGenLite() {
 
         function gameObject(
@@ -191,6 +187,7 @@ let isInitialized = false;
         genlite.notifications = await genlite.pluginLoader.addPlugin(GenLiteNotificationPlugin);
         genlite.settings = await genlite.pluginLoader.addPlugin(GenLiteSettingsPlugin);
         genlite.commands = await genlite.pluginLoader.addPlugin(GenLiteCommandsPlugin);
+        genlite.database = await genlite.pluginLoader.addPlugin(GenLiteDatabasePlugin);
         genlite.ui = await genlite.pluginLoader.addPlugin(GenLiteUIPlugin);
 
         /** Official Plugins */
@@ -216,6 +213,13 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteHighscores);
         await genlite.pluginLoader.addPlugin(GenLiteItemDisplays);
         await genlite.pluginLoader.addPlugin(GenLiteHealthRegenerationPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteFPSCounter);
+
+        /** post init things */
+        // await document['GenLiteDatabasePlugin'].postInit();
+        // await document['GenLiteSettingsPlugin'].postInit();
+        // await document['GenLiteNPCHighlightPlugin'].postInit();
+        // await document['GenLiteDropRecorderPlugin'].postInit();
 
         // NOTE: currently initGenlite is called after the scene has started
         //       (in minified function qS). The initializeUI function does not
@@ -264,16 +268,32 @@ let isInitialized = false;
         }
     }
 
+    function hookStartScene() {
+        if (localStorage.getItem("GenLiteConfirms") === "true") {
+            let doc = (document as any);
+            doc.client.set('document.client.originalStartScene', doc.client.get('qS'));
+            doc.client.set('qS', function () {
+                document.client.originalStartScene();
+                setTimeout(document.initGenLite, 100);
+            });
+        }
+    }
+
     hookClient();
     window.addEventListener('load', (e) => {
         document.initGenLite = initGenLite;
 
-        let doc = (document as any)
-        doc.client.set('document.client.originalStartScene', doc.client.get('qS'));
-        doc.client.set('qS', function () {
-            document.client.originalStartScene();
-            setTimeout(document.initGenLite, 100);
-        });
+        let confirmed = localStorage.getItem("GenLiteConfirms");
+        if (confirmed === "true") {
+            hookStartScene();
+        } else {
+            GenLiteConfirmation.confirmModal(DISCLAIMER, async () => {
+                // calls back only if accepted
+                localStorage.setItem("GenLiteConfirms", "true");
+                hookStartScene();
+            });
+        }
+
     });
 
 })();

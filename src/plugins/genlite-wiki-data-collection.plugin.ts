@@ -148,8 +148,6 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
             return;
 
         let xpDrop = xp.xp + this.vitDrop;
-        // hack? Math? i dunno i though i knew how this works but i dont but for some reason it increases the accuracy of the prediction
-        xpDrop += (xpDrop % 3);
         let levelDiff = (this.combatStyle == "melee" ? this.playerMeleeCL : this.playerRangedCL) - this.curEnemy.info.level;
         let baseXp;
         if (levelDiff == 0) {

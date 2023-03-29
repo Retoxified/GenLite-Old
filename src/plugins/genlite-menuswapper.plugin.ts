@@ -25,17 +25,6 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
     originalNPCIntersects: Function;
 
     pluginSettings : Settings = {
-        // Checkbox Example
-        "One-Click Bank": {
-            type: 'checkbox',
-            value: this.useOneClickBank,
-            stateHandler: this.handleLeftClickBankToggle.bind(this)
-        },
-        "One-Click Trade": {
-            type: 'checkbox',
-            value: this.useOneClickTrade,
-            stateHandler: this.handleLeftClickTradeToggle.bind(this)
-        },
         "Hide Stairs": {
             type: 'checkbox',
             value: this.hideStairs,
@@ -66,28 +55,13 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
         } else {
             document.game.OptimizedScene.prototype.intersects = this.originalSceneIntersects;
         }
-
-        if ((this.useOneClickBank || this.useOneClickTrade) && this.isEnabled) {
-            document.game.NPC.prototype.intersects = this.leftClickBankIntersects;
-        } else {
-            document.game.NPC.prototype.intersects = this.originalNPCIntersects;
-        }
-    }
-
-    handleLeftClickBankToggle(state: boolean) {
-        this.useOneClickBank = state;
-        this.updateState();
-    }
-
-    handleLeftClickTradeToggle(state: boolean) {
-        this.useOneClickTrade = state;
-        this.updateState();
     }
 
     handleHideStairsToggle(state: boolean) {
         this.hideStairs = state;
         this.updateState();
     }
+/* leaviing this in as example code but its not needed any more 
 
     leftClickBankIntersects(ray, list) {
         const self = (this as any);
@@ -141,6 +115,8 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
                 action: () => self.bank()
             });
     }
+
+    */
 
     /* clone of the original function with toggle for stairs */
     sceneryIntersects(ray, list) {

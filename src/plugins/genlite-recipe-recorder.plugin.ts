@@ -11,7 +11,7 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteRecipeRecorderPlugin';
@@ -54,7 +54,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
         this.isPluginEnabled = state;
     }
 
-    logoutOK(){
+    logoutOK() {
         this.isCrafting = false;
         this.isGathering = false;
     }
@@ -71,12 +71,12 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
                 this.prevInventory = document.game.INVENTORY.items;
                 this.recipeName = params.action.recipe;
                 let mats;
-                if(params.action.params){
+                if (params.action.params) {
                     mats = Object.keys(params.action.params);
                     mats = mats.sort();
+                    for (let i of mats) // if params is set here then record a complex recipe name
+                        this.recipeName = this.recipeName.concat("__", i, params.action.params[i]);
                 }
-                for (let i of mats) // if params is set here then record a complex recipe name
-                    this.recipeName = this.recipeName.concat("__", i, params.action.params[i]);
                 if (this.recipeResults[this.recipeName] === undefined)
                     this.recipeResults[this.recipeName] = {
                         input: {},
@@ -111,14 +111,14 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
             return;
         }
 
-        if (verb == "inventory_swap"){
+        if (verb == "inventory_swap") {
             this.swapped_inv = true;
             return;
         }
 
         /* if we get here check the white listed (non interupting) verbs and return otherwise set crafting and gathering to false */
         let whitelistverbs = ["request_sync", "p", "chat_private", "change_combat_stance", "conversation", "load_complete"];
-        if(whitelistverbs.includes(verb)){
+        if (whitelistverbs.includes(verb)) {
             return;
         }
         this.isGathering = false;
@@ -137,7 +137,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
         if (!(this.isCrafting || this.isGathering))
             return;
         if (verb == 'inventory') {
-            if(this.swapped_inv){
+            if (this.swapped_inv) {
                 this.swapped_inv = false;
                 return;
             }

@@ -9,6 +9,7 @@ export class GenLiteCommandsPlugin {
         document.genlite.registerPlugin(this);
 
         this.originalProcessInput = document.game.Chat.prototype.processInput;
+
         this.register("help", function (s) {
             if (!s) {
                 let helpStr = Object.keys(document.genlite.commands.commands).join(", ");

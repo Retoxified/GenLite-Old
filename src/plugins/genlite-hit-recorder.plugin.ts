@@ -69,6 +69,8 @@ export class GenLiteHitRecorder implements GenLitePlugin {
         level: 0
     };
 
+    isfirstHit: boolean = true //we ignore the first hit on login
+
     dpsOverlay: HTMLElement = undefined;
     dpsOverlayContainer: HTMLElement = undefined;
     dpsUiUpdateInterval: NodeJS.Timer = undefined;
@@ -110,6 +112,9 @@ export class GenLiteHitRecorder implements GenLitePlugin {
         }
     }
 
+    loginOK(){
+        this.isfirstHit = true;
+    }
     /* filters network packets for damage data from the player */
     handle(verb, payload) {
         if (this.isPluginEnabled === false) {
@@ -160,7 +165,9 @@ export class GenLiteHitRecorder implements GenLitePlugin {
                 damage -= this.prevHitInfo.overkill;
                 this.prevHitInfo.overkill = 0;
             }
-            this.recordDamage(this.playerHitInfo, damage);
+            if(!this.isfirstHit)
+                this.recordDamage(this.playerHitInfo, damage);
+            this.isfirstHit = false;
             this.curDpsAcc.totDam += damage;
             if (this.cumDpsAcc.timeStart != 0) //in case user resets dps mid combat for whatever reason
                 this.cumDpsAcc.totDam += damage;
@@ -360,8 +367,8 @@ export class GenLiteHitRecorder implements GenLitePlugin {
         this.dpsOverlay.classList.add("new_ux-color-ui");
         this.dpsOverlay.id = "GenliteDpsOverlay";
         style.top = "23px";
-        style.setProperty("--width", "1.3");
-        style.setProperty("--height", "0.6");
+        style.setProperty("--width", "0.3");
+        style.setProperty("--height", "1.4");
         style.width = "calc( var(--width) * var(--profile-pic-height) * var(--hud-ui-zoom-factor) )";
         style.height = "calc( var(--height) * var(--profile-pic-height) * var(--hud-ui-zoom-factor) )";
         style.backgroundColor = "#331101";
