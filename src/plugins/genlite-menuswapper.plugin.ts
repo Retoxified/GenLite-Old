@@ -11,7 +11,7 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteMenuSwapperPlugin';
@@ -23,15 +23,19 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
     originalSceneIntersects: Function;
     originalNPCIntersects: Function;
 
+    BANK: Bank;
+    qualToWith: string = ''; /* _lq, '', _hq for the 3 qualities */
+
     intersect_vector = new document.game.THREE.Vector3();
     async init() {
         document.genlite.registerPlugin(this);
-        
+
         this.hideStairs = document.genlite.settings.add("NPCMenuSwapper.hideStairs", false, "Hide Stairs", "checkbox", this.handleHideStairsToggle, this);
 
         this.originalSceneIntersects = document.game.OptimizedScene.prototype.intersects;
         this.originalNPCIntersects = document.game.NPC.prototype.intersects;
         this.updateState();
+        this.BANK = document.game.BANK;
     }
 
     updateState() {
@@ -46,62 +50,62 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
         this.hideStairs = state;
         this.updateState();
     }
-/* leaviing this in as example code but its not needed any more 
-
-    leftClickBankIntersects(ray, list) {
-        const self = (this as any);
-
-        let i = self.object.intersect(ray);
-        if (!i)
-            return;
-        list.push({
-            color: 'green',
-            distance: i.distance,
-            priority: -1,
-            object: this,
-            text: "Examine",
-            action: () => self.examine()
-        });
-        let priority = (self.levelDifference <= 10 && !document.game.PLAYER.character.combat) ? 2 : -2;
-        if (self.info.attackable)
+    /* leaviing this in as example code but its not needed any more 
+    
+        leftClickBankIntersects(ray, list) {
+            const self = (this as any);
+    
+            let i = self.object.intersect(ray);
+            if (!i)
+                return;
             list.push({
-                color: 'red',
+                color: 'green',
                 distance: i.distance,
-                priority: priority,
+                priority: -1,
                 object: this,
-                text: "Attack",
-                action: () => self.attack()
+                text: "Examine",
+                action: () => self.examine()
             });
-        if (self.info.talkable)
-            list.push({
-                color: 'red',
-                distance: i.distance,
-                priority: 2,
-                object: this,
-                text: "Talk to",
-                action: () => self.talk()
-            });
-        if (self.info.tradeable)
-            list.push({
-                color: 'red',
-                distance: i.distance,
-                priority: document[GenLiteMenuSwapperPlugin.pluginName].useOneClickTrade ? 15 : 1,
-                object: this,
-                text: "Trade with",
-                action: () => self.trade()
-            });
-        if (self.info.banker)
-            list.push({
-                color: 'red',
-                distance: i.distance,
-                priority: document[GenLiteMenuSwapperPlugin.pluginName].useOneClickBank ? 15 : 1,
-                object: this,
-                text: "Bank with",
-                action: () => self.bank()
-            });
-    }
-
-    */
+            let priority = (self.levelDifference <= 10 && !document.game.PLAYER.character.combat) ? 2 : -2;
+            if (self.info.attackable)
+                list.push({
+                    color: 'red',
+                    distance: i.distance,
+                    priority: priority,
+                    object: this,
+                    text: "Attack",
+                    action: () => self.attack()
+                });
+            if (self.info.talkable)
+                list.push({
+                    color: 'red',
+                    distance: i.distance,
+                    priority: 2,
+                    object: this,
+                    text: "Talk to",
+                    action: () => self.talk()
+                });
+            if (self.info.tradeable)
+                list.push({
+                    color: 'red',
+                    distance: i.distance,
+                    priority: document[GenLiteMenuSwapperPlugin.pluginName].useOneClickTrade ? 15 : 1,
+                    object: this,
+                    text: "Trade with",
+                    action: () => self.trade()
+                });
+            if (self.info.banker)
+                list.push({
+                    color: 'red',
+                    distance: i.distance,
+                    priority: document[GenLiteMenuSwapperPlugin.pluginName].useOneClickBank ? 15 : 1,
+                    object: this,
+                    text: "Bank with",
+                    action: () => self.bank()
+                });
+        }
+    
+        */
 
     /* clone of the original function with toggle for stairs */
     sceneryIntersects(ray, list) {
@@ -140,6 +144,78 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
                     list.push(Object.assign({}, actions[i], {
                         distance: oi[0].distance
                     }));
+                }
+            }
+        }
+    }
+
+    /* adds another option to withdraw N items being the last withdraw X amount
+        without going through the prompt
+        ctrl moves this option to the top of the list
+    */
+    _addContextOptionsActual(item, contextMenu, n) {
+        let toWithdraw = this.BANK.saved_withdraw_x ? this.BANK.saved_withdraw_x : 1
+        contextMenu.push({
+            color: "none",
+            priority: document.game.KEYBOARD['17'] ? 999 : 1,
+            object: n,
+            text: `Withdraw ${toWithdraw}`,
+            action: () => {
+                "unknown" == item.item ? document.game.NETWORK_CONTAINER.network.action("bank_action", {
+                    action: "withdraw",
+                    item: item.original_item,
+                    quantity: toWithdraw
+                }) : document.game.NETWORK_CONTAINER.network.action("bank_action", {
+                    action: "withdraw",
+                    item: item.item,
+                    quantity: toWithdraw
+                })
+            }
+        })
+    }
+
+    /* same as the above function but for stacked qualities
+        this uses the last quality withdrawn from the bank from ANY slot
+    */
+    _addContextOptions(itemSlot: any, contextMenu: any) {
+        let toWithdraw = this.BANK.saved_withdraw_x ? this.BANK.saved_withdraw_x : 1
+        let n = itemSlot + this.BANK.selected_page * document.game.SOME_CONST_USED_FOR_BANK;
+        let item = this.BANK.slots[n];
+        let a = item.item.substring(3);
+        a = a.concat(this.qualToWith);
+        let itemHumanName = `<span class='item'>${document.game.returnsAnItemName(a)}</span>`;
+        let r = {
+            type: "item",
+            id: item,
+            text: () => itemHumanName
+        }
+        if (item.item.startsWith('$q')) {
+            contextMenu.push({
+                color: "none",
+                priority: document.game.KEYBOARD['17'] ? 999 : 1,
+                object: r,
+                text: `Withdraw ${toWithdraw}`,
+                action: () => {
+                    document.game.NETWORK_CONTAINER.network.action("bank_action", {
+                        action: "withdraw",
+                        item: a,
+                        quantity: toWithdraw
+                    })
+                }
+            })
+        }
+    }
+
+    /* figure out what the last quality was we withdrew */
+    action(verb, param) {
+        if (verb == 'bank_action') {
+            if (param.action == 'withdraw') {
+                if (param.item.match(/_lq$/)) {
+                    this.qualToWith = '_lq';
+                } else if (param.item.match(/_hq$/)) {
+                    this.qualToWith = '_hq';
+                } else {
+                    this.qualToWith = ''; //nq case
                 }
             }
         }

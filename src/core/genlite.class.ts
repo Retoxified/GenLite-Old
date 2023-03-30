@@ -54,6 +54,8 @@ export class GenLite {
         this.installHook(document.game.Bank.prototype, 'handlePacket');
         this.installHook(document.game.Bank.prototype, '_showQualityPopup');
         this.installHook(document.game.Trade.prototype, 'handlePacket', this.hookTrade_handlePacket);
+        this.installHook(document.game.Bank.prototype, '_addContextOptionsActual')
+        this.installHook(document.game.Bank.prototype, '_addContextOptions')
 
 
     }

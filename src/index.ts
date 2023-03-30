@@ -51,8 +51,8 @@ declare global {
         game: any;
         client: any;
         genlite: {
-          [key: string]: any,
-          settings: GenLiteSettingsPlugin,
+            [key: string]: any,
+            settings: GenLiteSettingsPlugin,
         };
         initGenLite: () => void;
     }
@@ -158,7 +158,6 @@ let isInitialized = false;
         gameObject('GAME', 'K_.game');
         gameObject('GRAPHICS', 'KS.graphics');
         gameObject('INVENTORY', 'uw');
-        gameObject('KEYBOARD', 'XS');
         gameObject('NETWORK', 'pg.network');
         gameObject('PHASEDLOADINGMANAGER', 'gS');
         gameObject('PLAYER', '$S.player');
@@ -171,6 +170,18 @@ let isInitialized = false;
         gameObject('PLAYER_INFO', 'fw');
         gameObject('NPC', 'I_');
         gameObject('TRADE', 'Mw');
+        gameObject('NETWORK_CONTAINER', 'mg');
+
+        /* Special Case Objects */
+        /* have to do this here because keyboard is constantly redefined */
+        gameObject('KEYBOARD', 'XS');
+        hookKeyboard();
+
+        //Functions
+        gameObject('returnsAnItemName', 'Mg');
+
+        //Constants
+        gameObject('SOME_CONST_USED_FOR_BANK', 'P');
 
         if (isInitialized) {
             document.genlite.onUIInitialized();
@@ -274,6 +285,18 @@ let isInitialized = false;
         }
     }
 
+    /* KEYBOARD is redefined everytime the get gets focus
+        so we set a second listener with a small timeout that sets out variable just after genfanads
+        this feels really fucking hacky though
+    */
+    function hookKeyboard() {
+        window.addEventListener("focus", (e) => {
+            setTimeout(() => {
+                document.game.KEYBOARD = document.client.get('XS');
+            }, 10);
+        });
+    }
+
     hookClient();
     window.addEventListener('load', (e) => {
         document.initGenLite = initGenLite;
@@ -290,5 +313,4 @@ let isInitialized = false;
         }
 
     });
-
 })();

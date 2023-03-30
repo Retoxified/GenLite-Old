@@ -28,5 +28,9 @@ export interface GenLitePlugin {
     handlePacket?: (packet: any) => void,
     _showQualityPopup?: (packet: any) => void,
     Trade_handlePacket?: (packet: any) => void,
+    _addContextOptionsActual?: (item: any, contextMenu: any, n: any) => void,
+    _addContextOptions?: (itemSlot: Number, contextMenu: any) => void,
+
+
 
 }
