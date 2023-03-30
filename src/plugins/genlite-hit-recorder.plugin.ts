@@ -354,8 +354,8 @@ export class GenLiteHitRecorder implements GenLitePlugin {
             
         //setup container;
         let style = this.dpsOverlayContainer.style;
-        style.setProperty("--left", "1.3");
-        style.setProperty("--top", "0.8");
+        style.setProperty("--left", "0.3");
+        style.setProperty("--top", "0.4");
         style.left = "calc( var(--left) * var(--profile-pic-height) * var(--hud-ui-zoom-factor) )";
         style.top = "calc( var(--top) * var(--profile-pic-height) * var(--hud-ui-zoom-factor) )";
 
@@ -365,8 +365,8 @@ export class GenLiteHitRecorder implements GenLitePlugin {
         this.dpsOverlay.classList.add("new_ux-color-ui");
         this.dpsOverlay.id = "GenliteDpsOverlay";
         style.top = "23px";
-        style.setProperty("--width", "0.3");
-        style.setProperty("--height", "1.4");
+        style.setProperty("--width", "1.3");
+        style.setProperty("--height", "0.6");
         style.width = "calc( var(--width) * var(--profile-pic-height) * var(--hud-ui-zoom-factor) )";
         style.height = "calc( var(--height) * var(--profile-pic-height) * var(--hud-ui-zoom-factor) )";
         style.backgroundColor = "#331101";
