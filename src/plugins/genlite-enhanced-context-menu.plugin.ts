@@ -187,13 +187,13 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
                                 }));
                             }
 
-                            if (plugin.betterRockNames && o.modelInfo.impl && o.modelInfo.impl.params && o.modelInfo.impl.class === "rock") {
+                            if (plugin.betterRockNames && o.modelInfo.impl && o.modelInfo.impl.params && o.modelInfo.impl.class === "rock" && o.modelInfo.name === "Rock") {
                                 let rockName = o.modelInfo.impl.params;
                                 // Capitalize the first letter of the rock name
                                 rockName = rockName.charAt(0).toUpperCase() + rockName.slice(1);
 
                                 o.modelInfo.name = rockName + " Rock";
-                            } else if (!plugin.betterRockNames && o.modelInfo.impl && o.modelInfo.impl.params && o.modelInfo.impl.class === "rock" && o.modelInfo.name !== "Rock") {
+                            } else if (!plugin.betterRockNames && o.modelInfo.impl && o.modelInfo.impl.params && o.modelInfo.impl.class === "rock" && o.modelInfo.name.includes("Rock")) {
                                 o.modelInfo.name = "Rock";
                             }
 
@@ -206,8 +206,11 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
                                     priority: -2,
                                     text: "Lookup",
                                     action: () => {
-                                        if (plugin.betterRockNames && o.modelInfo.impl && o.modelInfo.impl.params && o.modelInfo.impl.class === "rock") {
+                                        if (plugin.betterRockNames && o.modelInfo.impl && o.modelInfo.impl.params && o.modelInfo.impl.class === "rock" && o.modelInfo.name.includes("Rock")) {
                                             let cleanName = thing.text();
+                                            cleanName = thing.text().replace(/(<([^>]+)>)/gi, "");
+                                            cleanName = cleanName.replace(' ', '_'); // Normal Space Replacement
+                                            cleanName = cleanName.replace('%20', '_'); // HTML Special Character Space Replacement
 
                                             window.open(plugin.wikiBaseURL + cleanName, '_blank');
                                         } else {
@@ -217,7 +220,7 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
                                             // Okay so this is a bit of a hack, but it works
                                             // This fixes the issue where when you disable the better rock names option
                                             // the rocks still have the type ("Iron", "Coal", etc.) in the name
-                                            if (o.modelInfo.impl && o.modelInfo.impl.params && o.modelInfo.impl.class === "rock") {
+                                            if (o.modelInfo.impl && o.modelInfo.impl.params && o.modelInfo.impl.class === "rock" && o.modelInfo.name.includes("Rock")) {
                                                 let rockType = o.modelInfo.impl.params;
 
                                                 // Capitalize the first letter of the rock type
