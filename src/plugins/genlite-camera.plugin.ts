@@ -52,9 +52,7 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
         // TODO: after settings rework move this to updateState/disable plugin
         let self = this;
         document.game.Segment.prototype.advanceToBB = function (c, d, debug = false) {
-            if (c.y > 24.35 && c.y < 24.36) {
-                c.y = 24.35;
-            }
+            c.y = Math.round(c.y * 100) / 100;
             return self.originalAdvanceToBB.call(this, c, d, debug);
         };
 
