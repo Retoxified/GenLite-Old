@@ -20,6 +20,8 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
     useOneClickTrade: boolean = false;
     hideStairs: boolean = false;
 
+    rightClickAttack: boolean = false;
+
     originalSceneIntersects: Function;
     originalNPCIntersects: Function;
 
@@ -28,6 +30,7 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
         document.genlite.registerPlugin(this);
         
         this.hideStairs = document.genlite.settings.add("NPCMenuSwapper.hideStairs", false, "Hide Stairs", "checkbox", this.handleHideStairsToggle, this);
+        this.rightClickAttack = document.genlite.settings.add("NPCMenuSwapper.rightClickAttack", false, "Right-Click Attack", "checkbox", this.rightClickAttackToggle, this);
 
         this.originalSceneIntersects = document.game.OptimizedScene.prototype.intersects;
         this.originalNPCIntersects = document.game.NPC.prototype.intersects;
@@ -40,6 +43,25 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
         } else {
             document.game.OptimizedScene.prototype.intersects = this.originalSceneIntersects;
         }
+
+        if (this.rightClickAttack) {
+            let plugin = this;
+            document.game.NPC.prototype.intersects = function (ray, list) {
+                plugin.originalNPCIntersects.call(this, ray, list);
+                for (let action of list) {
+                    if (action.text === 'Attack') {
+                        action.priority = -2;
+                    }
+                }
+            };
+        } else {
+            document.game.NPC.prototype.intersects = this.originalNPCIntersects;
+        }
+    }
+
+    rightClickAttackToggle(state: boolean) {
+        this.rightClickAttack = state;
+        this.updateState();
     }
 
     handleHideStairsToggle(state: boolean) {
@@ -143,5 +165,8 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
                 }
             }
         }
+    }
+
+    npcIntersects(ray, list) {
     }
 }
