@@ -138,6 +138,56 @@ export class GenLiteUIPlugin {
         this.settingsTab.style.left = '0';
         this.settingsTab.style.width = '100%';
         this.settingsTab.style.height = '100%';
+
+        // Add a Row for the Search Bar
+        const searchRow = document.createElement('div');
+        searchRow.style.width = '100%';
+        searchRow.style.height = '25px';
+        searchRow.style.borderBottom = '1px solid rgba(66, 66, 66, 1)';
+        searchRow.style.display = 'flex';
+        searchRow.style.alignItems = 'center';
+        searchRow.id = 'genlite-ui-search-row';
+
+        // Add a Search Bar to the Plugin List Tab
+        const searchBar = document.createElement('input');
+        searchBar.id = 'genlite-ui-search-bar';
+        searchBar.style.backgroundColor = 'rgba(42, 40, 40, 1)';
+        searchBar.style.color = 'rgba(255, 255, 255, 1)';
+        searchBar.style.fontSize = '16px';
+        searchBar.style.borderRadius = '0px';
+        searchBar.style.paddingLeft = '10px';
+        searchBar.style.paddingRight = '10px';
+        searchBar.style.boxSizing = 'border-box';
+        searchBar.style.outline = 'none';
+        searchBar.placeholder = 'Search Plugins...';
+        searchBar.style.width = '100%';
+        searchBar.style.border = 'none';
+
+        // Center the Search Bar in the Row
+        searchBar.style.marginLeft = 'auto';
+        searchBar.style.marginRight = 'auto';
+
+        searchBar.addEventListener('keyup', () => {
+            const search = searchBar.value.toLowerCase();
+            // Plugins are in the settings tab
+            const pluginListHTML = this.settingsTab.children as HTMLCollectionOf<HTMLDivElement>;
+
+            // This skips the first element, which is the search bar
+            for (let i = 1; i < pluginListHTML.length; i++) {
+                const pluginListHTMLRow = pluginListHTML[i].children[0].innerHTML.toLowerCase();
+                if (pluginListHTMLRow.includes(search)) {
+                    pluginListHTML[i].style.display = 'flex';
+                } else {
+                    pluginListHTML[i].style.display = 'none';
+                }
+            }
+        });
+        // Remove game focus on key press when using the search bar
+        searchBar.onfocus = () => { document.game.CHAT.focus_locked = true; }
+        searchBar.onblur = () => { document.game.CHAT.focus_locked = false; }
+        searchRow.appendChild(searchBar);
+        this.settingsTab.appendChild(searchRow);
+
         this.addTab('list', "Plugins", this.settingsTab);
 
         // Add the side panel to the body
@@ -301,12 +351,8 @@ export class GenLiteUIPlugin {
         const pluginRow = document.createElement('div');
         pluginRow.style.width = '100%';
         pluginRow.style.height = '25px';
-        pluginRow.style.borderBottom = '1px solid rgba(66, 66, 66, 1)';
-
-        // If this is not the first plugin, add a top border
-        if (Object.keys(this.pluginSettings).length !== 0) {
-            pluginRow.style.borderTop = '1px solid rgba(0, 0, 0, 1)';
-        }
+        pluginRow.style.borderBottom = '1px solid rgba(66, 66, 66, 1)'
+        pluginRow.style.borderTop = '1px solid rgba(0, 0, 0, 1)';
 
         pluginRow.style.display = 'flex';
         pluginRow.style.alignItems = 'center';
@@ -688,7 +734,12 @@ export class GenLiteUIPlugin {
 
 
                         settings[setting].stateHandler(value);
-                        valueLabel.innerHTML = settingInput.value;
+
+                        // Update the value label
+                        // valueLabel.innerHTML = value;
+
+                        valueLabel.value = value.toString();
+
 
                         this.setKey(plugin + "." + setting, value);
                     });
@@ -705,11 +756,46 @@ export class GenLiteUIPlugin {
                     settingsRow.style.justifyContent = 'center';
 
                     // Add a value label to the sliderRow   
-                    let valueLabel = document.createElement('label');
+                    // let valueLabel = document.createElement('label');
+                    // valueLabel.style.width = '20%';
+                    // valueLabel.style.textAlign = 'right';
+                    // valueLabel.style.paddingRight = '10px';
+                    // valueLabel.innerHTML = settingInput.value;
+                    // sliderRow.appendChild(valueLabel);
+
+                    // Make an editable value label
+                    let valueLabel = document.createElement('input');
                     valueLabel.style.width = '20%';
                     valueLabel.style.textAlign = 'right';
                     valueLabel.style.paddingRight = '10px';
-                    valueLabel.innerHTML = settingInput.value;
+                    valueLabel.style.backgroundColor = 'rgba(92, 92, 92, 0.75)';
+                    valueLabel.style.border = '1px solid rgba(0, 0, 0, 1)';
+                    valueLabel.style.borderRadius = '0px 0px 0px 0px';
+                    valueLabel.style.color = 'white';
+                    valueLabel.value = settingInput.value;
+                    
+                    valueLabel.addEventListener('change', () => {
+                        // Get the value as a number
+                        let value = parseFloat(valueLabel.value);
+
+                        // If the value is not a number, set it to the minimum value
+                        if (isNaN(value)) {
+                            value = settings[setting].min;
+                        }
+
+                        // If the value is less than the minimum value, set it to the minimum value
+                        if (value < settings[setting].min) {
+                            value = settings[setting].min;
+                        }
+
+                        // If the value is greater than the maximum value, set it to the maximum value
+                        if (value > settings[setting].max) {
+                            value = settings[setting].max;
+                        }
+
+                        // Set the value of the slider
+                        settingInput.value = value.toString();
+                    });
                     sliderRow.appendChild(valueLabel);
 
 
