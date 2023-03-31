@@ -33,7 +33,7 @@ import { GenLiteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
 import { GenLiteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
 import { GenLiteMusicPlugin } from "./plugins/genlite-music.plugin";
 import { GenLiteLocationsPlugin } from "./plugins/genlite-locations.plugin";
-import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
+// import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
 import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
 import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
 import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
@@ -43,6 +43,7 @@ import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
 import { GenLiteItemDisplays } from "./plugins/genlite-itemdisplay.plugin";
 import { GenLiteHealthRegenerationPlugin } from './plugins/genlite-health-regeneration.plugin';
 import { GenLiteFPSCounter } from "./plugins/genlite-fps.plugin";
+import { GenLiteEnhancedContextMenu } from "./plugins/genlite-enhanced-context-menu.plugin";
 
 declare const GM_getResourceText: (s: string) => string;
 
@@ -205,7 +206,7 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteMenuScaler);
         await genlite.pluginLoader.addPlugin(GenLiteMusicPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteLocationsPlugin);
-        await genlite.pluginLoader.addPlugin(GenLiteMenuSwapperPlugin);
+    //    await genlite.pluginLoader.addPlugin(GenLiteMenuSwapperPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteItemTooltips);
         await genlite.pluginLoader.addPlugin(GenLiteSoundNotification);
         await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
@@ -214,6 +215,7 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteItemDisplays);
         await genlite.pluginLoader.addPlugin(GenLiteHealthRegenerationPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteFPSCounter);
+        await genlite.pluginLoader.addPlugin(GenLiteEnhancedContextMenu);
 
         /** post init things */
         // await document['GenLiteDatabasePlugin'].postInit();
