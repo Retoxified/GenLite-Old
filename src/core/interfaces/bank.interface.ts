@@ -39,4 +39,5 @@ interface Bank {
     }>,
     saved_withdraw_x: number,
     visible: boolean,
+    selected_page: number,
 }

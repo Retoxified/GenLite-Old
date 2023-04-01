@@ -79,6 +79,27 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
             // Set the Player Tag's HTML to the Player's Nickname
             this.trackedPlayers[pID].tag.innerHTML = this.trackedPlayers[pID].character.nickname;
 
+            if(document.genlite.isAprilFools){
+                console.log()
+                if(this.trackedPlayers[pID].character.nickname == "Balls"){
+                    this.trackedPlayers[pID].tag.innerHTML = "Smelly " + this.trackedPlayers[pID].tag.innerHTML;
+                } else if (this.trackedPlayers[pID].character.nickname == "Nick"){
+                    this.trackedPlayers[pID].tag.innerHTML = "Pants Thief";
+                } else if (this.trackedPlayers[pID].character.nickname == "Red Bean"){
+                    this.trackedPlayers[pID].tag.innerHTML = "Lima Bean";
+                } else if (this.trackedPlayers[pID].character.nickname == "Rainbow Dash"){
+                    this.trackedPlayers[pID].tag.innerHTML = "Unwitting Test Subject Bean";
+                } else if (this.trackedPlayers[pID].character.nickname == "Chicken"){
+                    this.trackedPlayers[pID].tag.innerHTML = "Sweaty Chickens";
+                } else if (this.trackedPlayers[pID].character.nickname == "Weorhtleas"){
+                    this.trackedPlayers[pID].tag.innerHTML = "Weorhtlaes";
+                } else if (this.trackedPlayers[pID].character.nickname == "2 Pi"){
+                    this.trackedPlayers[pID].tag.innerHTML = "Friggen Math Nerd";
+                } else {
+                    this.trackedPlayers[pID].tag.innerHTML = this.trackedPlayers[pID].tag.innerHTML + " is a Smelly Nerd";
+                }
+            }
+
             // Set the Player Tag's Attributes
             
             // Font Family
