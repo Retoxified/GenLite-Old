@@ -262,13 +262,20 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
                 document.game.Inventory.prototype._getAllContextOptions = function(e, t) {
                     plugin.originalInventoryContextOptions.call(this, e, t);
 
+                    let itemId = this.items[e].item;
+                    if (itemId.startsWith('$scrip-')) {
+                        itemId = itemId.substring(7);
+                    } else if (itemId.startsWith('$q-')) {
+                        itemId = itemId.substring(3);
+                    }
+
                     let r = {
                         type: "item",
                         id: e,
-                        text: () => "<span class='item'>" + document.game.DATA.items[this.items[e].item].name + "</span>"
+                        text: () => "<span class='item'>" + document.game.DATA.items[itemId].name + "</span>"
                     }
 
-                    let cleanName = document.game.DATA.items[this.items[e].item].name.replace(' ', '_');
+                    let cleanName = document.game.DATA.items[itemId].name.replace(' ', '_');
 
                     // Remove H.Q. / L.Q. from the name of the item
                     cleanName = cleanName.replace('H.Q.', '');
