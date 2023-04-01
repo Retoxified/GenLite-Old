@@ -444,7 +444,7 @@ export class GenLiteUIPlugin {
         pluginCogAndCheckbox.appendChild(pluginCheckbox);
 
 
-        // Store the Plugin Name and State into Local Storage // MYQUICKREFTAG
+        // Store the Plugin Name and State into Local Storage
         // Determine if there is an old key
         if (oldKey !== null && oldKey !== undefined && oldKey !== '') {
             // Get the old key
