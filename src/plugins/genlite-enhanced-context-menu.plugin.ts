@@ -152,7 +152,6 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
                         action: () => {
                             // Take the name of the NPC remove any spaces 
                             const cleanName = self.info.name.replace(' ', '_');
-                            console.log(cleanName);
                             window.open(plugin.wikiBaseURL + cleanName, '_blank');
                         }
                     })
