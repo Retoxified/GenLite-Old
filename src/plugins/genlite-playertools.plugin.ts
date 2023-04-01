@@ -98,7 +98,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
                 } else if (this.trackedPlayers[pID].character.nickname == "Enchili"){
                     this.trackedPlayers[pID].tag.innerHTML = "Made An Inapproprate Request";
                 } else if (this.trackedPlayers[pID].character.nickname == "Stemman"){
-                    this.trackedPlayers[pID].tag.innerHTML = "Boomer";
+                    this.trackedPlayers[pID].tag.innerHTML = "Stairmman";
                 } else if (this.trackedPlayers[pID].character.nickname == "Dan"){
                     this.trackedPlayers[pID].tag.innerHTML = "Chris";
                 } else if (this.trackedPlayers[pID].character.nickname == "Despair"){
