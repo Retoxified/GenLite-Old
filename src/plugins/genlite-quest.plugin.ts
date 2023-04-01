@@ -17,14 +17,18 @@ export class GenLiteQuestPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteQuestPlugin';
 
     isPluginEnabled: boolean = true;
-    // pluginSettings: Settings = {
-    // };
+    pluginSettings: Settings = {
+    };
 
     questCounterDiv: HTMLElement;
     updateTimer = 0;
 
     async init() {
         document.genlite.registerPlugin(this);
+    }
+
+    async postInit() {
+        document.genlite.ui.registerPlugin("Quest Counter", null, this.handlePluginState.bind(this), this.pluginSettings);
     }
 
     public loginOK() {
@@ -40,6 +44,11 @@ export class GenLiteQuestPlugin implements GenLitePlugin {
             if (this.updateTimer) {
                 clearTimeout(this.updateTimer);
                 this.updateTimer = 0;
+            }
+            // Remove the quest counter
+            if (this.questCounterDiv) {
+                this.questCounterDiv.remove();
+                this.questCounterDiv = null;
             }
         }
         this.isPluginEnabled = state;
