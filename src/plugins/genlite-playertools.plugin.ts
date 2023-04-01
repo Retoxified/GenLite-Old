@@ -29,6 +29,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
         // Checkbox Example
         "Hide Character": {
             type: 'checkbox',
+            oldKey: 'GenLite.PlayerTools.HidePlayer',
             value: false,
             stateHandler: this.handleHidePlayerSettingChange.bind(this)
         }

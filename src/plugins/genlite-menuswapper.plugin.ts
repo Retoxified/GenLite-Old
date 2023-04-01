@@ -29,8 +29,15 @@ export class GenLiteMenuSwapperPlugin implements GenLitePlugin {
     pluginSettings : Settings = {
         "Hide Stairs": {
             type: 'checkbox',
+            oldKey: 'NPCMenuSwapper.hideStairs',
             value: this.hideStairs,
             stateHandler: this.handleHideStairsToggle.bind(this)
+        },
+        "Right Click Attack": {
+            type: 'checkbox',
+            oldKey: 'NPCMenuSwapper.rightClickAttack',
+            value: this.rightClickAttack,
+            stateHandler: this.rightClickAttackToggle.bind(this)
         }
     };
     BANK: Bank;

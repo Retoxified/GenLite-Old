@@ -15,7 +15,6 @@ export class GenLiteHealthRegenerationPlugin implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
-
     }
 
     async postInit() {

@@ -31,11 +31,13 @@ export class GenLiteItemTooltips implements GenLitePlugin {
     pluginSettings : Settings = {
         "Food Tooltips": {
             type: "checkbox",
+            oldKey: "GenLite.itemTooltips.FoodTooltips",
             value: this.isFoodEnabled,
             stateHandler: this.handleFoodEnableDisable.bind(this)
         },
         "Value Tooltips": {
             type: "checkbox",
+            oldKey: "GenLite.itemTooltips.ValueTooltips",
             value: this.isValueEnabled,
             stateHandler: this.handleValueEnableDisable.bind(this)
         }

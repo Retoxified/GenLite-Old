@@ -36,6 +36,7 @@ export class GenLiteSoundNotification implements GenLitePlugin {
     pluginSettings : Settings = {
         "Low Health Sound": {
             type: "checkbox",
+            oldKey: "GenLite.soundNotifications.LowHealthSound",
             value: this.doHealthCheck,
             stateHandler: this.handleDoHealthCheck.bind(this),
             children: {
@@ -50,6 +51,7 @@ export class GenLiteSoundNotification implements GenLitePlugin {
         },
         "Inventory Space Sound": {
             type: "checkbox",
+            oldKey: "GenLite.soundNotifications.InventorySpaceSound",
             value: this.doInvCheck,
             stateHandler: this.handleInvCheckEnableDisable.bind(this),
             children : {
@@ -64,6 +66,7 @@ export class GenLiteSoundNotification implements GenLitePlugin {
         },
         "Override Game Volume": {
             type: "checkbox",
+            oldKey: "GenLite.soundNotifications.OverrideGameVolume",
             value: this.overrideIGNVolume,
             stateHandler: this.handelOverrideVolumeEnableDisable.bind(this),
             children: {

@@ -74,11 +74,13 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     pluginSettings : Settings = {
         "Highlight Items": {
             type: "checkbox",
+            oldKey: "GenLite.itemHighlights.HighlightItems",
             value: this.hideLables,
             stateHandler: this.handleHideLabelsEnableDisable.bind(this),
         },
         "Priority Item Color": {
             value: "#ffa500",
+            oldKey: "GenLite.itemHighlights.PriorityItemColor",
             type: "color",
             stateHandler: this.handleColorChange.bind(this),
         },

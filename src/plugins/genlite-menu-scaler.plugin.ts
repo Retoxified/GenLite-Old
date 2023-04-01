@@ -23,6 +23,7 @@ export class GenLiteMenuScaler implements GenLitePlugin {
     pluginSettings : Settings = {
         "Right Click Menu": {
             type: "range",
+            oldKey: "GenLite.menuScaler.RightClickMenu",
             value: 1,
             min: 0.1,
             max: 4,
