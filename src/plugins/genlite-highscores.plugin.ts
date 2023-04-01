@@ -71,11 +71,13 @@ export class GenLiteHighscores implements GenLitePlugin {
         artistry: true,
         tailoring: true,
         whittling: true,
-        total: true
+        total: true,
+        combatLevel: true
     }
 
     pluginSettings: Settings = {}
 
+    curCombatLevel: number = 0;
     async init() {
         document.genlite.registerPlugin(this);
         console.log(`%c[GenLite] TODO: %c${this.constructor.name} %c need an implementation for Toggle All`, "color: #ff0", "color: #fff", "color: #f00");
@@ -138,6 +140,10 @@ export class GenLiteHighscores implements GenLitePlugin {
         this.sendInterval = null;
     }
 
+    initializeUI () {
+        this.curCombatLevel = document.game.PLAYER_INFO.combat_level;
+    }
+
     handle(verb, payload) {
         /* count steps */
         if (verb == "move" && document.game.PLAYER && payload.id == document.game.PLAYER.id) {
@@ -181,6 +187,10 @@ export class GenLiteHighscores implements GenLitePlugin {
         if (verb == 'xp') {
             this.updatedSkills[payload.skill] = true;
             this.updatedSkills["total"] = true;
+            if(this.curCombatLevel != document.game.PLAYER_INFO.combat_level){
+                this.updatedSkills['combatLevel'] = true;
+                this.curCombatLevel = document.game.PLAYER_INFO.combat_level;
+            }
         }
     }
 
@@ -211,6 +221,13 @@ export class GenLiteHighscores implements GenLitePlugin {
                     Stat: "Total",
                     Data1: totalLevel,
                     Data2: totalXp
+                });
+            }
+
+            if (this.updatedSkills["combatLevel"]){
+                this.highscores.Stats.push({
+                    Stat: "Combat Level",
+                    Data1: this.curCombatLevel
                 });
             }
             this.updatedSkills = {};

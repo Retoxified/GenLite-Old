@@ -33,7 +33,6 @@ import { GenLiteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
 import { GenLiteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
 import { GenLiteMusicPlugin } from "./plugins/genlite-music.plugin";
 import { GenLiteLocationsPlugin } from "./plugins/genlite-locations.plugin";
-// import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
 import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
 import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
 import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
@@ -44,6 +43,7 @@ import { GenLiteItemDisplays } from "./plugins/genlite-itemdisplay.plugin";
 import { GenLiteHealthRegenerationPlugin } from './plugins/genlite-health-regeneration.plugin';
 import { GenLiteFPSCounter } from "./plugins/genlite-fps.plugin";
 import { GenLiteEnhancedContextMenu } from "./plugins/genlite-enhanced-context-menu.plugin";
+import { GenLiteQuestPlugin } from "./plugins/genlite-quest.plugin";
 
 declare const GM_getResourceText: (s: string) => string;
 
@@ -53,8 +53,8 @@ declare global {
         game: any;
         client: any;
         genlite: {
-          [key: string]: any,
-          settings: GenLiteSettingsPlugin,
+            [key: string]: any,
+            settings: GenLiteSettingsPlugin,
         };
         initGenLite: () => void;
     }
@@ -160,7 +160,6 @@ let isInitialized = false;
         gameObject('GAME', 'K_.game');
         gameObject('GRAPHICS', 'KS.graphics');
         gameObject('INVENTORY', 'uw');
-        gameObject('KEYBOARD', 'XS');
         gameObject('NETWORK', 'pg.network');
         gameObject('PHASEDLOADINGMANAGER', 'gS');
         gameObject('PLAYER', '$S.player');
@@ -173,6 +172,18 @@ let isInitialized = false;
         gameObject('PLAYER_INFO', 'fw');
         gameObject('NPC', 'I_');
         gameObject('TRADE', 'Mw');
+        gameObject('NETWORK_CONTAINER', 'mg');
+
+        /* Special Case Objects */
+        /* have to do this here because keyboard is constantly redefined */
+        gameObject('KEYBOARD', 'XS');
+        hookKeyboard();
+
+        //Functions
+        gameObject('returnsAnItemName', 'Mg');
+
+        //Constants
+        gameObject('SOME_CONST_USED_FOR_BANK', 'P');
 
         if (isInitialized) {
             document.genlite.onUIInitialized();
@@ -206,7 +217,6 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteMenuScaler);
         await genlite.pluginLoader.addPlugin(GenLiteMusicPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteLocationsPlugin);
-    //    await genlite.pluginLoader.addPlugin(GenLiteMenuSwapperPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteItemTooltips);
         await genlite.pluginLoader.addPlugin(GenLiteSoundNotification);
         await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
@@ -216,6 +226,7 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteHealthRegenerationPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteFPSCounter);
         await genlite.pluginLoader.addPlugin(GenLiteEnhancedContextMenu);
+        await genlite.pluginLoader.addPlugin(GenLiteQuestPlugin);
 
         /** post init things */
         // await document['GenLiteDatabasePlugin'].postInit();
@@ -235,6 +246,13 @@ let isInitialized = false;
         //         The GenLiteUIPlugin.registerPlugin function requires being present in the postInit for a function
         //         as it calls various things involving settings that may not be ready until after init.
         genlite.onUIInitialized();
+
+        document.genlite.isAprilFools = document.genlite.settings.add("AprilFools.Enable", true, "April Fools", "checkbox",     handleAprilFools, this);
+
+    }
+
+    function handleAprilFools(state){
+        document.genlite.isAprilFools = state;
     }
 
     function firefoxOverride(e) {
@@ -281,6 +299,18 @@ let isInitialized = false;
         }
     }
 
+    /* KEYBOARD is redefined everytime the get gets focus
+        so we set a second listener with a small timeout that sets out variable just after genfanads
+        this feels really fucking hacky though
+    */
+    function hookKeyboard() {
+        window.addEventListener("focus", (e) => {
+            setTimeout(() => {
+                document.game.KEYBOARD = document.client.get('XS');
+            }, 10);
+        });
+    }
+
     hookClient();
     window.addEventListener('load', (e) => {
         document.initGenLite = initGenLite;
@@ -297,5 +327,4 @@ let isInitialized = false;
         }
 
     });
-
 })();
