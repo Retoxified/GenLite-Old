@@ -444,7 +444,7 @@ export class GenLiteUIPlugin {
         pluginCogAndCheckbox.appendChild(pluginCheckbox);
 
 
-        // Store the Plugin Name and State into Local Storage // MYQUICKREFTAG
+        // Store the Plugin Name and State into Local Storage
         // Determine if there is an old key
         if (oldKey !== null && oldKey !== undefined && oldKey !== '') {
             // Get the old key
@@ -754,14 +754,6 @@ export class GenLiteUIPlugin {
 
                     // Center the label
                     settingsRow.style.justifyContent = 'center';
-
-                    // Add a value label to the sliderRow   
-                    // let valueLabel = document.createElement('label');
-                    // valueLabel.style.width = '20%';
-                    // valueLabel.style.textAlign = 'right';
-                    // valueLabel.style.paddingRight = '10px';
-                    // valueLabel.innerHTML = settingInput.value;
-                    // sliderRow.appendChild(valueLabel);
 
                     // Make an editable value label
                     let valueLabel = document.createElement('input');
