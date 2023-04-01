@@ -241,6 +241,13 @@ let isInitialized = false;
         //       this needs to move to the qS override at the bottom of this
         //       file.
         genlite.onUIInitialized();
+
+        document.genlite.isAprilFools = document.genlite.settings.add("AprilFools.Enable", true, "April Fools", "checkbox",     handleAprilFools, this);
+
+    }
+
+    function handleAprilFools(state){
+        document.genlite.isAprilFools = state;
     }
 
     function firefoxOverride(e) {
