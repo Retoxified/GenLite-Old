@@ -97,8 +97,6 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
                     this.trackedPlayers[pID].tag.innerHTML = "Pants Thief";
                 } else if (this.trackedPlayers[pID].character.nickname == "Red Bean"){
                     this.trackedPlayers[pID].tag.innerHTML = "Lima Bean";
-                } else if (this.trackedPlayers[pID].character.nickname == "Rainbow Dash"){
-                    this.trackedPlayers[pID].tag.innerHTML = "Unwitting Test Subject Bean";
                 } else if (this.trackedPlayers[pID].character.nickname == "Chicken"){
                     this.trackedPlayers[pID].tag.innerHTML = "Sweaty Chickens";
                 } else if (this.trackedPlayers[pID].character.nickname == "Weorhtleas"){
@@ -115,6 +113,8 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
                     this.trackedPlayers[pID].tag.innerHTML = "#Off-Topic";
                 } else if (this.trackedPlayers[pID].character.nickname == "Enchi"){
                     this.trackedPlayers[pID].tag.innerHTML = "Cumlord7";
+                } else if (this.trackedPlayers[pID].character.nickname == "Nice Vodka") {
+                    this.trackedPlayers[pID].tag.innerHTML = "Nice Gin";
                 } else {
                     this.trackedPlayers[pID].tag.innerHTML = this.trackedPlayers[pID].tag.innerHTML + " is a Smelly Nerd";
                 }
