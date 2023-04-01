@@ -33,6 +33,7 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
     static defaultFogLevel = 0.5;
 
     originalCameraMode: Function;
+    originalAdvanceToBB: Function;
 
     unlockCamera: boolean = true;
     maxDistance: Number = 15;
@@ -46,6 +47,14 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
+
+        this.originalAdvanceToBB = document.game.Segment.prototype.advanceToBB;
+        // TODO: after settings rework move this to updateState/disable plugin
+        let self = this;
+        document.game.Segment.prototype.advanceToBB = function (c, d, debug = false) {
+            c.y = Math.round(c.y * 100) / 100;
+            return self.originalAdvanceToBB.call(this, c, d, debug);
+        };
 
         this.originalCameraMode = document.game.WorldManager.updatePlayerTile;
 
