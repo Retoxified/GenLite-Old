@@ -755,14 +755,6 @@ export class GenLiteUIPlugin {
                     // Center the label
                     settingsRow.style.justifyContent = 'center';
 
-                    // Add a value label to the sliderRow   
-                    // let valueLabel = document.createElement('label');
-                    // valueLabel.style.width = '20%';
-                    // valueLabel.style.textAlign = 'right';
-                    // valueLabel.style.paddingRight = '10px';
-                    // valueLabel.innerHTML = settingInput.value;
-                    // sliderRow.appendChild(valueLabel);
-
                     // Make an editable value label
                     let valueLabel = document.createElement('input');
                     valueLabel.style.width = '20%';
