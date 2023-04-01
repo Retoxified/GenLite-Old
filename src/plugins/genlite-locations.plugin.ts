@@ -207,7 +207,8 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
         }
         this.locationCheck()
     }
-    private updateMapIframeSrc(): void {
+    private updateMapIframeSrc(override=false): void {
+        if (!this.mapFocus && !this.mapTranslucent && !override) return
         let layer = document.game.PLAYER.location.layer.includes("world") ?
             document.game.PLAYER.location.layer.replace("world", '') : document.game.PLAYER.location.layer
         //Zoom Logic Goes here?
@@ -241,13 +242,14 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
         this.mapFocus = true
         this.mapTranslucent = false
 
-        this.updateMapIframeSrc()
+        this.updateMapIframeSrc(true)
 
         this.mapIframe.classList.add("map-iframe-focus")
         this.mapIframe.classList.remove("iframe-map-hidden")
         this.mapIframe.classList.remove("map-iframe-translucent")
     }
     openMap() {
+        this.updateMapIframeSrc(true)
         let layer = document.game.PLAYER.location.layer.includes("world") ?
             document.game.PLAYER.location.layer.replace("world", '') : document.game.PLAYER.location.layer
 

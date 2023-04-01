@@ -86,6 +86,8 @@ export class GenLiteFPSCounter implements GenLitePlugin {
         this.stats.dom.style.position = 'absolute';
         this.stats.dom.style.left = '';
         this.stats.dom.style.right = '0px';
+        this.stats.dom.style.top = '30px';
+        this.stats.dom.style.zIndex = '9998';
         document.body.appendChild(this.stats.dom);
         this.isInit = true;
     }
