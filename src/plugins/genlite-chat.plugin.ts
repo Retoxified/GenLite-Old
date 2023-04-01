@@ -186,8 +186,12 @@ export class GenLiteChatPlugin implements GenLitePlugin {
     bufferHooked: boolean = false;
     buffers: Record<string, GenLiteMessageBuffer> = {};
 
+    isPluginEnabled = true;
+
     async init() {
         document.genlite.registerPlugin(this);
+        this.originalGameMessage = document.game.CHAT.addGameMessage;
+
         document.genlite.database.add((db) => {
             let store = db.createObjectStore('chatlog', {
                 keyPath: 'key',
@@ -225,13 +229,11 @@ export class GenLiteChatPlugin implements GenLitePlugin {
     }
 
     handlePluginState(state: boolean): void {
-        // TODO: Implement
-        // Display Yellow Console Message Stating the plugin needs to implement this
-        console.log(`%c[GenLite] %c${this.constructor.name} %cneeds to implement handlePluginState()`, "color: #ff0", "color: #fff", "color: #f00");
+        this.isPluginEnabled = state;
+        this.updateState();
     }
 
     public loginOK() {
-        this.originalGameMessage = document.game.CHAT.addGameMessage;
         this.updateState();
     }
 
@@ -251,13 +253,13 @@ export class GenLiteChatPlugin implements GenLitePlugin {
     }
 
     updateState() {
-        if (this.condenseMessages || this.preserveMessages) {
+        if (this.isPluginEnabled && (this.condenseMessages || this.preserveMessages)) {
             this.hookBuffer();
         } else {
             this.unhookBuffer();
         }
 
-        if (this.filterGameMessages) {
+        if (this.isPluginEnabled && this.filterGameMessages) {
             document.game.CHAT.addGameMessage = this.newGameMessage.bind(
                 document.game.CHAT,
                 this,
