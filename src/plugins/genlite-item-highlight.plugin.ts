@@ -377,9 +377,9 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         // when disabling the plugin clear the current list of items
         if (state === false) {
             this.clearTracked();
-            document.game.ItemStack.intersects = this.originalItemStackIntersects;
+            document.game.ItemStack.prototype.intersects = this.originalItemStackIntersects;
         } else {
-            document.game.ItemStack.intersects = this.ItemStack_intersects;
+            document.game.ItemStack.prototype.intersects = this.ItemStack_intersects;
         }
 
         this.isPluginEnabled = state;
