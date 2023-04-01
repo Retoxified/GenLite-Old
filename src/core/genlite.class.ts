@@ -58,6 +58,12 @@ export class GenLite {
         this.installHook(document.game.Trade.prototype, 'handlePacket', this.hookTrade_handlePacket);
         this.installHook(document.game.Bank.prototype, '_addContextOptionsActual')
         this.installHook(document.game.Bank.prototype, '_addContextOptions')
+    
+        // Enhanced Context Menu Hooks
+        this.installHook(document.game.NPC.prototype, 'intersects', this.hookNPC_Intersects);
+        this.installHook(document.game.OptimizedScene.prototype, 'intersects', this.hookOptimizedScene_Intersects);
+        this.installHook(document.game.Inventory.prototype, '_getAllContextOptions', this.hookInventory_getAllContextOptions);
+
     }
 
     onUIInitialized() {
@@ -79,11 +85,9 @@ export class GenLite {
     hookPhased(fnName: string, ...args: Array<unknown>) {
         if (args[0] === "game_loaded") {
             this.hook('loginOK', args);
-            console.log("GenLite: loginOK hook fired")
 
             if (!this.ui.hasInitialized) {
                 this.pluginLoader.postInit();
-                console.log("GenLite: postInit hook fired");
             }
         }
     }
@@ -97,6 +101,18 @@ export class GenLite {
         this.hook('Trade_handlePacket', args)
     }
 
+    // Intersect Hooks
+    hookNPC_Intersects(fnName: string, ...args: Array<unknown>) {
+        this.hook('NPC_Intersects', ...args);
+    }
+
+    hookOptimizedScene_Intersects(fnName: string, ...args: Array<unknown>) {
+        this.hook('OptimizedScene_Intersects', ...args);
+    }
+
+    hookInventory_getAllContextOptions(fnName: string, ...args: Array<unknown>) {
+        this.hook('Inventory_getAllContextOptions', ...args);
+    }
 
     registerPlugin(plugin: GenLitePlugin) {
         this.pluginList.push(plugin);
