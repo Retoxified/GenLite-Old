@@ -64,6 +64,7 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
     }
 
     async init() {
+        document.genlite.registerPlugin(this);
         this.originalNPCIntersects = document.game.NPC.prototype.intersects;
         this.originalSceneIntersects = document.game.OptimizedScene.prototype.intersects;
         this.originalInventoryContextOptions = document.game.Inventory.prototype._getAllContextOptions;
@@ -75,255 +76,213 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
 
     handlePluginState(state: boolean): void {
         this.isEnabled = state;
-        this.updateState();
     }
 
     handleHideStairsToggle(state: boolean): void {
         this.hideStairs = state;
-        this.updateState();
     }
 
     handleLookupNPCsToggle(state: boolean): void {
         this.lookupNPCs = state;
-        this.updateState();
     }
 
     handleLookupObjectsToggle(state: boolean): void {
         this.lookupObjects = state;
-        this.updateState();
     }
 
     handleLookupItemsToggle(state: boolean): void {
         this.lookupItems = state;
-        this.updateState();
     }
 
     handleBetterRockNamesToggle(state: boolean): void {
         this.betterRockNames = state;
-        this.updateState();
     }
 
     handleRightClickAttackToggle(state: boolean): void {
         this.rightClickAttack = state;
-        this.updateState();
     }
 
-    updateState() {
-        if (this.isEnabled) {
-            let plugin = this;
-            if (this.lookupNPCs || this.rightClickAttack) {
-                document.game.NPC.prototype.intersects = document.game.NPC.prototype.intersects = function (ray, list) {
-                    const self = (this as any);
-                    let i = self.object.intersect(ray);
-    
-                    if (!i) {
-                        return;
-                    }
+    NPC_Intersects(ray, list) {
+        // If the plugin is disabled or list is empty, return
+        if (!this.isEnabled || list.length === 0) return;
 
-                    list.push({
-                        color: 'green',
-                        distance: i.distance,
-                        priority: - 1,
-                        object: this,
-                        text: 'Examine',
-                        action: () => this.examine()
-                    });
-    
-                    if (self.info.attackable)
-                        list.push({
-                            color: 'red',
-                            distance: i.distance,
-                            priority: (!plugin.rightClickAttack && self.levelDifference <= 10 && !document.game.PLAYER.character.combat) ? 2 : -2,
-                            object: this,
-                            text: "Attack",
-                            action: () => self.attack()
-                        });
-                    if (self.info.talkable)
-                        list.push({
-                            color: 'red',
-                            distance: i.distance,
-                            priority: 1,
-                            object: this,
-                            text: "Talk to",
-                            action: () => self.talk()
-                        });
-                    if (self.info.tradeable)
-                        list.push({
-                            color: 'red',
-                            distance: i.distance,
-                            priority: 2,
-                            object: this,
-                            text: "Trade with",
-                            action: () => self.trade()
-                        });
-                    if (self.info.banker)
-                        list.push({
-                            color: 'red',
-                            distance: i.distance,
-                            priority: 3,
-                            object: this,
-                            text: "Bank with",
-                            action: () => self.bank()
-                        });
+        // Create a Map to store the actions
+        let NPCs = new Map();
 
-                    if (plugin.lookupNPCs) {
-                        list.push({
-                            object: this,
-                            distance: i.distance,
-                            priority: 0,
-                            text: "Lookup",
-                            action: () => {
-                                // Take the name of the NPC remove any spaces
-                                const cleanName = self.info.name.replace(' ', '_');
-                                window.open(plugin.wikiBaseURL + cleanName, '_blank');
-                            }
-                        })
-                    }
-                }
-            } else {
-                document.game.NPC.prototype.intersects = this.originalNPCIntersects;
+        for (let i = 0; i < list.length; i++) {
+            // Get the action object
+            let actionObject = list[i].object;
+
+            if (actionObject.type === "player") continue;
+
+            // See if the object is already in the set
+            if (NPCs.has(actionObject)) {
+                // Push the action to the existing array
+                NPCs.get(actionObject).push(list[i]);
             }
-
-            if (this.lookupObjects || this.hideStairs || this.betterRockNames) {
-                document.game.OptimizedScene.prototype.intersects = function (ray, list) {
-                    const self = (this as any);
-                    let seen = new Set();
-                    for (let i in self.objectStatus) {
-                        let o = self.allObjects[i];
-                        if (!self.checkInteract(o)) continue;
-                        if (o.ignore_intersections) continue;
-    
-                        let oi;
-                        if (o.bounding_box) {
-                            let point = ray.ray.intersectBox(o.bounding_box, plugin.intersect_vector);
-                            oi = point ? [point] : [];
-                        } else {
-                            oi = ray.intersectObject(o.mesh, true);
-                        }
-                        if (oi.length > 0) {
-                            let thing = o.source;
-                            let actions = thing.actions();
-                            for (let i in actions) {
-                                /* if stairs or ladder depo if setting checked */
-                                if (plugin.hideStairs && !document.game.KEYBOARD['16']) { //its conveint genfanad keeps track of all keyboard keys
-                                    switch (actions[i].text) {
-                                        case "Climb up":
-                                        case "Climb down":
-                                            actions[i].priority = -10;
-                                    }
-                                } else {
-                                    switch (actions[i].text) {
-                                        case "Climb up":
-                                        case "Climb down":
-                                            actions[i].priority = 1;
-                                    }
-                                }
-                                list.push(Object.assign({}, actions[i], {
-                                    distance: oi[0].distance
-                                }));
-                            }
-
-                            if (plugin.betterRockNames && o.modelInfo.impl && o.modelInfo.impl.params && o.modelInfo.impl.class === "rock" && o.modelInfo.name === "Rock") {
-                                let rockName = o.modelInfo.impl.params;
-                                // Capitalize the first letter of the rock name
-                                rockName = rockName.charAt(0).toUpperCase() + rockName.slice(1);
-
-                                o.modelInfo.name = rockName + " Rock";
-                            } else if (!plugin.betterRockNames && o.modelInfo.impl && o.modelInfo.impl.params && o.modelInfo.impl.class === "rock" && o.modelInfo.name.includes("Rock")) {
-                                o.modelInfo.name = "Rock";
-                            }
-
-                            // If it has more than just an examine action, add a lookup action (it likely has a wiki page)
-                            // and we are looking up objects
-                            if (actions.length !== 1 && plugin.lookupObjects) {
-                                list.push({
-                                    object: thing,
-                                    distance: oi[0].distance,
-                                    priority: -2,
-                                    text: "Lookup",
-                                    action: () => {
-                                        if (plugin.betterRockNames && o.modelInfo.impl && o.modelInfo.impl.params && o.modelInfo.impl.class === "rock" && o.modelInfo.name.includes("Rock")) {
-                                            let cleanName = thing.text();
-                                            cleanName = thing.text().replace(/(<([^>]+)>)/gi, "");
-                                            cleanName = cleanName.replace(' ', '_'); // Normal Space Replacement
-                                            cleanName = cleanName.replace('%20', '_'); // HTML Special Character Space Replacement
-
-                                            window.open(plugin.wikiBaseURL + cleanName, '_blank');
-                                        } else {
-                                            // Remove the HTML tags from the text
-                                            let cleanName = thing.text().replace(/(<([^>]+)>)/gi, "");
-
-                                            // Okay so this is a bit of a hack, but it works
-                                            // This fixes the issue where when you disable the better rock names option
-                                            // the rocks still have the type ("Iron", "Coal", etc.) in the name
-                                            if (o.modelInfo.impl && o.modelInfo.impl.params && o.modelInfo.impl.class === "rock" && o.modelInfo.name.includes("Rock")) {
-                                                let rockType = o.modelInfo.impl.params;
-
-                                                // Capitalize the first letter of the rock type
-                                                rockType = rockType.charAt(0).toUpperCase() + rockType.slice(1);
-
-                                                cleanName = rockType + " Rock";
-                                            }
-        
-                                            // Replace any spaces with underscores
-                                            cleanName = cleanName.replace(' ', '_');
-
-                                            // Open the wiki page in a new tab
-                                            window.open(plugin.wikiBaseURL + cleanName, '_blank');
-                                        }
-                                    }
-                                })
-                            }
-                        }
-                    }
-                }
-            } else {
-                document.game.OptimizedScene.prototype.intersects = this.originalSceneIntersects;
+            else {
+                // Create a new array and push the action
+                NPCs.set(actionObject, [list[i]]);
             }
-
-            if (this.lookupItems) {
-                document.game.Inventory.prototype._getAllContextOptions = function(e, t) {
-                    plugin.originalInventoryContextOptions.call(this, e, t);
-
-                    let itemId = this.items[e].item;
-                    if (itemId.startsWith('$scrip-')) {
-                        itemId = itemId.substring(7);
-                    } else if (itemId.startsWith('$q-')) {
-                        itemId = itemId.substring(3);
-                    }
-
-                    let r = {
-                        type: "item",
-                        id: e,
-                        text: () => "<span class='item'>" + document.game.DATA.items[itemId].name + "</span>"
-                    }
-
-                    let cleanName = document.game.DATA.items[itemId].name.replace(' ', '_');
-
-                    // Remove H.Q. / L.Q. from the name of the item
-                    cleanName = cleanName.replace('H.Q.', '');
-                    cleanName = cleanName.replace('L.Q.', '');
-
-                    // Remove " +1" and " +2" from the name of the item
-                    cleanName = cleanName.replace(' +1', '');
-                    cleanName = cleanName.replace(' +2', '');
-
-                    t.push({
-                        text: "Lookup",
-                        priority: -2,
-                        object: r,
-                        action: () => {
-                            window.open(plugin.wikiBaseURL + cleanName, '_blank');
-                        }
-                    })
-                }   
-            } else {
-                document.game.Inventory.prototype._getAllContextOptions = this.originalInventoryContextOptions;
-            }
-        } else {
-            document.game.NPC.prototype.intersects = this.originalNPCIntersects;
-            document.game.OptimizedScene.prototype.intersects = this.originalSceneIntersects;
-            document.game.Inventory.prototype._getAllContextOptions = this.originalInventoryContextOptions;
         }
+
+        NPCs.forEach((value, key) => {
+            if (this.lookupNPCs && (!value.find((action) => action.text === "Lookup"))) {
+                // Create Lookup Action
+                list.push({
+                    object: key,
+                    distance: value[0].distance,
+                    priority: -3,
+                    text: "Lookup",
+                    action: () => {
+                        const cleanName = key.info.name.replace(' ', '_');
+                        // Take the name of the NPC remove any spaces
+                        window.open(this.wikiBaseURL + cleanName, '_blank');
+                    }
+                })
+            }
+
+            if (key.info.attackable) {
+                // Find the list element with the attack action attached to key
+                let attackAction = list.find((action) => action.text === "Attack" && action.object === key);
+                attackAction.priority = (!this.rightClickAttack && key.levelDifference <= 10 && !document.game.PLAYER.character.combat) ? 2 : -2;
+            }
+        });
+    }
+
+    OptimizedScene_Intersects(ray, list) {
+        if (!this.isEnabled || list.length === 0) return;
+
+        let sceneObjects = new Map();
+
+        for (let i = 0; i < list.length; i++) {
+            let sceneObject = list[i].object;
+
+            if (sceneObject.type === "player") continue;
+
+            // See if the object is already in the set
+            if (sceneObjects.has(sceneObject)) {
+                // Push the action to the existing array
+                sceneObjects.get(sceneObject).push(list[i]);
+            } else {
+                // Create a new array and push the action
+                sceneObjects.set(sceneObject, [list[i]]);
+            }
+        }
+
+        // Find all actions in the list that are "Climb up" or "Climb down"
+        let climbActions = list.filter((action) => action.text === "Climb up" || action.text === "Climb down");
+
+        if (this.hideStairs && !document.game.KEYBOARD['16']) {
+            // Set the priority of all climb actions to -10
+            climbActions.forEach((action) => action.priority = -10);
+        } else {
+            // Set the priority of all climb actions to 1
+            climbActions.forEach((action) => action.priority = 1);
+        }
+
+        // 
+        sceneObjects.forEach((value, key) => {
+            // Get the detailed object information
+
+            // If the object has more than one action, it is an object worth looking up
+            // This filters out things like the world object (it contains walk here action)
+            // As well as filters out things with just an examine action
+
+            // Get the detailed object information from document.game.GRAPHICS.scene.allObjects which is an object containing objects stored by their id
+            let detailedObject = document.game.GRAPHICS.scene.allObjects[key.id];
+
+            // If the object is not in the allObjects object, we can't do anything with it
+            if (!detailedObject) {
+                return;
+            }
+
+            if (value.length <= 1 && !(detailedObject.modelInfo && detailedObject.modelInfo.impl && detailedObject.modelInfo.impl.class === "rock")) {
+                return;
+            }
+
+            // Hardcoded things to ignore such as Doors, etc.
+            const nickIgnoreList = ["Door"]
+
+            if (nickIgnoreList.includes(detailedObject.nick)) {
+                return;
+            }
+
+            if (this.lookupObjects && (!value.find((action) => action.text === "Lookup"))) {
+                // Create Lookup Action
+                list.push({
+                    object: key,
+                    distance: value[0].distance,
+                    priority: -3,
+                    text: "Lookup",
+                    action: () => {
+                        // Take the name of the NPC remove any spaces
+                        if (detailedObject.modelInfo.name === "Rock") {
+                            // Get the params from the rock, this is the rock type
+                            let rockType = detailedObject.modelInfo.impl.params;
+
+                            // Capitalize the first letter of the rock type
+                            rockType = rockType.charAt(0).toUpperCase() + rockType.slice(1);
+
+                            const cleanName = rockType + "_Rock";
+                            window.open(this.wikiBaseURL + cleanName, '_blank');
+                        } else {
+                            const cleanName = detailedObject.modelInfo.name.replace(' ', '_');
+                            window.open(this.wikiBaseURL + cleanName, '_blank');
+                        }
+                    }
+                })
+            }
+
+            if (this.betterRockNames && detailedObject.modelInfo.impl.class === "rock") {
+                // Get the params from the rock, this is the rock type
+                let rockType = detailedObject.modelInfo.impl.params;
+
+                // Capitalize the first letter of the rock type
+                rockType = rockType.charAt(0).toUpperCase() + rockType.slice(1);
+
+                // Save the old rock name as a property
+                if (!detailedObject.modelInfo.originalName) {
+                    detailedObject.modelInfo.originalName = detailedObject.modelInfo.name;
+                }
+
+                // Set the new rock name
+                detailedObject.modelInfo.name = rockType + " Rock";
+            } else if (!this.betterRockNames && detailedObject.modelInfo.impl.class === "rock" && detailedObject.modelInfo.originalName) {
+                // Set Model Name back to original name
+                detailedObject.modelInfo.name = detailedObject.modelInfo.originalName;
+                detailedObject.modelInfo.originalName = null; // Remove the original name property, this allows this to only run once
+            }
+
+
+
+        });
+    }
+
+    Inventory_getAllContextOptions(itemID, itemActions) {
+        if (!this.isEnabled && !this.lookupItems) return;
+
+        const objectName = itemActions[0].object.text();
+
+        let cleanName = objectName.replace(/(<([^>]+)>)/gi, ""); // Remove the HTML tags from the name
+        cleanName = cleanName.replace('Scrip - ', ''); // Remove Scrip - from the name of the item
+        cleanName = cleanName.replace(' ', '_'); // Replace spaces with underscores
+
+        // Remove H.Q. / L.Q. from the name of the item
+        cleanName = cleanName.replace('H.Q.', '');
+        cleanName = cleanName.replace('L.Q.', '');
+
+        // Remove " +1" and " +2" from the name of the item
+        cleanName = cleanName.replace(' +1', '');
+        cleanName = cleanName.replace(' +2', '');
+        
+        itemActions.push({
+            text: "Lookup",
+            priority: -2, 
+            object: itemActions[0].object,
+            action: () => {
+                window.open(this.wikiBaseURL + cleanName, '_blank');
+            }
+        })
     }
 }

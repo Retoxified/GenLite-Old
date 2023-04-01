@@ -45,7 +45,6 @@ export class GenLiteGeneralChatCommands implements GenLitePlugin {
     loginOK() {
         if (this.isLogged)
             return;
-        console.log("login");
         this.loginTime = Date.now();
         this.timeSinceLastSave = this.loginTime;
         this.playedSaveInverval = setInterval(() => this.savePlayed.apply(this), 1000); // set an interval to save the playedTime every second in case of ungraceful close
@@ -53,7 +52,6 @@ export class GenLiteGeneralChatCommands implements GenLitePlugin {
     }
 
     logoutOK() {
-        console.log("logout");
         this.loginTime = 0;
         clearInterval(this.playedSaveInverval);
         this.playedSaveInverval = null;

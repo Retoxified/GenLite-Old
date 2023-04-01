@@ -32,7 +32,7 @@ export interface GenLitePlugin {
     Trade_handlePacket?: (packet: any) => void,
     _addContextOptionsActual?: (item: any, contextMenu: any, n: any) => void,
     _addContextOptions?: (itemSlot: Number, contextMenu: any) => void,
-
-
-
+    NPC_Intersects?: (ray: any, list: any) => void,
+    OptimizedScene_Intersects?: (ray: any, list: any) => void,
+    Inventory_Intersects?: (e: any, t: any) => void,
 }
