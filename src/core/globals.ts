@@ -23,3 +23,31 @@ declare interface CommandSpec {
     helpText: string,
     echo: boolean,
 }
+
+declare type Settings = {
+    [key: string]: {
+        type: string,
+        value: any,
+        stateHandler: Function,
+
+        // This should be removed in the future as it is only used for backwards compatibility with the old settings system
+        oldKey?: string,
+
+        // Any Children that are enabled/disabled when this setting is enabled/disabled
+        children?: Settings,
+
+        // If a popup message is needed when the setting is enabled then enter the message here
+        alert?: string
+
+        // Ranges
+        min?: number,
+        max?: number,
+        step?: number
+
+        // Select
+        options?: any[],
+
+        // Tooltips
+        description?: string,
+    }
+}

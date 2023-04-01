@@ -3,11 +3,8 @@
 */
 /*
     This file is part of GenLite.
-
     GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
     GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
@@ -161,6 +158,23 @@ export class GenLiteChatPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteChatPlugin';
     static storageKey = 'IgnoredGameChatMessages';
 
+    pluginSettings : Settings = {
+        // Checkbox Example
+        "Condense Messages": {
+            type: 'checkbox',
+            oldKey: 'GenLite.Chat.CondenseMessages',
+            value: false,
+            stateHandler: this.handleCondenseMessages.bind(this)
+        },
+        "Filter Game Messages": {
+            type: 'checkbox',
+            oldKey: 'GenLite.Chat.FilterGameMessages',
+            value: false,
+            stateHandler: this.handleFilterGameMessages.bind(this)
+        },
+
+    };
+    
     customMessagesToIgnore: Set<string> = new Set<string>();
 
     filterGameMessages: boolean = false;
@@ -174,14 +188,6 @@ export class GenLiteChatPlugin implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
-        this.condenseMessages = document.genlite.settings.add(
-            'Chat.CondenseMessages',
-            false,
-            'Condense Chat Messages',
-            'checkbox',
-            this.handleCondenseMessages,
-            this
-        );
         document.genlite.database.add((db) => {
             let store = db.createObjectStore('chatlog', {
                 keyPath: 'key',
@@ -192,14 +198,12 @@ export class GenLiteChatPlugin implements GenLitePlugin {
 
         this.indexedDBSupported = 'indexedDB' in window;
         if (this.indexedDBSupported) {
-            this.preserveMessages = document.genlite.settings.add(
-                'Chat.PreserveMessages',
-                false,
-                'Preserve Chat Log',
-                'checkbox',
-                this.handlePreserveMessages,
-                this
-            );
+            this.pluginSettings['Preserve Messages'] = {
+                type: 'checkbox',
+                oldKey: 'GenLite.Chat.PreserveMessages',
+                value: false,
+                stateHandler: this.handlePreserveMessages.bind(this)
+            };
         } else {
             this.preserveMessages = false;
             console.log(
@@ -208,20 +212,22 @@ export class GenLiteChatPlugin implements GenLitePlugin {
             );
         }
 
-        this.filterGameMessages = document.genlite.settings.add(
-            'Chat.FilterGameMessages',
-            false,
-            'Filter Game Chat',
-            'checkbox',
-            this.handleFilterGameMessages,
-            this
-        );
         this.customMessagesToIgnore = this.loadSavedSettings();
         document.genlite.commands.register(
             'log',
             this.handleCommand.bind(this),
             this.helpCommand.bind(this)
         );
+    }
+
+    async postInit() {
+        document.genlite.ui.registerPlugin("Chat Filtering", null, this.handlePluginState.bind(this), this.pluginSettings);
+    }
+
+    handlePluginState(state: boolean): void {
+        // TODO: Implement
+        // Display Yellow Console Message Stating the plugin needs to implement this
+        console.log(`%c[GenLite] %c${this.constructor.name} %cneeds to implement handlePluginState()`, "color: #ff0", "color: #fff", "color: #f00");
     }
 
     public loginOK() {

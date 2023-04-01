@@ -20,6 +20,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
     ];
 
     isPluginEnabled: boolean = false;
+    uiTab: HTMLElement = null;
     originalSetTrack: Function;
 
     selectionMenu: HTMLElement;
@@ -42,42 +43,18 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
+
         this.originalSetTrack = document.game.MUSIC_PLAYER.setNextTrack;
 
-        this.isPluginEnabled = document.genlite.settings.add(
-            "MusicPlugin.Enable",
-            false,
-            "Music Selection",
-            "checkbox",
-            this.handlePluginEnableDisable,
-            this
-        );
-
         this.selectionMenu = <HTMLElement>document.createElement("div");
-        this.selectionMenu.style.position = "fixed";
-        this.selectionMenu.style.right = "20px";
-        this.selectionMenu.style.top = "20px";
 
         this.selectionMenu.style.height = "20em";
         this.selectionMenu.style.display = "flex";
         this.selectionMenu.style.flexDirection = "column";
+        this.selectionMenu.style.overflowX = "hidden";
 
         this.selectionMenu.style.color = "#ffd593";
-        this.selectionMenu.style.borderTop = "2px solid #b54f08";
-        this.selectionMenu.style.borderLeft = "2px solid #572008";
-        this.selectionMenu.style.borderRight = "2px solid #572008";
-        this.selectionMenu.style.borderBottom = "2px solid #250801";
         this.selectionMenu.style.fontFamily = "acme,times new roman,Times,serif";
-
-        let header = <HTMLElement>document.createElement("div");
-        header.innerText = "Music Selection";
-        header.style.fontWeight = "bold";
-        header.style.padding = "4px";
-        header.style.textAlign = "center";
-        header.style.textShadow = "-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000";
-        header.style.backgroundColor = "#9c4209";
-        header.style.color = "#fdda2e";
-        this.selectionMenu.appendChild(header);
 
         let container = <HTMLElement>document.createElement("div");
         container.style.overflow = "scroll";
@@ -90,7 +67,8 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
             }
             let name = document.game.MUSIC_TRACK_NAMES[track];
             let b = <HTMLElement>document.createElement("div");
-            b.style.backgroundColor = '#461400';
+            b.style.backgroundColor = '#0e0c0b';
+            b.style.padding = "2px";
             b.style.width = "100%";
             b.innerText = name;
             b.onclick = (e) => {
@@ -108,6 +86,55 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
             this.selectionOptions[track] = b;
         }
 
+        // Create Dropbown for setting music mode
+        let modeDropdown = <HTMLElement>document.createElement("div");
+        modeDropdown.style.display = "flex";
+        modeDropdown.style.flexDirection = "row";
+        modeDropdown.style.justifyContent = "space-between";
+        modeDropdown.style.padding = "2px";
+        modeDropdown.style.width = "100%";
+
+        let modeLabel = <HTMLElement>document.createElement("div");
+        modeLabel.innerText = "Mode:";
+        modeDropdown.appendChild(modeLabel);
+
+        let modeSelect = <HTMLSelectElement>document.createElement("select");
+        modeSelect.style.width = "100%";
+        modeSelect.style.backgroundColor = "#0e0c0b";
+        modeSelect.style.color = "#ffd593";
+        modeSelect.style.fontFamily = "acme,times new roman,Times,serif";
+        modeSelect.style.border = "1px solid #ffd593";
+        modeSelect.style.borderRadius = "4px";
+        modeSelect.style.padding = "2px";
+
+        let passthroughOption = <HTMLOptionElement>document.createElement("option");
+        passthroughOption.value = "passthrough";
+        passthroughOption.innerText = "Passthrough";
+        modeSelect.appendChild(passthroughOption);
+
+        let manualOption = <HTMLOptionElement>document.createElement("option");
+        manualOption.value = "manual";
+        manualOption.innerText = "Manual";
+        modeSelect.appendChild(manualOption);
+
+        let shuffleOption = <HTMLOptionElement>document.createElement("option");
+        shuffleOption.value = "shuffle";
+        shuffleOption.innerText = "Shuffle";
+        modeSelect.appendChild(shuffleOption);
+
+        modeSelect.onchange = (e) => {
+            this.musicMode = modeSelect.value as any;
+            this.updateMusicUI();
+        };
+
+        modeDropdown.appendChild(modeSelect);
+
+        this.selectionMenu.appendChild(modeDropdown);
+
+
+
+        this.uiTab = document.genlite.ui.addTab("music", "Music Selection", this.selectionMenu, this.isPluginEnabled);
+
         document.genlite.commands.register(
             "music",
             this.handleCommand.bind(this),
@@ -115,9 +142,18 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
         );
     }
 
-    handlePluginEnableDisable(state: boolean) {
+    async postInit() {
+        document.genlite.ui.registerPlugin("Music Selection", null,  this.handlePluginState.bind(this));
+    }
+
+    handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
         this.updateMusicUI();
+        
+        // Hide uiTab if plugin is disabled
+        if (this.uiTab) {
+            this.uiTab.style.display = state ? "flex" : "none";
+        }
     }
 
     initializeUI() {
@@ -189,7 +225,7 @@ export class GenLiteMusicPlugin implements GenLitePlugin {
 
     setNextTrack(track: string) {
         if (this.currentSelection != null) {
-            this.currentSelection.style.backgroundColor = '#461400';
+            this.currentSelection.style.backgroundColor = '#0e0c0b';
         }
 
         var e = this.selectionOptions[track];

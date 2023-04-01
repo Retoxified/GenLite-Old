@@ -36,6 +36,12 @@ export class GenLiteGeneralChatCommands implements GenLitePlugin {
         document.genlite.commands.register("logged", () => { this.printLoggedTime.apply(this) }, "Prints time logged in.");
     }
 
+    handlePluginState(state: boolean): void {
+        // TODO: Implement
+        // Display Yellow Console Message Stating the plugin needs to implement this
+        console.log(`%c[GenLite] %c${this.constructor.name} %cneeds to implement handlePluginState()`, "color: #ff0", "color: #fff", "color: #f00");
+    }
+
     loginOK() {
         if (this.isLogged)
             return;

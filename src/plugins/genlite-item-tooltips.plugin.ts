@@ -28,17 +28,30 @@ export class GenLiteItemTooltips implements GenLitePlugin {
     isFoodEnabled: boolean = false;
     isValueEnabled: boolean = false;
 
+    pluginSettings : Settings = {
+        "Food Tooltips": {
+            type: "checkbox",
+            oldKey: "GenLite.itemTooltips.FoodTooltips",
+            value: this.isFoodEnabled,
+            stateHandler: this.handleFoodEnableDisable.bind(this)
+        },
+        "Value Tooltips": {
+            type: "checkbox",
+            oldKey: "GenLite.itemTooltips.ValueTooltips",
+            value: this.isValueEnabled,
+            stateHandler: this.handleValueEnableDisable.bind(this)
+        }
+    };
+    
     async init() {
         document.genlite.registerPlugin(this);
-
-        this.isPluginEnabled = document.genlite.settings.add("ItemToolTips.Enable", true, "Tooltips", "checkbox", this.handlePluginEnableDisable, this);
-        this.isFoodEnabled = document.genlite.settings.add("FoodToolTips.Enable", true, "Food Tooltips", "checkbox", this.handleFoodEnableDisable, this, undefined, undefined, "ItemToolTips.Enable");
-        this.isValueEnabled = document.genlite.settings.add("ValueToolTips.Enable", true, "Value Tooltips", "checkbox", this.handleValueEnableDisable, this, undefined, undefined, "ItemToolTips.Enable");
-
-
     }
 
-    handlePluginEnableDisable(state: boolean) {
+    async postInit() {
+        document.genlite.ui.registerPlugin("Item Tooltips", null, this.handlePluginState.bind(this), this.pluginSettings);
+    }
+
+    handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
         if (state) {
             if (!this.isUiInit) // if non inited run
@@ -178,6 +191,10 @@ export class GenLiteItemTooltips implements GenLitePlugin {
 
     /* disable all the stuff */
     onmouseleave(event, callback_this) {
+        // Verify that itemToolTip is not null
+        if (callback_this.itemToolTip == null || callback_this.itemToolTip == undefined) return;
+
+
         callback_this.itemToolTip.style.display = "none";
         callback_this.healthBarHealing.style.width = "0%";
     }

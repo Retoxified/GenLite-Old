@@ -15,7 +15,16 @@ import { GenLitePlugin } from '../core/interfaces/plugin.interface';
 
 export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
     static pluginName = 'GenLiteNPCHighlightPlugin';
-    static healthListVersion = "3"
+    static healthListVersion = "3";
+
+    pluginSettings : Settings = {
+        "Invert Hiding": {
+            type: "checkbox",
+            oldKey: "GenLite.NpcHideInvert.Enable",
+            value: true,
+            stateHandler: this.handleHideInvertEnableDisable.bind(this)
+        },
+    };
 
     trackedNpcs = {};
     npcData = {};
@@ -51,18 +60,15 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
 
         window.addEventListener('keydown', this.keyDownHandler.bind(this));
         window.addEventListener('keyup', this.keyUpHandler.bind(this));
-        window.addEventListener("blur", this.blurHandler.bind(this))
-
-        this.isPluginEnabled = document.genlite.settings.add("NpcHighlight.Enable", true, "Highlight NPCs", "checkbox", this.handlePluginEnableDisable, this);
-        this.hideInvert = document.genlite.settings.add("NpcHideInvert.Enable", true, "Invert NPC Hiding", "checkbox", this.handleHideInvertEnableDisable, this, undefined, undefined, "NpcHighlight.Enable");
-
+        window.addEventListener("blur", this.blurHandler.bind(this));
     }
 
     async postInit() {
         this.packList = document['GenLiteWikiDataCollectionPlugin'].packList;
+        document.genlite.ui.registerPlugin("NPC Highlights", "GenLite.NpcHighlight.Enable", this.handlePluginState.bind(this), this.pluginSettings);
     }
 
-    handlePluginEnableDisable(state: boolean) {
+    handlePluginState(state: boolean): void {
         // when disabling the plugin clear the current list of npcs
         if (state === false) {
             this.npc_highlight_div.innerHTML = '';
@@ -198,8 +204,11 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         npcsToMod = Object.keys(document.game.GAME.npcs).filter(x => document.game.GAME.npcs[x].id.split('-')[0] == object.id.split('-')[0]);
         for (let key in npcsToMod) {
             let npcid = npcsToMod[key];
-            if (this.trackedNpcs[npcid] && this.trackedNpcs[npcid].hasHp)
+
+            if (this.trackedNpcs[npcid] === undefined || this.trackedNpcs[npcid].hasHp) {
                 continue;
+            }
+
             this.trackedNpcs[npcid].innerHTML += ` HP: ${this.npcHealthList[hpKey]}`;
             this.trackedNpcs[npcid].hasHp = true;
         }

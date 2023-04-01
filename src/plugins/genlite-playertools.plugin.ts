@@ -24,6 +24,17 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
 
     // Plugin UI
     PlayerTagContainer: HTMLDivElement;
+    
+    pluginSettings : Settings = {
+        // Checkbox Example
+        "Hide Character": {
+            type: 'checkbox',
+            oldKey: 'GenLite.PlayerTools.HidePlayer',
+            value: false,
+            stateHandler: this.handleHidePlayerSettingChange.bind(this)
+        }
+    };
+    
 
     // Plugin Hooks
     async init() {
@@ -33,23 +44,22 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
         this.PlayerTagContainer = document.createElement('div');
         this.PlayerTagContainer.className = 'player-tag-container';
         document.body.appendChild(this.PlayerTagContainer);
+    }
 
-        // Add Settings to the Settings Menu
-        this.isEnabled = document.genlite.settings.add(
-            "PlayerHighlights.Enabled",
-            true,
-            "Enable Player Highlights",
-            "checkbox",
-            this.handleHighlightSettingChange,
-            this);
+    async postInit() {
+        this.pluginSettings = document.genlite.ui.registerPlugin("Player Tools", null, this.handlePluginState.bind(this), this.pluginSettings);
+    }
 
-        document.genlite.settings.add(
-            "PlayerTools.HidePlayer",
-            false,
-            "Hide My Character",
-            "checkbox",
-            this.handleHidePlayerSettingChange,
-            this);
+    handlePluginState(state: boolean): void {
+        if (!state) {
+            // Clear Tracked Players
+            this.trackedPlayers = {};
+
+            // Empty the Player Tag Container
+            this.PlayerTagContainer.innerHTML = "";
+        }
+
+        this.isEnabled = state;
     }
 
     update(dt) {
@@ -87,12 +97,12 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
                     this.trackedPlayers[pID].tag.innerHTML = "Pants Thief";
                 } else if (this.trackedPlayers[pID].character.nickname == "Red Bean"){
                     this.trackedPlayers[pID].tag.innerHTML = "Lima Bean";
-                } else if (this.trackedPlayers[pID].character.nickname == "Rainbow Dash"){
-                    this.trackedPlayers[pID].tag.innerHTML = "Unwitting Test Subject Bean";
                 } else if (this.trackedPlayers[pID].character.nickname == "Chicken"){
                     this.trackedPlayers[pID].tag.innerHTML = "Sweaty Chickens";
                 } else if (this.trackedPlayers[pID].character.nickname == "Weorhtleas"){
                     this.trackedPlayers[pID].tag.innerHTML = "Weorhtlaes";
+                } else if (this.trackedPlayers[pID].character.nickname == "Rainbow Dash"){
+                    this.trackedPlayers[pID].tag.innerHTML = "Unwitting Test Subject";
                 } else if (this.trackedPlayers[pID].character.nickname == "Two Pi"){
                     this.trackedPlayers[pID].tag.innerHTML = "Friggen Math Nerd";
                 } else if (this.trackedPlayers[pID].character.nickname == "Enchili"){
@@ -105,6 +115,8 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
                     this.trackedPlayers[pID].tag.innerHTML = "#Off-Topic";
                 } else if (this.trackedPlayers[pID].character.nickname == "Enchi"){
                     this.trackedPlayers[pID].tag.innerHTML = "Cumlord7";
+                } else if (this.trackedPlayers[pID].character.nickname == "Nice Vodka") {
+                    this.trackedPlayers[pID].tag.innerHTML = "Nice Gin";
                 } else {
                     this.trackedPlayers[pID].tag.innerHTML = this.trackedPlayers[pID].tag.innerHTML + " is a Smelly Nerd";
                 }
@@ -199,20 +211,8 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
         this.PlayerTagContainer.innerHTML = "";
     }
 
-    // Setting Callbacks
-    handleHighlightSettingChange(state: boolean) {
-        if (!state) {
-            // Clear Tracked Players
-            this.trackedPlayers = {};
-
-            // Empty the Player Tag Container
-            this.PlayerTagContainer.innerHTML = "";
-        }
-
-        this.isEnabled = state;
-    }
-
     handleHidePlayerSettingChange(state: boolean) {
+        if ( document.game.GRAPHICS.threeScene.getObjectByName(document.game.GAME.me.id) === undefined) return;
         document.game.GRAPHICS.threeScene.getObjectByName(document.game.GAME.me.id).visible = !state;
     }
 

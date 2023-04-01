@@ -44,37 +44,35 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     isPluginEnabled: boolean = false;
     submitItemsToServer: boolean = false;
 
+    pluginSettings : Settings = {
+        "Send Drops to Wiki": {
+            type: "checkbox",
+            oldKey: "GenLite.dropRecorder.SendDropstoWiki",
+            value: this.submitItemsToServer,
+            stateHandler: this.handleSubmitToServer.bind(this),
+            alert: "This will send your drops to the wiki (a third party), please only enable this if you are comfortable with this."
+        }
+    };
+            
+
     async init() {
         document.genlite.registerPlugin(this);
+
         let dropTableString = localStorage.getItem("genliteDropTable");
         if (dropTableString == null) {
             this.dropTable = {};
         } else {
             this.dropTable = JSON.parse(dropTableString);
         }
-        this.isPluginEnabled = document.genlite.settings.add("DropRecorder.Enable", true, "Drop Recorder", "checkbox", this.handlePluginEnableDisable, this);
-        this.submitItemsToServer = document.genlite.settings.add(
-            "DropRecorder.SubmitToServer", // Key
-            false,                         // Default
-            "Send Drops to Server(REMOTE SERVER)", // Name in UI
-            "checkbox", // Type
-            this.handleSubmitToServer, // handler function
-            this,  // context for handler
-            "Warning!\n" + // Warning
-            "Turning this setting on will send monster drop data along with your IP\u00A0address to an external server.\n\n" +
-            "Are you sure you want to enable this setting?",
-            undefined,
-            "DropRecorder.Enable"
-        );
     }
 
     async postInit() {
         this.packList = document['GenLiteWikiDataCollectionPlugin'].packList;
+        document.genlite.ui.registerPlugin("Drop Recorder", null, this.handlePluginState.bind(this), this.pluginSettings);
     }
 
-    handlePluginEnableDisable(state: boolean) {
+    handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
-
     }
 
     handleSubmitToServer(state: boolean) {

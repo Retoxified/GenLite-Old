@@ -58,13 +58,20 @@ export class GenLiteXpCalculator implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
+
         this.resetCalculatorAll();
-        this.isPluginEnabled = document.genlite.settings.add("XPCalculator.Enable", true, "XP Calculator", "checkbox", this.handlePluginEnableDisable, this);
+        // THIS IS A PRIME TARGET FOR NEW UI TABS
     }
 
-    handlePluginEnableDisable(state: boolean) {
+    async postInit() {
+        document.genlite.ui.registerPlugin("XP Calculator", null, this.handlePluginState.bind(this));
+    }
+
+    handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
+
         this.resetCalculatorAll();
+
         /* if toggle on mid way through we have to run the init code */
         if (state) {
             this.initializeUI();
@@ -238,11 +245,14 @@ export class GenLiteXpCalculator implements GenLitePlugin {
             this.skillsList.total.startXP = xp;
             this.skillsList.total.gainedXP = 0;
             this.totalLevelCalc(event, this);
+            document.game.PLAYER_INFO.tracking = false;
             return;
         }
         delete temp.gainedXP;
         this.skillsList[skill] = temp;
-        if (this.isHookInstalled)
+
+
+        if (this.isHookInstalled && document.game.PLAYER_INFO.tracking_skill && document.game.PLAYER_INFO.tracking_skill.group)
             document.game.PLAYER_INFO.updateTooltip();
     }
 

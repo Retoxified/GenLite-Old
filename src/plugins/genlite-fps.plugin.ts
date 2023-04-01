@@ -52,6 +52,12 @@ export class GenLiteFPSCounter implements GenLitePlugin {
             this.logoutOK();
         }
     }
+    
+    handlePluginState(state: boolean): void {
+        // TODO: Implement
+        // Display Yellow Console Message Stating the plugin needs to implement this
+        console.log(`%c[GenLite] %c${this.constructor.name} %cneeds to implement handlePluginState()`, "color: #ff0", "color: #fff", "color: #f00");
+    }
 
     /* start tracking fps */
     loginOK() {
@@ -80,6 +86,8 @@ export class GenLiteFPSCounter implements GenLitePlugin {
         this.stats.dom.style.position = 'absolute';
         this.stats.dom.style.left = '';
         this.stats.dom.style.right = '0px';
+        this.stats.dom.style.top = '30px';
+        this.stats.dom.style.zIndex = '9998';
         document.body.appendChild(this.stats.dom);
         this.isInit = true;
     }

@@ -36,6 +36,10 @@ export class GenLiteSettingsPlugin {
         settingsModal.appendChild(this.container);
     }
 
+    handlePluginState(state: boolean): void {
+        // TODO: Implement
+    }
+
     /* goes through and disables child settings if needed */
     async postInit() {
         for (let key in this.settings) {

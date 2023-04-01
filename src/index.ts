@@ -33,16 +33,18 @@ import { GenLiteHitRecorder } from "./plugins/genlite-hit-recorder.plugin";
 import { GenLiteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
 import { GenLiteMusicPlugin } from "./plugins/genlite-music.plugin";
 import { GenLiteLocationsPlugin } from "./plugins/genlite-locations.plugin";
-import { GenLiteMenuSwapperPlugin } from "./plugins/genlite-menuswapper.plugin";
 import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
 import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
 import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
+import { GenLiteUIPlugin } from "./core/plugins/genlite-ui-plugin";
 import { GenLitePlayerToolsPlugin } from "./plugins/genlite-playertools.plugin";
 import { GenLiteHighscores } from "./plugins/genlite-highscores.plugin";
 import { GenLiteItemDisplays } from "./plugins/genlite-itemdisplay.plugin";
 import { GenLiteHealthRegenerationPlugin } from './plugins/genlite-health-regeneration.plugin';
 import { GenLiteFPSCounter } from "./plugins/genlite-fps.plugin";
+import { GenLiteEnhancedContextMenu } from "./plugins/genlite-enhanced-context-menu.plugin";
 import { GenLiteQuestPlugin } from "./plugins/genlite-quest.plugin";
+import { GenLiteEnhancedBanking } from "./plugins/genlite-enhanced-banking.plugin";
 
 declare const GM_getResourceText: (s: string) => string;
 
@@ -199,6 +201,7 @@ let isInitialized = false;
         genlite.settings = await genlite.pluginLoader.addPlugin(GenLiteSettingsPlugin);
         genlite.commands = await genlite.pluginLoader.addPlugin(GenLiteCommandsPlugin);
         genlite.database = await genlite.pluginLoader.addPlugin(GenLiteDatabasePlugin);
+        genlite.ui = await genlite.pluginLoader.addPlugin(GenLiteUIPlugin);
 
         /** Official Plugins */
         await genlite.pluginLoader.addPlugin(GenLiteVersionPlugin);
@@ -215,7 +218,6 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteMenuScaler);
         await genlite.pluginLoader.addPlugin(GenLiteMusicPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteLocationsPlugin);
-        await genlite.pluginLoader.addPlugin(GenLiteMenuSwapperPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteItemTooltips);
         await genlite.pluginLoader.addPlugin(GenLiteSoundNotification);
         await genlite.pluginLoader.addPlugin(GenLiteGeneralChatCommands);
@@ -224,13 +226,15 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteItemDisplays);
         await genlite.pluginLoader.addPlugin(GenLiteHealthRegenerationPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteFPSCounter);
+        await genlite.pluginLoader.addPlugin(GenLiteEnhancedContextMenu);
         await genlite.pluginLoader.addPlugin(GenLiteQuestPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteEnhancedBanking);
 
         /** post init things */
-        await document['GenLiteDatabasePlugin'].postInit();
-        await document['GenLiteSettingsPlugin'].postInit();
-        await document['GenLiteNPCHighlightPlugin'].postInit();
-        await document['GenLiteDropRecorderPlugin'].postInit();
+        // await document['GenLiteDatabasePlugin'].postInit();
+        // await document['GenLiteSettingsPlugin'].postInit();
+        // await document['GenLiteNPCHighlightPlugin'].postInit();
+        // await document['GenLiteDropRecorderPlugin'].postInit();
 
         // NOTE: currently initGenlite is called after the scene has started
         //       (in minified function qS). The initializeUI function does not
@@ -240,6 +244,9 @@ let isInitialized = false;
         //       We should eventually move genlite to init at page start, then
         //       this needs to move to the qS override at the bottom of this
         //       file.
+        // NOTE 2: This is now also used to call postInit on plugins through GenLitePluginLoader
+        //         The GenLiteUIPlugin.registerPlugin function requires being present in the postInit for a function
+        //         as it calls various things involving settings that may not be ready until after init.
         genlite.onUIInitialized();
 
         document.genlite.isAprilFools = document.genlite.settings.add("AprilFools.Enable", true, "April Fools", "checkbox",     handleAprilFools, this);

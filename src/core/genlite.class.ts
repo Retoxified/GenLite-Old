@@ -16,7 +16,8 @@ import { GenLiteNotificationPlugin } from "./plugins/genlite-notification.plugin
 import { GenLiteSettingsPlugin } from "./plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./plugins/genlite-commands.plugin";
 import { GenLiteDatabasePlugin } from "./plugins/genlite-database.plugin";
-import { GenLitePlugin } from './interfaces/plugin.interface';
+import { GenLiteUIPlugin } from "./plugins/genlite-ui-plugin";
+import { GenLitePlugin} from './interfaces/plugin.interface';
 
 export class GenLite {
     static pluginName = 'GenLite';
@@ -29,6 +30,7 @@ export class GenLite {
     settings: GenLiteSettingsPlugin;
     commands: GenLiteCommandsPlugin;
     database: GenLiteDatabasePlugin;
+    ui: GenLiteUIPlugin;
 
     /** We allow setting "any field, to anything" in order to load core features such as genlite.notifications */
     [key: string]: any;
@@ -56,8 +58,6 @@ export class GenLite {
         this.installHook(document.game.Trade.prototype, 'handlePacket', this.hookTrade_handlePacket);
         this.installHook(document.game.Bank.prototype, '_addContextOptionsActual')
         this.installHook(document.game.Bank.prototype, '_addContextOptions')
-
-
     }
 
     onUIInitialized() {
@@ -79,6 +79,12 @@ export class GenLite {
     hookPhased(fnName: string, ...args: Array<unknown>) {
         if (args[0] === "game_loaded") {
             this.hook('loginOK', args);
+            console.log("GenLite: loginOK hook fired")
+
+            if (!this.ui.hasInitialized) {
+                this.pluginLoader.postInit();
+                console.log("GenLite: postInit hook fired");
+            }
         }
     }
 

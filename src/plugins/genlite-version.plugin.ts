@@ -46,4 +46,10 @@ export class GenLiteVersionPlugin implements GenLitePlugin {
         // Append the Version Paragraph to the Login Version Span
         document.body.querySelector('#loginversion').appendChild(this.versionContainer);
     }
+
+    handlePluginState(state: boolean): void {
+        // TODO: Implement
+        // Display Yellow Console Message Stating the plugin needs to implement this
+        console.log(`%c[GenLite] %c${this.constructor.name} %cneeds to implement handlePluginState()`, "color: #ff0", "color: #fff", "color: #f00");
+    }
 }

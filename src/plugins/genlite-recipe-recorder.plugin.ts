@@ -34,6 +34,7 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
+
         let dropTableString = localStorage.getItem("GenliteRecipeRecorder")
         if (dropTableString == null) {
             this.recipeResults = {};
@@ -43,10 +44,13 @@ export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
             this.recipeResults = saved.recipe ? saved.recipe : {};
             this.gatherResults = saved.gathering ? saved.gathering : {};
         }
-        this.isPluginEnabled = document.genlite.settings.add("RecipeRecorder.Enable", true, "Record Recipes", "checkbox", this.handlePluginEnableDisable, this);
     }
 
-    handlePluginEnableDisable(state: boolean) {
+    async postInit() {
+        document.genlite.ui.registerPlugin("Recipe Recorder", null, this.handlePluginState.bind(this));
+    }
+
+    handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
     }
 

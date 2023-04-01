@@ -44,6 +44,10 @@ export class GenLiteCommandsPlugin {
         }, "display help text for a command: '//help <command>'");
     }
 
+    handlePluginState(state: boolean): void {
+        // TODO: Implement
+    }
+
     processInput(plugin, originalFunction) {
         const self = (this as any);
 

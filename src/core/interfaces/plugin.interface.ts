@@ -13,6 +13,8 @@
 
 export interface GenLitePlugin {
     init: () => Promise<void>,
+    handlePluginState(state: boolean): void,
+    postInit?: () => Promise<void>,
     loginOK?: () => void,
     logoutOK?: () => void,
     action?: (verb: string, params: any) => void // TODO: provide proper type

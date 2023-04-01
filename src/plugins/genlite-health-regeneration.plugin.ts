@@ -14,26 +14,21 @@ export class GenLiteHealthRegenerationPlugin implements GenLitePlugin {
     static healthRegenerationIntervalMilliseconds = 100;
 
     async init() {
-        this.isPluginEnabled = document.genlite.settings.add(
-          "HealthRegenerationAudioNotify.Enable",
-          false,
-          "Health Regeneration Audio Notification",
-          "checkbox",
-          this.handlePluginToggled,
-          this
-        );
-
-        this.handlePluginToggled(this.isPluginEnabled);
+        document.genlite.registerPlugin(this);
     }
 
-    handlePluginToggled(state: boolean) {
-        this.isPluginEnabled = state;
+    async postInit() {
+      document.genlite.ui.registerPlugin("Health Regen Alert", null, this.handlePluginState.bind(this));
+    }
 
-        if (state) {
-          this.start();
-        } else {
-          this.stop();
-        }
+    handlePluginState(state: boolean): void {
+      this.isPluginEnabled = state;
+
+      if (state) {
+        this.start();
+      } else {
+        this.stop();
+      }
     }
 
     public stop() {
