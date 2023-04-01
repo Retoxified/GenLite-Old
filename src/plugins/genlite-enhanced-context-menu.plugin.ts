@@ -21,6 +21,7 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
     lookupObjects: boolean = false;
     lookupItems: boolean = false;
     betterRockNames: boolean = false;
+    rightClickAttack: boolean = false;
 
     originalInventoryContextOptions: Function;
     originalNPCIntersects: Function;
@@ -53,6 +54,12 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
             type: 'checkbox',
             value: this.betterRockNames,
             stateHandler: this.handleBetterRockNamesToggle.bind(this)
+        },
+        "Right Click Attack": {
+            type: 'checkbox',
+            oldKey: 'NPCMenuSwapper.rightClickAttack',
+            value: this.rightClickAttack,
+            stateHandler: this.handleRightClickAttackToggle.bind(this)
         }
     }
 
@@ -96,10 +103,15 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
         this.updateState();
     }
 
+    handleRightClickAttackToggle(state: boolean): void {
+        this.rightClickAttack = state;
+        this.updateState();
+    }
+
     updateState() {
         if (this.isEnabled) {
             let plugin = this;
-            if (this.lookupNPCs) {
+            if (this.lookupNPCs || this.rightClickAttack) {
                 document.game.NPC.prototype.intersects = document.game.NPC.prototype.intersects = function (ray, list) {
                     const self = (this as any);
                     let i = self.object.intersect(ray);
@@ -107,12 +119,21 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
                     if (!i) {
                         return;
                     }
+
+                    list.push({
+                        color: 'green',
+                        distance: i.distance,
+                        priority: - 1,
+                        object: this,
+                        text: 'Examine',
+                        action: () => this.examine()
+                    });
     
                     if (self.info.attackable)
                         list.push({
                             color: 'red',
                             distance: i.distance,
-                            priority: (self.levelDifference <= 10 && !document.game.PLAYER.character.combat) ? 2 : -2,
+                            priority: (!plugin.rightClickAttack && self.levelDifference <= 10 && !document.game.PLAYER.character.combat) ? 2 : -2,
                             object: this,
                             text: "Attack",
                             action: () => self.attack()
@@ -144,17 +165,20 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
                             text: "Bank with",
                             action: () => self.bank()
                         });
-                    list.push({
-                        object: this,
-                        distance: i.distance,
-                        priority: 0,
-                        text: "Lookup",
-                        action: () => {
-                            // Take the name of the NPC remove any spaces 
-                            const cleanName = self.info.name.replace(' ', '_');
-                            window.open(plugin.wikiBaseURL + cleanName, '_blank');
-                        }
-                    })
+
+                    if (plugin.lookupNPCs) {
+                        list.push({
+                            object: this,
+                            distance: i.distance,
+                            priority: 0,
+                            text: "Lookup",
+                            action: () => {
+                                // Take the name of the NPC remove any spaces
+                                const cleanName = self.info.name.replace(' ', '_');
+                                window.open(plugin.wikiBaseURL + cleanName, '_blank');
+                            }
+                        })
+                    }
                 }
             } else {
                 document.game.NPC.prototype.intersects = this.originalNPCIntersects;
