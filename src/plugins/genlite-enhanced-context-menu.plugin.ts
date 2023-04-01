@@ -19,8 +19,10 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
     hideStairs: boolean = false;
     lookupNPCs: boolean = false;
     lookupObjects: boolean = false;
+    lookupItems: boolean = false;
     betterRockNames: boolean = false;
 
+    originalInventoryContextOptions: Function;
     originalNPCIntersects: Function;
     originalSceneIntersects: Function;
 
@@ -42,6 +44,11 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
             value: this.lookupObjects,
             stateHandler: this.handleLookupObjectsToggle.bind(this)
         },
+        "Lookup on Items": {
+            type: 'checkbox',
+            value: this.lookupItems,
+            stateHandler: this.handleLookupItemsToggle.bind(this)
+        },
         "Better Rock Names": {
             type: 'checkbox',
             value: this.betterRockNames,
@@ -52,6 +59,7 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
     async init() {
         this.originalNPCIntersects = document.game.NPC.prototype.intersects;
         this.originalSceneIntersects = document.game.OptimizedScene.prototype.intersects;
+        this.originalInventoryContextOptions = document.game.Inventory.prototype._getAllContextOptions;
     }
 
     async postInit() {
@@ -75,6 +83,11 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
 
     handleLookupObjectsToggle(state: boolean): void {
         this.lookupObjects = state;
+        this.updateState();
+    }
+
+    handleLookupItemsToggle(state: boolean): void {
+        this.lookupItems = state;
         this.updateState();
     }
 
@@ -244,9 +257,43 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
             } else {
                 document.game.OptimizedScene.prototype.intersects = this.originalSceneIntersects;
             }
+
+            if (this.lookupItems) {
+                document.game.Inventory.prototype._getAllContextOptions = function(e, t) {
+                    plugin.originalInventoryContextOptions.call(this, e, t);
+
+                    let r = {
+                        type: "item",
+                        id: e,
+                        text: () => "<span class='item'>" + document.game.DATA.items[this.items[e].item].name + "</span>"
+                    }
+
+                    let cleanName = document.game.DATA.items[this.items[e].item].name.replace(' ', '_');
+
+                    // Remove H.Q. / L.Q. from the name of the item
+                    cleanName = cleanName.replace('H.Q.', '');
+                    cleanName = cleanName.replace('L.Q.', '');
+
+                    // Remove " +1" and " +2" from the name of the item
+                    cleanName = cleanName.replace(' +1', '');
+                    cleanName = cleanName.replace(' +2', '');
+
+                    t.push({
+                        text: "Lookup",
+                        priority: -2,
+                        object: r,
+                        action: () => {
+                            window.open(plugin.wikiBaseURL + cleanName, '_blank');
+                        }
+                    })
+                }   
+            } else {
+                document.game.Inventory.prototype._getAllContextOptions = this.originalInventoryContextOptions;
+            }
         } else {
             document.game.NPC.prototype.intersects = this.originalNPCIntersects;
             document.game.OptimizedScene.prototype.intersects = this.originalSceneIntersects;
+            document.game.Inventory.prototype._getAllContextOptions = this.originalInventoryContextOptions;
         }
     }
 }
