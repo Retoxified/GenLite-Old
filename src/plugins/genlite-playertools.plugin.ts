@@ -101,6 +101,8 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
                     this.trackedPlayers[pID].tag.innerHTML = "Sweaty Chickens";
                 } else if (this.trackedPlayers[pID].character.nickname == "Weorhtleas"){
                     this.trackedPlayers[pID].tag.innerHTML = "Weorhtlaes";
+                } else if (this.trackedPlayers[pID].character.nickname == "Rainbow Dash"){
+                    this.trackedPlayers[pID].tag.innerHTML = "Unwitting Test Subject";
                 } else if (this.trackedPlayers[pID].character.nickname == "Two Pi"){
                     this.trackedPlayers[pID].tag.innerHTML = "Friggen Math Nerd";
                 } else if (this.trackedPlayers[pID].character.nickname == "Enchili"){
