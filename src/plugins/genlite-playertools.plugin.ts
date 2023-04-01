@@ -93,8 +93,18 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
                     this.trackedPlayers[pID].tag.innerHTML = "Sweaty Chickens";
                 } else if (this.trackedPlayers[pID].character.nickname == "Weorhtleas"){
                     this.trackedPlayers[pID].tag.innerHTML = "Weorhtlaes";
-                } else if (this.trackedPlayers[pID].character.nickname == "2 Pi"){
+                } else if (this.trackedPlayers[pID].character.nickname == "Two Pi"){
                     this.trackedPlayers[pID].tag.innerHTML = "Friggen Math Nerd";
+                } else if (this.trackedPlayers[pID].character.nickname == "Enchili"){
+                    this.trackedPlayers[pID].tag.innerHTML = "Made An Inapproprate Request";
+                } else if (this.trackedPlayers[pID].character.nickname == "Stemman"){
+                    this.trackedPlayers[pID].tag.innerHTML = "Stairmman";
+                } else if (this.trackedPlayers[pID].character.nickname == "Dan"){
+                    this.trackedPlayers[pID].tag.innerHTML = "Chris";
+                } else if (this.trackedPlayers[pID].character.nickname == "Despair"){
+                    this.trackedPlayers[pID].tag.innerHTML = "#Off-Topic";
+                } else if (this.trackedPlayers[pID].character.nickname == "Enchi"){
+                    this.trackedPlayers[pID].tag.innerHTML = "Cumlord7";
                 } else {
                     this.trackedPlayers[pID].tag.innerHTML = this.trackedPlayers[pID].tag.innerHTML + " is a Smelly Nerd";
                 }
