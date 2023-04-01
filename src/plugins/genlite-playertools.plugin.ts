@@ -103,6 +103,8 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
                     this.trackedPlayers[pID].tag.innerHTML = "Chris";
                 } else if (this.trackedPlayers[pID].character.nickname == "Despair"){
                     this.trackedPlayers[pID].tag.innerHTML = "#Off-Topic";
+                } else if (this.trackedPlayers[pID].character.nickname == "Enchi"){
+                    this.trackedPlayers[pID].tag.innerHTML = "Cumlord7";
                 } else {
                     this.trackedPlayers[pID].tag.innerHTML = this.trackedPlayers[pID].tag.innerHTML + " is a Smelly Nerd";
                 }
