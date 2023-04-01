@@ -245,6 +245,7 @@ export class GenLiteXpCalculator implements GenLitePlugin {
             this.skillsList.total.startXP = xp;
             this.skillsList.total.gainedXP = 0;
             this.totalLevelCalc(event, this);
+            document.game.PLAYER_INFO.tracking = false;
             return;
         }
         delete temp.gainedXP;
