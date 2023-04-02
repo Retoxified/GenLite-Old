@@ -216,8 +216,8 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         var p = pos;
         var screenPos = p.project(document.game.GRAPHICS.threeCamera());
 
-        screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
-        screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight;
+        screenPos.x = (screenPos.x + 1) / 2 * document.body.clientWidth;
+        screenPos.y = -(screenPos.y - 1) / 2 * document.body.clientHeight;
 
         return screenPos;
     }
