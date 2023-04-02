@@ -153,16 +153,15 @@ export class GenLiteUIPlugin {
 
         // This handles visibility of the Side Panel when it is closed/opened
         this.sidePanel.addEventListener('transitionend', () => {
-            if (this.resizeGame) {
-                if (this.sidePanel.style.right === '-302px') {
-                    this.tabBar.style.display = 'none';
-                    this.tabContentHeader.style.display = 'none';
-                    this.tabContentHolder.style.display = 'none';
+            if (this.sidePanel.style.right === '-302px') {
+                if (this.resizeGame) {
                     document.body.style.removeProperty('width');
                     document.getElementById('new_ux-minimap-UI-anchor').style.removeProperty('transition');
+                    document.game.GRAPHICS.resize();
                 }
-    
-                document.game.GRAPHICS.resize();
+                this.tabBar.style.display = 'none';
+                this.tabContentHeader.style.display = 'none';
+                this.tabContentHolder.style.display = 'none';
             }
         });
 
