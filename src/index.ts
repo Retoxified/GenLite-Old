@@ -250,13 +250,6 @@ let isInitialized = false;
         //         The GenLiteUIPlugin.registerPlugin function requires being present in the postInit for a function
         //         as it calls various things involving settings that may not be ready until after init.
         genlite.onUIInitialized();
-
-        document.genlite.isAprilFools = document.genlite.settings.add("AprilFools.Enable", true, "April Fools", "checkbox",     handleAprilFools, this);
-
-    }
-
-    function handleAprilFools(state){
-        document.genlite.isAprilFools = state;
     }
 
     function firefoxOverride(e) {
