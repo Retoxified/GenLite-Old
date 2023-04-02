@@ -44,7 +44,6 @@ import { GenLiteHealthRegenerationPlugin } from './plugins/genlite-health-regene
 import { GenLiteFPSCounter } from "./plugins/genlite-fps.plugin";
 import { GenLiteEnhancedContextMenu } from "./plugins/genlite-enhanced-context-menu.plugin";
 import { GenLiteQuestPlugin } from "./plugins/genlite-quest.plugin";
-import { GenLiteResizePlugin } from "./plugins/genlite-resize.plugin";
 import { GenLiteEnhancedBanking } from "./plugins/genlite-enhanced-banking.plugin";
 
 declare const GM_getResourceText: (s: string) => string;
@@ -88,6 +87,11 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
     + "};"
     + scriptText.substring(scriptText.length - 5)
     + "//# sourceURL=client.js";
+
+
+// Regex to replace window.innerWidth and window.innerHeight with document.body.clientWidth and document.body.clientHeight
+scriptText = scriptText.replace(/window\.innerWidth/g, "document.body.clientWidth");
+
 
 let isInitialized = false;
 
@@ -229,7 +233,6 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteFPSCounter);
         await genlite.pluginLoader.addPlugin(GenLiteEnhancedContextMenu);
         await genlite.pluginLoader.addPlugin(GenLiteQuestPlugin);
-        await genlite.pluginLoader.addPlugin(GenLiteResizePlugin);
         await genlite.pluginLoader.addPlugin(GenLiteEnhancedBanking);
 
         /** post init things */

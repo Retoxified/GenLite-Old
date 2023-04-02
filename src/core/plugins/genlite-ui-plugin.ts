@@ -17,6 +17,7 @@ export class GenLiteUIPlugin {
     }
 
 
+    private originalGraphicsResize: Function;
     private sidePanel: HTMLElement;
     private tabBar: HTMLElement;
     private tabContentHeader: HTMLElement;
@@ -27,11 +28,15 @@ export class GenLiteUIPlugin {
     private pluginTabs = {};
     private pluginSettings: Map<string, HTMLElement> = new Map<string, HTMLElement>();
 
-
+    // Plugin Settings (Handled differently than other plugins)
+    private resizeGame : boolean = false;
 
     async init() {
         // Register the plugin
         document.genlite.registerPlugin(this);
+
+        // Grab the original resize method
+        this.originalGraphicsResize = document.game.GRAPHICS.resize;
         
         // Main Side Panel Element
         this.sidePanel = document.createElement('div');
@@ -122,25 +127,42 @@ export class GenLiteUIPlugin {
         visibilityButton.style.transition = 'transform 0.5s ease-in-out';
         visibilityButton.addEventListener('click', () => {
             if (this.sidePanel.style.right === '-302px') {
-                this.sidePanel.style.right = '0';
+                this.sidePanel.style.right = '0px';
+                if (this.resizeGame) {
+                    document.getElementById('new_ux-minimap-UI-anchor').style.right = '301px';
+                    document.getElementById('new_ux-minimap-UI-anchor').style.transition = 'right 0.5s ease-in-out';
+                    document.body.style.transition = 'width 0.5s ease-in-out';
+                    document.body.style.width = 'calc(100% - 302px)';
+                }
                 visibilityButton.style.transform = 'rotate(180deg)';
                 this.tabBar.style.display = 'block';
                 this.tabContentHeader.style.display = 'flex';
                 this.tabContentHolder.style.display = 'block';
             } else {
+                if (this.resizeGame) {
+                    document.getElementById('new_ux-minimap-UI-anchor').style.removeProperty('right');
+                    document.body.style.removeProperty('transition');
+                    document.body.style.width = `calc(${document.body.style.width} + 302px)`;
+                    document.game.GRAPHICS.resize();
+                }
                 this.sidePanel.style.right = '-302px';
                 visibilityButton.style.transform = 'rotate(0deg)';
-                document.genlite.hook('genlite_onSettingsClose');
             }
         });
         this.sidePanel.appendChild(visibilityButton);
 
         // This handles visibility of the Side Panel when it is closed/opened
         this.sidePanel.addEventListener('transitionend', () => {
-            if (this.sidePanel.style.right === '-302px') {
-                this.tabBar.style.display = 'none';
-                this.tabContentHeader.style.display = 'none';
-                this.tabContentHolder.style.display = 'none';
+            if (this.resizeGame) {
+                if (this.sidePanel.style.right === '-302px') {
+                    this.tabBar.style.display = 'none';
+                    this.tabContentHeader.style.display = 'none';
+                    this.tabContentHolder.style.display = 'none';
+                    document.body.style.removeProperty('width');
+                    document.getElementById('new_ux-minimap-UI-anchor').style.removeProperty('transition');
+                }
+    
+                document.game.GRAPHICS.resize();
             }
         });
 
@@ -202,6 +224,10 @@ export class GenLiteUIPlugin {
         searchBar.onblur = () => { document.game.CHAT.focus_locked = false; }
         searchRow.appendChild(searchBar);
         this.settingsTab.appendChild(searchRow);
+
+        // Make the Plugin List Tab scrollable
+        this.settingsTab.style.overflowY = 'auto';
+
 
         this.addTab('list', "Plugins", this.settingsTab);
 
@@ -318,6 +344,7 @@ export class GenLiteUIPlugin {
     async postInit() {
         this._hasInitialized = true;
         this.sidePanel.style.display = 'block';
+        this.registerPlugin("UI Transition", null, this.handlePluginState.bind(this));
     }
 
     loginOK() {
@@ -337,7 +364,17 @@ export class GenLiteUIPlugin {
     }
 
     handlePluginState(state: boolean): void {
-        // TODO: Implement
+        if (state) {
+            document.game.GRAPHICS.resize = function (width=document.body.clientWidth, height=window.innerHeight) {
+                this.camera.resize();
+                this.renderer.setSize(width, height);
+            }
+        } else {
+            document.game.GRAPHICS.resize = this.originalGraphicsResize;
+        }
+
+        this.resizeGame = state;
+        document.game.GRAPHICS.resize();
     }
 
     addTab(icon: string, tabName: string, tabContent: HTMLElement, initiallyVisible: boolean = true) {
@@ -449,7 +486,6 @@ export class GenLiteUIPlugin {
         // Display the alert holder
         this.alertHolder.style.display = 'flex';
     }
-
 
     showTab(tabName: string) {
         // Update the tab content header
@@ -650,6 +686,32 @@ export class GenLiteUIPlugin {
 
         // Add the settings div to this.pluginSettings
         this.pluginSettings[plugin] = pluginSettingsDiv;
+
+
+        // Sort the plugins alphabetically
+        const pluginRows = Array.from(this.settingsTab.children);
+        pluginRows.sort((a, b) => {
+            const aName = a.children[0].innerHTML;
+            const bName = b.children[0].innerHTML;
+
+            if (aName < bName) {
+                return -1;
+            } else if (aName > bName) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+
+        // Remove all the plugin rows
+        while (this.settingsTab.firstChild) {
+            this.settingsTab.removeChild(this.settingsTab.firstChild);
+        }
+
+        // Add the sorted plugin rows
+        for (const pluginRow of pluginRows) {
+            this.settingsTab.appendChild(pluginRow);
+        }
     };
 
     // Add Settings
