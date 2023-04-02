@@ -44,6 +44,7 @@ import { GenLiteHealthRegenerationPlugin } from './plugins/genlite-health-regene
 import { GenLiteFPSCounter } from "./plugins/genlite-fps.plugin";
 import { GenLiteEnhancedContextMenu } from "./plugins/genlite-enhanced-context-menu.plugin";
 import { GenLiteQuestPlugin } from "./plugins/genlite-quest.plugin";
+import { GenLiteResizePlugin } from "./plugins/genlite-resize.plugin";
 import { GenLiteEnhancedBanking } from "./plugins/genlite-enhanced-banking.plugin";
 
 declare const GM_getResourceText: (s: string) => string;
@@ -228,6 +229,7 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteFPSCounter);
         await genlite.pluginLoader.addPlugin(GenLiteEnhancedContextMenu);
         await genlite.pluginLoader.addPlugin(GenLiteQuestPlugin);
+        await genlite.pluginLoader.addPlugin(GenLiteResizePlugin);
         await genlite.pluginLoader.addPlugin(GenLiteEnhancedBanking);
 
         /** post init things */
@@ -248,13 +250,6 @@ let isInitialized = false;
         //         The GenLiteUIPlugin.registerPlugin function requires being present in the postInit for a function
         //         as it calls various things involving settings that may not be ready until after init.
         genlite.onUIInitialized();
-
-        document.genlite.isAprilFools = document.genlite.settings.add("AprilFools.Enable", true, "April Fools", "checkbox",     handleAprilFools, this);
-
-    }
-
-    function handleAprilFools(state){
-        document.genlite.isAprilFools = state;
     }
 
     function firefoxOverride(e) {

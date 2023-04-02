@@ -45,6 +45,8 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
     skyboxEnabled: boolean = false;
     skybox: any = null;
 
+    isPluginEnabled = true;
+
     pluginSettings : Settings = {
         "Unlock Camera": {
             type: "checkbox",
@@ -109,16 +111,8 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
-
-        this.originalAdvanceToBB = document.game.Segment.prototype.advanceToBB;
-        // TODO: after settings rework move this to updateState/disable plugin
-        let self = this;
-        document.game.Segment.prototype.advanceToBB = function (c, d, debug = false) {
-            c.y = Math.round(c.y * 100) / 100;
-            return self.originalAdvanceToBB.call(this, c, d, debug);
-        };
-
         this.originalCameraMode = document.game.WorldManager.updatePlayerTile;
+        this.originalAdvanceToBB = document.game.Segment.prototype.advanceToBB;
     }
 
     async postInit() {
@@ -126,24 +120,33 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
     }
 
     handlePluginState(state: boolean): void {
-        // TODO: Implement
-        // Display Yellow Console Message Stating the plugin needs to implement this
-        console.log(`%c[GenLite] %c${this.constructor.name} %cneeds to implement handlePluginState()`, "color: #ff0", "color: #fff", "color: #f00");
+        this.isPluginEnabled = state;
+        if (state) {
+            let self = this;
+            document.game.Segment.prototype.advanceToBB = function (c, d, debug = false) {
+                c.y = Math.round(c.y * 100) / 100;
+                return self.originalAdvanceToBB.call(this, c, d, debug);
+            };
+        } else {
+            document.game.Segment.prototype.advanceToBB = this.originalAdvanceToBB;
+        }
+        this.updateCameraMode();
+        this.updateSkyboxAndFog();
     }
     
     handleUnlockCameraToggle(state: boolean) {
         this.unlockCamera = state;
-        this.setCameraMode();
+        this.updateCameraMode();
     }
 
     handleMaxDistance(value: Number) {
         this.maxDistance = value;
-        this.setCameraMode();
+        this.updateCameraMode();
     }
 
     handleMinDistance(value: Number) {
         this.minDistance = value;
-        this.setCameraMode();
+        this.updateCameraMode();
     }
 
     handleRenderDistance(value: number) {
@@ -168,7 +171,21 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
 
     handleSkybox(value: boolean) {
         this.skyboxEnabled = value;
-        if (value) {
+        this.updateSkyboxAndFog();
+    }
+
+    handleFog(value: boolean) {
+        this.distanceFog = value;
+        this.updateFog();
+    }
+
+    handleFogLevel(value: number) {
+        this.fogLevel = value;
+        this.updateFog();
+    }
+
+    updateSkyboxAndFog() {
+        if (this.isPluginEnabled && this.skyboxEnabled) {
             if (this.skybox == null) {
                 const loader = new document.game.THREE.CubeTextureLoader();
                 this.skybox = loader.load([
@@ -189,18 +206,8 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
         this.handleFog(this.distanceFog); // update fog color
     }
 
-    handleFog(value: boolean) {
-        this.distanceFog = value;
-        this.updateFog();
-    }
-
-    handleFogLevel(value: number) {
-        this.fogLevel = value;
-        this.updateFog();
-    }
-
     updateFog() {
-        if (this.distanceFog) {
+        if (this.isPluginEnabled && this.distanceFog) {
             let color = 0x000000;
             if (this.skyboxEnabled) {
                 color = 0xDEFDFF;
@@ -214,18 +221,18 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
     }
 
     loginOK() {
-        this.setCameraMode();
+        this.updateCameraMode();
         this.handleRenderDistance(this.renderDistance);
         this.handleSkybox(this.skyboxEnabled);
     }
 
-    setCameraMode() {
+    updateCameraMode() {
         if (document.game.WORLDMANAGER !== undefined) {
             document.game.WORLDMANAGER.updatePlayerTile.call(document.game.WORLDMANAGER);
         }
 
         if (document.game.GRAPHICS !== undefined) {
-            if (this.unlockCamera === true) {
+            if (this.isPluginEnabled && this.unlockCamera === true) {
                 document.game.GRAPHICS.camera.controls.minDistance = this.minDistance;
                 document.game.GRAPHICS.camera.controls.maxDistance = this.maxDistance;
                 document.game.GRAPHICS.camera.controls.minPolarAngle = 0.35;

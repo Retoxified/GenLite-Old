@@ -98,11 +98,6 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
             let npc = document.game.GAME.npcs[npcsToAdd[key]]
             let hpKey = this.packList[npc.id.split('-')[0]]
             let text = npc.htmlName;        
-            if(document.genlite.isAprilFools && text.match(/Banker/)){
-                console.log(text);
-                text = text.replace(/Banker/, 'B0nker');
-                console.log(text);
-            }
             if (this.npcHealthList[hpKey] !== undefined)
                 text += ` HP: ${this.npcHealthList[hpKey]}`
             text += `
@@ -123,7 +118,7 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
                 /* if the health was updated but the npc tag doesnt have that set regen the tag */
                 if (!this.trackedNpcs[key].hasHp && this.npcHealthList[this.packList[key.split('-')[0]]]) {
                     this.trackedNpcs[key].remove();
-                    delete this.trackedNpcs[key];           
+                    delete this.trackedNpcs[key];
                     continue;
                 }
 
@@ -221,8 +216,8 @@ export class GenLiteNPCHighlightPlugin implements GenLitePlugin {
         var p = pos;
         var screenPos = p.project(document.game.GRAPHICS.threeCamera());
 
-        screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
-        screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight;
+        screenPos.x = (screenPos.x + 1) / 2 * document.body.clientWidth;
+        screenPos.y = -(screenPos.y - 1) / 2 * document.body.clientHeight;
 
         return screenPos;
     }

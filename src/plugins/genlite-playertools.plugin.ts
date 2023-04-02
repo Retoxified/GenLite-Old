@@ -89,39 +89,6 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
             // Set the Player Tag's HTML to the Player's Nickname
             this.trackedPlayers[pID].tag.innerHTML = this.trackedPlayers[pID].character.nickname;
 
-            if(document.genlite.isAprilFools){
-                console.log()
-                if(this.trackedPlayers[pID].character.nickname == "Balls"){
-                    this.trackedPlayers[pID].tag.innerHTML = "Smelly " + this.trackedPlayers[pID].tag.innerHTML;
-                } else if (this.trackedPlayers[pID].character.nickname == "Nick"){
-                    this.trackedPlayers[pID].tag.innerHTML = "Pants Thief";
-                } else if (this.trackedPlayers[pID].character.nickname == "Red Bean"){
-                    this.trackedPlayers[pID].tag.innerHTML = "Lima Bean";
-                } else if (this.trackedPlayers[pID].character.nickname == "Chicken"){
-                    this.trackedPlayers[pID].tag.innerHTML = "Sweaty Chickens";
-                } else if (this.trackedPlayers[pID].character.nickname == "Weorhtleas"){
-                    this.trackedPlayers[pID].tag.innerHTML = "Weorhtlaes";
-                } else if (this.trackedPlayers[pID].character.nickname == "Rainbow Dash"){
-                    this.trackedPlayers[pID].tag.innerHTML = "Unwitting Test Subject";
-                } else if (this.trackedPlayers[pID].character.nickname == "Two Pi"){
-                    this.trackedPlayers[pID].tag.innerHTML = "Friggen Math Nerd";
-                } else if (this.trackedPlayers[pID].character.nickname == "Enchili"){
-                    this.trackedPlayers[pID].tag.innerHTML = "Made An Inapproprate Request";
-                } else if (this.trackedPlayers[pID].character.nickname == "Stemman"){
-                    this.trackedPlayers[pID].tag.innerHTML = "Stairmman";
-                } else if (this.trackedPlayers[pID].character.nickname == "Dan"){
-                    this.trackedPlayers[pID].tag.innerHTML = "Chris";
-                } else if (this.trackedPlayers[pID].character.nickname == "Despair"){
-                    this.trackedPlayers[pID].tag.innerHTML = "#Off-Topic";
-                } else if (this.trackedPlayers[pID].character.nickname == "Enchi"){
-                    this.trackedPlayers[pID].tag.innerHTML = "Cumlord7";
-                } else if (this.trackedPlayers[pID].character.nickname == "Nice Vodka") {
-                    this.trackedPlayers[pID].tag.innerHTML = "Nice Gin";
-                } else {
-                    this.trackedPlayers[pID].tag.innerHTML = this.trackedPlayers[pID].tag.innerHTML + " is a Smelly Nerd";
-                }
-            }
-
             // Set the Player Tag's Attributes
             
             // Font Family
@@ -221,8 +188,8 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
         var p = pos;
         var screenPos = p.project(document.game.GRAPHICS.threeCamera());
 
-        screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
-        screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight;
+        screenPos.x = (screenPos.x + 1) / 2 * document.body.clientWidth;
+        screenPos.y = -(screenPos.y - 1) / 2 * document.body.clientHeight;
 
         return screenPos;
     }
