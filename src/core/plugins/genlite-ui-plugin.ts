@@ -130,6 +130,7 @@ export class GenLiteUIPlugin {
             } else {
                 this.sidePanel.style.right = '-302px';
                 visibilityButton.style.transform = 'rotate(0deg)';
+                document.genlite.hook('genlite_onSettingsClose');
             }
         });
         this.sidePanel.appendChild(visibilityButton);

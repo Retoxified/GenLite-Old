@@ -318,8 +318,8 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     world_to_screen(pos, stack_count) {
         var p = pos;
         var screenPos = p.project(document.game.GRAPHICS.threeCamera());
-        screenPos.x = (screenPos.x + 1) / 2 * window.innerWidth;
-        screenPos.y = -(screenPos.y - 1) / 2 * window.innerHeight - (stack_count * 15);
+        screenPos.x = (screenPos.x + 1) / 2 * document.body.clientWidth;
+        screenPos.y = -(screenPos.y - 1) / 2 * document.body.clientHeight - (stack_count * 15);
         return screenPos;
     }
 
