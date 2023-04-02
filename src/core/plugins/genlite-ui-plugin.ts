@@ -17,6 +17,7 @@ export class GenLiteUIPlugin {
     }
 
 
+    private originalGraphicsResize: Function;
     private sidePanel: HTMLElement;
     private tabBar: HTMLElement;
     private tabContentHeader: HTMLElement;
@@ -27,9 +28,16 @@ export class GenLiteUIPlugin {
     private pluginTabs = {};
     private pluginSettings: Map<string, HTMLElement> = new Map<string, HTMLElement>();
 
-
+    // Plugin Settings (Handled differently than other plugins)
+    private resizeGame : boolean = false;
 
     async init() {
+        // Register the plugin
+        document.genlite.registerPlugin(this);
+
+        // Grab the original resize method
+        this.originalGraphicsResize = document.game.GRAPHICS.resize;
+        
         // Main Side Panel Element
         this.sidePanel = document.createElement('div');
         this.sidePanel.id = 'genlite-ui';
@@ -42,8 +50,6 @@ export class GenLiteUIPlugin {
         this.sidePanel.style.color = 'white';
         this.sidePanel.style.transition = 'right 0.5s ease-in-out';
         this.sidePanel.style.fontFamily = 'acme, times new roman, Times, serif';
-
-
 
         // Tab Bar portion of the Side Panel (Right Side)
         this.tabBar = document.createElement('div');
@@ -121,16 +127,44 @@ export class GenLiteUIPlugin {
         visibilityButton.style.transition = 'transform 0.5s ease-in-out';
         visibilityButton.addEventListener('click', () => {
             if (this.sidePanel.style.right === '-302px') {
-                this.sidePanel.style.right = '0';
+                this.sidePanel.style.right = '0px';
+                if (this.resizeGame) {
+                    document.getElementById('new_ux-minimap-UI-anchor').style.right = '301px';
+                    document.getElementById('new_ux-minimap-UI-anchor').style.transition = 'right 0.5s ease-in-out';
+                    document.body.style.transition = 'width 0.5s ease-in-out';
+                    document.body.style.width = 'calc(100% - 302px)';
+                }
                 visibilityButton.style.transform = 'rotate(180deg)';
-                document.genlite.hook('genlite_onSettingsOpen');
+                this.tabBar.style.display = 'block';
+                this.tabContentHeader.style.display = 'flex';
+                this.tabContentHolder.style.display = 'block';
             } else {
+                if (this.resizeGame) {
+                    document.getElementById('new_ux-minimap-UI-anchor').style.removeProperty('right');
+                    document.body.style.removeProperty('transition');
+                    document.body.style.width = `calc(${document.body.style.width} + 302px)`;
+                    document.game.GRAPHICS.resize();
+                }
                 this.sidePanel.style.right = '-302px';
                 visibilityButton.style.transform = 'rotate(0deg)';
-                document.genlite.hook('genlite_onSettingsClose');
             }
         });
         this.sidePanel.appendChild(visibilityButton);
+
+        // This handles visibility of the Side Panel when it is closed/opened
+        this.sidePanel.addEventListener('transitionend', () => {
+            if (this.sidePanel.style.right === '-302px') {
+                if (this.resizeGame) {
+                    document.body.style.removeProperty('width');
+                    document.getElementById('new_ux-minimap-UI-anchor').style.removeProperty('transition');
+                }
+                this.tabBar.style.display = 'none';
+                this.tabContentHeader.style.display = 'none';
+                this.tabContentHolder.style.display = 'none';
+            }
+            document.game.GRAPHICS.resize();
+        });
+
 
         // Plugin List Tab
         this.settingsTab = document.createElement('div');
@@ -190,157 +224,170 @@ export class GenLiteUIPlugin {
         searchRow.appendChild(searchBar);
         this.settingsTab.appendChild(searchRow);
 
+        // Make the Plugin List Tab scrollable
+        this.settingsTab.style.overflowY = 'auto';
+
+
         this.addTab('list', "Plugins", this.settingsTab);
 
         // Add the side panel to the body
         document.body.appendChild(this.sidePanel);
 
-        // Hide the side panel
-        this.sidePanel.style.visibility = 'hidden';
-
         // Set Initial View
         this.showTab('Plugins');
+
+        // Initially hide the side panel components
+        this.sidePanel.style.display = 'none';
+        this.tabBar.style.display = 'none';
+        this.tabContentHeader.style.display = 'none';
+        this.tabContentHolder.style.display = 'none';
 
 
         // Add CSS to the page
         const style = document.createElement('style');
         style.innerHTML = `
-            input[type=range] {
-                -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
-                width: 100%; /* Specific width is required for Firefox. */
-                background: transparent; /* Otherwise white in Chrome */
-            }
-            
-            input[type=range]::-webkit-slider-thumb {
-                -webkit-appearance: none;
-            }
-            
-            input[type=range]:focus {
-                outline: none; /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
-            }
-            
-            input[type=range]::-ms-track {
-                width: 100%;
-                cursor: pointer;
-            
-                /* Hides the slider so custom styles can be added */
-                background: transparent; 
-                border-color: transparent;
-                color: transparent;
-            }
-
-            /* Special styling for WebKit/Blink */
-            input[type=range]::-webkit-slider-thumb {
+        input[type=range] {
+            width: 100%;
+            margin: 3.3px 0;
+            background-color: transparent;
             -webkit-appearance: none;
-            border: 1px solid #000000;
-            height: 24px;
-            width: 16px;
-            border-radius: 3px;
-            background: #ffffff;
+          }
+          input[type=range]:focus {
+            outline: none;
+          }
+          input[type=range]::-webkit-slider-runnable-track {
+            background: rgba(48, 113, 169, 0.78);
+            border: 0.2px solid #010101;
+            border-radius: 1.3px;
+            width: 100%;
+            height: 11.4px;
             cursor: pointer;
-            margin-top: -4px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
-            box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d; /* Add cool effects to your sliders! */
-            }
-
-            /* All the same stuff for Firefox */
-            input[type=range]::-moz-range-thumb {
-            box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-            border: 1px solid #000000;
-            height: 24px;
-            width: 16px;
-            border-radius: 3px;
+          }
+          input[type=range]::-webkit-slider-thumb {
+            margin-top: -3.5px;
+            width: 19px;
+            height: 18px;
             background: #ffffff;
+            border: 1.8px solid #00001e;
+            border-radius: 15px;
             cursor: pointer;
-            }
-
-            /* All the same stuff for IE */
-            input[type=range]::-ms-thumb {
-            box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-            border: 1px solid #000000;
-            height: 24px;
-            width: 16px;
-            border-radius: 3px;
+            -webkit-appearance: none;
+          }
+          input[type=range]:focus::-webkit-slider-runnable-track {
+            background: #367ebd;
+          }
+          input[type=range]::-moz-range-track {
+            background: rgba(48, 113, 169, 0.78);
+            border: 0.2px solid #010101;
+            border-radius: 1.3px;
+            width: 100%;
+            height: 11.4px;
+            cursor: pointer;
+          }
+          input[type=range]::-moz-range-thumb {
+            width: 19px;
+            height: 18px;
             background: #ffffff;
+            border: 1.8px solid #00001e;
+            border-radius: 15px;
             cursor: pointer;
+          }
+          input[type=range]::-ms-track {
+            background: transparent;
+            border-color: transparent;
+            border-width: 4.2px 0;
+            color: transparent;
+            width: 100%;
+            height: 11.4px;
+            cursor: pointer;
+          }
+          input[type=range]::-ms-fill-lower {
+            background: #2a6495;
+            border: 0.2px solid #010101;
+            border-radius: 2.6px;
+          }
+          input[type=range]::-ms-fill-upper {
+            background: rgba(48, 113, 169, 0.78);
+            border: 0.2px solid #010101;
+            border-radius: 2.6px;
+          }
+          input[type=range]::-ms-thumb {
+            width: 19px;
+            height: 18px;
+            background: #ffffff;
+            border: 1.8px solid #00001e;
+            border-radius: 15px;
+            cursor: pointer;
+            margin-top: 0px;
+            /*Needed to keep the Edge thumb centred*/
+          }
+          input[type=range]:focus::-ms-fill-lower {
+            background: rgba(48, 113, 169, 0.78);
+          }
+          input[type=range]:focus::-ms-fill-upper {
+            background: #367ebd;
+          }
+          /*TODO: Use one of the selectors from https://stackoverflow.com/a/20541859/7077589 and figure out
+          how to remove the virtical space around the range input in IE*/
+          @supports (-ms-ime-align:auto) {
+            /* Pre-Chromium Edge only styles, selector taken from hhttps://stackoverflow.com/a/32202953/7077589 */
+            input[type=range] {
+              margin: 0;
+              /*Edge starts the margin from the thumb, not the track as other browsers do*/
             }
-
-            input[type=range]::-webkit-slider-runnable-track {
-                width: 100%;
-                height: 8.4px;
-                cursor: pointer;
-                box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-                background: #3071a9;
-                border-radius: 1.3px;
-                border: 0.2px solid #010101;
-              }
-              
-              input[type=range]:focus::-webkit-slider-runnable-track {
-                background: #367ebd;
-              }
-              
-              input[type=range]::-moz-range-track {
-                width: 100%;
-                height: 8.4px;
-                cursor: pointer;
-                box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-                background: #3071a9;
-                border-radius: 1.3px;
-                border: 0.2px solid #010101;
-              }
-              
-              input[type=range]::-ms-track {
-                width: 100%;
-                height: 8.4px;
-                cursor: pointer;
-                background: transparent;
-                border-color: transparent;
-                border-width: 16px 0;
-                color: transparent;
-              }
-              input[type=range]::-ms-fill-lower {
-                background: #2a6495;
-                border: 0.2px solid #010101;
-                border-radius: 2.6px;
-                box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-              }
-              input[type=range]:focus::-ms-fill-lower {
-                background: #3071a9;
-              }
-              input[type=range]::-ms-fill-upper {
-                background: #3071a9;
-                border: 0.2px solid #010101;
-                border-radius: 2.6px;
-                box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-              }
-              input[type=range]:focus::-ms-fill-upper {
-                background: #367ebd;
-              }
+          }                             
         `;
         document.head.appendChild(style);
     }
 
     async postInit() {
         this._hasInitialized = true;
-        this.sidePanel.style.visibility = 'visible';
+        this.sidePanel.style.display = 'block';
+        this.registerPlugin("UI Transition", null, this.handlePluginState.bind(this));
     }
 
     loginOK() {
         // Show the show button
-        this.sidePanel.style.visibility = 'visible';
+        this.sidePanel.style.display = 'block';
     }
 
     logoutOK() {
+        console.log('logoutOK');
         // If the side panel is open, close it
-        if (this.sidePanel.style.right === '0') {
+        if (this.sidePanel.style.right === '0px') {
             document.getElementById('genlite-ui-close-button').click();
         }
 
         // Hide the panel
-        this.sidePanel.style.visibility = 'hidden';
+        this.sidePanel.style.display = 'none';
     }
 
     handlePluginState(state: boolean): void {
-        // TODO: Implement
+        if (state) {
+            document.game.GRAPHICS.resize = function (width=document.body.clientWidth, height=window.innerHeight) {
+                this.camera.resize();
+                this.renderer.setSize(width, height);
+            }
+
+            // If the side panel is open, apply the resize
+            if (this.sidePanel.style.right === '0px') {
+                document.getElementById('new_ux-minimap-UI-anchor').style.transition = 'right 0.5s';
+                document.getElementById('new_ux-minimap-UI-anchor').style.right = '300px';
+                document.body.style.transition = 'width 0.5s';
+                document.body.style.width = 'calc(100% - 302px)';
+            }
+
+        } else {
+            document.getElementById('new_ux-minimap-UI-anchor').style.removeProperty('transition');
+            document.getElementById('new_ux-minimap-UI-anchor').style.removeProperty('right');
+            document.body.style.removeProperty('transition');
+            document.body.style.removeProperty('width');
+            document.game.GRAPHICS.resize = this.originalGraphicsResize;
+            
+        }
+
+        this.resizeGame = state;
+        document.game.GRAPHICS.resize();
     }
 
     addTab(icon: string, tabName: string, tabContent: HTMLElement, initiallyVisible: boolean = true) {
@@ -452,7 +499,6 @@ export class GenLiteUIPlugin {
         // Display the alert holder
         this.alertHolder.style.display = 'flex';
     }
-
 
     showTab(tabName: string) {
         // Update the tab content header
@@ -569,10 +615,16 @@ export class GenLiteUIPlugin {
             // Get the old key
             const oldKeyState = this.getKeyRaw(oldKey);
 
-            if (oldKeyState !== null || oldKeyState !== undefined) {
+            console.log(oldKey)
+            console.log(oldKeyState)
+
+            if (oldKeyState != null && oldKeyState != undefined) {
                 // Set the new key
                 this.setKey(plugin, oldKeyState);
             }
+
+            // Remove the old key
+            this.deleteKey(oldKey);
         };
         let pluginState = this.getKey(plugin, false);
 
@@ -650,6 +702,32 @@ export class GenLiteUIPlugin {
 
         // Add the settings div to this.pluginSettings
         this.pluginSettings[plugin] = pluginSettingsDiv;
+
+
+        // Sort the plugins alphabetically
+        const pluginRows = Array.from(this.settingsTab.children);
+        pluginRows.sort((a, b) => {
+            const aName = a.children[0].innerHTML;
+            const bName = b.children[0].innerHTML;
+
+            if (aName < bName) {
+                return -1;
+            } else if (aName > bName) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+
+        // Remove all the plugin rows
+        while (this.settingsTab.firstChild) {
+            this.settingsTab.removeChild(this.settingsTab.firstChild);
+        }
+
+        // Add the sorted plugin rows
+        for (const pluginRow of pluginRows) {
+            this.settingsTab.appendChild(pluginRow);
+        }
     };
 
     // Add Settings
