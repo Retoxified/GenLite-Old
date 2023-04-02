@@ -129,6 +129,9 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
         this.locationLabel = document.createElement("div")
         this.locationLabel.style.display = "none";
         this.locationLabel.style.visibility = "hidden";
+        this.locationLabel.style.color = "goldenrod";
+        this.locationLabel.style.fontFamily = "'Acme', 'Times New Roman', Times, serif";
+        this.locationLabel.style.textShadow = "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000";
         this.locationLabel.classList.add("location-label")
         this.locationLabel.innerText = ""
         document.body.appendChild(this.locationLabel)
