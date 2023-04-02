@@ -18,11 +18,12 @@ export class GenLiteResizePlugin implements GenLitePlugin {
 
     isPluginEnabled: boolean = true;
     pluginSettings: Settings = {
-        "Resize Camera View": {
-            type: 'checkbox',
-            value: false,
-            stateHandler: this.handleResizeCameraViewToggle.bind(this)
-        },
+        // "Resize Camera View": {
+        //     type: 'checkbox',
+        //     value: false,
+        //     stateHandler: this.handleResizeCameraViewToggle.bind(this),
+        //     alert: 'Enabling this setting may cause UI bugs, if you find any please report them in the GenLite discord'
+        // },
     };
 
     originalGraphicsResize: Function;
