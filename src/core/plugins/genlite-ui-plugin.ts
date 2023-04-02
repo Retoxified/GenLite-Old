@@ -355,7 +355,7 @@ export class GenLiteUIPlugin {
     logoutOK() {
         console.log('logoutOK');
         // If the side panel is open, close it
-        if (this.sidePanel.style.right === '0') {
+        if (this.sidePanel.style.right === '0px') {
             document.getElementById('genlite-ui-close-button').click();
         }
 
@@ -369,8 +369,24 @@ export class GenLiteUIPlugin {
                 this.camera.resize();
                 this.renderer.setSize(width, height);
             }
+
+            // If the side panel is open, apply the resize
+            if (this.sidePanel.style.right === '0px') {
+                document.getElementById('new_ux-minimap-UI-anchor').style.transition = 'right 0.5s';
+                document.getElementById('new_ux-minimap-UI-anchor').style.right = '300px';
+                document.body.style.transition = 'width 0.5s';
+                document.body.style.width = 'calc(100% - 302px)';
+            } else {
+                console.log('not resizing')
+            }
+
         } else {
+            document.getElementById('new_ux-minimap-UI-anchor').style.removeProperty('transition');
+            document.getElementById('new_ux-minimap-UI-anchor').style.removeProperty('right');
+            document.body.style.removeProperty('transition');
+            document.body.style.removeProperty('width');
             document.game.GRAPHICS.resize = this.originalGraphicsResize;
+            
         }
 
         this.resizeGame = state;
