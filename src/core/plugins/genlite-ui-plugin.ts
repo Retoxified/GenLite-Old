@@ -157,12 +157,12 @@ export class GenLiteUIPlugin {
                 if (this.resizeGame) {
                     document.body.style.removeProperty('width');
                     document.getElementById('new_ux-minimap-UI-anchor').style.removeProperty('transition');
-                    document.game.GRAPHICS.resize();
                 }
                 this.tabBar.style.display = 'none';
                 this.tabContentHeader.style.display = 'none';
                 this.tabContentHolder.style.display = 'none';
             }
+            document.game.GRAPHICS.resize();
         });
 
 
@@ -375,8 +375,6 @@ export class GenLiteUIPlugin {
                 document.getElementById('new_ux-minimap-UI-anchor').style.right = '300px';
                 document.body.style.transition = 'width 0.5s';
                 document.body.style.width = 'calc(100% - 302px)';
-            } else {
-                console.log('not resizing')
             }
 
         } else {
@@ -617,7 +615,10 @@ export class GenLiteUIPlugin {
             // Get the old key
             const oldKeyState = this.getKeyRaw(oldKey);
 
-            if (oldKeyState !== null || oldKeyState !== undefined) {
+            console.log(oldKey)
+            console.log(oldKeyState)
+
+            if (oldKeyState != null && oldKeyState != undefined) {
                 // Set the new key
                 this.setKey(plugin, oldKeyState);
             }
