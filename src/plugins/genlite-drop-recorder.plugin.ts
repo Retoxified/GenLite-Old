@@ -47,7 +47,7 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
     pluginSettings : Settings = {
         "Send Drops to Wiki": {
             type: "checkbox",
-            oldKey: "GenLite.dropRecorder.SendDropstoWiki",
+            oldKey: "GenLite.DropRecorder.SubmitToServer",
             value: this.submitItemsToServer,
             stateHandler: this.handleSubmitToServer.bind(this),
             alert: "This will send your drops to the wiki (a third party), please only enable this if you are comfortable with this."
@@ -68,7 +68,7 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
 
     async postInit() {
         this.packList = document['GenLiteWikiDataCollectionPlugin'].packList;
-        document.genlite.ui.registerPlugin("Drop Recorder", null, this.handlePluginState.bind(this), this.pluginSettings);
+        document.genlite.ui.registerPlugin("Drop Recorder", "GenLite.DropRecorder.Enable", this.handlePluginState.bind(this), this.pluginSettings);
     }
 
     handlePluginState(state: boolean): void {

@@ -36,12 +36,13 @@ export class GenLiteSoundNotification implements GenLitePlugin {
     pluginSettings : Settings = {
         "Low Health Sound": {
             type: "checkbox",
-            oldKey: "GenLite.soundNotifications.LowHealthSound",
+            oldKey: "GenLite.LowHealthSound.Enable",
             value: this.doHealthCheck,
             stateHandler: this.handleDoHealthCheck.bind(this),
             children: {
                 "Health Threshold": {
                     type: "range",
+                    oldKey: "GenLite.LowHealth.0",
                     value: this.healthThreshold,
                     stateHandler: this.setHealthThreshold.bind(this),
                     min: 1,
@@ -51,12 +52,13 @@ export class GenLiteSoundNotification implements GenLitePlugin {
         },
         "Inventory Space Sound": {
             type: "checkbox",
-            oldKey: "GenLite.soundNotifications.InventorySpaceSound",
+            oldKey: "GenLite.InvCheck.Enable",
             value: this.doInvCheck,
             stateHandler: this.handleInvCheckEnableDisable.bind(this),
             children : {
                 "Inventory Threshold": {
                     type: "range",
+                    oldKey: "GenLite.InvThreshold.0",
                     value: this.invThreshold,
                     stateHandler: this.setInvThreshold.bind(this),
                     min: 1,
@@ -66,12 +68,13 @@ export class GenLiteSoundNotification implements GenLitePlugin {
         },
         "Override Game Volume": {
             type: "checkbox",
-            oldKey: "GenLite.soundNotifications.OverrideGameVolume",
+            oldKey: "GenLite.overrideIGNVolume.Enable",
             value: this.overrideIGNVolume,
             stateHandler: this.handelOverrideVolumeEnableDisable.bind(this),
             children: {
                 "Override Volume": {
                     type: "range",
+                    oldKey: "GenLite.overrideVolume.0",
                     value: this.overrideVolume,
                     stateHandler: this.setOverrideVolume.bind(this),
                     min: 1,
