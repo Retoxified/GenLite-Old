@@ -31,13 +31,13 @@ export class GenLiteItemTooltips implements GenLitePlugin {
     pluginSettings : Settings = {
         "Food Tooltips": {
             type: "checkbox",
-            oldKey: "GenLite.itemTooltips.FoodTooltips",
+            oldKey: "GenLite.FoodToolTips.Enable",
             value: this.isFoodEnabled,
             stateHandler: this.handleFoodEnableDisable.bind(this)
         },
         "Value Tooltips": {
             type: "checkbox",
-            oldKey: "GenLite.itemTooltips.ValueTooltips",
+            oldKey: "GenLite.ValueToolTips.Enable",
             value: this.isValueEnabled,
             stateHandler: this.handleValueEnableDisable.bind(this)
         }
@@ -48,7 +48,7 @@ export class GenLiteItemTooltips implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.ui.registerPlugin("Item Tooltips", null, this.handlePluginState.bind(this), this.pluginSettings);
+        document.genlite.ui.registerPlugin("Item Tooltips", "GenLite.ItemTooltips.Enable", this.handlePluginState.bind(this), this.pluginSettings);
     }
 
     handlePluginState(state: boolean): void {

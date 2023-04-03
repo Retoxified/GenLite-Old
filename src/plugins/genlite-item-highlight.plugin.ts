@@ -72,15 +72,15 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     hideLables: boolean = false;
 
     pluginSettings : Settings = {
-        "Highlight Items": {
+        "Show Item Labels": {
             type: "checkbox",
-            oldKey: "GenLite.itemHighlights.HighlightItems",
+            oldKey: "GenLite.HideItemLabels.Enable",
             value: this.hideLables,
             stateHandler: this.handleHideLabelsEnableDisable.bind(this),
         },
         "Priority Item Color": {
             value: "#ffa500",
-            oldKey: "GenLite.itemHighlights.PriorityItemColor",
+            oldKey: "GenLite.ItemHighlight.PriorityColor",
             type: "color",
             stateHandler: this.handleColorChange.bind(this),
         },
@@ -106,7 +106,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.ui.registerPlugin("Item Highlights", null, this.handlePluginState.bind(this), this.pluginSettings);
+        document.genlite.ui.registerPlugin("Item Highlights", "GenLite.ItemHighLight.Enable", this.handlePluginState.bind(this), this.pluginSettings);
     }
 
     //

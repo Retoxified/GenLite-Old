@@ -23,7 +23,7 @@ export class GenLiteMenuScaler implements GenLitePlugin {
     pluginSettings : Settings = {
         "Right Click Menu": {
             type: "range",
-            oldKey: "GenLite.menuScaler.RightClickMenu",
+            oldKey: "GenLite.MenuScalerRightCLick.1",
             value: 1,
             min: 0.1,
             max: 4,
@@ -39,7 +39,7 @@ export class GenLiteMenuScaler implements GenLitePlugin {
     }
 
     async postInit() {
-        document.genlite.ui.registerPlugin("Menu Scaler", null, this.handlePluginState.bind(this), this.pluginSettings);
+        document.genlite.ui.registerPlugin("Menu Scaler", "GenLite.MenuScaler.Enable", this.handlePluginState.bind(this), this.pluginSettings);
     }
 
     handlePluginState(state: boolean): void {

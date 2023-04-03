@@ -89,8 +89,15 @@ scriptText = scriptText.substring(0, scriptText.length - 5)
     + "//# sourceURL=client.js";
 
 
+
+
+// THESE TWO SETTINGS ARE UI RELATED AND SHOULD BE MOVED TO THE UI PLUGIN IF AT ALL POSSIBLE IN THE FUTURE
 // Regex to replace window.innerWidth and window.innerHeight with document.body.clientWidth and document.body.clientHeight
 scriptText = scriptText.replace(/window\.innerWidth/g, "document.body.clientWidth");
+// .new_ux-settings-modal__setting-controls--draggable__bar input[type=range] {\n    /*Calculated proportions against a settings modal block with an arbitrary height of 65.3vh\n        left:   NaN         = 0\n        top:    0.25        = 0.003828483920368\n        width:  28vh        = 0.428790199081164\n        height: 1.5vh       = 0.022\n    */\n\n    --top: 0.003828483920368;\n    --width: 0.428790199081164;\n    --height: 0.022;\n\n    left: 7%;\n    top: calc(var(--top) * var(--settings-modal-height) * var(--settings-modal-zoom-factor));\n    width: calc(var(--width) * var(--settings-modal-height) * var(--settings-modal-zoom-factor));\n    height: calc(var(--height) * var(--settings-modal-height) * var(--settings-modal-zoom-factor));\n\n\n\n    -webkit-appearance: none;\n\n\n    border-radius: 5px;\n\n    background: var(--brown-6);\n    background-image: linear-gradient(var(--yellow-3), var(--yellow-3));\n    background-clip: border-box;\n    background-repeat: no-repeat;\n    border-bottom: 1px solid var(--brown-2);\n}
+// Regex needs to replace background-image in .new_ux-settings-modal__setting-controls--draggable__bar input[type=range] with nothing
+scriptText = scriptText.replace(/background-image: linear-gradient\(var\(--yellow-3\), var\(--yellow-3\)\);/g, "");
+
 
 
 let isInitialized = false;

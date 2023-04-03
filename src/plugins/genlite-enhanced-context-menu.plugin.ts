@@ -260,7 +260,12 @@ export class GenLiteEnhancedContextMenu implements GenLitePlugin {
     }
 
     Inventory_getAllContextOptions(itemID, itemActions) {
-        if (!this.isEnabled && !this.lookupItems) return;
+        if (!this.isEnabled || !this.lookupItems) {
+            console.log("Lookup Off")
+            return;
+        } 
+
+        
 
         const objectName = itemActions[0].object.text();
 
