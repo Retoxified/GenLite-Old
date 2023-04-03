@@ -127,13 +127,11 @@ export class GenLiteUIPlugin {
         visibilityButton.style.transition = 'transform 0.5s ease-in-out';
         visibilityButton.addEventListener('click', () => {
             if (this.sidePanel.style.right === '-302px') {
-                this.sidePanel.style.right = '0px';
                 if (this.resizeGame) {
                     document.getElementById('new_ux-minimap-UI-anchor').style.right = '301px';
                     document.getElementById('new_ux-minimap-UI-anchor').style.transition = 'right 0.5s ease-in-out';
-                    document.body.style.transition = 'width 0.5s ease-in-out';
-                    document.body.style.width = 'calc(100% - 302px)';
                 }
+                this.sidePanel.style.right = '0px';
                 visibilityButton.style.transform = 'rotate(180deg)';
                 this.tabBar.style.display = 'block';
                 this.tabContentHeader.style.display = 'flex';
@@ -161,6 +159,11 @@ export class GenLiteUIPlugin {
                 this.tabBar.style.display = 'none';
                 this.tabContentHeader.style.display = 'none';
                 this.tabContentHolder.style.display = 'none';
+            }
+
+            if (this.sidePanel.style.right === '0px' && this.resizeGame) {
+                document.body.style.transition = 'width 0.5s ease-in-out';
+                document.body.style.width = 'calc(100% - 302px)';
             }
             document.game.GRAPHICS.resize();
         });
