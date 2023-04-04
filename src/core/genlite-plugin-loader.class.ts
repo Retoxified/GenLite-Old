@@ -45,7 +45,7 @@ export class GenLitePluginLoader {
             document[pluginClass.pluginName] = pluginInstance;
 
             this.plugins.push(pluginInstance);
-            console.info(`[GenLitePluginLoader]: Loaded plugin ${pluginClass.pluginName}`);
+            console.log(`[GenLitePluginLoader]: Loaded plugin ${pluginClass.pluginName}`);
             return pluginInstance;
         } catch (e) {
             console.error(`[GenLitePluginLoader]: Error initialising plugin ${pluginClass.pluginName}`, e);
