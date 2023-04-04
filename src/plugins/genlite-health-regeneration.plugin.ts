@@ -1,6 +1,6 @@
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-export class GenLiteHealthRegenerationPlugin implements GenLitePlugin {
+export class GenLiteHealthRegenerationPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteHealthRegenerationPlugin';
 
     healthRegenerationInterval;

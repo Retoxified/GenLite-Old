@@ -11,9 +11,9 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-export class GenLiteEnhancedBanking implements GenLitePlugin {
+export class GenLiteEnhancedBanking extends GenLitePlugin {
     static pluginName = 'GenLiteEnhancedBanking';
 
     isEnabled: boolean = false;
@@ -22,7 +22,11 @@ export class GenLiteEnhancedBanking implements GenLitePlugin {
     pluginSettings : Settings = {}
 
     BANK: Bank;
-    qualToWith: string = ''; /* _lq, '', _hq for the 3 qualities */
+    toWith: {[slot: number]: {
+        quantity: number,
+        quality: string  /* _lq, '', _hq for the 3 qualities */
+    }} = {};
+    lastSlot: number = 0;
 
     intersect_vector = new document.game.THREE.Vector3();
     async init() {
@@ -44,7 +48,7 @@ export class GenLiteEnhancedBanking implements GenLitePlugin {
     */
     _addContextOptionsActual(item, contextMenu, n) {
         if (this.isEnabled == false) return;
-        let toWithdraw = this.BANK.saved_withdraw_x ? this.BANK.saved_withdraw_x : 1
+        let toWithdraw = this.toWith[this.lastSlot] ? this.toWith[this.lastSlot].quantity : 1
         contextMenu.push({
             color: "none",
             priority: document.game.KEYBOARD['17'] ? 999 : 1,
@@ -69,11 +73,11 @@ export class GenLiteEnhancedBanking implements GenLitePlugin {
     */
     _addContextOptions(itemSlot: any, contextMenu: any) {
         if (this.isEnabled == false) return;
-        let toWithdraw = this.BANK.saved_withdraw_x ? this.BANK.saved_withdraw_x : 1
-        let n = itemSlot + this.BANK.selected_page * document.game.SOME_CONST_USED_FOR_BANK;
+        let toWithdraw = this.toWith[this.lastSlot] ? this.toWith[this.lastSlot].quantity : 1
+        let n    = itemSlot + this.BANK.selected_page * document.game.SOME_CONST_USED_FOR_BANK;
         let item = this.BANK.slots[n];
         let a = item.item.substring(3);
-        a = a.concat(this.qualToWith);
+        a = a.concat(this.toWith[itemSlot]? this.toWith[itemSlot].quality : "");
         let itemHumanName = `<span class='item'>${document.game.returnsAnItemName(a)}</span>`;
         let r = {
             type: "item",
@@ -95,6 +99,7 @@ export class GenLiteEnhancedBanking implements GenLitePlugin {
                 }
             })
         }
+        this.lastSlot = itemSlot;
     }
 
     /* figure out what the last quality was we withdrew */
@@ -102,13 +107,16 @@ export class GenLiteEnhancedBanking implements GenLitePlugin {
         if (this.isEnabled == false) return;
         if (verb == 'bank_action') {
             if (param.action == 'withdraw') {
+                this.toWith[this.lastSlot] = {quantity: 1, quality: ''};
                 if (param.item.match(/_lq$/)) {
-                    this.qualToWith = '_lq';
+                    this.toWith[this.lastSlot].quality = '_lq';
                 } else if (param.item.match(/_hq$/)) {
-                    this.qualToWith = '_hq';
+                    this.toWith[this.lastSlot].quality = '_hq';
                 } else {
-                    this.qualToWith = ''; //nq case
+                    this.toWith[this.lastSlot].quality = ''; //nq case
                 }
+                this.toWith[this.lastSlot].quantity = this.BANK.saved_withdraw_x ? this.BANK.saved_withdraw_x : 1;
+                this.log(param, "plspls", verb, this.toWith);
             }
         }
     }

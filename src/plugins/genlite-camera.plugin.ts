@@ -18,10 +18,10 @@ import {
     SkyboxUriDown,
     SkyboxUriBack,
     SkyboxUriFront,
-} from "./skybox-data";
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+} from "../core/data/skybox-data";
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-export class GenLiteCameraPlugin implements GenLitePlugin {
+export class GenLiteCameraPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteCameraPlugin';
 
     static minRenderDistance = 40;

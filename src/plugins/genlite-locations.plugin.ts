@@ -18,9 +18,9 @@
  Known Issues:
  */
 
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-export class GenLiteLocationsPlugin implements GenLitePlugin {
+export class GenLiteLocationsPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteLocationsPlugin'
     private classifyPoint = require("robust-point-in-polygon")
     private stylesheetAdded: boolean
@@ -41,11 +41,7 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
     private mapZoom: number
     private mapTranslucent: boolean
     private translucentScale: number
-    constructor() {
-        this.setupLocations()
-        this.setupUILocationLabel()
-        this.setupUIMapIframe()
-    }
+
     private setupLocations(): void {
         this.lastPosition = [0, 0]
         this.currentLocation = [[0, 0]]
@@ -147,7 +143,11 @@ export class GenLiteLocationsPlugin implements GenLitePlugin {
         document.body.appendChild(this.mapIframe)
     }
     async init() {
-        document.genlite.registerPlugin(this)
+        document.genlite.registerPlugin(this);
+
+        this.setupLocations();
+        this.setupUILocationLabel();
+        this.setupUIMapIframe();
 
 
 

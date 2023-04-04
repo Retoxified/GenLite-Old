@@ -12,13 +12,15 @@
 */
 
 import { ExamplePlugin } from "./help/example-plugin.class";
-import {GenLitePlugin} from './interfaces/plugin.interface';
+import { GenLitePlugin } from './interfaces/plugin.class';
+
+
 
 export class GenLitePluginLoader {
     plugins;
 
     constructor() {
-        this.plugins  = [];
+        this.plugins = [];
     }
 
     /**
@@ -71,7 +73,7 @@ export class GenLitePluginLoader {
             throw new Error(`Plugin class ${pluginClass} does not define an init function.`);
         }
 
-        if (typeof(pluginClass.prototype.init) !== 'function') {
+        if (typeof (pluginClass.prototype.init) !== 'function') {
             throw new Error(`Plugin class ${pluginClass}.init was not defined as a function`);
         }
 
@@ -83,7 +85,7 @@ export class GenLitePluginLoader {
             throw new Error(`Plugin class ${pluginClass} does not define a handlePluginState function.`);
         }
 
-        if (typeof(pluginClass.prototype.handlePluginState) !== 'function') {
+        if (typeof (pluginClass.prototype.handlePluginState) !== 'function') {
             throw new Error(`Plugin class ${pluginClass}.handlePluginState was not defined as a function`);
         }
     }

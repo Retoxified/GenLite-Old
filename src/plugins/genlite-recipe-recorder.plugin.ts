@@ -11,9 +11,9 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-export class GenLiteRecipeRecorderPlugin implements GenLitePlugin {
+export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteRecipeRecorderPlugin';
 
     isCrafting = false;

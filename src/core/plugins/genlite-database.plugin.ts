@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2023 snwhd
+    Copyright (C) 2023 KKonaOG dpeGit
 */
 /*
     This file is part of GenLite.
@@ -11,10 +11,12 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { GenLitePlugin } from "../interfaces/plugin.class";
+
 type DatabaseCallback = (db: IDBDatabase) => void;
 type StoreCallback = (db: IDBObjectStore) => void;
 
-export class GenLiteDatabasePlugin {
+export class GenLiteDatabasePlugin extends GenLitePlugin {
     public static pluginName = 'GenLiteDatabasePlugin';
     public static dbName = 'GenLiteDatabase';
     public static version = 2;

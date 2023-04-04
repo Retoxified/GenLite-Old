@@ -17,7 +17,7 @@ import { GenLiteSettingsPlugin } from "./plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./plugins/genlite-commands.plugin";
 import { GenLiteDatabasePlugin } from "./plugins/genlite-database.plugin";
 import { GenLiteUIPlugin } from "./plugins/genlite-ui-plugin";
-import { GenLitePlugin} from './interfaces/plugin.interface';
+import { GenLitePlugin} from './interfaces/plugin.class';
 
 export class GenLite {
     static pluginName = 'GenLite';

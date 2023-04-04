@@ -11,11 +11,11 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
 import Stats from '../../thirdPartyModules/Stats.js/build/stats.module';
 
-export class GenLiteFPSCounter implements GenLitePlugin {
+export class GenLiteFPSCounter extends GenLitePlugin {
     static pluginName = 'GenLiteFPSCounter';
 
     stats;

@@ -9,10 +9,10 @@
 */
 
 // Import GenLite Plugin Interface
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import {GenLitePlugin} from '../core/interfaces/plugin.class';
 
 // Create PlayerTools Plugin Class
-export class GenLitePlayerToolsPlugin implements GenLitePlugin {
+export class GenLitePlayerToolsPlugin extends GenLitePlugin {
     static pluginName = 'GenLitePlayerToolsPlugin';
 
     // Plugin Settings

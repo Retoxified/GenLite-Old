@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2023 FrozenReality
+    Copyright (C) 2023 FrozenReality dpeGit
 */
 /*
     This file is part of GenLite.
@@ -13,9 +13,9 @@
 
 
 /* note if copying change import to `../core/interfaces/plugin.interface` */
-import {GenLitePlugin} from '../interfaces/plugin.interface';
+import {GenLitePlugin} from '../interfaces/plugin.class';
 
-export class ExamplePlugin implements GenLitePlugin {
+export class ExamplePlugin extends GenLitePlugin {
     static pluginName = 'My Plugin';
     async init() {}
     handlePluginState(state: boolean) {}

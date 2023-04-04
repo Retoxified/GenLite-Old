@@ -11,7 +11,7 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
 class Highscore {
     Player: string;
@@ -27,7 +27,7 @@ class Highscore {
     ] = [];
 }
 
-export class GenLiteHighscores implements GenLitePlugin {
+export class GenLiteHighscores extends GenLitePlugin {
     static pluginName = 'GenLiteHighscores';
 
     highscores: Highscore;
