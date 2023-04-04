@@ -18,6 +18,7 @@ import { GenLiteCommandsPlugin } from "./plugins/genlite-commands.plugin";
 import { GenLiteDatabasePlugin } from "./plugins/genlite-database.plugin";
 import { GenLiteUIPlugin } from "./plugins/genlite-ui-plugin";
 import { GenLitePlugin} from './interfaces/plugin.interface';
+import { GenLiteLogger } from "./plugins/genlite-logger.plugin";
 
 export class GenLite {
     static pluginName = 'GenLite';
@@ -31,6 +32,7 @@ export class GenLite {
     commands: GenLiteCommandsPlugin;
     database: GenLiteDatabasePlugin;
     ui: GenLiteUIPlugin;
+    logger: GenLiteLogger;
 
     /** We allow setting "any field, to anything" in order to load core features such as genlite.notifications */
     [key: string]: any;

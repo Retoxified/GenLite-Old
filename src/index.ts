@@ -12,6 +12,7 @@
 
 /** Core Features */
 import { GenLite } from "./core/genlite.class";
+import { GenLiteLogger } from "./core/plugins/genlite-logger.plugin";
 import { GenLiteNotificationPlugin } from "./core/plugins/genlite-notification.plugin";
 import { GenLiteSettingsPlugin } from "./core/plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./core/plugins/genlite-commands.plugin";
@@ -206,6 +207,7 @@ let isInitialized = false;
 
         const genlite = new GenLite();
         document.genlite = genlite;
+        genlite.logger = new GenLiteLogger();
         await genlite.init();
 
         /** Core Features */
