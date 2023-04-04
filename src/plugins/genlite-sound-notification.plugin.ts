@@ -108,7 +108,7 @@ export class GenLiteSoundNotification implements GenLitePlugin {
     handlePluginState(state: boolean): void {
         // TODO: Implement
         // Display Yellow Console Message Stating the plugin needs to implement this
-        console.warn(`${GenLiteSoundNotification.pluginName} needs to implement handlePluginState()`);
+        console.log(`%c[GenLite] %c${this.constructor.name} %cneeds to implement handlePluginState()`, "color: #ff0", "color: #fff", "color: #f00");
     }
 
     handleDoHealthCheck(state: boolean) {
