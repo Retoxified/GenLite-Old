@@ -114,7 +114,7 @@ export class GenLiteHitRecorder extends GenLitePlugin {
         this.isfirstHit = true;
     }
     /* filters network packets for damage data from the player */
-    handle(verb, payload) {
+    Network_handle(verb, payload) {
         if (this.isPluginEnabled === false) {
             return;
         }

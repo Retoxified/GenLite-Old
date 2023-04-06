@@ -49,7 +49,7 @@ export class GenLiteFPSCounter extends GenLitePlugin {
             this.loginOK();
             this.initializeUI();
         } else {
-            this.logoutOK();
+            this.Network_logoutOK();
         }
     }
     
@@ -70,7 +70,7 @@ export class GenLiteFPSCounter extends GenLitePlugin {
     }
 
     /* stop tracking fps */
-    logoutOK() {
+    Network_logoutOK() {
         this.doUpdateFPS = false;
         this.stats.dom.style.display = 'none';
     }

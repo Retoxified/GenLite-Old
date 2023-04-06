@@ -206,7 +206,7 @@ export class GenLiteMusicPlugin extends GenLitePlugin {
         }
     }
 
-    logoutOK() {
+    Network_logoutOK() {
         this.hideMusicSelection();
     }
 

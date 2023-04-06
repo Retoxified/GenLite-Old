@@ -51,7 +51,7 @@ export class GenLiteGeneralChatCommands extends GenLitePlugin {
         this.isLogged = true;
     }
 
-    logoutOK() {
+    Network_logoutOK() {
         this.loginTime = 0;
         clearInterval(this.playedSaveInverval);
         this.playedSaveInverval = null;

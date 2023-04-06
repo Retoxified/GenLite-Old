@@ -75,7 +75,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         /* if toggle on mid way through we have to run the init code */
         if (state) {
             this.initializeUI();
-            this.updateSkills();
+            this.PlayerInfo_updateSkills();
         }
     }
 
@@ -100,7 +100,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
     }
 
     /* when an xp update comes calculate skillsList fields */
-    updateXP(xp) {
+    PlayerInfo_updateXP(xp) {
         if (!this.isPluginEnabled) {
             return;
         }
@@ -164,7 +164,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
     }
 
     /* if tooltip is update just run onmouseenter() again */
-    updateTooltip() {
+    PlayerInfo_updateTooltip() {
         if (!this.isPluginEnabled) {
             return;
         }
@@ -176,7 +176,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
     }
 
     /* calculates tot exp on login */
-    updateSkills() {
+    PlayerInfo_updateSkills() {
         if (!this.isPluginEnabled) {
             return;
         }

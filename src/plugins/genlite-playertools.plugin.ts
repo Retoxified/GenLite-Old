@@ -62,7 +62,7 @@ export class GenLitePlayerToolsPlugin extends GenLitePlugin {
         this.isEnabled = state;
     }
 
-    update(dt) {
+    Camera_update(dt) {
         // Set the Player Tag Container's Visibility to Hidden based off doRender
         this.PlayerTagContainer.style.visibility = this.doRender ? 'visible' : 'hidden';
 
@@ -172,7 +172,7 @@ export class GenLitePlayerToolsPlugin extends GenLitePlugin {
         this.doRender = true;
     }
 
-    logoutOK() {
+    Network_logoutOK() {
         this.doRender = false;
         this.trackedPlayers = {};
         this.PlayerTagContainer.innerHTML = "";

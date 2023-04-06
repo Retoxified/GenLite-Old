@@ -253,19 +253,16 @@ export class GenLiteEnhancedContextMenu extends GenLitePlugin {
                 detailedObject.modelInfo.name = detailedObject.modelInfo.originalName;
                 detailedObject.modelInfo.originalName = null; // Remove the original name property, this allows this to only run once
             }
-
-
-
         });
     }
 
-    Inventory_getAllContextOptions(itemID, itemActions) {
+    Inventory__getAllContextOptions(itemID, itemActions) {
         if (!this.isEnabled || !this.lookupItems) {
             console.log("Lookup Off")
             return;
-        } 
+        }
 
-        
+
 
         const objectName = itemActions[0].object.text();
 
@@ -280,10 +277,10 @@ export class GenLiteEnhancedContextMenu extends GenLitePlugin {
         // Remove " +1" and " +2" from the name of the item
         cleanName = cleanName.replace(' +1', '');
         cleanName = cleanName.replace(' +2', '');
-        
+
         itemActions.push({
             text: "Lookup",
-            priority: -2, 
+            priority: -2,
             object: itemActions[0].object,
             action: () => {
                 window.open(this.wikiBaseURL + cleanName, '_blank');

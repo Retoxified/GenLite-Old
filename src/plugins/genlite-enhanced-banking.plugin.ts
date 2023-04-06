@@ -19,14 +19,18 @@ export class GenLiteEnhancedBanking extends GenLitePlugin {
     isEnabled: boolean = false;
 
 
-    pluginSettings : Settings = {}
+    pluginSettings: Settings = {}
 
     BANK: Bank;
-    toWith: {[slot: number]: {
-        quantity: number,
-        quality: string  /* _lq, '', _hq for the 3 qualities */
-    }} = {};
-    lastSlot: number = 0;
+    toWith: {
+        [baseItem: string]: {
+            '_lq': number
+            '_hq': number
+            '': number
+            'lastQual': string
+        }
+    } = {};
+    lastQual: string;
 
     intersect_vector = new document.game.THREE.Vector3();
     async init() {
@@ -46,9 +50,16 @@ export class GenLiteEnhancedBanking extends GenLitePlugin {
         without going through the prompt
         ctrl moves this option to the top of the list
     */
-    _addContextOptionsActual(item, contextMenu, n) {
+    Bank__addContextOptionsActual(item, contextMenu, n) {
         if (this.isEnabled == false) return;
-        let toWithdraw = this.toWith[this.lastSlot] ? this.toWith[this.lastSlot].quantity : 1
+        let baseItem = item.item;
+        let qual = ''
+        if (baseItem.match(/(_lq|_hq)$/)) {
+            baseItem = baseItem.substring(0, baseItem.length - 3);
+            qual = baseItem.substring(baseItem.length - 3);
+        }
+        this.toWith[baseItem] = this.toWith[baseItem] ? this.toWith[baseItem] :  { '_lq': 1, '_hq': 1, '': 1, lastQual: '' };
+        let toWithdraw = this.toWith[baseItem] ? this.toWith[baseItem][qual] : 1
         contextMenu.push({
             color: "none",
             priority: document.game.KEYBOARD['17'] ? 999 : 1,
@@ -71,53 +82,63 @@ export class GenLiteEnhancedBanking extends GenLitePlugin {
     /* same as the above function but for stacked qualities
         this uses the last quality withdrawn from the bank from ANY slot
     */
-    _addContextOptions(itemSlot: any, contextMenu: any) {
+    Bank__addContextOptions(itemSlot: any, contextMenu: any) {
         if (this.isEnabled == false) return;
-        let toWithdraw = this.toWith[this.lastSlot] ? this.toWith[this.lastSlot].quantity : 1
-        let n    = itemSlot + this.BANK.selected_page * document.game.SOME_CONST_USED_FOR_BANK;
+        let n = itemSlot + this.BANK.selected_page * document.game.SOME_CONST_USED_FOR_BANK;
         let item = this.BANK.slots[n];
-        let a = item.item.substring(3);
-        a = a.concat(this.toWith[itemSlot]? this.toWith[itemSlot].quality : "");
-        let itemHumanName = `<span class='item'>${document.game.returnsAnItemName(a)}</span>`;
-        let r = {
-            type: "item",
-            id: item,
-            text: () => itemHumanName
-        }
         if (item.item.startsWith('$q')) {
-            contextMenu.push({
-                color: "none",
-                priority: document.game.KEYBOARD['17'] ? 999 : 1,
-                object: r,
-                text: `Withdraw ${toWithdraw}`,
-                action: () => {
-                    document.game.NETWORK_CONTAINER.network.action("bank_action", {
-                        action: "withdraw",
-                        item: a,
-                        quantity: toWithdraw
-                    })
+            let baseItem = item.item.substring(3);
+            this.toWith[baseItem] =  this.toWith[baseItem] ? this.toWith[baseItem] :  { '_lq': 1, '_hq': 1, '': 1, lastQual: '' };    
+            for (let qual of ['_lq', '', '_hq']) {
+                let qual2 = qual == '' ? 'mq' : qual.substring(1);
+                if (item.stored_amounts[qual2] <= 0)
+                    continue;
+                let itemWithQual = baseItem.concat(qual)
+                let itemHumanName = `<span class='item'>${document.game.returnsAnItemName(itemWithQual)}</span>`;
+                let r = {
+                    type: "item",
+                    id: item,
+                    text: () => itemHumanName
                 }
-            })
+                contextMenu.push({
+                    color: "none",
+                    priority: this.toWith[baseItem][this.lastQual] == qual ? (document.game.KEYBOARD['17'] ? 999 : 1) : 1,
+                    object: r,
+                    text: `Withdraw ${this.toWith[baseItem][qual]}`,
+                    action: () => {
+                        document.game.NETWORK_CONTAINER.network.action("bank_action", {
+                            action: "withdraw",
+                            item: itemWithQual,
+                            quantity: this.toWith[baseItem][qual]
+                        })
+                    }
+                })
+            }
         }
-        this.lastSlot = itemSlot;
     }
 
-    /* figure out what the last quality was we withdrew */
-    action(verb, param) {
+    /* record the amount and quality withdrawn */
+    Network_action(verb, param) {
         if (this.isEnabled == false) return;
         if (verb == 'bank_action') {
             if (param.action == 'withdraw') {
-                this.toWith[this.lastSlot] = {quantity: 1, quality: ''};
                 if (param.item.match(/_lq$/)) {
-                    this.toWith[this.lastSlot].quality = '_lq';
+                    this.toWith[param.item.substring(0, param.item.length - 3)]['_lq'] = param.quantity;
+                    this.toWith[param.item.substring(0, param.item.length - 3)]['lastQual'] = '_lq';
                 } else if (param.item.match(/_hq$/)) {
-                    this.toWith[this.lastSlot].quality = '_hq';
+                    this.toWith[param.item.substring(0, param.item.length - 3)]['_lq'] = param.quantity;
+                    this.toWith[param.item.substring(0, param.item.length - 3)]['lastQual'] = '_hq';
                 } else {
-                    this.toWith[this.lastSlot].quality = ''; //nq case
+                    this.toWith[param.item][''] = param.quantity;
+                    this.toWith[param.item]['lastQual'] = '';
                 }
-                this.toWith[this.lastSlot].quantity = this.BANK.saved_withdraw_x ? this.BANK.saved_withdraw_x : 1;
-                this.log(param, "plspls", verb, this.toWith);
             }
         }
+    }
+
+    _getContextOptionsBank(e, t, n){
+        this.log(e);
+        this.log(t);
+        this.log(n);
     }
 }

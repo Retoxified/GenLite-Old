@@ -57,14 +57,14 @@ export class GenLiteWikiDataCollectionPlugin extends GenLitePlugin {
             this.sendInterval = setInterval(() => { this.sendToServer(this) }, 1000);
     }
 
-    logoutOK() {
+    Network_logoutOK() {
         clearInterval(this.scanInterval);
         this.scanInterval = null;
         clearInterval(this.sendInterval);
         this.sendInterval = null;
     }
 
-    updateSkills() {
+    PlayerInfo_updateSkills() {
         if (!this.isRemoteEnabled) {
             return;
         }
@@ -76,7 +76,7 @@ export class GenLiteWikiDataCollectionPlugin extends GenLitePlugin {
         this.playerRangedCL = document.game.PLAYER_INFO.skills.ranged.level;
     }
 
-    combatUpdate(update) {
+    Game_combatUpdate(update) {
         let object = document.game.GAME.objectById(update.id);
 
         if (update.id == document.game.PLAYER.id || document.game.GAME.players[update.id] !== undefined)
@@ -96,7 +96,7 @@ export class GenLiteWikiDataCollectionPlugin extends GenLitePlugin {
         }
     }
 
-    handle(verb, payload) {
+    Network_handle(verb, payload) {
 
         /* look for start of combat set the curEnemy and record data */
         if (verb == "spawnObject" && payload.type == "combat" &&
@@ -132,7 +132,7 @@ export class GenLiteWikiDataCollectionPlugin extends GenLitePlugin {
         }
     }
 
-    updateXP(xp) {
+    PlayerInfo_updateXP(xp) {
         if (xp.levelUp) {
             this.playerMeleeCL = Math.trunc((document.game.PLAYER_INFO.skills.attack.level + document.game.PLAYER_INFO.skills.defense.level + document.game.PLAYER_INFO.skills.strength.level) / 3);
             this.playerRangedCL = document.game.PLAYER_INFO.skills.ranged.level;

@@ -432,7 +432,7 @@ export class GenLiteLocationsPlugin extends GenLitePlugin {
         if (this.compassMap)
             this.enableMapIframe()
     }
-    logoutOK() {
+    Network_logoutOK() {
         this.disableLocationLabels()
         this.disableMapIframe()
     }

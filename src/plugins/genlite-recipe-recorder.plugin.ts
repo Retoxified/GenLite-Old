@@ -54,12 +54,12 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         this.isPluginEnabled = state;
     }
 
-    logoutOK() {
+    Network_logoutOK() {
         this.isCrafting = false;
         this.isGathering = false;
     }
 
-    action(verb, params) {
+    Network_action(verb, params) {
         if (this.isPluginEnabled === false) {
             return;
         }
@@ -125,7 +125,7 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         this.isCrafting = false;
     }
 
-    handle(verb, payload) {
+    Network_handle(verb, payload) {
         if (this.isPluginEnabled === false) {
             return;
         }

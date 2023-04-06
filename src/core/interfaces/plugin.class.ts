@@ -16,25 +16,26 @@ export abstract class GenLitePlugin {
     abstract handlePluginState(state: boolean): void;
     postInit? (): Promise<void>;
     loginOK? (): void;
-    logoutOK? (): void;
-    action? (verb: string, params: any): void // TODO: provide proper type
-    handle? (verb: string, payload: any): void;
-    update? (dt: number): void;
-    updateXP? (xp: any): void; // TODO: provide proper type
-    updateTooltip? ():  void;
-    updateSkills? (): void;
     initializeUI? (): void;
-    combatUpdate? (update: any): void;
-    setHealth? (current: number, max: number): void;
-    handleUpdatePacket? (packet: any): void;
-    handlePacket? (packet: any): void;
-    _showQualityPopup? (packet: any): void;
+    Network_logoutOK? (): void;
+    Network_action? (verb: string, params: any): void; // TODO: provide proper type
+    Network_handle? (verb: string, payload: any): void;
+    Camera_update? (dt: number): void;
+    PlayerInfo_updateXP? (xp: any): void; // TODO: provide proper type
+    PlayerInfo_updateTooltip? ():  void;
+    PlayerInfo_updateSkills? (): void;
+    Game_combatUpdate? (update: any): void;
+    PlayerHUD_setHealth? (current: number, max: number): void;
+    Inventory_handleUpdatePacket? (packet: any): void;
+    Bank_handlePacket? (packet: any): void;
+    Bank__showQualityPopup? (packet: any): void;
+    Bank__addContextOptionsActual? (item: any, contextMenu: any, n: any): void;
+    Bank__addContextOptions? (itemSlot: Number, contextMenu: any): void;
     Trade_handlePacket? (packet: any): void;
-    _addContextOptionsActual? (item: any, contextMenu: any, n: any): void;
-    _addContextOptions? (itemSlot: Number, contextMenu: any): void;
     NPC_Intersects? (ray: any, list: any): void;
     OptimizedScene_Intersects? (ray: any, list: any): void;
     Inventory_Intersects? (e: any, t: any): void;
+    Inventory__getAllContextOptions? (itemID, itemActions): void;
 
     log(...args): void{
         if(process.env.NODE_ENV === 'production')

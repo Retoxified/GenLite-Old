@@ -147,14 +147,14 @@ export class GenLiteSoundNotification extends GenLitePlugin {
         this.invThreshold = threshold;
     }
 
-    combatUpdate(update) {
+    Game_combatUpdate(update) {
         if (update.id != document.game.PLAYER.id)
             return;
         if ((update.hp / update.maxhp) <= (this.healthThreshold / 100) && this.doHealthCheck)
             this.playerInUse.play('spell-failure');
     }
 
-    handleUpdatePacket(packet) {
+    Inventory_handleUpdatePacket(packet) {
         if (!this.doInvCheck)
             return;
         let inUse = Object.keys(document.game.INVENTORY.items).length;

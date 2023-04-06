@@ -233,7 +233,7 @@ export class GenLiteItemHighlightPlugin extends GenLitePlugin {
         this.render = true;
     }
 
-    logoutOK() {
+    Network_logoutOK() {
         this.render = false;
         this.clearTracked();
     }
@@ -389,7 +389,7 @@ export class GenLiteItemHighlightPlugin extends GenLitePlugin {
     // update loop
     //
 
-    update() {
+    Camera_update() {
         if (this.isPluginEnabled && this.render) {
             this.updateTrackedStacks();
             this.updateElements();

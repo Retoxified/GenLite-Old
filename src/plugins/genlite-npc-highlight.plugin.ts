@@ -86,7 +86,7 @@ export class GenLiteNPCHighlightPlugin extends GenLitePlugin {
         this.hideInvert = state;
     }
 
-    update(dt) {
+    Camera_update(dt) {
         if (this.isPluginEnabled === false || this.render === false) {
             return;
         }
@@ -152,14 +152,14 @@ export class GenLiteNPCHighlightPlugin extends GenLitePlugin {
         this.render = true;
     }
 
-    logoutOK() {
+    Network_logoutOK() {
         this.npc_highlight_div.innerHTML = '';
         this.trackedNpcs = {};
         this.render = false;
     }
 
     /* figure out which npc we are fighting and when that combat ends */
-    handle(verb, payload) {
+    Network_handle(verb, payload) {
         if (this.isPluginEnabled === false || document.game.NETWORK.loggedIn === false) {
             return;
         }
@@ -179,7 +179,7 @@ export class GenLiteNPCHighlightPlugin extends GenLitePlugin {
         }
     }
 
-    combatUpdate(update) {
+    Game_combatUpdate(update) {
         if (this.isPluginEnabled === false) {
             return;
         }

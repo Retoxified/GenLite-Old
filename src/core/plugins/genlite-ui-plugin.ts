@@ -360,7 +360,7 @@ export class GenLiteUIPlugin extends GenLitePlugin {
         this.sidePanel.style.display = 'block';
     }
 
-    logoutOK() {
+    Network_logoutOK() {
         // If the side panel is open, close it
         if (this.sidePanel.style.right === '0px') {
             document.getElementById('genlite-ui-close-button').click();

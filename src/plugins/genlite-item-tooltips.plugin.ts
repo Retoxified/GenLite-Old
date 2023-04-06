@@ -115,7 +115,7 @@ export class GenLiteItemTooltips extends GenLitePlugin {
     }
 
     /* every time health is updated move the healthBarHealing element to where the end of the health bar is */
-    setHealth(current, max) {
+    PlayerHUD_setHealth(current, max) {
         if (this.isUiInit) {
             let healthbar = document.getElementById("new_ux-hp-bar__meter--bar");
             this.healthBarHealing.style.left = healthbar.style.width;
@@ -123,7 +123,7 @@ export class GenLiteItemTooltips extends GenLitePlugin {
     }
 
     /* figure out which npc we are fighting and when that combat ends */
-    handle(verb, payload) {
+    Network_handle(verb, payload) {
         if (this.isPluginEnabled === false || document.game.NETWORK.loggedIn === false) {
             return;
         }

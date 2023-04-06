@@ -112,7 +112,7 @@ export class GenLiteHighscores extends GenLitePlugin {
         if (state) {
             this.loginOK();
         } else {
-            this.logoutOK();
+            this.Network_logoutOK();
         }
     }
 
@@ -135,7 +135,7 @@ export class GenLiteHighscores extends GenLitePlugin {
     }
 
     /* stop intercals */
-    logoutOK() {
+    Network_logoutOK() {
         clearInterval(this.sendInterval);
         this.sendInterval = null;
     }
@@ -144,7 +144,7 @@ export class GenLiteHighscores extends GenLitePlugin {
         this.curCombatLevel = document.game.PLAYER_INFO.combat_level;
     }
 
-    handle(verb, payload) {
+    Network_handle(verb, payload) {
         /* count steps */
         if (verb == "move" && document.game.PLAYER && payload.id == document.game.PLAYER.id) {
             switch (payload.direction) {

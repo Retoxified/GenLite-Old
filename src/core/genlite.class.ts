@@ -40,29 +40,28 @@ export class GenLite {
     }
 
     async init() {
-        this.installHook(document.game.Camera.prototype, 'update');
-        this.installHook(document.game.Network.prototype, 'logoutOK');
-        this.installHook(document.game.Network.prototype, 'disconnect', this.hookDisconnect)
-        this.installHook(document.game.PhasedLoadingManager, 'start_phase', this.hookPhased);
-        this.installHook(document.game.Network.prototype, 'action');
-        this.installHook(document.game.Network.prototype, 'handle');
-        this.installHook(document.game.PlayerInfo.prototype, 'updateXP');
-        this.installHook(document.game.PlayerInfo.prototype, 'updateTooltip');
-        this.installHook(document.game.PlayerInfo.prototype, 'updateSkills');
-        // this no longer exists in genfanad: this.installHook(window, 'initializeUI');
-        this.installHook(document.game.Game.prototype, 'combatUpdate');
-        this.installHook(document.game.PlayerHUD.prototype, 'setHealth');
-        this.installHook(document.game.Inventory.prototype, 'handleUpdatePacket');
-        this.installHook(document.game.Bank.prototype, 'handlePacket');
-        this.installHook(document.game.Bank.prototype, '_showQualityPopup');
-        this.installHook(document.game.Trade.prototype, 'handlePacket', this.hookTrade_handlePacket);
-        this.installHook(document.game.Bank.prototype, '_addContextOptionsActual')
-        this.installHook(document.game.Bank.prototype, '_addContextOptions')
+        this.installHookNoProto('PhasedLoadingManager', 'start_phase', this.hookPhased);
+        this.installHook('Network', 'logoutOK');
+        this.installHook('Network', 'disconnect', this.hookDisconnect)
+        this.installHook('Network', 'action');
+        this.installHook('Network', 'handle');
+        this.installHook('Camera', 'update');
+        this.installHook('PlayerInfo', 'updateXP');
+        this.installHook('PlayerInfo', 'updateTooltip');
+        this.installHook('PlayerInfo', 'updateSkills');
+        this.installHook('Game', 'combatUpdate');
+        this.installHook('PlayerHUD', 'setHealth');
+        this.installHook('Inventory', 'handleUpdatePacket');
+        this.installHook('Bank', 'handlePacket');
+        this.installHook('Bank', '_showQualityPopup');
+        this.installHook('Bank', '_addContextOptionsActual')
+        this.installHook('Bank', '_addContextOptions')
+        this.installHook('Trade', 'handlePacket');
     
         // Enhanced Context Menu Hooks
-        this.installHook(document.game.NPC.prototype, 'intersects', this.hookNPC_Intersects);
-        this.installHook(document.game.OptimizedScene.prototype, 'intersects', this.hookOptimizedScene_Intersects);
-        this.installHook(document.game.Inventory.prototype, '_getAllContextOptions', this.hookInventory_getAllContextOptions);
+        this.installHook('NPC', 'intersects');
+        this.installHook('OptimizedScene', 'intersects');
+        this.installHook('Inventory', '_getAllContextOptions');
 
     }
 
@@ -76,7 +75,7 @@ export class GenLite {
                 try {
                     module[fnName].apply(module, args);
                 } catch (e) {
-                    console.error(`GenLite plugin ${module.constructor.pluginName} error in ${fnName}:`, e);
+                    console.error(`GenLite plugin ${module.constructor.pluginName} error ${fnName}:`, e);
                 }
             }
         }
@@ -93,25 +92,7 @@ export class GenLite {
     }
 
     hookDisconnect(fnName: string, ...args: Array<unknown>) {
-        this.hook('logoutOK', args);
-    }
-
-    /* because Bank and Trade have the same function name */
-    hookTrade_handlePacket(fnName: string, ...args: Array<unknown>){
-        this.hook('Trade_handlePacket', args)
-    }
-
-    // Intersect Hooks
-    hookNPC_Intersects(fnName: string, ...args: Array<unknown>) {
-        this.hook('NPC_Intersects', ...args);
-    }
-
-    hookOptimizedScene_Intersects(fnName: string, ...args: Array<unknown>) {
-        this.hook('OptimizedScene_Intersects', ...args);
-    }
-
-    hookInventory_getAllContextOptions(fnName: string, ...args: Array<unknown>) {
-        this.hook('Inventory_getAllContextOptions', ...args);
+        this.hook('Network_logoutOK', args);
     }
 
     registerPlugin(plugin: GenLitePlugin) {
@@ -126,14 +107,32 @@ export class GenLite {
         }
     }
 
-    installHook(object: Object, functionName: string, hookFn = this.hook) {
+    installHook(objectName: string, functionName: string, hookFn = this.hook) {
         const self = this;
+        const object = document.game[objectName].prototype;
+        const hookName = `${objectName}_${functionName}`;
 
         (function (originalFunction) {
             object[functionName] = function (...args: Array<unknown>) {
                 const returnValue = originalFunction.apply(this, arguments);
 
-                hookFn.apply(self, [functionName, ...args]);
+                hookFn.apply(self, [hookName, ...args]);
+
+                return returnValue;
+            };
+        }(object[functionName]));
+    }
+
+    installHookNoProto(objectName: string, functionName: string, hookFn = this.hook) {
+        const self = this;
+        const object = document.game[objectName];
+        const hookName = `${objectName}_${functionName}`;
+
+        (function (originalFunction) {
+            object[functionName] = function (...args: Array<unknown>) {
+                const returnValue = originalFunction.apply(this, arguments);
+
+                hookFn.apply(self, [hookName, ...args]);
 
                 return returnValue;
             };

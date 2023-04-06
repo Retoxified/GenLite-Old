@@ -79,7 +79,7 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
         this.submitItemsToServer = state;
     }
 
-    handle(verb: string, payload: { [key: string]: any }) {
+    Network_handle(verb: string, payload: { [key: string]: any }) {
         if (this.isPluginEnabled === false || document.game.NETWORK.loggedIn === false) {
             return;
         }
