@@ -35,7 +35,7 @@ export class GenLiteUIPlugin extends GenLitePlugin {
     private pluginSettings: Map<string, HTMLElement> = new Map<string, HTMLElement>();
 
     // Plugin Settings (Handled differently than other plugins)
-    private resizeGame : boolean = false;
+    private resizeGame: boolean = false;
 
     async init() {
         // Register the plugin
@@ -43,7 +43,7 @@ export class GenLiteUIPlugin extends GenLitePlugin {
 
         // Grab the original resize method
         this.originalGraphicsResize = document.game.GRAPHICS.resize;
-        
+
         // Main Side Panel Element
         this.sidePanel = document.createElement('div');
         this.sidePanel.id = 'genlite-ui';
@@ -372,7 +372,7 @@ export class GenLiteUIPlugin extends GenLitePlugin {
 
     handlePluginState(state: boolean): void {
         if (state) {
-            document.game.GRAPHICS.resize = function (width=document.body.clientWidth, height=window.innerHeight) {
+            document.game.GRAPHICS.resize = function (width = document.body.clientWidth, height = window.innerHeight) {
                 this.camera.resize();
                 this.renderer.setSize(width, height);
             }
@@ -391,7 +391,7 @@ export class GenLiteUIPlugin extends GenLitePlugin {
             document.body.style.removeProperty('transition');
             document.body.style.removeProperty('width');
             document.game.GRAPHICS.resize = this.originalGraphicsResize;
-            
+
         }
 
         this.resizeGame = state;
@@ -787,14 +787,13 @@ export class GenLiteUIPlugin extends GenLitePlugin {
             }
 
             settings[setting].value = this.getKey(plugin + "." + setting, defaultValue);
-
             // Get the setting value in its correct type
             switch (settings[setting].type) {
                 case 'checkbox':
                     settings[setting].value = settings[setting].value === 'true' ? true : false;
                     break;
                 case 'number':
-                    settings[setting].value = parseInt(settings[setting].value);
+                    settings[setting].value = parseFloat(settings[setting].value);
                     break;
                 case 'text':
                     settings[setting].value = settings[setting].value.toString();
@@ -806,7 +805,7 @@ export class GenLiteUIPlugin extends GenLitePlugin {
                     settings[setting].value = settings[setting].value.toString();
                     break;
                 case 'range':
-                    settings[setting].value = parseInt(settings[setting].value);
+                    settings[setting].value = parseFloat(settings[setting].value);
                     break;
                 default:
                     console.error(`Invalid setting type for ${setting} in ${plugin}`);
@@ -899,10 +898,10 @@ export class GenLiteUIPlugin extends GenLitePlugin {
                     settingInput.type = 'range';
                     settingInput.min = settings[setting].min;
                     settingInput.max = settings[setting].max;
-                    settingInput.value = settings[setting].value as Number;
                     if (settings[setting].step !== undefined) {
                         settingInput.step = settings[setting].step;
                     }
+                    settingInput.value = settings[setting].value as number;
                     settingInput.style.width = '80%';
 
                     // If there is a parent, we need to add an event listener to the parent to hide/show the setting when the parent is toggled
@@ -931,9 +930,9 @@ export class GenLiteUIPlugin extends GenLitePlugin {
                     }
 
                     // Add the event listener to the input
-                    settingInput.addEventListener('change', () => {
+                    settingInput.addEventListener('change', (e) => {
                         // Call the plugin state handler
-                        
+
                         // Get the value as a number
                         let value = parseFloat(settingInput.value);
 
@@ -962,6 +961,10 @@ export class GenLiteUIPlugin extends GenLitePlugin {
 
                     // Make an editable value label
                     let valueLabel = document.createElement('input');
+                    valueLabel.type = 'number';
+                    if (settings[setting].step !== undefined) {
+                        valueLabel.step = settings[setting].step.toString();
+                    }
                     valueLabel.style.width = '20%';
                     valueLabel.style.textAlign = 'right';
                     valueLabel.style.paddingRight = '10px';
@@ -970,8 +973,9 @@ export class GenLiteUIPlugin extends GenLitePlugin {
                     valueLabel.style.borderRadius = '0px 0px 0px 0px';
                     valueLabel.style.color = 'white';
                     valueLabel.value = settingInput.value;
-                    
-                    valueLabel.addEventListener('change', () => {
+
+                    valueLabel.addEventListener('change', (e) => {
+                        e.preventDefault();
                         // Get the value as a number
                         let value = parseFloat(valueLabel.value);
 
@@ -1083,13 +1087,11 @@ export class GenLiteUIPlugin extends GenLitePlugin {
 
         // Check if setting exists in local storage
         let keyValue: string | number | boolean = localStorage.getItem("GenLite." + setting);
-
         // If it doesn't exist, set it to the default value
         if (keyValue === null || keyValue === undefined) {
             if (typeof defaultValue === 'boolean') {
                 defaultValue = defaultValue ? 'true' : 'false';
             }
-
             localStorage.setItem("GenLite." + setting, defaultValue);
             keyValue = defaultValue;
         }

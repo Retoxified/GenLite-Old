@@ -15,7 +15,7 @@ interface Message {
     message: HTMLElement;
     timestamp: string;
 }
-    
+
 interface MessageBuffer {
     messages: Message[];
 

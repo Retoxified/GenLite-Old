@@ -12,48 +12,49 @@
 */
 
 export abstract class GenLitePlugin {
-    abstract init (): Promise<void>;
+    abstract init(): Promise<void>;
     abstract handlePluginState(state: boolean): void;
-    postInit? (): Promise<void>;
-    loginOK? (): void;
-    initializeUI? (): void;
-    Network_logoutOK? (): void;
-    Network_action? (verb: string, params: any): void; // TODO: provide proper type
-    Network_handle? (verb: string, payload: any): void;
-    Camera_update? (dt: number): void;
-    PlayerInfo_updateXP? (xp: any): void; // TODO: provide proper type
-    PlayerInfo_updateTooltip? ():  void;
-    PlayerInfo_updateSkills? (): void;
-    Game_combatUpdate? (update: any): void;
-    PlayerHUD_setHealth? (current: number, max: number): void;
-    Inventory_handleUpdatePacket? (packet: any): void;
-    Bank_handlePacket? (packet: any): void;
-    Bank__showQualityPopup? (packet: any): void;
-    Bank__addContextOptionsActual? (item: any, contextMenu: any, n: any): void;
-    Bank__addContextOptions? (itemSlot: Number, contextMenu: any): void;
-    Trade_handlePacket? (packet: any): void;
-    NPC_Intersects? (ray: any, list: any): void;
-    OptimizedScene_Intersects? (ray: any, list: any): void;
-    Inventory_Intersects? (e: any, t: any): void;
-    Inventory__getAllContextOptions? (itemID, itemActions): void;
+    postInit?(): Promise<void>;
+    loginOK?(): void;
+    initializeUI?(): void;
+    Network_logoutOK?(): void;
+    Network_action?(verb: string, params: object): void; // TODO: provide proper type
+    Network_handle?(verb: string, payload: object): void;
+    Camera_update?(dt: number): void;
+    PlayerInfo_updateXP?(xp: object): void; // TODO: provide proper type
+    PlayerInfo_updateTooltip?(): void;
+    PlayerInfo_updateSkills?(): void;
+    Game_combatUpdate?(update: any): void;
+    PlayerHUD_setHealth?(current: number, max: number): void;
+    Inventory_handleUpdatePacket?(packet: any): void;
+    Bank_handlePacket?(packet: any): void;
+    Bank__showQualityPopup?(packet: any): void;
+    Bank__addContextOptionsActual?(item: object, contextMenu: contextMenu[], n: any): void;
+    Bank__addContextOptions?(itemSlot: number, contextMenu: contextMenu[]): void;
+    Trade_handlePacket?(packet: any): void;
+    NPC_Intersects?(ray: any, list: any): void;
+    OptimizedScene_Intersects?(ray: any, list: any): void;
+    Inventory_Intersects?(e: any, t: any): void;
+    Inventory__getAllContextOptions?(itemID, itemActions): void;
+    Inventory__getContextOptionsBank?(slotId: number, invBankObject: invBankObject, contextMenu: contextMenu[]): void;
 
-    log(...args): void{
-        if(process.env.NODE_ENV === 'production')
+    log(...args): void {
+        if (process.env.NODE_ENV === 'production')
             return;
         console.log(`[${this.constructor.name}]`, args);
-    }   
+    }
 
-    info(...args): void{
-        if(process.env.NODE_ENV === 'production')
+    info(...args): void {
+        if (process.env.NODE_ENV === 'production')
             return;
         console.info(`[${this.constructor.name}]`, args);
     }
 
-    warn(...args): void{
+    warn(...args): void {
         console.warn(`[${this.constructor.name}]`, args);
     }
 
-    error(...args): void{
+    error(...args): void {
         console.error(`[${this.constructor.name}]`, args);
     }
 }

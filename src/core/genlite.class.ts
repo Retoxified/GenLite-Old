@@ -17,7 +17,7 @@ import { GenLiteSettingsPlugin } from "./plugins/genlite-settings.plugin";
 import { GenLiteCommandsPlugin } from "./plugins/genlite-commands.plugin";
 import { GenLiteDatabasePlugin } from "./plugins/genlite-database.plugin";
 import { GenLiteUIPlugin } from "./plugins/genlite-ui-plugin";
-import { GenLitePlugin} from './interfaces/plugin.class';
+import { GenLitePlugin } from './interfaces/plugin.class';
 
 export class GenLite {
     static pluginName = 'GenLite';
@@ -52,12 +52,13 @@ export class GenLite {
         this.installHook('Game', 'combatUpdate');
         this.installHook('PlayerHUD', 'setHealth');
         this.installHook('Inventory', 'handleUpdatePacket');
+        this.installHook('Inventory', '_getContextOptionsBank');
         this.installHook('Bank', 'handlePacket');
         this.installHook('Bank', '_showQualityPopup');
         this.installHook('Bank', '_addContextOptionsActual')
         this.installHook('Bank', '_addContextOptions')
         this.installHook('Trade', 'handlePacket');
-    
+
         // Enhanced Context Menu Hooks
         this.installHook('NPC', 'intersects');
         this.installHook('OptimizedScene', 'intersects');
@@ -67,7 +68,9 @@ export class GenLite {
 
     onUIInitialized() {
         this.hook('initializeUI');
+        this.hookInventoryContextMenu()
     }
+
 
     hook(fnName: string, ...args: Array<unknown>) {
         for (const module of this.pluginList) {
@@ -93,6 +96,17 @@ export class GenLite {
 
     hookDisconnect(fnName: string, ...args: Array<unknown>) {
         this.hook('Network_logoutOK', args);
+    }
+
+    /* override the client's function referance after hooking */
+    hookInventoryContextMenu() {
+        let context_map = (<Inventory>document.game.INVENTORY).context_map;
+        let invProto = document.game.Inventory.prototype;
+        context_map.normal = invProto._getContextOptionsNormal;
+        context_map.trade = invProto._getContextOptionsTrade;
+        context_map.bank = invProto._getContextOptionsBank;
+        context_map.crafting_slots = invProto._getContextOptionsCraftingSlots;
+        context_map.shop = invProto._getContextOptionsShop;
     }
 
     registerPlugin(plugin: GenLitePlugin) {

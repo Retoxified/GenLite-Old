@@ -22,6 +22,7 @@ export class GenLiteEnhancedBanking extends GenLitePlugin {
     pluginSettings: Settings = {}
 
     BANK: Bank;
+    INVENTORY: Inventory;
     toWith: {
         [baseItem: string]: {
             '_lq': number
@@ -30,12 +31,12 @@ export class GenLiteEnhancedBanking extends GenLitePlugin {
             'lastQual': string
         }
     } = {};
-    lastQual: string;
 
     intersect_vector = new document.game.THREE.Vector3();
     async init() {
         document.genlite.registerPlugin(this);
         this.BANK = document.game.BANK;
+        this.INVENTORY = document.game.INVENTORY
     }
 
     async postInit() {
@@ -50,16 +51,19 @@ export class GenLiteEnhancedBanking extends GenLitePlugin {
         without going through the prompt
         ctrl moves this option to the top of the list
     */
-    Bank__addContextOptionsActual(item, contextMenu, n) {
+    Bank__addContextOptionsActual(item: BankSlot, contextMenu: contextMenu[], n: invBankObject) {
         if (this.isEnabled == false) return;
+        /* get the baseItemKey and the quality */
         let baseItem = item.item;
         let qual = ''
         if (baseItem.match(/(_lq|_hq)$/)) {
             baseItem = baseItem.substring(0, baseItem.length - 3);
-            qual = baseItem.substring(baseItem.length - 3);
+            qual = item.item.substring(item.item.length - 3);
         }
-        this.toWith[baseItem] = this.toWith[baseItem] ? this.toWith[baseItem] :  { '_lq': 1, '_hq': 1, '': 1, lastQual: '' };
-        let toWithdraw = this.toWith[baseItem] ? this.toWith[baseItem][qual] : 1
+        /* if first time seeing this item set up the key and look up withdraw ammount */
+        this.toWith[baseItem] = this.toWith[baseItem] ? this.toWith[baseItem] : { '_lq': 1, '_hq': 1, '': 1, lastQual: '' };
+        let toWithdraw = this.toWith[baseItem][qual];
+        /* push contextMenu option */
         contextMenu.push({
             color: "none",
             priority: document.game.KEYBOARD['17'] ? 999 : 1,
@@ -82,17 +86,22 @@ export class GenLiteEnhancedBanking extends GenLitePlugin {
     /* same as the above function but for stacked qualities
         this uses the last quality withdrawn from the bank from ANY slot
     */
-    Bank__addContextOptions(itemSlot: any, contextMenu: any) {
+    Bank__addContextOptions(itemSlot: number, contextMenu: contextMenu[]) {
         if (this.isEnabled == false) return;
         let n = itemSlot + this.BANK.selected_page * document.game.SOME_CONST_USED_FOR_BANK;
         let item = this.BANK.slots[n];
+        /* we only want to modify condenced qualities as the above function handles the rest */
         if (item.item.startsWith('$q')) {
+            /* grab the baseItemKey */
             let baseItem = item.item.substring(3);
-            this.toWith[baseItem] =  this.toWith[baseItem] ? this.toWith[baseItem] :  { '_lq': 1, '_hq': 1, '': 1, lastQual: '' };    
+            this.toWith[baseItem] = this.toWith[baseItem] ? this.toWith[baseItem] : { '_lq': 1, '_hq': 1, '': 1, lastQual: '' };
+            /* iterate though each quality */
             for (let qual of ['_lq', '', '_hq']) {
+                /* genfanad compatibility because i dont want to rewrite */
                 let qual2 = qual == '' ? 'mq' : qual.substring(1);
                 if (item.stored_amounts[qual2] <= 0)
                     continue;
+                /* setup context menu push */
                 let itemWithQual = baseItem.concat(qual)
                 let itemHumanName = `<span class='item'>${document.game.returnsAnItemName(itemWithQual)}</span>`;
                 let r = {
@@ -102,7 +111,7 @@ export class GenLiteEnhancedBanking extends GenLitePlugin {
                 }
                 contextMenu.push({
                     color: "none",
-                    priority: this.toWith[baseItem][this.lastQual] == qual ? (document.game.KEYBOARD['17'] ? 999 : 1) : 1,
+                    priority: this.toWith[baseItem]['lastQual'] == qual ? (document.game.KEYBOARD['17'] ? 999 : 1) : 1, // we only want to push up the last withdrawn qualitys
                     object: r,
                     text: `Withdraw ${this.toWith[baseItem][qual]}`,
                     action: () => {
@@ -126,7 +135,7 @@ export class GenLiteEnhancedBanking extends GenLitePlugin {
                     this.toWith[param.item.substring(0, param.item.length - 3)]['_lq'] = param.quantity;
                     this.toWith[param.item.substring(0, param.item.length - 3)]['lastQual'] = '_lq';
                 } else if (param.item.match(/_hq$/)) {
-                    this.toWith[param.item.substring(0, param.item.length - 3)]['_lq'] = param.quantity;
+                    this.toWith[param.item.substring(0, param.item.length - 3)]['_hq'] = param.quantity;
                     this.toWith[param.item.substring(0, param.item.length - 3)]['lastQual'] = '_hq';
                 } else {
                     this.toWith[param.item][''] = param.quantity;
@@ -136,9 +145,35 @@ export class GenLiteEnhancedBanking extends GenLitePlugin {
         }
     }
 
-    _getContextOptionsBank(e, t, n){
-        this.log(e);
-        this.log(t);
-        this.log(n);
+    /* look this is basically the same as above just with inventory slots and stuff */
+    Inventory__getContextOptionsBank(slotId: number, invBankObject: invBankObject, contextMenu: contextMenu[]): void {
+        if (this.isEnabled == false) return;
+        let item = this.INVENTORY.items[slotId];
+        let numItem = this.INVENTORY.countItemTotal(item.item);
+        let baseItem = item.item;
+        let qual = ''
+        if (baseItem.match(/(_lq|_hq)$/)) {
+            baseItem = baseItem.substring(0, baseItem.length - 3);
+            qual = item.item.substring(item.item.length - 3);
+        }
+        this.toWith[baseItem] = this.toWith[baseItem] ? this.toWith[baseItem] : { '_lq': 1, '_hq': 1, '': 1, lastQual: '' };
+        let toWithdraw = Math.min(this.toWith[baseItem][qual], numItem);
+        contextMenu.push({
+            color: "none",
+            priority: document.game.KEYBOARD['17'] ? 999 : 1,
+            object: invBankObject,
+            text: `Deposit ${toWithdraw}`,
+            action: () => {
+                "unknown" == item.item ? document.game.NETWORK_CONTAINER.network.action("bank_action", {
+                    action: "deposit",
+                    item: item.original_item,
+                    quantity: toWithdraw
+                }) : document.game.NETWORK_CONTAINER.network.action("bank_action", {
+                    action: "deposit",
+                    item: item.item,
+                    quantity: toWithdraw
+                })
+            }
+        })
     }
 }

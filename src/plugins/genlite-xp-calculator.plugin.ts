@@ -11,7 +11,7 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {GenLitePlugin} from '../core/interfaces/plugin.class';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
 export class GenLiteXpCalculator extends GenLitePlugin {
     static pluginName = 'GenLiteXpCalculatorPlugin';
