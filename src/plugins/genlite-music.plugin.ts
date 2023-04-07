@@ -123,6 +123,11 @@ export class GenLiteMusicPlugin extends GenLitePlugin {
         modeSelect.appendChild(shuffleOption);
 
         modeSelect.onchange = (e) => {
+            if (modeSelect.value === "shuffle") {
+                this.enableShuffle();
+            } else {
+                this.disableShuffle();
+            }
             this.musicMode = modeSelect.value as any;
             this.updateMusicUI();
         };
