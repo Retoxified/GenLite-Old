@@ -46,8 +46,6 @@ import { GenLiteEnhancedContextMenu } from "./plugins/genlite-enhanced-context-m
 import { GenLiteQuestPlugin } from "./plugins/genlite-quest.plugin";
 import { GenLiteEnhancedBanking } from "./plugins/genlite-enhanced-banking.plugin";
 
-declare const GM_getResourceText: (s: string) => string;
-
 // TODO: use globals.ts?
 declare global {
     interface Document {
@@ -69,36 +67,6 @@ const DISCLAIMER = [
     "If you find a bug and are unsure, post in the GenLite Discord. We will help you.",
     "While we work to ensure compatibility, Use At Your Own Risk.",
 ];
-
-const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-
-let scriptText = GM_getResourceText('clientjs');
-scriptText = scriptText.replace(
-    /import.meta.url/g,
-    '("https://play.genfanad.com/play/js/client.js")'
-);
-scriptText = scriptText.substring(0, scriptText.length - 5)
-    + "; document.client = {};"
-    + "document.client.get = function(a) {"
-    + "return eval(a);"
-    + "};"
-    + "document.client.set = function(a, b) {"
-    + "eval(a + ' = ' + b);"
-    + "};"
-    + scriptText.substring(scriptText.length - 5)
-    + "//# sourceURL=client.js";
-
-
-
-
-// THESE TWO SETTINGS ARE UI RELATED AND SHOULD BE MOVED TO THE UI PLUGIN IF AT ALL POSSIBLE IN THE FUTURE
-// Regex to replace window.innerWidth and window.innerHeight with document.body.clientWidth and document.body.clientHeight
-scriptText = scriptText.replace(/window\.innerWidth/g, "document.body.clientWidth");
-// .new_ux-settings-modal__setting-controls--draggable__bar input[type=range] {\n    /*Calculated proportions against a settings modal block with an arbitrary height of 65.3vh\n        left:   NaN         = 0\n        top:    0.25        = 0.003828483920368\n        width:  28vh        = 0.428790199081164\n        height: 1.5vh       = 0.022\n    */\n\n    --top: 0.003828483920368;\n    --width: 0.428790199081164;\n    --height: 0.022;\n\n    left: 7%;\n    top: calc(var(--top) * var(--settings-modal-height) * var(--settings-modal-zoom-factor));\n    width: calc(var(--width) * var(--settings-modal-height) * var(--settings-modal-zoom-factor));\n    height: calc(var(--height) * var(--settings-modal-height) * var(--settings-modal-zoom-factor));\n\n\n\n    -webkit-appearance: none;\n\n\n    border-radius: 5px;\n\n    background: var(--brown-6);\n    background-image: linear-gradient(var(--yellow-3), var(--yellow-3));\n    background-clip: border-box;\n    background-repeat: no-repeat;\n    border-bottom: 1px solid var(--brown-2);\n}
-// Regex needs to replace background-image in .new_ux-settings-modal__setting-controls--draggable__bar input[type=range] with nothing
-scriptText = scriptText.replace(/background-image: linear-gradient\(var\(--yellow-3\), var\(--yellow-3\)\);/g, "");
-
-
 
 let isInitialized = false;
 
@@ -262,39 +230,6 @@ let isInitialized = false;
         genlite.onUIInitialized();
     }
 
-    function firefoxOverride(e) {
-        let src = e.target.src;
-        if (src === 'https://play.genfanad.com/play/js/client.js') {
-            e.preventDefault(); // do not load
-            e.stopPropagation();
-            var script = document.createElement('script');
-            script.textContent = scriptText;
-            script.type = 'module';
-            (document.head || document.documentElement).appendChild(script);
-        }
-    }
-
-    function hookClient() {
-        if (document.head) {
-            throw new Error('Head already exists - make sure to enable instant script injection');
-        }
-
-        if (isFirefox) {
-            document.addEventListener("beforescriptexecute", firefoxOverride, true);
-        } else {
-            new MutationObserver((_, observer) => {
-                const clientjsScriptTag = document.querySelector('script[src*="client.js"]');
-                if (clientjsScriptTag) {
-                    clientjsScriptTag.removeAttribute('src');
-                    clientjsScriptTag.textContent = scriptText;
-                }
-            }).observe(document.documentElement, {
-                childList: true,
-                subtree: true
-            });
-        }
-    }
-
     function hookStartScene() {
         if (localStorage.getItem("GenLiteConfirms") === "true") {
             let doc = (document as any);
@@ -318,7 +253,6 @@ let isInitialized = false;
         });
     }
 
-    hookClient();
     window.addEventListener('load', (e) => {
         document.initGenLite = initGenLite;
 
