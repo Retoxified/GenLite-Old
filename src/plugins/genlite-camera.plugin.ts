@@ -38,8 +38,8 @@ export class GenLiteCameraPlugin extends GenLitePlugin {
     unlockCamera: boolean = true;
     maxDistance: number = 15;
     minDistance: number = Math.PI;
-    minAngle: number = 0.8;
-    maxAngle: number = 1
+    minAngle: number = 0.35;
+    maxAngle: number = 1.4;
 
     renderDistance: number = 65;
     distanceFog: boolean = false;
