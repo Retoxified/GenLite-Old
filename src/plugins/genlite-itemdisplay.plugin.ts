@@ -11,9 +11,9 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-export class GenLiteItemDisplays implements GenLitePlugin {
+export class GenLiteItemDisplays extends GenLitePlugin {
     static pluginName = 'GenLiteItemDisplays';
 
     isPluginEnabled: boolean = false;
@@ -30,8 +30,8 @@ export class GenLiteItemDisplays implements GenLitePlugin {
         this.isPluginEnabled = state;
         if (state) {
             this.initializeUI();
-            this.handleUpdatePacket(document.game.INVENTORY.items);
-            this.handlePacket(document.game.BANK.slots);
+            this.Inventory_handleUpdatePacket(document.game.INVENTORY.items);
+            this.Bank_handlePacket(document.game.BANK.slots);
         } else {
             let spans = document.getElementsByClassName("genlite_item_extras");
             for (let span in spans) {
@@ -55,8 +55,8 @@ export class GenLiteItemDisplays implements GenLitePlugin {
         this.initUI(document.game.TRADE.DOM_your_slots);
         this.initUI(document.game.TRADE.DOM_their_slots);
         this.isUIInit = true;
-        this.handleUpdatePacket(document.game.INVENTORY.items);
-        this.handlePacket(document.game.BANK.slots);
+        this.Inventory_handleUpdatePacket(document.game.INVENTORY.items);
+        this.Bank_handlePacket(document.game.BANK.slots);
     }
 
     /* creates an element and appends it to the dom list passed */
@@ -82,20 +82,20 @@ export class GenLiteItemDisplays implements GenLitePlugin {
     }
 
     /*  these all update our element when needed */
-    handleUpdatePacket(payload) {
+    Inventory_handleUpdatePacket(payload) {
         if (!this.isPluginEnabled)
             return;
         this.itemExtraUpdate(payload, document.game.INVENTORY.DOM_slots);
     }
 
-    handlePacket(payload: any) {
+    Bank_handlePacket(payload: any) {
         if (!this.isPluginEnabled)
             return;
         this.itemExtraUpdate(payload.bank_contents, document.game.BANK.DOM_slots);
 
     }
 
-    _showQualityPopup(payload: any) {
+    Bank__showQualityPopup(payload: any) {
         if (!this.isPluginEnabled)
             return;
         this.itemExtraUpdate(document.game.BANK.quality_slots, document.game.BANK.quality_DOM_slots);

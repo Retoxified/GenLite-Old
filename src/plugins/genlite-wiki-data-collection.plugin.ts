@@ -11,9 +11,9 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
+export class GenLiteWikiDataCollectionPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteWikiDataCollectionPlugin';
 
     previously_seen = {};
@@ -57,14 +57,14 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
             this.sendInterval = setInterval(() => { this.sendToServer(this) }, 1000);
     }
 
-    logoutOK() {
+    Network_logoutOK() {
         clearInterval(this.scanInterval);
         this.scanInterval = null;
         clearInterval(this.sendInterval);
         this.sendInterval = null;
     }
 
-    updateSkills() {
+    PlayerInfo_updateSkills() {
         if (!this.isRemoteEnabled) {
             return;
         }
@@ -76,7 +76,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         this.playerRangedCL = document.game.PLAYER_INFO.skills.ranged.level;
     }
 
-    combatUpdate(update) {
+    Game_combatUpdate(update) {
         let object = document.game.GAME.objectById(update.id);
 
         if (update.id == document.game.PLAYER.id || document.game.GAME.players[update.id] !== undefined)
@@ -96,7 +96,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         }
     }
 
-    handle(verb, payload) {
+    Network_handle(verb, payload) {
 
         /* look for start of combat set the curEnemy and record data */
         if (verb == "spawnObject" && payload.type == "combat" &&
@@ -132,7 +132,7 @@ export class GenLiteWikiDataCollectionPlugin implements GenLitePlugin {
         }
     }
 
-    updateXP(xp) {
+    PlayerInfo_updateXP(xp) {
         if (xp.levelUp) {
             this.playerMeleeCL = Math.trunc((document.game.PLAYER_INFO.skills.attack.level + document.game.PLAYER_INFO.skills.defense.level + document.game.PLAYER_INFO.skills.strength.level) / 3);
             this.playerRangedCL = document.game.PLAYER_INFO.skills.ranged.level;

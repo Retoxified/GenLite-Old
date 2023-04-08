@@ -11,13 +11,13 @@
 // This plugin is designed to insert an HTML element into the game's UI that displays the current version of GenLite next to the Client Version
 
 // Import Plugin Interface
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import {GenLitePlugin} from '../core/interfaces/plugin.class';
 
 // Require the package.json file
 const packageJson = require('../../package.json');
 
 // Create Version Plugin Class
-export class GenLiteVersionPlugin implements GenLitePlugin {
+export class GenLiteVersionPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteVersionPlugin';
 
     // Plugin Data

@@ -11,9 +11,9 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-export class GenLiteGeneralChatCommands implements GenLitePlugin {
+export class GenLiteGeneralChatCommands extends GenLitePlugin {
     static pluginName = 'GenLiteGeneralChatCommands';
 
     loginTime: number = 0;
@@ -51,7 +51,7 @@ export class GenLiteGeneralChatCommands implements GenLitePlugin {
         this.isLogged = true;
     }
 
-    logoutOK() {
+    Network_logoutOK() {
         this.loginTime = 0;
         clearInterval(this.playedSaveInverval);
         this.playedSaveInverval = null;

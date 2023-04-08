@@ -8,7 +8,7 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
 /*
  * Chat plugin order of operations
@@ -154,7 +154,7 @@ class GenLiteMessageBuffer {
 
 }
 
-export class GenLiteChatPlugin implements GenLitePlugin {
+export class GenLiteChatPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteChatPlugin';
     static storageKey = 'IgnoredGameChatMessages';
 

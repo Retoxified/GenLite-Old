@@ -18,10 +18,10 @@ import {
     SkyboxUriDown,
     SkyboxUriBack,
     SkyboxUriFront,
-} from "./skybox-data";
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+} from "../core/data/skybox-data";
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-export class GenLiteCameraPlugin implements GenLitePlugin {
+export class GenLiteCameraPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteCameraPlugin';
 
     static minRenderDistance = 40;
@@ -36,8 +36,10 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
     originalAdvanceToBB: Function;
 
     unlockCamera: boolean = true;
-    maxDistance: Number = 15;
-    minDistance: Number = Math.PI;
+    maxDistance: number = 15;
+    minDistance: number = Math.PI;
+    minAngle: number = 0.35;
+    maxAngle: number = 1.4;
 
     renderDistance: number = 65;
     distanceFog: boolean = false;
@@ -47,7 +49,7 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
 
     isPluginEnabled = true;
 
-    pluginSettings : Settings = {
+    pluginSettings: Settings = {
         "Unlock Camera": {
             type: "checkbox",
             oldKey: "GenLite.Camera.UnlockCam",
@@ -71,7 +73,23 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
                     "min": 0,
                     "max": 8,
                     "step": 1,
-                }
+                },
+                "Max Pitch": {
+                    "type": "range",
+                    "value": this.minAngle,
+                    "stateHandler": this.handleMinAngle.bind(this),
+                    "min": 0,
+                    "max": 1.5,
+                    "step": 0.05,
+                },
+                "Min Pitch": {
+                    "type": "range",
+                    "value": this.maxAngle,
+                    "stateHandler": this.handleMaxAngle.bind(this),
+                    "min": 0,
+                    "max": 1.5,
+                    "step": 0.05,
+                },
             }
         },
         "Enable Skybox": {
@@ -133,19 +151,29 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
         this.updateCameraMode();
         this.updateSkyboxAndFog();
     }
-    
+
     handleUnlockCameraToggle(state: boolean) {
         this.unlockCamera = state;
         this.updateCameraMode();
     }
 
-    handleMaxDistance(value: Number) {
+    handleMaxDistance(value: number) {
         this.maxDistance = value;
         this.updateCameraMode();
     }
 
-    handleMinDistance(value: Number) {
+    handleMinDistance(value: number) {
         this.minDistance = value;
+        this.updateCameraMode();
+    }
+
+    handleMinAngle(value: number) {
+        this.minAngle = value;
+        this.updateCameraMode();
+    }
+
+    handleMaxAngle(value: number) {
+        this.maxAngle = value;
         this.updateCameraMode();
     }
 
@@ -235,8 +263,8 @@ export class GenLiteCameraPlugin implements GenLitePlugin {
             if (this.isPluginEnabled && this.unlockCamera === true) {
                 document.game.GRAPHICS.camera.controls.minDistance = this.minDistance;
                 document.game.GRAPHICS.camera.controls.maxDistance = this.maxDistance;
-                document.game.GRAPHICS.camera.controls.minPolarAngle = 0.35;
-                document.game.GRAPHICS.camera.controls.maxPolarAngle = 1.4;
+                document.game.GRAPHICS.camera.controls.minPolarAngle = this.minAngle;
+                document.game.GRAPHICS.camera.controls.maxPolarAngle = this.maxAngle;
             } else {
                 document.game.GRAPHICS.camera.controls.minDistance = 8
                 document.game.GRAPHICS.camera.controls.maxDistance = 8;

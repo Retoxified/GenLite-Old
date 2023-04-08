@@ -11,9 +11,9 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import {GenLitePlugin} from '../core/interfaces/plugin.class';
 
-export class GenLiteSoundNotification implements GenLitePlugin {
+export class GenLiteSoundNotification extends GenLitePlugin {
     static pluginName = 'GenLiteSoundNotification';
 
     doHealthCheck: boolean = false;
@@ -147,14 +147,14 @@ export class GenLiteSoundNotification implements GenLitePlugin {
         this.invThreshold = threshold;
     }
 
-    combatUpdate(update) {
+    Game_combatUpdate(update) {
         if (update.id != document.game.PLAYER.id)
             return;
         if ((update.hp / update.maxhp) <= (this.healthThreshold / 100) && this.doHealthCheck)
             this.playerInUse.play('spell-failure');
     }
 
-    handleUpdatePacket(packet) {
+    Inventory_handleUpdatePacket(packet) {
         if (!this.doInvCheck)
             return;
         let inUse = Object.keys(document.game.INVENTORY.items).length;

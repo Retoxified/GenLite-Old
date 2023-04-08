@@ -11,9 +11,9 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import {GenLitePlugin} from '../core/interfaces/plugin.class';
 
-export class GenLiteMenuScaler implements GenLitePlugin {
+export class GenLiteMenuScaler extends GenLitePlugin {
     static pluginName = 'GenLiteMenuScaler';
 
     scaleList;

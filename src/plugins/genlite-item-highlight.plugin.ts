@@ -50,9 +50,9 @@ interface Element {
  * to each item, modifying the left-click and right-click actions order.
 */
 
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-export class GenLiteItemHighlightPlugin implements GenLitePlugin {
+export class GenLiteItemHighlightPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteItemHighlightPlugin';
 
     originalItemStackIntersects: Function;
@@ -233,7 +233,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
         this.render = true;
     }
 
-    logoutOK() {
+    Network_logoutOK() {
         this.render = false;
         this.clearTracked();
     }
@@ -389,7 +389,7 @@ export class GenLiteItemHighlightPlugin implements GenLitePlugin {
     // update loop
     //
 
-    update() {
+    Camera_update() {
         if (this.isPluginEnabled && this.render) {
             this.updateTrackedStacks();
             this.updateElements();

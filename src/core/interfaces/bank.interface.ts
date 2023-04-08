@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2023 FrozenReality
+    Copyright (C) 2023 FrozenReality dpeGit
 */
 /*
     This file is part of GenLite.
@@ -18,6 +18,7 @@ interface BankSlot {
     base_item_id?: string,
     contained_items?: Record<string, string>,
     stored_amounts?: Record<string, number>,
+    original_item?: any //TODO what is this
 }
 
 interface BankDomSlot {

@@ -11,9 +11,9 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-export class GenLiteXpCalculator implements GenLitePlugin {
+export class GenLiteXpCalculator extends GenLitePlugin {
     static pluginName = 'GenLiteXpCalculatorPlugin';
 
     skillsList = {
@@ -75,7 +75,7 @@ export class GenLiteXpCalculator implements GenLitePlugin {
         /* if toggle on mid way through we have to run the init code */
         if (state) {
             this.initializeUI();
-            this.updateSkills();
+            this.PlayerInfo_updateSkills();
         }
     }
 
@@ -100,7 +100,7 @@ export class GenLiteXpCalculator implements GenLitePlugin {
     }
 
     /* when an xp update comes calculate skillsList fields */
-    updateXP(xp) {
+    PlayerInfo_updateXP(xp) {
         if (!this.isPluginEnabled) {
             return;
         }
@@ -164,7 +164,7 @@ export class GenLiteXpCalculator implements GenLitePlugin {
     }
 
     /* if tooltip is update just run onmouseenter() again */
-    updateTooltip() {
+    PlayerInfo_updateTooltip() {
         if (!this.isPluginEnabled) {
             return;
         }
@@ -176,7 +176,7 @@ export class GenLiteXpCalculator implements GenLitePlugin {
     }
 
     /* calculates tot exp on login */
-    updateSkills() {
+    PlayerInfo_updateSkills() {
         if (!this.isPluginEnabled) {
             return;
         }

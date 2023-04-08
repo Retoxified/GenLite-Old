@@ -11,9 +11,9 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-export class GenLiteQuestPlugin implements GenLitePlugin {
+export class GenLiteQuestPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteQuestPlugin';
 
     isPluginEnabled: boolean = true;
