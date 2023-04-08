@@ -30,7 +30,7 @@ let genfanadLastModified: Date;
 let xhrGenfanadModified = new XMLHttpRequest();
 xhrGenfanadModified.open('HEAD', 'https://play.genfanad.com/play/js/client.js', false);
 xhrGenfanadModified.setRequestHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-xhrGenfanadModified.send(null);
+xhrGenfanadModified.send();
 
 let genfanadModifiedDate = xhrGenfanadModified.getResponseHeader('Last-Modified');
 // Convert the Last-Modified header to a UNIX timestamp
@@ -42,8 +42,8 @@ if (genfanadModifiedDate == null || genfanadModifiedDate == undefined) {
 
 let xhrGenliteModified = new XMLHttpRequest();
 xhrGenliteModified.open('GET', 'https://api.github.com/repos/dpeGit/GenLite/releases/latest', false);
-xhrGenliteModified.setRequestHeader("Accept", "application/vnd.dpeGit.v3+json")
-xhrGenliteModified.send(null);
+xhrGenliteModified.setRequestHeader("Accept", "application/vnd.github.v3+json")
+xhrGenliteModified.send();
 let genliteAPIRespose = JSON.parse(xhrGenliteModified.responseText);
 
 
