@@ -150,7 +150,7 @@ export class GenLiteEnhancedContextMenu extends GenLitePlugin {
         });
     }
 
-    OptimizedScene_Intersects(ray, list) {
+    OptimizedScene_intersects(ray, list) {
         if (!this.isEnabled || list.length === 0) return;
 
         let sceneObjects = new Map();
