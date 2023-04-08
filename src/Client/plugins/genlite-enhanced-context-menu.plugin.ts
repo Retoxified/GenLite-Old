@@ -256,13 +256,13 @@ export class GenLiteEnhancedContextMenu extends GenLitePlugin {
         });
     }
 
-    Inventory__getAllContextOptions(itemID, itemActions) {
+    Inventory__getAllContextOptions(slotID, itemActions) {
         if (!this.isEnabled || !this.lookupItems) {
-            console.log("Lookup Off")
             return;
         }
 
-
+        if (!document.game.INVENTORY.items[slotID])
+            return;
 
         const objectName = itemActions[0].object.text();
 
