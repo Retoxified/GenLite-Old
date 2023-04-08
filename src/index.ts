@@ -194,6 +194,7 @@ let isInitialized = false;
 
         //Functions
         gameObject('returnsAnItemName', 'Mg');
+        gameObject('getStaticPath', 'O');
 
         //Constants
         gameObject('SOME_CONST_USED_FOR_BANK', 'P');
