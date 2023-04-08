@@ -23,43 +23,72 @@ export class GenLiteMusicPlugin extends GenLitePlugin {
     uiTab: HTMLElement = null;
     originalSetTrack: Function;
 
-    selectionMenu: HTMLElement;
-    displayed = false;
-
     selectionOptions: { [key: string]: HTMLElement } = {};
     currentSelection: HTMLElement = null;
+    nameDiv : HTMLElement = null;
 
     // plugin modes
     //   passthrough - default genfanad music
     //   manual      - manual select and repeat song
     //   shuffle     - change song every 3 min
-    musicMode: "passthrough" | "manual" | "shuffle" = "passthrough";
-
-    // save state when enabling shuffle
+    mode: "passthrough" | "manual" | "shuffle" = "passthrough";
     previousMode: "passthrough" | "manual" = "passthrough";
     shuffleTimeout = 0;
-
     currentTrack = "";
+
+    history = [];
+    historyIndex = 0;
 
     async init() {
         document.genlite.registerPlugin(this);
-
         this.originalSetTrack = document.game.MUSIC_PLAYER.setNextTrack;
+        this.createCSS();
 
-        this.selectionMenu = <HTMLElement>document.createElement("div");
+        const plugin = this;
+        const controlNames = ['backward-step', 'shuffle', 'forward-step'];
 
-        this.selectionMenu.style.height = "20em";
-        this.selectionMenu.style.display = "flex";
-        this.selectionMenu.style.flexDirection = "column";
-        this.selectionMenu.style.overflowX = "hidden";
+        let settingsMenu = <HTMLElement>document.createElement("div");
+        settingsMenu.classList.add("genlite-music-container");
 
-        this.selectionMenu.style.color = "#ffd593";
-        this.selectionMenu.style.fontFamily = "acme,times new roman,Times,serif";
+        let current = <HTMLElement>document.createElement("div");
+        current.classList.add("genlite-music-current");
+        settingsMenu.appendChild(current);
 
-        let container = <HTMLElement>document.createElement("div");
-        container.style.overflow = "scroll";
-        container.style.width = "100%";
-        this.selectionMenu.appendChild(container);
+        let anim = <HTMLElement>document.createElement("div");
+        anim.classList.add("genlite-music-anim");
+        anim.appendChild(document.createElement("span"));
+        anim.appendChild(document.createElement("span"));
+        anim.appendChild(document.createElement("span"));
+        anim.appendChild(document.createElement("span"));
+        current.appendChild(anim);
+
+        this.nameDiv = <HTMLElement>document.createElement("div");
+        this.nameDiv.classList.add("genlite-music-name");
+        this.nameDiv.innerText = "";
+        current.appendChild(this.nameDiv);
+
+        // lets css center the name div
+        let padding = <HTMLElement>document.createElement("div");
+        padding.style.width = "26px";
+        current.appendChild(padding);
+
+        let controls = <HTMLElement>document.createElement("div");
+        controls.classList.add("genlite-music-controls");
+        for (const controlName of controlNames) {
+            let button = <HTMLElement>document.createElement("div");
+            button.id = `genlite-music-button-${controlName}`;
+            button.innerHTML = `<i class="fas fa-${controlName}"></i>`;
+            button.classList.add('genlite-music-control-button');
+            button.onclick = function (e) {
+                plugin.onControlClicked(controlName);
+            };
+            controls.appendChild(button);
+        }
+        settingsMenu.appendChild(controls);
+
+        let trackList = <HTMLElement>document.createElement("div");
+        trackList.classList.add('genlite-music-list');
+        settingsMenu.appendChild(trackList);
 
         for (const track in document.game.MUSIC_TRACK_NAMES) {
             if (GenLiteMusicPlugin.missingTracks.includes(track)) {
@@ -67,78 +96,16 @@ export class GenLiteMusicPlugin extends GenLitePlugin {
             }
             let name = document.game.MUSIC_TRACK_NAMES[track];
             let b = <HTMLElement>document.createElement("div");
-            b.style.backgroundColor = '#0e0c0b';
-            b.style.padding = "2px";
-            b.style.width = "100%";
+            b.classList.add('genlite-music-track');
             b.innerText = name;
-            b.onclick = (e) => {
-                this.setManual();
-                if (this.musicMode == "shuffle" && this.shuffleTimeout != 0) {
-                    clearTimeout(this.shuffleTimeout);
-                    this.shuffleTimeout = window.setTimeout(this.nextShuffle.bind(this), 3 * 60 * 1000);
-                }
-
-                document.game.SETTINGS.setMusicTrackText("Transitioning...");
-                this.setNextTrack(track);
+            b.onclick = function (e) {
+                plugin.onTrackClicked(track);
             };
-
-            container.appendChild(b);
+            trackList.appendChild(b);
             this.selectionOptions[track] = b;
         }
 
-        // Create Dropbown for setting music mode
-        let modeDropdown = <HTMLElement>document.createElement("div");
-        modeDropdown.style.display = "flex";
-        modeDropdown.style.flexDirection = "row";
-        modeDropdown.style.justifyContent = "space-between";
-        modeDropdown.style.padding = "2px";
-        modeDropdown.style.width = "100%";
-
-        let modeLabel = <HTMLElement>document.createElement("div");
-        modeLabel.innerText = "Mode:";
-        modeDropdown.appendChild(modeLabel);
-
-        let modeSelect = <HTMLSelectElement>document.createElement("select");
-        modeSelect.style.width = "100%";
-        modeSelect.style.backgroundColor = "#0e0c0b";
-        modeSelect.style.color = "#ffd593";
-        modeSelect.style.fontFamily = "acme,times new roman,Times,serif";
-        modeSelect.style.border = "1px solid #ffd593";
-        modeSelect.style.borderRadius = "4px";
-        modeSelect.style.padding = "2px";
-
-        let passthroughOption = <HTMLOptionElement>document.createElement("option");
-        passthroughOption.value = "passthrough";
-        passthroughOption.innerText = "Passthrough";
-        modeSelect.appendChild(passthroughOption);
-
-        let manualOption = <HTMLOptionElement>document.createElement("option");
-        manualOption.value = "manual";
-        manualOption.innerText = "Manual";
-        modeSelect.appendChild(manualOption);
-
-        let shuffleOption = <HTMLOptionElement>document.createElement("option");
-        shuffleOption.value = "shuffle";
-        shuffleOption.innerText = "Shuffle";
-        modeSelect.appendChild(shuffleOption);
-
-        modeSelect.onchange = (e) => {
-            if (modeSelect.value === "shuffle") {
-                this.enableShuffle();
-            } else {
-                this.disableShuffle();
-            }
-            this.musicMode = modeSelect.value as any;
-            this.updateMusicUI();
-        };
-
-        modeDropdown.appendChild(modeSelect);
-
-        this.selectionMenu.appendChild(modeDropdown);
-
-
-
-        this.uiTab = document.genlite.ui.addTab("music", "Music Selection", this.selectionMenu, this.isPluginEnabled);
+        this.uiTab = document.genlite.ui.addTab("music", "Music Selection", settingsMenu, this.isPluginEnabled);
 
         document.genlite.commands.register(
             "music",
@@ -151,6 +118,104 @@ export class GenLiteMusicPlugin extends GenLitePlugin {
         document.genlite.ui.registerPlugin("Music Selection", null,  this.handlePluginState.bind(this));
     }
 
+    createCSS() {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .genlite-music-container {
+                height: 20em;
+                display: flex;
+                flex-direction: column;
+                overflow-x: hidden;
+                color: #ffd593;
+                font-family: acme,times new roman,Times,serif;
+                row-gap: 1em;
+                padding: 1em;
+            }
+
+            .genlite-music-current {
+                display: flex;
+                column-gap: 1em;
+                justify-content: center;
+            }
+
+            .genlite-music-anim {
+                position: relative;
+                bottom: 3px;
+                width: 26px;
+            }
+
+            .genlite-music-anim span {
+                width: 5px;
+                height: 5px;
+                bottom: 3px;
+                position: absolute;
+                background: rgb(66, 66, 66);
+                -webkit-animation: bodong .75s infinite ease;
+            }
+
+            .genlite-music-anim span:first-child {
+                left: 0px;
+                -webkit-animation-delay: .1s;
+            }
+
+            .genlite-music-anim span:nth-child(2){
+                left: 7px;
+                -webkit-animation-delay: .4s;
+            }
+
+            .genlite-music-anim span:nth-child(3){
+                left: 14px;
+                -webkit-animation-delay: .2s;
+            }
+
+            .genlite-music-anim span:nth-child(4){
+                left: 21px;
+                -webkit-animation-delay: .6s;
+            }
+
+            @-webkit-keyframes bodong{  
+                0%   {height:5px;  background:lawngreen;}  
+                30%  {height:12px; background:lawngreen;}  
+                60%  {height:15px; background:lawngreen;}  
+                80%  {height:12px; background:lawngreen;}  
+                100% {height:5px;  background:lawngreen;}  
+            }
+
+            .genlite-music-name {
+            }
+
+            .genlite-music-controls {
+                display: flex;
+                column-gap: 1em;
+                justify-content: center;
+            }
+
+            .genlite-music-control-button {
+                cursor: pointer;
+            }
+
+            #genlite-music-button-shuffle {
+                color: gray;
+            }
+
+            .genlite-music-list {
+                overflow-y: scroll;
+                overflow-x: hidden;
+                width: 100%;
+                margin: auto;
+                text-align: center;
+            }
+
+            .genlite-music-track {
+                text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+                background-color: #0e0c0b;
+                padding: 2px;
+                width: 100%;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
     handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
         this.updateMusicUI();
@@ -161,62 +226,11 @@ export class GenLiteMusicPlugin extends GenLitePlugin {
         }
     }
 
-    initializeUI() {
-        this.updateMusicUI();
-    }
-
-    updateMusicUI() {
-        if (this.isPluginEnabled) {
-            document.game.MUSIC_PLAYER.setNextTrack = (t) => {
-                if (this.musicMode == "passthrough") {
-                    this.setNextTrack(t);
-                }
-            };
-            document.game.SETTINGS.DOM_music_text.onclick = (e) => {
-                this.toggleDisplay();
-            };
-        } else {
-            document.game.MUSIC_PLAYER.setNextTrack = this.originalSetTrack;
-            document.game.SETTINGS.DOM_music_text.onclick = (e) => { };
-            this.hideMusicSelection();
-        }
-    }
-
-    setManual() {
-        if (this.musicMode != "shuffle") {
-            this.musicMode = "manual";
-        }
-    }
-
-    enableShuffle() {
-        if (this.musicMode != "shuffle") {
-            this.previousMode = this.musicMode;
-            this.musicMode = "shuffle";
-            this.nextShuffle();
-        }
-    }
-
-    disableShuffle() {
-        if (this.musicMode == "shuffle") {
-            this.musicMode = this.previousMode;
-        }
-    }
-
-    nextShuffle() {
-        if (this.musicMode == "shuffle") {
-            var choices = Object.keys(this.selectionOptions);
-            var track = choices[Math.floor(Math.random() * choices.length)];
-            this.setNextTrack(track);
-            this.shuffleTimeout = window.setTimeout(this.nextShuffle.bind(this), 3 * 60 * 1000);
-        }
-    }
-
-    Network_logoutOK() {
-        this.hideMusicSelection();
-    }
-
     loginOK() {
-        switch (this.musicMode) {
+        this.nameDiv.innerText = document.game.MUSIC_TRACK_NAMES[
+            document.game.MUSIC_PLAYER.currentTrackID
+        ];
+        switch (this.mode) {
             case "passthrough":
                 break;
             case "manual":
@@ -228,7 +242,11 @@ export class GenLiteMusicPlugin extends GenLitePlugin {
         }
     }
 
-    setNextTrack(track: string) {
+    setNextTrack(track: string, appendHistory=true) {
+        if (document.game.MUSIC_PLAYER.loading || document.game.MUSIC_PLAYER.fading) {
+            return false;
+        }
+
         if (this.currentSelection != null) {
             this.currentSelection.style.backgroundColor = '#0e0c0b';
         }
@@ -236,29 +254,107 @@ export class GenLiteMusicPlugin extends GenLitePlugin {
         var e = this.selectionOptions[track];
         if (e) {
             this.currentSelection = e;
-            e.style.backgroundColor = '#008000';
+            e.style.backgroundColor = 'lawngreen';
         }
 
+        let len = this.history.length;
+        let lastTrack = len ? this.history[len - 1] : "";
+        if (appendHistory && lastTrack != track) {
+            this.history.push(track);
+            while (this.history.length > 20) {
+                this.history.shift();
+            }
+            this.historyIndex = this.history.length - 1;
+        }
         this.currentTrack = track;
+        this.nameDiv.innerText = document.game.MUSIC_TRACK_NAMES[track];
         this.originalSetTrack.call(document.game.MUSIC_PLAYER, track);
+        return true;
     }
 
-    toggleDisplay() {
-        if (this.displayed) {
-            this.hideMusicSelection();
+    updateMusicUI() {
+        if (this.isPluginEnabled) {
+            document.game.MUSIC_PLAYER.setNextTrack = (t) => {
+                if (this.mode == "passthrough") {
+                    this.setNextTrack(t);
+                }
+            };
         } else {
-            this.displayMusicSelection();
+            document.game.MUSIC_PLAYER.setNextTrack = this.originalSetTrack;
         }
     }
 
-    displayMusicSelection() {
-        document.body.appendChild(this.selectionMenu);
-        this.displayed = true;
+    onTrackClicked(track: string) {
+        this.setManual();
+        if (this.mode == "shuffle" && this.shuffleTimeout != 0) {
+            clearTimeout(this.shuffleTimeout);
+            this.shuffleTimeout = window.setTimeout(this.nextShuffle.bind(this), 3 * 60 * 1000);
+        }
+
+        document.game.SETTINGS.setMusicTrackText("Transitioning...");
+        this.setNextTrack(track);
     }
 
-    hideMusicSelection() {
-        this.selectionMenu.remove();
-        this.displayed = false;
+    onControlClicked(control: string) {
+        switch (control) {
+            case "shuffle":
+                if (this.mode === "shuffle") {
+                    this.disableShuffle();
+                } else {
+                    this.enableShuffle();
+                }
+                break;
+            case "forward-step":
+                if (this.historyIndex < this.history.length - 1) {
+                    if (this.setNextTrack(this.history[this.historyIndex + 1], false)) {
+                        this.historyIndex++;
+                    }
+                } else if (this.mode === "shuffle") {
+                    this.nextShuffle();
+                }
+                break;
+            case "backward-step":
+                if (this.historyIndex > 0) {
+                    if (this.setNextTrack(this.history[this.historyIndex - 1], false)) {
+                        this.historyIndex--;
+                    }
+                }
+                break;
+        }
+    }
+
+    setManual() {
+        if (this.mode != "shuffle") {
+            this.mode = "manual";
+        }
+    }
+
+    enableShuffle() {
+        if (this.mode != "shuffle") {
+            let button = document.getElementById("genlite-music-button-shuffle");
+            button.style.color = "lawngreen";
+            this.previousMode = this.mode;
+            this.mode = "shuffle";
+            this.nextShuffle();
+        }
+    }
+
+    disableShuffle() {
+        if (this.mode == "shuffle") {
+            let button = document.getElementById("genlite-music-button-shuffle");
+            button.style.removeProperty("color");
+            this.mode = this.previousMode;
+        }
+    }
+
+    nextShuffle() {
+        if (this.mode == "shuffle") {
+            var choices = Object.keys(this.selectionOptions);
+            var track = choices[Math.floor(Math.random() * choices.length)];
+            this.setNextTrack(track);
+            clearTimeout(this.shuffleTimeout);
+            this.shuffleTimeout = window.setTimeout(this.nextShuffle.bind(this), 3 * 60 * 1000);
+        }
     }
 
     helpCommand(args: string) {
@@ -352,7 +448,7 @@ export class GenLiteMusicPlugin extends GenLitePlugin {
                 }
                 break;
             case "default":
-                this.musicMode = "passthrough";
+                this.mode = "passthrough";
                 break;
             default:
                 this.helpCommand("");
