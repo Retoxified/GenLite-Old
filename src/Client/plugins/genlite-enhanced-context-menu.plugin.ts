@@ -102,7 +102,7 @@ export class GenLiteEnhancedContextMenu extends GenLitePlugin {
         this.rightClickAttack = state;
     }
 
-    NPC_Intersects(ray, list) {
+    NPC_intersects(ray, list) {
         // If the plugin is disabled or list is empty, return
         if (!this.isEnabled || list.length === 0) return;
 

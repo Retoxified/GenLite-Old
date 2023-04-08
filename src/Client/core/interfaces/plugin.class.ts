@@ -32,7 +32,7 @@ export abstract class GenLitePlugin {
     Bank__addContextOptionsActual?(item: object, contextMenu: contextMenu[], n: any): void;
     Bank__addContextOptions?(itemSlot: number, contextMenu: contextMenu[]): void;
     Trade_handlePacket?(packet: any): void;
-    NPC_Intersects?(ray: any, list: any): void;
+    NPC_intersects?(ray: any, list: any): void;
     OptimizedScene_Intersects?(ray: any, list: any): void;
     Inventory_Intersects?(e: any, t: any): void;
     Inventory__getAllContextOptions?(itemID, itemActions): void;
