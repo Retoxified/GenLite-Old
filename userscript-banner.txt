@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         GenLite
-// @namespace    GenLite
+// @name         GenLite-KKonaOG
+// @namespace    GenLite-KKonaOG
 // @version      ${version}
 // @description  try to take over the world!
 // @author       https://github.com/Retoxified/GenLite/blob/main/CREDITS.md
