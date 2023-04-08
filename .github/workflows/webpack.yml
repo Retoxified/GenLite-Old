@@ -24,11 +24,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Update Tampermonkey Banner with Repository Owner
-        run: |
-          sed -i "2s/GenLite/GenLite-${{github.repository_owner}}/" userscript-banner.txt
-          sed -i "3s/GenLite/GenLite-${{github.repository_owner}}/" userscript-banner.txt
-          
       - name: Build
         working-directory: ./
         run: |
@@ -42,6 +37,11 @@ jobs:
           commit_options: '--no-verify'
           file_pattern: '.' # Change this to the path of the directory containing the files you want to commit
     
+      - name: Update Tampermonkey Banner with Repository Owner
+        run: |
+          sed -i "2s/GenLite/GenLite-${{github.repository_owner}}/" userscript-banner.txt
+          sed -i "3s/GenLite/GenLite-${{github.repository_owner}}/" userscript-banner.txt
+      
       - name: Push to Release Branch
         env:
           GITHUB_TOKEN: ${{ secrets.BUILD_TOKEN }}
