@@ -296,9 +296,9 @@ let isInitialized = false;
         genfanadJS = genfanadJS.replace(/window\.innerWidth/g, "document.body.clientWidth");
         genfanadJS = genfanadJS.replace(/background-image: linear-gradient\(var\(--yellow-3\), var\(--yellow-3\)\);/g, "");
         
-        if (document.head) {
-            throw new Error('Head already exists - make sure to enable instant script injection');
-        }
+        // if (document.head) {
+        //     throw new Error('Head already exists - make sure to enable instant script injection');
+        // }
         
         const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
         
