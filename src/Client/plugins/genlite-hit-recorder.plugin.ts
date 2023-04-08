@@ -11,7 +11,7 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import {GenLitePlugin} from '../core/interfaces/plugin.class';
 
 class HitInfo {
     //this needs to be moved to an interface once i figure out how TS interfaces work
@@ -35,7 +35,7 @@ class HitInfo {
     entropy = 0;
 }
 
-export class GenLiteHitRecorder implements GenLitePlugin {
+export class GenLiteHitRecorder extends GenLitePlugin {
     static pluginName = 'GenLiteHitRecorder';
 
     curEnemy: { [key: string]: any } = undefined;
@@ -78,17 +78,15 @@ export class GenLiteHitRecorder implements GenLitePlugin {
 
     isPluginEnabled: boolean = false;
 
-    constructor() {
+    async init() {
+        document.genlite.registerPlugin(this);
+
         this.playerHitInfo = new HitInfo();
         this.enemyHitInfo = new HitInfo();
 
         this.isUIinit = false;
         this.dpsOverlayContainer = <HTMLElement>document.createElement("div");
         this.dpsOverlay = <HTMLElement>document.createElement("div");
-    }
-
-    async init() {
-        document.genlite.registerPlugin(this);
         this.dpsOverlayContainer.appendChild(this.dpsOverlay);
     }
 
@@ -116,7 +114,7 @@ export class GenLiteHitRecorder implements GenLitePlugin {
         this.isfirstHit = true;
     }
     /* filters network packets for damage data from the player */
-    handle(verb, payload) {
+    Network_handle(verb, payload) {
         if (this.isPluginEnabled === false) {
             return;
         }

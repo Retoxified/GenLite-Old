@@ -11,7 +11,7 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
 class Highscore {
     Player: string;
@@ -27,7 +27,7 @@ class Highscore {
     ] = [];
 }
 
-export class GenLiteHighscores implements GenLitePlugin {
+export class GenLiteHighscores extends GenLitePlugin {
     static pluginName = 'GenLiteHighscores';
 
     highscores: Highscore;
@@ -112,7 +112,7 @@ export class GenLiteHighscores implements GenLitePlugin {
         if (state) {
             this.loginOK();
         } else {
-            this.logoutOK();
+            this.Network_logoutOK();
         }
     }
 
@@ -135,7 +135,7 @@ export class GenLiteHighscores implements GenLitePlugin {
     }
 
     /* stop intercals */
-    logoutOK() {
+    Network_logoutOK() {
         clearInterval(this.sendInterval);
         this.sendInterval = null;
     }
@@ -144,7 +144,7 @@ export class GenLiteHighscores implements GenLitePlugin {
         this.curCombatLevel = document.game.PLAYER_INFO.combat_level;
     }
 
-    handle(verb, payload) {
+    Network_handle(verb, payload) {
         /* count steps */
         if (verb == "move" && document.game.PLAYER && payload.id == document.game.PLAYER.id) {
             switch (payload.direction) {

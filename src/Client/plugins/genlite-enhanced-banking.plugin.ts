@@ -11,23 +11,32 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-export class GenLiteEnhancedBanking implements GenLitePlugin {
+export class GenLiteEnhancedBanking extends GenLitePlugin {
     static pluginName = 'GenLiteEnhancedBanking';
 
     isEnabled: boolean = false;
 
 
-    pluginSettings : Settings = {}
+    pluginSettings: Settings = {}
 
     BANK: Bank;
-    qualToWith: string = ''; /* _lq, '', _hq for the 3 qualities */
+    INVENTORY: Inventory;
+    toWith: {
+        [baseItem: string]: {
+            '_lq': number
+            '_hq': number
+            '': number
+            'lastQual': string
+        }
+    } = {};
 
     intersect_vector = new document.game.THREE.Vector3();
     async init() {
         document.genlite.registerPlugin(this);
         this.BANK = document.game.BANK;
+        this.INVENTORY = document.game.INVENTORY
     }
 
     async postInit() {
@@ -42,9 +51,19 @@ export class GenLiteEnhancedBanking implements GenLitePlugin {
         without going through the prompt
         ctrl moves this option to the top of the list
     */
-    _addContextOptionsActual(item, contextMenu, n) {
+    Bank__addContextOptionsActual(item: BankSlot, contextMenu: contextMenu[], n: invBankObject) {
         if (this.isEnabled == false) return;
-        let toWithdraw = this.BANK.saved_withdraw_x ? this.BANK.saved_withdraw_x : 1
+        /* get the baseItemKey and the quality */
+        let baseItem = item.item;
+        let qual = ''
+        if (baseItem.match(/(_lq|_hq)$/)) {
+            baseItem = baseItem.substring(0, baseItem.length - 3);
+            qual = item.item.substring(item.item.length - 3);
+        }
+        /* if first time seeing this item set up the key and look up withdraw ammount */
+        this.toWith[baseItem] = this.toWith[baseItem] ? this.toWith[baseItem] : { '_lq': 1, '_hq': 1, '': 1, lastQual: '' };
+        let toWithdraw = this.toWith[baseItem][qual];
+        /* push contextMenu option */
         contextMenu.push({
             color: "none",
             priority: document.game.KEYBOARD['17'] ? 999 : 1,
@@ -67,49 +86,94 @@ export class GenLiteEnhancedBanking implements GenLitePlugin {
     /* same as the above function but for stacked qualities
         this uses the last quality withdrawn from the bank from ANY slot
     */
-    _addContextOptions(itemSlot: any, contextMenu: any) {
+    Bank__addContextOptions(itemSlot: number, contextMenu: contextMenu[]) {
         if (this.isEnabled == false) return;
-        let toWithdraw = this.BANK.saved_withdraw_x ? this.BANK.saved_withdraw_x : 1
         let n = itemSlot + this.BANK.selected_page * document.game.SOME_CONST_USED_FOR_BANK;
         let item = this.BANK.slots[n];
-        let a = item.item.substring(3);
-        a = a.concat(this.qualToWith);
-        let itemHumanName = `<span class='item'>${document.game.returnsAnItemName(a)}</span>`;
-        let r = {
-            type: "item",
-            id: item,
-            text: () => itemHumanName
-        }
+        /* we only want to modify condenced qualities as the above function handles the rest */
         if (item.item.startsWith('$q')) {
-            contextMenu.push({
-                color: "none",
-                priority: document.game.KEYBOARD['17'] ? 999 : 1,
-                object: r,
-                text: `Withdraw ${toWithdraw}`,
-                action: () => {
-                    document.game.NETWORK_CONTAINER.network.action("bank_action", {
-                        action: "withdraw",
-                        item: a,
-                        quantity: toWithdraw
-                    })
+            /* grab the baseItemKey */
+            let baseItem = item.item.substring(3);
+            this.toWith[baseItem] = this.toWith[baseItem] ? this.toWith[baseItem] : { '_lq': 1, '_hq': 1, '': 1, lastQual: '' };
+            /* iterate though each quality */
+            for (let qual of ['_lq', '', '_hq']) {
+                /* genfanad compatibility because i dont want to rewrite */
+                let qual2 = qual == '' ? 'mq' : qual.substring(1);
+                if (item.stored_amounts[qual2] <= 0)
+                    continue;
+                /* setup context menu push */
+                let itemWithQual = baseItem.concat(qual)
+                let itemHumanName = `<span class='item'>${document.game.returnsAnItemName(itemWithQual)}</span>`;
+                let r = {
+                    type: "item",
+                    id: item,
+                    text: () => itemHumanName
                 }
-            })
+                contextMenu.push({
+                    color: "none",
+                    priority: this.toWith[baseItem]['lastQual'] == qual ? (document.game.KEYBOARD['17'] ? 999 : 1) : 1, // we only want to push up the last withdrawn qualitys
+                    object: r,
+                    text: `Withdraw ${this.toWith[baseItem][qual]}`,
+                    action: () => {
+                        document.game.NETWORK_CONTAINER.network.action("bank_action", {
+                            action: "withdraw",
+                            item: itemWithQual,
+                            quantity: this.toWith[baseItem][qual]
+                        })
+                    }
+                })
+            }
         }
     }
 
-    /* figure out what the last quality was we withdrew */
-    action(verb, param) {
+    /* record the amount and quality withdrawn */
+    Network_action(verb, param) {
         if (this.isEnabled == false) return;
         if (verb == 'bank_action') {
             if (param.action == 'withdraw') {
                 if (param.item.match(/_lq$/)) {
-                    this.qualToWith = '_lq';
+                    this.toWith[param.item.substring(0, param.item.length - 3)]['_lq'] = param.quantity;
+                    this.toWith[param.item.substring(0, param.item.length - 3)]['lastQual'] = '_lq';
                 } else if (param.item.match(/_hq$/)) {
-                    this.qualToWith = '_hq';
+                    this.toWith[param.item.substring(0, param.item.length - 3)]['_hq'] = param.quantity;
+                    this.toWith[param.item.substring(0, param.item.length - 3)]['lastQual'] = '_hq';
                 } else {
-                    this.qualToWith = ''; //nq case
+                    this.toWith[param.item][''] = param.quantity;
+                    this.toWith[param.item]['lastQual'] = '';
                 }
             }
         }
+    }
+
+    /* look this is basically the same as above just with inventory slots and stuff */
+    Inventory__getContextOptionsBank(slotId: number, invBankObject: invBankObject, contextMenu: contextMenu[]): void {
+        if (this.isEnabled == false) return;
+        let item = this.INVENTORY.items[slotId];
+        let numItem = this.INVENTORY.countItemTotal(item.item);
+        let baseItem = item.item;
+        let qual = ''
+        if (baseItem.match(/(_lq|_hq)$/)) {
+            baseItem = baseItem.substring(0, baseItem.length - 3);
+            qual = item.item.substring(item.item.length - 3);
+        }
+        this.toWith[baseItem] = this.toWith[baseItem] ? this.toWith[baseItem] : { '_lq': 1, '_hq': 1, '': 1, lastQual: '' };
+        let toWithdraw = Math.min(this.toWith[baseItem][qual], numItem);
+        contextMenu.push({
+            color: "none",
+            priority: document.game.KEYBOARD['17'] ? 999 : 1,
+            object: invBankObject,
+            text: `Deposit ${toWithdraw}`,
+            action: () => {
+                "unknown" == item.item ? document.game.NETWORK_CONTAINER.network.action("bank_action", {
+                    action: "deposit",
+                    item: item.original_item,
+                    quantity: toWithdraw
+                }) : document.game.NETWORK_CONTAINER.network.action("bank_action", {
+                    action: "deposit",
+                    item: item.item,
+                    quantity: toWithdraw
+                })
+            }
+        })
     }
 }

@@ -11,9 +11,9 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GenLitePlugin } from '../core/interfaces/plugin.interface';
+import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-export class GenLiteDropRecorderPlugin implements GenLitePlugin {
+export class GenLiteDropRecorderPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteDropRecorderPlugin';
 
     monsterData = {
@@ -79,7 +79,7 @@ export class GenLiteDropRecorderPlugin implements GenLitePlugin {
         this.submitItemsToServer = state;
     }
 
-    handle(verb: string, payload: { [key: string]: any }) {
+    Network_handle(verb: string, payload: { [key: string]: any }) {
         if (this.isPluginEnabled === false || document.game.NETWORK.loggedIn === false) {
             return;
         }

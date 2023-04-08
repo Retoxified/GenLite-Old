@@ -9,10 +9,10 @@
 */
 
 // Import GenLite Plugin Interface
-import {GenLitePlugin} from '../core/interfaces/plugin.interface';
+import {GenLitePlugin} from '../core/interfaces/plugin.class';
 
 // Create PlayerTools Plugin Class
-export class GenLitePlayerToolsPlugin implements GenLitePlugin {
+export class GenLitePlayerToolsPlugin extends GenLitePlugin {
     static pluginName = 'GenLitePlayerToolsPlugin';
 
     // Plugin Settings
@@ -62,7 +62,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
         this.isEnabled = state;
     }
 
-    update(dt) {
+    Camera_update(dt) {
         // Set the Player Tag Container's Visibility to Hidden based off doRender
         this.PlayerTagContainer.style.visibility = this.doRender ? 'visible' : 'hidden';
 
@@ -172,7 +172,7 @@ export class GenLitePlayerToolsPlugin implements GenLitePlugin {
         this.doRender = true;
     }
 
-    logoutOK() {
+    Network_logoutOK() {
         this.doRender = false;
         this.trackedPlayers = {};
         this.PlayerTagContainer.innerHTML = "";

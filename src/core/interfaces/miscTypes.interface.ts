@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2023 FrozenReality dpeGit
+    Copyright (C) 2023 dpeGit
 */
 /*
     This file is part of GenLite.
@@ -10,13 +10,16 @@
 
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
+interface invBankObject {
+    id: number,
+    text: () => string,
+    type: string
+}
 
-
-/* note if copying change import to `../core/interfaces/plugin.interface` */
-import {GenLitePlugin} from '../interfaces/plugin.class';
-
-export class ExamplePlugin extends GenLitePlugin {
-    static pluginName = 'My Plugin';
-    async init() {}
-    handlePluginState(state: boolean) {}
+interface contextMenu {
+    color: string,
+    priority: number,
+    object: object,
+    text: string,
+    action: () => void
 }
