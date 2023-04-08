@@ -36,10 +36,8 @@ xhrGenfanadModified.send(null);
 let genfanadModifiedDate = xhrGenfanadModified.getResponseHeader('Last-Modified');
 // Convert the Last-Modified header to a UNIX timestamp
 if (genfanadModifiedDate == null || genfanadModifiedDate == undefined) {
-    console.log("GenFanad Last-Modified header is null or undefined. Setting to 0.");
     genfanadLastModified = new Date(0)
 } else {
-    console.log("GenFanad Last-Modified header is " + genfanadModifiedDate);
     genfanadLastModified = new Date(genfanadModifiedDate);
 }
 
@@ -61,8 +59,10 @@ if (genliteModifiedDate == null || genliteModifiedDate == undefined) {
 
 console.log("GenLite Last-Modified header is " + genliteLastModified);
 console.log("GenFanad Last-Modified header is " + genfanadLastModified);
-console.log(genfanadLastModified > genfanadUpdateTimestampDate)
-console.log(genliteLastModified > genliteUpdateTimestampDate)
+console.log(genliteLastModified.getMilliseconds());
+console.log(genliteUpdateTimestampDate.getMilliseconds());
+console.log("Update GenLite? " + (genliteLastModified.getMilliseconds() > genliteUpdateTimestampDate.getMilliseconds()))
+
 
 // Genfanad Client is always updated
 let genfanadJS = localStorage.getItem('GenFanad.Client');
