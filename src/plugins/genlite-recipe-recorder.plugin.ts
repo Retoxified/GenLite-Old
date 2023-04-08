@@ -33,6 +33,8 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
     isPluginEnabled: boolean = false;
 
     uiTab: HTMLElement = null;
+    listContainer: HTMLElement = null;
+    recipeElements: Record<string, HTMLElement> = {};
 
     async init() {
         document.genlite.registerPlugin(this);
@@ -157,111 +159,143 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         };
 
         // recipe list
-        let listContainer = <HTMLElement>document.createElement("div");
-        listContainer.classList.add("genlite-recipes-list");
-        settingsMenu.appendChild(listContainer);
+        this.listContainer = <HTMLElement>document.createElement("div");
+        this.listContainer.classList.add("genlite-recipes-list");
+        settingsMenu.appendChild(this.listContainer);
         for (const recipeName in this.recipeResults) {
-            const result = this.recipeResults[recipeName];
-
-            let row = <HTMLElement>document.createElement("div");
-            row.classList.add("genlite-recipes-row");
-            listContainer.appendChild(row);
-
-            // inputs
-            let icons = <HTMLElement>document.createElement("div");
-            icons.classList.add("genlite-recipes-iconlist");
-            row.appendChild(icons);
-
-            let arrow = <HTMLElement>document.createElement("div");
-            arrow.classList.add("genlite-recipes-arrow");
-            let i = <HTMLElement>document.createElement("i");
-            i.classList.add("fa-chevron-right");
-            i.classList.add("fas");
-            arrow.appendChild(i);
-            icons.appendChild(arrow);
-
-            let nInputs = 0;
-            for (const item in result.input) {
-                nInputs = result.input[item]; // TODO: make sure input #s are always equal
-                let div = <HTMLImageElement>document.createElement("div");
-                div.classList.add("genlite-recipes-icon");
-                icons.appendChild(div);
-
-                let icon = <HTMLImageElement>document.createElement("img");
-                icon.classList.add("genlite-recipes-icon");
-                icon.title = item;
-                div.appendChild(icon);
-
-                const itemdata = document.game.DATA.items[item];
-                if (itemdata && itemdata.image && itemdata.name) {
-                    icon.title = itemdata.name;
-                    icon.src = document.game.getStaticPath('items/' + itemdata.image);
-
-                    if (itemdata.border) {
-                        let path = `items/placeholders/${ itemdata.border }_border.png`;
-                        path = document.game.getStaticPath(path);
-                        let qual = <HTMLImageElement>document.createElement("img");
-                        qual.classList.add("new_ux-inventory_quality-image");
-                        qual.src = path;
-                        div.appendChild(qual);
-                    }
-                }
-            }
-
-            // now draw outputs
-            let outputBox = <HTMLElement>document.createElement("div");
-            outputBox.classList.add("genlite-recipes-output");
-            row.appendChild(outputBox);
-            outputBox.appendChild(document.createTextNode(`${nInputs} tries`));
-
-            for (const item in result.output) {
-                let orow = <HTMLElement>document.createElement("div");
-                orow.classList.add("genlite-recipes-output-row");
-
-                let div = <HTMLImageElement>document.createElement("div");
-                div.classList.add("genlite-recipes-icon");
-                orow.appendChild(div);
-
-                let icon = <HTMLImageElement>document.createElement("img");
-                icon.classList.add("genlite-recipes-icon");
-                icon.title = item;
-                div.appendChild(icon);
-
-                const itemdata = document.game.DATA.items[item];
-                if (itemdata && itemdata.image && itemdata.name) {
-                    icon.title = itemdata.name;
-                    icon.src = document.game.getStaticPath('items/' + itemdata.image);
-
-                    if (itemdata.border) {
-                        let path = `items/placeholders/${ itemdata.border }_border.png`;
-                        path = document.game.getStaticPath(path);
-                        let qual = <HTMLImageElement>document.createElement("img");
-                        qual.classList.add("new_ux-inventory_quality-image");
-                        qual.src = path;
-                        div.appendChild(qual);
-                    }
-                }
-
-                let n = result.output[item];
-                let pct = (n / nInputs * 100);
-                pct = Math.round(pct * 100) / 100;
-                orow.appendChild(document.createTextNode(`${n} (${pct}%)`));
-
-                outputBox.appendChild(orow);
-            }
-
-            arrow.onclick = function (e) {
-                if (i.classList.toggle("fa-chevron-right")) {
-                    i.classList.remove("fa-chevron-down");
-                    outputBox.style.display = "none";
-                } else {
-                    i.classList.add("fa-chevron-down");
-                    outputBox.style.display = "flex";
-                }
-            };
+            this.createRecipeRow(recipeName);
         }
 
         this.uiTab = document.genlite.ui.addTab("kitchen-set", "Recipe Recorder", settingsMenu, this.isPluginEnabled);
+    }
+
+    createRecipeRow(recipeName: string) {
+        const result = this.recipeResults[recipeName];
+
+        let row = <HTMLElement>document.createElement("div");
+        row.classList.add("genlite-recipes-row");
+        this.listContainer.appendChild(row);
+
+        this.recipeElements[recipeName] = row;
+
+        // inputs
+        let icons = <HTMLElement>document.createElement("div");
+        icons.classList.add("genlite-recipes-iconlist");
+        row.appendChild(icons);
+
+        let arrow = <HTMLElement>document.createElement("div");
+        arrow.classList.add("genlite-recipes-arrow");
+        let i = <HTMLElement>document.createElement("i");
+        i.classList.add("fa-chevron-right");
+        i.classList.add("fas");
+        arrow.appendChild(i);
+        icons.appendChild(arrow);
+
+        let nInputs = 0;
+        for (const item in result.input) {
+            nInputs = result.input[item]; // TODO: make sure input #s are always equal
+            let div = <HTMLImageElement>document.createElement("div");
+            div.classList.add("genlite-recipes-icon");
+            icons.appendChild(div);
+
+            let icon = <HTMLImageElement>document.createElement("img");
+            icon.classList.add("genlite-recipes-icon");
+            icon.title = item;
+            div.appendChild(icon);
+
+            const itemdata = document.game.DATA.items[item];
+            if (itemdata && itemdata.image && itemdata.name) {
+                icon.title = itemdata.name;
+                icon.src = document.game.getStaticPath('items/' + itemdata.image);
+
+                if (itemdata.border) {
+                    let path = `items/placeholders/${ itemdata.border }_border.png`;
+                    path = document.game.getStaticPath(path);
+                    let qual = <HTMLImageElement>document.createElement("img");
+                    qual.classList.add("new_ux-inventory_quality-image");
+                    qual.src = path;
+                    div.appendChild(qual);
+                }
+            }
+        }
+
+        // now draw outputs
+        let outputBox = <HTMLElement>document.createElement("div");
+        outputBox.classList.add("genlite-recipes-output");
+        row.appendChild(outputBox);
+
+        this.updateOutputBox(outputBox, result);
+
+        arrow.onclick = function (e) {
+            if (i.classList.toggle("fa-chevron-right")) {
+                i.classList.remove("fa-chevron-down");
+                outputBox.style.display = "none";
+            } else {
+                i.classList.add("fa-chevron-down");
+                outputBox.style.display = "flex";
+            }
+        };
+    }
+
+    updateOutputBox(outputBox: HTMLElement, results) {
+        let nInputs = 0;
+        for (const item in results.input) {
+            nInputs = results.input[item];
+            break;
+        }
+
+        outputBox.innerHTML = '';
+        outputBox.appendChild(document.createTextNode(`${nInputs} tries`));
+
+        for (const item in results.output) {
+            let orow = <HTMLElement>document.createElement("div");
+            orow.classList.add("genlite-recipes-output-row");
+
+            let div = <HTMLImageElement>document.createElement("div");
+            div.classList.add("genlite-recipes-icon");
+            orow.appendChild(div);
+
+            let icon = <HTMLImageElement>document.createElement("img");
+            icon.classList.add("genlite-recipes-icon");
+            icon.title = item;
+            div.appendChild(icon);
+
+            const itemdata = document.game.DATA.items[item];
+            if (itemdata && itemdata.image && itemdata.name) {
+                icon.title = itemdata.name;
+                icon.src = document.game.getStaticPath('items/' + itemdata.image);
+
+                if (itemdata.border) {
+                    let path = `items/placeholders/${ itemdata.border }_border.png`;
+                    path = document.game.getStaticPath(path);
+                    let qual = <HTMLImageElement>document.createElement("img");
+                    qual.classList.add("new_ux-inventory_quality-image");
+                    qual.src = path;
+                    div.appendChild(qual);
+                }
+            }
+
+            let n = results.output[item];
+            let pct = (n / nInputs * 100);
+            pct = Math.round(pct * 100) / 100;
+            orow.appendChild(document.createTextNode(`${n} (${pct}%)`));
+
+            outputBox.appendChild(orow);
+        }
+    }
+
+    updateRecipeRow(recipeName: string) {
+        let row = this.recipeElements[recipeName];
+        if (!row) {
+            this.createRecipeRow(recipeName);
+        } else {
+            let results = this.recipeResults[recipeName];
+            let es = row.getElementsByClassName('genlite-recipes-output');
+            if (es) {
+                let outputBox = <HTMLElement>es[0];
+                this.updateOutputBox(outputBox, results);
+            }
+        }
     }
 
     handlePluginState(state: boolean): void {
@@ -434,6 +468,7 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
             this.recipeResults[this.recipeName].output["nothing"]++;
         }
 
+        this.updateRecipeRow(this.recipeName);
     }
 
     storeGatherData(itemList) {
