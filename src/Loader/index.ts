@@ -42,7 +42,7 @@ if (genfanadModifiedDate == null || genfanadModifiedDate == undefined) {
 }
 
 let xhrGenliteModified = new XMLHttpRequest();
-xhrGenliteModified.open('GET', 'https://api.github.com/repos/KKonaOG/GenLite-Revamp/releases/latest', false);
+xhrGenliteModified.open('GET', 'https://api.github.com/repos/KKonaOG/GenLite/releases/latest', false);
 xhrGenliteModified.setRequestHeader("Accept", "application/vnd.github.v3+json")
 xhrGenliteModified.send(null);
 let genliteAPIRespose = JSON.parse(xhrGenliteModified.responseText);
@@ -218,7 +218,7 @@ if (needsUpdate) {
         okayButton.onclick = (e) => {
             localStorage.setItem('GenLite.UpdateTimestamp', genliteLastModified.toString());
             let xhrGenLiteJS = new XMLHttpRequest();
-            xhrGenLiteJS.open("GET", "https://raw.githubusercontent.com/KKonaOG/GenLite-Revamp/release/dist/genlite.user.js");
+            xhrGenLiteJS.open("GET", "https://raw.githubusercontent.com/KKonaOG/GenLite/release/dist/genlite.user.js");
             xhrGenLiteJS.onload = function () {
                 if (xhrGenLiteJS.status == 200) {
                     let genliteJS = xhrGenLiteJS.responseText;
