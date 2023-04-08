@@ -107,7 +107,7 @@ if (needsUpdate) {
         backdrop.style.left = '0';
         backdrop.style.width = '100%';
         backdrop.style.height = '100%';
-        backdrop.style.backgroundImage = 'url(https://genfanad.com/media/concept-art/magic-card-classwip.png)';
+        backdrop.style.backgroundImage = 'url(https://i.imgur.com/KutJ1gO.png)';
         backdrop.style.zIndex = '99';
         backdrop.style.filter = 'blur(5px)';
         backdrop.style.backgroundSize = 'cover';
