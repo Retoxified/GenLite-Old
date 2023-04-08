@@ -41,8 +41,8 @@ if (genfanadModifiedDate == null || genfanadModifiedDate == undefined) {
 }
 
 let xhrGenliteModified = new XMLHttpRequest();
-xhrGenliteModified.open('GET', 'https://api.github.com/repos/KKonaOG/GenLite/releases/latest', false);
-xhrGenliteModified.setRequestHeader("Accept", "application/vnd.github.v3+json")
+xhrGenliteModified.open('GET', 'https://api.github.com/repos/dpeGit/GenLite/releases/latest', false);
+xhrGenliteModified.setRequestHeader("Accept", "application/vnd.dpeGit.v3+json")
 xhrGenliteModified.send(null);
 let genliteAPIRespose = JSON.parse(xhrGenliteModified.responseText);
 
