@@ -59,9 +59,8 @@ if (genliteModifiedDate == null || genliteModifiedDate == undefined) {
 
 console.log("GenLite Last-Modified header is " + genliteLastModified);
 console.log("GenFanad Last-Modified header is " + genfanadLastModified);
-console.log(genliteLastModified.getMilliseconds());
-console.log(genliteUpdateTimestampDate.getMilliseconds());
-console.log("Update GenLite? " + (genliteLastModified.getMilliseconds() > genliteUpdateTimestampDate.getMilliseconds()))
+console.log("GenLite Update Timestamp is " + genliteUpdateTimestampDate);
+console.log("GenFanad Update Timestamp is " + genfanadUpdateTimestampDate);
 
 
 // Genfanad Client is always updated
