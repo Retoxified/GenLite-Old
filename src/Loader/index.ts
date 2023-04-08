@@ -100,15 +100,6 @@ if (genfanadLastModified > genfanadUpdateTimestampDate) {
 
             localStorage.setItem('GenFanad.Client', genfanadJS);
 
-            // Place the modified client.js into the cache location for https://play.genfanad.com/play/js/client.js
-            caches.open('genfanad').then(function (cache) {
-                cache.put('https://play.genfanad.com/play/js/client.js', new Response(genfanadJS, {
-                    headers: {
-                        'Content-Type': 'application/javascript',
-                        'Last-Modified': genfanadLastModified.toString()
-                    }
-                }));
-            });
 
         } else {
             console.error("GenFanad Client.js failed to load. Status: " + xhrClientJS.status);
