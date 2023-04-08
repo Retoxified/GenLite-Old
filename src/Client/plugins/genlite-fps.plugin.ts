@@ -13,7 +13,7 @@
 
 import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-import Stats from '../../thirdPartyModules/Stats.js/build/stats.module';
+import Stats from  '../../../thirdPartyModules/Stats.js/build/stats.module.js';
 
 export class GenLiteFPSCounter extends GenLitePlugin {
     static pluginName = 'GenLiteFPSCounter';
