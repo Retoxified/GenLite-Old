@@ -947,6 +947,9 @@ export class GenLiteUIPlugin extends GenLitePlugin {
 
                         this.setKey(plugin + "." + setting, value);
                     });
+                    settingInput.onfocus = () => { document.game.CHAT.focus_locked = true; }
+                    settingInput.onblur = () => { document.game.CHAT.focus_locked = false; }
+
 
                     sliderRow.appendChild(settingInput);
 
@@ -1001,6 +1004,8 @@ export class GenLiteUIPlugin extends GenLitePlugin {
                         settings[setting].stateHandler(value);
                         this.setKey(plugin + "." + setting, value);
                     });
+                    valueLabel.onfocus = () => {document.game.CHAT.focus_locked = true;}
+                    valueLabel.onblur = () => {document.game.CHAT.focus_locked = false;}
                     sliderRow.appendChild(valueLabel);
 
 
