@@ -72,7 +72,35 @@ if (genfanadLastModified > genfanadUpdateTimestampDate) {
     xhrClientJS.onload = function () {
         if (xhrClientJS.status == 200) {
             genfanadJS = xhrClientJS.responseText;
+
+            // Implement Work-Arounds for Closure
+            genfanadJS = genfanadJS.replace(
+                /import.meta.url/g,
+                '("https://play.genfanad.com/play/js/client.js")'
+            );
+            genfanadJS = genfanadJS.substring(0, genfanadJS.length - 5)
+                + "; document.client = {};"
+                + "document.client.get = function(a) {"
+                + "return eval(a);"
+                + "};"
+                + "document.client.set = function(a, b) {"
+                + "eval(a + ' = ' + b);"
+                + "};"
+                + genfanadJS.substring(genfanadJS.length - 5)
+                + "//# sourceURL=client.js";
+
             localStorage.setItem('GenFanad.Client', genfanadJS);
+
+            // Place the modified client.js into the cache location for https://play.genfanad.com/play/js/client.js
+            caches.open('genfanad').then(function (cache) {
+                cache.put('https://play.genfanad.com/play/js/client.js', new Response(genfanadJS, {
+                    headers: {
+                        'Content-Type': 'application/javascript',
+                        'Last-Modified': genfanadLastModified.toString()
+                    }
+                }));
+            });
+
         } else {
             console.error("GenFanad Client.js failed to load. Status: " + xhrClientJS.status);
         }

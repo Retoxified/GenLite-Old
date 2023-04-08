@@ -277,22 +277,6 @@ let isInitialized = false;
     if (!genfanadJS) {
         console.error("GenFanad.Client not found in localStorage. GenLite will not work.");
     } else {
-        genfanadJS = genfanadJS.replace(
-            /import.meta.url/g,
-            '("https://play.genfanad.com/play/js/client.js")'
-        );
-        genfanadJS = genfanadJS.substring(0, genfanadJS.length - 5)
-            + "; document.client = {};"
-            + "document.client.get = function(a) {"
-            + "return eval(a);"
-            + "};"
-            + "document.client.set = function(a, b) {"
-            + "eval(a + ' = ' + b);"
-            + "};"
-            + genfanadJS.substring(genfanadJS.length - 5)
-            + "//# sourceURL=client.js";
-        
-        
         genfanadJS = genfanadJS.replace(/window\.innerWidth/g, "document.body.clientWidth");
         genfanadJS = genfanadJS.replace(/background-image: linear-gradient\(var\(--yellow-3\), var\(--yellow-3\)\);/g, "");
         
