@@ -49,6 +49,7 @@ export class GenLiteFPSCounter extends GenLitePlugin {
     handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
         if (state) {
+            this.stats.dom.style.display = 'block';
             this.initializeUI();
         } else {
             this.Network_logoutOK();
