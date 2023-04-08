@@ -1,12 +1,7 @@
 /*
-*/
-/*
     This file is part of GenLite.
-
     GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
     GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
@@ -19,7 +14,6 @@ import { GenLiteConfirmation } from "./core/helpers/genlite-confirmation.class";
 import { GenLiteDatabasePlugin } from "./core/plugins/genlite-database.plugin";
 
 /** Official Plugins */
-import { GenLiteVersionPlugin } from "./plugins/genlite-version.plugin";
 import { GenLiteCameraPlugin } from "./plugins/genlite-camera.plugin";
 import { GenLiteChatPlugin } from "./plugins/genlite-chat.plugin";
 import { GenLiteDropRecorderPlugin } from "./plugins/genlite-drop-recorder.plugin";
@@ -184,7 +178,6 @@ let isInitialized = false;
         genlite.ui = await genlite.pluginLoader.addPlugin(GenLiteUIPlugin);
 
         /** Official Plugins */
-        await genlite.pluginLoader.addPlugin(GenLiteVersionPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteCameraPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteChatPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteNPCHighlightPlugin);
@@ -266,6 +259,62 @@ let isInitialized = false;
                 hookStartScene();
             });
         }
-
     });
+
+    function firefoxOverride(e) {
+        let src = e.target.src;
+        if (src === 'https://play.genfanad.com/play/js/client.js') {
+            e.preventDefault(); // do not load
+            e.stopPropagation();
+            var script = document.createElement('script');
+            script.textContent = genfanadJS;
+            script.type = 'module';
+            (document.head || document.documentElement).appendChild(script);
+        }
+    }
+    
+    let genfanadJS = localStorage.getItem("GenFanad.Client");
+    if (!genfanadJS) {
+        console.error("GenFanad.Client not found in localStorage. GenLite will not work.");
+    } else {
+        genfanadJS = genfanadJS.replace(
+            /import.meta.url/g,
+            '("https://play.genfanad.com/play/js/client.js")'
+        );
+        genfanadJS = genfanadJS.substring(0, genfanadJS.length - 5)
+            + "; document.client = {};"
+            + "document.client.get = function(a) {"
+            + "return eval(a);"
+            + "};"
+            + "document.client.set = function(a, b) {"
+            + "eval(a + ' = ' + b);"
+            + "};"
+            + genfanadJS.substring(genfanadJS.length - 5)
+            + "//# sourceURL=client.js";
+        
+        
+        genfanadJS = genfanadJS.replace(/window\.innerWidth/g, "document.body.clientWidth");
+        genfanadJS = genfanadJS.replace(/background-image: linear-gradient\(var\(--yellow-3\), var\(--yellow-3\)\);/g, "");
+        
+        if (document.head) {
+            throw new Error('Head already exists - make sure to enable instant script injection');
+        }
+        
+        const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+        
+        if (isFirefox) {
+            document.addEventListener("beforescriptexecute", firefoxOverride, true);
+        } else {
+            new MutationObserver((_, observer) => {
+                const clientjsScriptTag = document.querySelector('script[src*="client.js"]');
+                if (clientjsScriptTag) {
+                    clientjsScriptTag.removeAttribute('src');
+                    clientjsScriptTag.textContent = genfanadJS;
+                }
+            }).observe(document.documentElement, {
+                childList: true,
+                subtree: true
+            });
+        }
+    }
 })();
