@@ -48,12 +48,11 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
             this.recipeResults = saved.recipe ? saved.recipe : {};
             this.gatherResults = saved.gathering ? saved.gathering : {};
         }
-
-        this.createCSS();
-        this.createUITab();
     }
 
     async postInit() {
+        this.createCSS();
+        this.createUITab();
         document.genlite.ui.registerPlugin("Recipe Recorder", null, this.handlePluginState.bind(this));
     }
 
@@ -71,15 +70,12 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
                 overflow-x: hidden;
                 color: #ffd593;
                 font-family: acme,times new roman,Times,serif;
-                row-gap: 1em;
-                padding: 1em;
                 height: 100%;
             }
 
             .genlite-recipes-list {
                 display: flex;
                 flex-direction: column;
-                row-gap: 1em;
                 overflow-y: scroll;
                 height: 80%;
             }
@@ -87,9 +83,10 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
             .genlite-recipes-row {
                 display: flex;
                 flex-direction: column;
-                background-color: #0e0c0b;
                 padding: 0.25em;
                 flex-shrink: 0;
+                border-bottom: 1px solid rgb(66, 66, 66);
+                border-top: 1px solid rgb(0, 0, 0);
             }
 
             .genlite-recipes-iconlist {
@@ -128,7 +125,27 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
                 align-items: center;
             }
 
+            .genlite-recipes-search-row {
+                width: 100%;
+                height: 25px;
+                border-bottom: 1px solid rgb(66, 66, 66);
+                display: flex;
+                align-items: center;
+            }
+
             .genlite-recipes-search {
+                background-color: rgb(42, 40, 40);
+                color: rgb(255, 255, 255);
+                font-size: 16px;
+                border-radius: 0px;
+                padding-left: 10px;
+                padding-right: 10px;
+                box-sizing: border-box;
+                outline: none;
+                width: 100%;
+                border: medium none;
+                margin-left: auto;
+                margin-right: auto
             }
         `;
         document.head.appendChild(style);
@@ -143,9 +160,14 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         settingsMenu.classList.add("genlite-recipes-container");
 
         // search bar
+        let searchrow = <HTMLElement>document.createElement("div");
+        searchrow.classList.add("genlite-recipes-search-row");
+        settingsMenu.appendChild(searchrow);
+
         let search = <HTMLInputElement>document.createElement("input");
-        settingsMenu.appendChild(search);
+        searchrow.appendChild(search);
         search.classList.add("genlite-recipes-search");
+        search.placeholder = "Search Recipes...";
         search.type = "text";
 
         search.onfocus = () => {
