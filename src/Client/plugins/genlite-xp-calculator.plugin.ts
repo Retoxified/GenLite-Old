@@ -55,6 +55,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
     isHookInstalled = false;
 
     isPluginEnabled: boolean = false;
+    uiTab: HTMLElement = null;
 
     async init() {
         document.genlite.registerPlugin(this);
@@ -77,6 +78,17 @@ export class GenLiteXpCalculator extends GenLitePlugin {
             this.initializeUI();
             this.PlayerInfo_updateSkills();
         }
+    }
+
+    createUITab() {
+        if (this.uiTab) {
+            this.uiTab.remove();
+        }
+
+        let tabBody : HTMLElement = document.createElement("div");
+        
+        this.uiTab = document.genlite.ui.addTab("chart-simple", "XP Calculator", tabBody, this.isPluginEnabled);
+
     }
 
     /* we need the UI to be initalized before hooking */
