@@ -167,6 +167,12 @@ export class GenLitePlayerToolsPlugin extends GenLitePlugin {
         });
     }
 
+    Network_handle(verb: string, payload: object): void {
+        if (verb == "move" || verb == "stop") {
+            this.log(verb, payload);
+        }
+    }
+
 
     loginOK() {
         this.doRender = true;
