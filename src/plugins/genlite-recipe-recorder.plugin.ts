@@ -83,7 +83,6 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
             .genlite-recipes-row {
                 display: flex;
                 flex-direction: column;
-                padding: 0.25em;
                 flex-shrink: 0;
                 border-bottom: 1px solid rgb(66, 66, 66);
                 border-top: 1px solid rgb(0, 0, 0);
@@ -117,6 +116,15 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
             .genlite-recipes-output {
                 display: none;
                 flex-direction: column;
+                padding-left: 1em;
+                background-color: rgb(33, 33, 33);
+                margin-left: 1em;
+                margin-right: 1em;
+                margin-bottom: 1em;
+                border-bottom-left-radius: 1em;
+                padding: 1em;
+                border-bottom-right-radius: 1em;
+                box-shadow: -2px 2px rgb(30,30,30);
             }
 
             .genlite-recipes-output-row {

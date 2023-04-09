@@ -121,7 +121,6 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
             .genlite-drops-row {
                 display: flex;
                 flex-direction: column;
-                padding: 0.25em;
                 flex-shrink: 0;
                 border-bottom: 1px solid rgb(66, 66, 66);
                 border-top: 1px solid rgb(0, 0, 0);
@@ -166,6 +165,16 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
             .genlite-drops-output {
                 display: none;
                 flex-direction: column;
+                padding-left: 1em;
+                flex-direction: column;
+                background-color: rgb(33, 33, 33);
+                margin-left: 1em;
+                margin-right: 1em;
+                margin-bottom: 1em;
+                border-bottom-left-radius: 1em;
+                padding: 1em;
+                border-bottom-right-radius: 1em;
+                box-shadow: -2px 2px rgb(30,30,30);
             }
 
             .genlite-drops-output-row {
@@ -278,7 +287,7 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
 
         let title = <HTMLElement>document.createElement("div");
         title.classList.add("genlite-drops-title");
-        title.innerText = `${data.Monster_Name} - Level ${data.Monster_Level}`;
+        title.innerText = this.getUITitle(data);
         header.appendChild(title);
 
         let outputBox = <HTMLElement>document.createElement("div");
@@ -336,6 +345,9 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
         return div;
     }
 
+    getUITitle(data) {
+        return `Lv ${data.Monster_Level} ${data.Monster_Name} (${data.Num_Killed} killed)`;
+    }
 
     updateOutputBox(outputBox: HTMLElement, data) {
         let seo = `mob:${data.Monster_Name};`;
@@ -355,8 +367,13 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
             }
         }
 
+        // update header w/ number killed, blame kkona for this hack
+        let es = outputBox.parentElement.getElementsByClassName('genlite-drops-title');
+        if (es.length) {
+            (es[0] as HTMLElement).innerText = this.getUITitle(data);
+        }
+
         outputBox.innerHTML = '';
-        outputBox.appendChild(document.createTextNode(`${data.Num_Killed} killed`));
 
         let sorted = Object.entries(data.drops).sort(([,a],[,b]) => (b as number) - (a as number))
         for (const entry of sorted) {
