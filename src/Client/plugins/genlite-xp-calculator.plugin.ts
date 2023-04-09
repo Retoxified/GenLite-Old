@@ -57,6 +57,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
 
     isPluginEnabled: boolean = false;
     uiTab: HTMLElement = null;
+    uiTabBody: HTMLElement = null;
 
 
 
@@ -91,9 +92,9 @@ export class GenLiteXpCalculator extends GenLitePlugin {
             this.uiTab.remove();
         }
 
-        let tabBody : HTMLElement = document.createElement("div");
+        this.uiTabBody = document.createElement("div");
 
-        this.uiTab = document.genlite.ui.addTab("chart-simple", "XP Calculator", tabBody, this.isPluginEnabled);
+        this.uiTab = document.genlite.ui.addTab("chart-simple", "XP Calculator", this.uiTabBody, this.isPluginEnabled);
     }
 
 
@@ -108,7 +109,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
 
         
         // Add the skill info to the tab
-        this.uiTab.appendChild(skillInfo);
+        this.uiTabBody.appendChild(skillInfo);
 
         return skillInfo;
     }
