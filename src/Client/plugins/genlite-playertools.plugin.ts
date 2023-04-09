@@ -48,7 +48,6 @@ export class GenLitePlayerToolsPlugin extends GenLitePlugin {
 
     async postInit() {
         this.pluginSettings = document.genlite.ui.registerPlugin("Player Tools", null, this.handlePluginState.bind(this), this.pluginSettings);
-        this.error("Player Tools Plugin Loaded");
     }
 
     handlePluginState(state: boolean): void {
@@ -169,9 +168,8 @@ export class GenLitePlayerToolsPlugin extends GenLitePlugin {
     }
 
     Network_handle(verb: string, payload: object): void {
-        if (verb == "move" || verb == "stop") {
-            this.log(verb, payload);
-        }
+        this.log(verb)
+        this.log(payload)
     }
 
 
