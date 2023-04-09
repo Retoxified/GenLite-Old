@@ -89,10 +89,60 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         }
 
         let tabBody : HTMLElement = document.createElement("div");
+
+        // The goal with this tab is to mimic the style of RuneLite's XP Tracker Tab
+        
+        // Group 1 (Combat): Vitality, Attack, Strength, Defense, Ranged, Sorcery
+
+        // Create a Header for the Combat Group
+        let combatHeader = document.createElement("div");
+        combatHeader.style.width = '100%';
+        combatHeader.style.height = '25px';
+        combatHeader.style.flexDirection = 'row';
+        combatHeader.style.borderBottom = '1px solid rgba(66, 66, 66, 1)';
+        combatHeader.style.display = 'flex';
+        combatHeader.style.alignItems = 'center';
+        combatHeader.innerHTML = '<div style="width: 100%; text-align: center; font-weight: bold;">Combat</div>';
+
+
+
+        // Group 2 (Processing): Cooking, Forging, Artistry, Tailoring, Whittling
+        let processingHeader = document.createElement("div");
+        processingHeader.style.width = '100%';
+        processingHeader.style.height = '25px';
+        processingHeader.style.flexDirection = 'row';
+        processingHeader.style.borderBottom = '1px solid rgba(66, 66, 66, 1)';
+        processingHeader.style.display = 'flex';
+        processingHeader.style.alignItems = 'center';
+        processingHeader.innerHTML = '<div style="width: 100%; text-align: center; font-weight: bold;">Processing</div>';
+
+        // Group 3 (Support): Evocation, Survival, Piety
+        let supportHeader = document.createElement("div");
+        supportHeader.style.width = '100%';
+        supportHeader.style.height = '25px';
+        supportHeader.style.flexDirection = 'row';
+        supportHeader.style.borderBottom = '1px solid rgba(66, 66, 66, 1)';
+        supportHeader.style.display = 'flex';
+        supportHeader.style.alignItems = 'center';
+        supportHeader.innerHTML = '<div style="width: 100%; text-align: center; font-weight: bold;">Support</div>';
+        
+        // Group 4 (Gathering): Logging, Mining, Botany, Butchery
+        let gatheringHeader = document.createElement("div");
+        gatheringHeader.style.width = '100%';
+        gatheringHeader.style.height = '25px';
+        gatheringHeader.style.flexDirection = 'row';
+        gatheringHeader.style.borderBottom = '1px solid rgba(66, 66, 66, 1)';
+        gatheringHeader.style.display = 'flex';
+        gatheringHeader.style.alignItems = 'center';
+        gatheringHeader.innerHTML = '<div style="width: 100%; text-align: center; font-weight: bold;">Support</div>';
+
+
+
+
         
         this.uiTab = document.genlite.ui.addTab("chart-simple", "XP Calculator", tabBody, this.isPluginEnabled);
-
     }
+
 
     /* we need the UI to be initalized before hooking */
     initializeUI() {
