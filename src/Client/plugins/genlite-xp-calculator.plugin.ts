@@ -61,15 +61,18 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         document.genlite.registerPlugin(this);
 
         this.resetCalculatorAll();
-        // THIS IS A PRIME TARGET FOR NEW UI TABS
     }
 
     async postInit() {
         document.genlite.ui.registerPlugin("XP Calculator", null, this.handlePluginState.bind(this));
+        this.createUITab();
     }
 
     handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
+        if (this.uiTab) {
+            this.uiTab.style.display = state ? "flex" : "none";
+        }
 
         this.resetCalculatorAll();
 
