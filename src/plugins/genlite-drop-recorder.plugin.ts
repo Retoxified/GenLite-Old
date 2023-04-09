@@ -358,7 +358,10 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
         outputBox.innerHTML = '';
         outputBox.appendChild(document.createTextNode(`${data.Num_Killed} killed`));
 
-        for (const item in data.drops) {
+        let sorted = Object.entries(data.drops).sort(([,a],[,b]) => (b as number) - (a as number))
+        for (const entry of sorted) {
+            let item = entry[0];
+
             let orow = <HTMLElement>document.createElement("div");
             orow.classList.add("genlite-drops-output-row");
 
