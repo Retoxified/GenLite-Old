@@ -125,6 +125,7 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
             .genlite-recipes-output-row {
                 display: flex;
                 column-gap: 1em;
+                align-items: center;
             }
 
             .genlite-recipes-search {
@@ -279,6 +280,10 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
                 qual.src = path;
                 div.appendChild(qual);
             }
+        }
+
+        if (!icon.src) {
+            icon.src = document.game.getStaticPath('items/unknown.png');
         }
         return div;
     }
