@@ -148,14 +148,38 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         search.type = "text";
 
         search.oninput = function (e) {
-            let value = search.value.trim();
-            let list = document.getElementsByClassName("genlite-recipes-row");
-            for (let i = 0; i < list.length; i++) {
-                let row = list[i] as HTMLElement;
+            let value = search.value.trim().toLowerCase();
+            let values = [];
+            for (const v of value.split(",")) {
+                values.push(v.trim());
+            }
+
+            let rows = document.getElementsByClassName("genlite-recipes-row");
+            for (let i = 0; i < rows.length; i++) {
+                let row = rows[i] as HTMLElement;
                 let content = row.innerHTML.toLowerCase();
                 if (value === "") {
                     row.style.removeProperty("display");
-                } else if (content.includes(value)) {
+                    continue;
+                }
+
+                let match = true;
+                for (let v of values) {
+                    let invert = v[0] === "-";
+                    if (invert) {
+                        v = v.substr(1);
+                    }
+
+                    if (!invert && !content.includes(v)) {
+                        match = false;
+                        break;
+                    } else if (invert && content.includes(v)) {
+                        match = false;
+                        break;
+                    }
+                }
+
+                if (match) {
                     row.style.removeProperty("display");
                 } else {
                     row.style.display = "none";
@@ -260,12 +284,36 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
     }
 
     updateOutputBox(outputBox: HTMLElement, results) {
+        let seo = "";
+
+        function addSEO(prefix, s) {
+            seo += prefix + s;
+            seo += prefix + s
+                .replace("L.Q.", "LQ")
+                .replace("H.Q.", "HQ")
+                .replace("Bronze Component (", "")
+                .replace("Iron Component (", "")
+                .replace("Steel Component (", "")
+                .replace("Mithril Component (", "");
+            if (!s.includes("L.Q.") && !s.includes("H.Q.")) {
+                seo += prefix + "N.Q. " + s;
+                seo += prefix + "NQ " + s;
+            }
+        }
+
         let nInputs = Infinity;
         for (const item in results.input) {
             let amt = results.input[item];
             if (amt < nInputs) {
                 nInputs = amt;
             }
+
+            let seoitem = item + ";";
+            const itemdata = document.game.DATA.items[item];
+            if (itemdata && itemdata.name) {
+                seoitem = itemdata.name + ";";
+            }
+            addSEO("in:", seoitem);
         }
 
         outputBox.innerHTML = '';
@@ -278,12 +326,24 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
             let icon = this.createIconDiv(item);
             orow.appendChild(icon);
 
+            let seoitem = item + ";";
+            const itemdata = document.game.DATA.items[item];
+            if (itemdata && itemdata.name) {
+                seoitem = itemdata.name + ";";
+            }
+            addSEO("out:", seoitem);
+
             let n = results.output[item];
             let pct = (n / nInputs * 100);
             pct = Math.round(pct * 100) / 100;
             orow.appendChild(document.createTextNode(`${n} (${pct}%)`));
             outputBox.appendChild(orow);
         }
+
+        let seospan = <HTMLElement>document.createElement("span");
+        seospan.style.display = "none";
+        seospan.innerText = seo;
+        outputBox.appendChild(seospan);
     }
 
     updateRecipeRow(recipeName: string) {
