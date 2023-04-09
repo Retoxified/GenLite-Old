@@ -151,7 +151,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         }
         // this section feels ugly and should be cleaned up
         [xp.skill, "total"].forEach(element => {
-
+            console.log(document.game.PLAYER_INFO.skills[element])
             let skill = this.skillsList[element];
             let avg = skill.avgActionXP;
             avg *= skill.numActions;
