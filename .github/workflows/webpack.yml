@@ -39,8 +39,9 @@ jobs:
     
       - name: Update Tampermonkey Banner with Repository Owner
         run: |
-          sed -i "2s/GenLite/GenLite-${{github.repository_owner}}/" userscript-banner.txt
-          sed -i "3s/GenLite/GenLite-${{github.repository_owner}}/" userscript-banner.txt
+          sed -i "2s/GenLite/GenLite-${{github.repository_owner}}/" dist/genlite.user.js
+          sed -i "3s/GenLite/GenLite-${{github.repository_owner}}/" dist/genlite.user.js
+          sed -i "s/REPO_OWNER_TO_SED/${{github.repository_owner}}/g" dist/genlite.user.js
       
       - name: Push to Release Branch
         env:

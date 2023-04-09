@@ -23,7 +23,7 @@ export class GenLiteDatabasePlugin extends GenLitePlugin {
 
     public supported = false;
 
-    stores: Array<{callback: DatabaseCallback}> = [];
+    stores: Array<{ callback: DatabaseCallback }> = [];
 
     async init() {
         document.genlite.registerPlugin(this);
@@ -50,7 +50,7 @@ export class GenLiteDatabasePlugin extends GenLitePlugin {
 
     public storeTx(
         store: string,
-        rw: 'readwrite'|'readonly',
+        rw: 'readwrite' | 'readonly',
         callback: StoreCallback
     ) {
         if (!this.supported) {
@@ -77,7 +77,7 @@ export class GenLiteDatabasePlugin extends GenLitePlugin {
             GenLiteDatabasePlugin.version
         );
         r.onerror = (e) => {
-            console.log('GenLiteDatabaseError: ' + e);
+            this.error(e);
         };
 
         return r;
@@ -99,7 +99,7 @@ export class GenLiteDatabasePlugin extends GenLitePlugin {
             };
         }
     }
-    
+
     handlePluginState(state: boolean): void {
         // TODO: Implement
     }

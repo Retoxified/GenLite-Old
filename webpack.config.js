@@ -23,48 +23,102 @@ readme = readme.replace(versionString, newVersionString);
 // Write README.md
 fs.writeFileSync('./README.md', readme);
 
-module.exports = [
-  {
-    mode: 'production',
-    resolve: {
-      extensions: ['.ts', '.js', '.json']
-    },
-    module: {
-      rules: [
-        // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
-        {
-          test: /\.tsx?$/,
-          loader: 'ts-loader',
-          exclude: /node_modules/,
+module.exports = (env, argv) => {
+  let modules = [];
+  if (argv.mode === 'production') {
+    modules.push(
+      {
+        mode: 'production',
+        resolve: {
+          extensions: ['.ts', '.js', '.json']
         },
-        // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
-        {
-          test: /\.js$/,
-          loader: "source-map-loader"
-        }
-      ]
-    },
-    entry: './src/Client/index.ts',
-    output: {
-      filename: 'genlite.user.js',
-      path: path.resolve(__dirname, 'dist'),
-    },
-    optimization: {
-      minimize: true,
-      minimizer: [
-        new TerserPlugin({
-          terserOptions: {
-            output: {
-              beautify: false,
-              comments: false
+        module: {
+          rules: [
+            // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
+            {
+              test: /\.tsx?$/,
+              loader: 'ts-loader',
+              exclude: /node_modules/,
             },
-          },
-          extractComments: true,
-        })
-      ],
-    },
-  },
-  {
+            // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
+            {
+              test: /\.js$/,
+              loader: "source-map-loader"
+            }
+          ]
+        },
+        entry: './src/Client/index.ts',
+        output: {
+          filename: 'genliteClient.user.js',
+          path: path.resolve(__dirname, 'dist'),
+        },
+        optimization: {
+          minimize: true,
+          minimizer: [
+            new TerserPlugin({
+              terserOptions: {
+                output: {
+                  beautify: false,
+                  comments: false
+                },
+              },
+              extractComments: true,
+            })
+          ],
+        },
+      });
+  } else {
+    modules.push(
+      {
+        mode: 'development',
+        resolve: {
+          extensions: ['.ts', '.js', '.json']
+        },
+        module: {
+          rules: [
+            // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
+            {
+              test: /\.tsx?$/,
+              loader: 'ts-loader',
+              exclude: /node_modules/,
+            },
+            // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
+            {
+              test: /\.js$/,
+              loader: "source-map-loader"
+            }
+          ]
+        },
+        entry: './src/Client/index.ts',
+        output: {
+          filename: 'genlite.dev.user.js',
+          path: path.resolve(__dirname, 'dist'),
+        },
+        optimization: {
+          minimize: true,
+          minimizer: [
+            new TerserPlugin({
+              terserOptions: {
+                output: {
+                  beautify: false,
+                  preamble: METADATA,
+                  comments: false
+                },
+              },
+              extractComments: true,
+            })
+          ],
+        },
+        plugins: [
+          new webpack.BannerPlugin({
+            raw: true,
+            banner: METADATA
+          })
+        ]
+      });
+  }
+  modules.push(
+    {
     mode: 'production',
     resolve: {
       extensions: ['.ts', '.js', '.json']
@@ -86,7 +140,7 @@ module.exports = [
     },
     entry: './src/Loader/index.ts',
     output: {
-      filename: 'loader.user.js',
+      filename: 'genlite.user.js',
       path: path.resolve(__dirname, 'dist'),
     },
     optimization: {
@@ -110,5 +164,6 @@ module.exports = [
         banner: METADATA
       })
     ]
-  }
-];
+  });
+  return modules;
+};

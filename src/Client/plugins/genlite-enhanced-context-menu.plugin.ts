@@ -150,7 +150,7 @@ export class GenLiteEnhancedContextMenu extends GenLitePlugin {
         });
     }
 
-    OptimizedScene_Intersects(ray, list) {
+    OptimizedScene_intersects(ray, list) {
         if (!this.isEnabled || list.length === 0) return;
 
         let sceneObjects = new Map();
@@ -256,13 +256,13 @@ export class GenLiteEnhancedContextMenu extends GenLitePlugin {
         });
     }
 
-    Inventory__getAllContextOptions(itemID, itemActions) {
+    Inventory__getAllContextOptions(slotID, itemActions) {
         if (!this.isEnabled || !this.lookupItems) {
-            console.log("Lookup Off")
             return;
         }
 
-
+        if (!document.game.INVENTORY.items[slotID])
+            return;
 
         const objectName = itemActions[0].object.text();
 
