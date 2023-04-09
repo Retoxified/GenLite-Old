@@ -148,6 +148,14 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         search.classList.add("genlite-recipes-search");
         search.type = "text";
 
+        search.onfocus = () => {
+            document.game.CHAT.focus_locked = true;
+        }
+
+        search.onblur = () => {
+            document.game.CHAT.focus_locked = false;
+        }
+
         search.oninput = function (e) {
             let value = search.value.trim().toLowerCase();
             let values = [];
