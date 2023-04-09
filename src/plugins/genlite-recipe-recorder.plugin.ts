@@ -125,6 +125,7 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
             .genlite-recipes-output-row {
                 display: flex;
                 column-gap: 1em;
+                align-items: center;
             }
 
             .genlite-recipes-search {
@@ -148,14 +149,38 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         search.type = "text";
 
         search.oninput = function (e) {
-            let value = search.value.trim();
-            let list = document.getElementsByClassName("genlite-recipes-row");
-            for (let i = 0; i < list.length; i++) {
-                let row = list[i] as HTMLElement;
+            let value = search.value.trim().toLowerCase();
+            let values = [];
+            for (const v of value.split(",")) {
+                values.push(v.trim());
+            }
+
+            let rows = document.getElementsByClassName("genlite-recipes-row");
+            for (let i = 0; i < rows.length; i++) {
+                let row = rows[i] as HTMLElement;
                 let content = row.innerHTML.toLowerCase();
                 if (value === "") {
                     row.style.removeProperty("display");
-                } else if (content.includes(value)) {
+                    continue;
+                }
+
+                let match = true;
+                for (let v of values) {
+                    let invert = v[0] === "-";
+                    if (invert) {
+                        v = v.substr(1);
+                    }
+
+                    if (!invert && !content.includes(v)) {
+                        match = false;
+                        break;
+                    } else if (invert && content.includes(v)) {
+                        match = false;
+                        break;
+                    }
+                }
+
+                if (match) {
                     row.style.removeProperty("display");
                 } else {
                     row.style.display = "none";
@@ -196,32 +221,15 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         arrow.appendChild(i);
         icons.appendChild(arrow);
 
-        let nInputs = 0;
+        let nInputs = Infinity;
         for (const item in result.input) {
-            nInputs = result.input[item]; // TODO: make sure input #s are always equal
-            let div = <HTMLImageElement>document.createElement("div");
-            div.classList.add("genlite-recipes-icon");
-            icons.appendChild(div);
-
-            let icon = <HTMLImageElement>document.createElement("img");
-            icon.classList.add("genlite-recipes-icon");
-            icon.title = item;
-            div.appendChild(icon);
-
-            const itemdata = document.game.DATA.items[item];
-            if (itemdata && itemdata.image && itemdata.name) {
-                icon.title = itemdata.name;
-                icon.src = document.game.getStaticPath('items/' + itemdata.image);
-
-                if (itemdata.border) {
-                    let path = `items/placeholders/${ itemdata.border }_border.png`;
-                    path = document.game.getStaticPath(path);
-                    let qual = <HTMLImageElement>document.createElement("img");
-                    qual.classList.add("new_ux-inventory_quality-image");
-                    qual.src = path;
-                    div.appendChild(qual);
-                }
+            let amt = result.input[item];
+            if (amt < nInputs) {
+                nInputs = amt;
             }
+
+            let icon = this.createIconDiv(item);
+            icons.appendChild(icon);
         }
 
         // now draw outputs
@@ -242,11 +250,75 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         };
     }
 
+    createIconDiv(item) {
+        let div = <HTMLImageElement>document.createElement("div");
+        div.classList.add("genlite-recipes-icon");
+
+        let icon = <HTMLImageElement>document.createElement("img");
+        icon.classList.add("genlite-recipes-icon");
+        icon.title = item;
+        div.appendChild(icon);
+
+        const itemdata = document.game.DATA.items[item];
+        if (itemdata) {
+            if (itemdata.name) {
+                icon.title = itemdata.name;
+            }
+
+            if (itemdata.image) {
+                icon.src = document.game.getStaticPath('items/' + itemdata.image);
+            } else if (itemdata.images) {
+                let image = itemdata.images[itemdata.images.length - 1][1];
+                icon.src = document.game.getStaticPath('items/' + image);
+            }
+
+            if (itemdata.border) {
+                let path = `items/placeholders/${ itemdata.border }_border.png`;
+                path = document.game.getStaticPath(path);
+                let qual = <HTMLImageElement>document.createElement("img");
+                qual.classList.add("new_ux-inventory_quality-image");
+                qual.src = path;
+                div.appendChild(qual);
+            }
+        }
+
+        if (!icon.src) {
+            icon.src = document.game.getStaticPath('items/unknown.png');
+        }
+        return div;
+    }
+
     updateOutputBox(outputBox: HTMLElement, results) {
-        let nInputs = 0;
+        let seo = "";
+
+        function addSEO(prefix, s) {
+            seo += prefix + s;
+            seo += prefix + s
+                .replace("L.Q.", "LQ")
+                .replace("H.Q.", "HQ")
+                .replace("Bronze Component (", "")
+                .replace("Iron Component (", "")
+                .replace("Steel Component (", "")
+                .replace("Mithril Component (", "");
+            if (!s.includes("L.Q.") && !s.includes("H.Q.")) {
+                seo += prefix + "N.Q. " + s;
+                seo += prefix + "NQ " + s;
+            }
+        }
+
+        let nInputs = Infinity;
         for (const item in results.input) {
-            nInputs = results.input[item];
-            break;
+            let amt = results.input[item];
+            if (amt < nInputs) {
+                nInputs = amt;
+            }
+
+            let seoitem = item + ";";
+            const itemdata = document.game.DATA.items[item];
+            if (itemdata && itemdata.name) {
+                seoitem = itemdata.name + ";";
+            }
+            addSEO("in:", seoitem);
         }
 
         outputBox.innerHTML = '';
@@ -256,37 +328,27 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
             let orow = <HTMLElement>document.createElement("div");
             orow.classList.add("genlite-recipes-output-row");
 
-            let div = <HTMLImageElement>document.createElement("div");
-            div.classList.add("genlite-recipes-icon");
-            orow.appendChild(div);
+            let icon = this.createIconDiv(item);
+            orow.appendChild(icon);
 
-            let icon = <HTMLImageElement>document.createElement("img");
-            icon.classList.add("genlite-recipes-icon");
-            icon.title = item;
-            div.appendChild(icon);
-
+            let seoitem = item + ";";
             const itemdata = document.game.DATA.items[item];
-            if (itemdata && itemdata.image && itemdata.name) {
-                icon.title = itemdata.name;
-                icon.src = document.game.getStaticPath('items/' + itemdata.image);
-
-                if (itemdata.border) {
-                    let path = `items/placeholders/${ itemdata.border }_border.png`;
-                    path = document.game.getStaticPath(path);
-                    let qual = <HTMLImageElement>document.createElement("img");
-                    qual.classList.add("new_ux-inventory_quality-image");
-                    qual.src = path;
-                    div.appendChild(qual);
-                }
+            if (itemdata && itemdata.name) {
+                seoitem = itemdata.name + ";";
             }
+            addSEO("out:", seoitem);
 
             let n = results.output[item];
             let pct = (n / nInputs * 100);
             pct = Math.round(pct * 100) / 100;
             orow.appendChild(document.createTextNode(`${n} (${pct}%)`));
-
             outputBox.appendChild(orow);
         }
+
+        let seospan = <HTMLElement>document.createElement("span");
+        seospan.style.display = "none";
+        seospan.innerText = seo;
+        outputBox.appendChild(seospan);
     }
 
     updateRecipeRow(recipeName: string) {
