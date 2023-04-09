@@ -168,6 +168,7 @@ export class GenLitePlayerToolsPlugin extends GenLitePlugin {
     }
 
     Network_handle(verb: string, payload: object): void {
+        this.log("Network_Handle");
         this.log(verb)
         this.log(payload)
     }
