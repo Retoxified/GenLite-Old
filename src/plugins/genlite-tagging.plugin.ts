@@ -137,7 +137,7 @@ export class GenLiteTaggingPlugin extends GenLitePlugin {
         }
     }
 
-    Friends_populateFriends(friends) {
+    Friends__populateFriends(friends) {
         this.updateUI();
     }
 
