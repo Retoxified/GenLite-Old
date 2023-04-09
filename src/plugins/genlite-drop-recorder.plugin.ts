@@ -115,7 +115,7 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
                 display: flex;
                 flex-direction: column;
                 overflow-y: scroll;
-                height: 80%;
+                height: 100%;
             }
 
             .genlite-drops-row {
