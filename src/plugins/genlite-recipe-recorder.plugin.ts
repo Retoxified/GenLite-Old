@@ -322,7 +322,7 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         }
 
         outputBox.innerHTML = '';
-        outputBox.appendChild(document.createTextNode(`${nInputs} tries`));
+        outputBox.appendChild(document.createTextNode(`${nInputs} attempts`));
 
         for (const item in results.output) {
             let orow = <HTMLElement>document.createElement("div");
