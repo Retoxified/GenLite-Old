@@ -48,6 +48,7 @@ export class GenLitePlayerToolsPlugin extends GenLitePlugin {
 
     async postInit() {
         this.pluginSettings = document.genlite.ui.registerPlugin("Player Tools", null, this.handlePluginState.bind(this), this.pluginSettings);
+        this.error("Player Tools Plugin Loaded");
     }
 
     handlePluginState(state: boolean): void {
