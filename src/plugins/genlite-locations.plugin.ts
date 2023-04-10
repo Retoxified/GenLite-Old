@@ -193,7 +193,7 @@ export class GenLiteLocationsPlugin extends GenLitePlugin {
         // TODO: Implement
     }
     private handleCompassMapTranslucentSlider(value) {
-        this.translucentScale = value
+        this.translucentScale = value;
         this.addGlobalStylesheet(`
             .map-iframe-translucent {
                     display: block;
@@ -201,12 +201,11 @@ export class GenLiteLocationsPlugin extends GenLitePlugin {
                     opacity: ${this.translucentScale};
                     pointer-events: none;
             }
-        `)//Not the best way to do this.
-
+        `);//Not the best way to do this.
     }
     private handleLocationLabelsEnableDisable(state: boolean): void {
-        this.locationLabels = state
-        this.checkLocationLabels()
+        this.locationLabels = state;
+        this.checkLocationLabels();
     }
     private checkLocationLabels(): void {
         if (this.locationLabels) {
