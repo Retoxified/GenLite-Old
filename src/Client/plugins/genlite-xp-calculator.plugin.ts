@@ -87,6 +87,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         this.isPluginEnabled = state;
         if (this.uiTab) {
             this.uiTab.style.display = state ? "flex" : "none";
+            this.uiTabBody.innerHTML = "";
         }
 
         this.resetCalculatorAll();
@@ -100,13 +101,9 @@ export class GenLiteXpCalculator extends GenLitePlugin {
             // Destroy the timer
             clearInterval(this.updateTimer);
 
-            // Remove all the skill info
-            this.uiTabBody.innerHTML = "";
-
             // Delete any references to the skill info
             for (let skillName in this.skillsList) {
-                if (this.skillsList[skillName].trackerReference) {
-                    this.skillsList[skillName].trackerReference.remove();
+                if (this.skillsList[skillName].trackerReference !== null && this.skillsList[skillName].trackerReference !== undefined) {
                     this.skillsList[skillName].trackerReference = null;
                 }
             }
@@ -390,8 +387,6 @@ export class GenLiteXpCalculator extends GenLitePlugin {
 
         // if currently moused over the progress bar, show the time to level instead of the percent
         if (skillInfo.progressBarFill.style.backgroundColor == "red") {
-            this.log("moused over")
-            this.log(skill.tsStart);
             if (skill.tsStart != 0) {
                 let xpRate = 0;
                 let timeDiff = Date.now() - skill.tsStart;
@@ -460,6 +455,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
                 if (element != "total")
                     skill.startXP = document.game.PLAYER_INFO.skills[element].xp - xp.xp;
             }
+
 
             if (skill.trackerReference == null || skill.trackerReference == undefined) {
                 this.createSkillInfo(element);
