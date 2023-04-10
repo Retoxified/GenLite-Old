@@ -99,6 +99,7 @@ export class GenLiteUIPlugin extends GenLitePlugin {
         this.tabContentHolder.style.backgroundColor = 'rgba(42, 40, 40, 1)';
         this.tabContentHolder.style.borderTop = '1px solid rgba(0, 0, 0, 1)';
         this.tabContentHolder.style.borderRight = '1px solid rgba(66, 66, 66, 1)';
+        this.tabContentHolder.style.overflow = 'auto';
         this.sidePanel.appendChild(this.tabContentHolder);
 
         // Alert Holder

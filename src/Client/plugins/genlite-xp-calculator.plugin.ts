@@ -63,13 +63,12 @@ export class GenLiteXpCalculator extends GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
-
-        this.resetCalculatorAll();
     }
 
     async postInit() {
         document.genlite.ui.registerPlugin("XP Calculator", null, this.handlePluginState.bind(this));
         this.createUITab();
+        this.resetCalculatorAll();
     }
 
     handlePluginState(state: boolean): void {
@@ -99,28 +98,273 @@ export class GenLiteXpCalculator extends GenLitePlugin {
 
 
     createSkillInfo(skillName: string, skill: any) {
-        let skillInfo = document.createElement("div");
-        skillInfo.classList.add("genlite-xp-calculator-skill-info");
-        skillInfo.innerHTML = `
-            <div class="genlite-xp-calculator-skill-info__name">${skillName}</div>
-            <div class="genlite-xp-calculator-skill-info__avg-xp">${skill.avgActionXP.toFixed(2)}</div>
-            <div class="genlite-xp-calculator-skill-info__actions-to-next">${skill.actionsToNext}</div>
-        `;
+        if (skillName === "total") {
+            return;
+        };
 
+        let skillInfo: HTMLElement = document.createElement("div");
+        skillInfo.style.padding = "8px";
+
+
+        let skillImageURL: string = null;
+        let piSkill = document.game.PLAYER_INFO.skills[skillName]
+
+        // Find the right skill in the skill container
+        let allSkillContainers = document.getElementsByClassName("new_ux-player-info-modal__modal__window--stats__skill__container");
+        for (let i = 0; i < allSkillContainers.length; i++) {
+            let skillContainer = <HTMLElement>allSkillContainers[i];
+            let skillNameElement = <HTMLElement>skillContainer.getElementsByClassName("new_ux-player-info-modal__modal__window--stats__section__list__name__text")[0];
+            if (skillNameElement.innerText.toLowerCase() === skillName) {
+                skillImageURL = skillContainer.getElementsByClassName("new_ux-player-info-modal__modal__window--stats__skill__icon__image")[0].getAttribute("src");
+                break;
+            }
+        }
+
+        let skillInfoContainer = document.createElement("div");
+        skillInfoContainer.style.padding = "4px";
+        skillInfoContainer.style.borderRadius = "5px";
+        skillInfoContainer.style.backgroundColor = "rgba(30, 30, 30, 1)";
+        skillInfo.appendChild(skillInfoContainer);
+
+        // The Skill Image should be in a group with the rest of the info
+        // The Skill Image should be on the left side of the group and the rest of the info should be on the right side of the group
+        // The progress bar should be on the bottom of the group and be the full width of the group
+
+        let skillImageGroup = document.createElement("div");
+        skillImageGroup.style.display = "flex";
+        skillImageGroup.style.flexDirection = "column-reverse";
+        skillImageGroup.style.alignContent = "center";
+        skillImageGroup.style.flexWrap = "wrap";
+        skillImageGroup.style.marginBottom = "10px";
+        skillInfoContainer.appendChild(skillImageGroup);
+
+        // Skill Image
+        let skillImage = document.createElement("img");
+        skillImage.src = skillImageURL;
+        skillImage.style.width = "65px";
+        skillImage.style.marginRight = "10px";
+        skillImage.style.float = "left";
+        skillImageGroup.appendChild(skillImage);
+
+        // Skill Name
+        let skillNameElement = document.createElement("span");
+        skillNameElement.innerText = skillName.charAt(0).toUpperCase() + skillName.slice(1);
+        skillNameElement.style.fontSize = "1.5em";
+        skillNameElement.style.fontWeight = "bold";
+        skillNameElement.style.marginBottom = "5px";
+        skillImageGroup.appendChild(skillNameElement);
+
+
+        // Group the rest of the info together
+        let skillInfoGroup = document.createElement("div");
+        skillInfoGroup.style.display = "flex";
+        skillInfoGroup.style.flexDirection = "row";
+        skillInfoGroup.style.alignItems = "center";
+        skillInfoGroup.style.justifyContent = "space-evenly";
+        skillInfoGroup.style.marginBottom = "5px";
+        skillInfoContainer.appendChild(skillInfoGroup);
+
+        // XP Gained
+        let xpGained = document.createElement("span");
+        xpGained.innerText = `XP Tracked: ${skill.startXP == 0 ? 0 : ((piSkill.xp - skill.startXP) / 10).toLocaleString("en-US")}`;
+        skillInfoGroup.appendChild(xpGained);
+
+        // XP/Hour
+        let xpHour = document.createElement("span");
+        xpHour.innerText = `XP/Hour: ${(Math.round(((piSkill.xp - skill.startXP / (Date.now() - skill.tsStart / 3600000)))) / 10).toLocaleString("en-US")}`;
+        skillInfoGroup.appendChild(xpHour);
+
+        // The remaining information is shown on a new line
+        let skillInfoNewLine = document.createElement("div");
+        skillInfoNewLine.style.display = "flex";
+        skillInfoNewLine.style.flexDirection = "row";
+        skillInfoNewLine.style.alignItems = "center";
+        skillInfoNewLine.style.justifyContent = "space-evenly";
+        skillInfoContainer.appendChild(skillInfoNewLine);
+
+        // XP Left
+        let xpLeft = document.createElement("span");
+        xpLeft.innerText = `XP Left: ${piSkill.tnl.toLocaleString("en-US")}`;
+        skillInfoNewLine.appendChild(xpLeft);
+
+        // Actions
+        let actions = document.createElement("span");
+        actions.innerText = `Actions: ${skill.actionsToNext.toLocaleString("en-US")}`;
+        actions.style.marginLeft = "10px";
+        skillInfoNewLine.appendChild(actions);
+
+        // Progress Bar
+        let progressBar = document.createElement("div");
+        progressBar.style.width = "100%";
+        progressBar.style.height = "19px";
+        progressBar.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+        progressBar.style.marginTop = "10px";
+        progressBar.style.marginBottom = "10px";
+        progressBar.style.overflow = "hidden";
+        skillInfoContainer.appendChild(progressBar);
+
+        let progressBarFill = document.createElement("div");
+        progressBarFill.style.width = `${piSkill.percent}%`;
+        progressBarFill.style.height = "100%";
+        progressBarFill.style.backgroundColor = "green";
+        progressBar.appendChild(progressBarFill);
+
+        // Show the percentage of the progress bar (centered in the progress bar)
+        let progressBarPercent = document.createElement("span");
+        progressBarPercent.innerText = `${Math.round(piSkill.percent*10)/10}%`;
+        progressBarPercent.style.position = "absolute";
+        progressBarPercent.style.left = "45%";
+        progressBarPercent.style.fontSize = "0.9em";
+        progressBarFill.appendChild(progressBarPercent);
+
+        // Show the current level (left in the progress bar)
+        let progressBarLevel = document.createElement("span");
+        progressBarLevel.innerText = `Level ${piSkill.level}`;
+        progressBarLevel.style.position = "absolute";
+        progressBarLevel.style.left = "15px";
+        progressBarLevel.style.fontSize = "0.9em";
+        progressBarFill.appendChild(progressBarLevel);
+
+        // Show the next level (right in the progress bar)
+        let progressBarNextLevel = document.createElement("span");
+        progressBarNextLevel.innerText = `Level ${piSkill.level + 1}`;
+        progressBarNextLevel.style.position = "absolute";
+        progressBarNextLevel.style.right = "15px";
+        progressBarNextLevel.style.fontSize = "0.9em";
+        progressBarFill.appendChild(progressBarNextLevel);
         
-        // Add the skill info to the tab
+        // When the user hovers over the progress bar, show a tool tip with the time remaining to the next level
+        progressBar.onmouseover = () => {
+            progressBarLevel.innerText = 'Time to Level:';
+            progressBarNextLevel.innerText = '';
+            progressBarFill.style.backgroundColor = "red";
+            if (this.skillsList[skillName].tsStart != 0) {
+                let xpRate = ((piSkill.xp - skill.startXP / (Date.now() - this.skillsList[skillName].tsStart / 3600000)) / 10);
+                let ttl = piSkill.tnl / xpRate;
+                progressBarPercent.innerText = ttl.toLocaleString("en-US") + " hours";
+            }  else {
+                progressBarPercent.innerText = "Infinite";
+            }
+
+        }
+        progressBar.onmouseout = () => {
+            progressBarFill.style.backgroundColor = "green";
+            progressBarPercent.innerText = `${Math.round(piSkill.percent*10)/10}%`;
+            progressBarLevel.innerText = `Level ${piSkill.level}`;
+            progressBarNextLevel.innerText = `Level ${piSkill.level + 1}`;
+        }
+        
+
+        // Button Div
+        let buttonDiv = document.createElement("div");
+        buttonDiv.style.display = "flex";
+        buttonDiv.style.flexDirection = "row";
+        buttonDiv.style.alignItems = "center";
+        buttonDiv.style.justifyContent = "space-evenly";
+        skillInfoContainer.appendChild(buttonDiv);
+
+
+        // Add an X button to remove the skill from the tracker in the top right corner of the skill info
+        let removeSkillButton = document.createElement("button");
+        removeSkillButton.innerText = "[Remove Tracker]";
+        removeSkillButton.style.backgroundColor = "transparent";
+        removeSkillButton.style.border = "none";
+        removeSkillButton.style.color = "white";
+        removeSkillButton.style.fontSize = "0.75em";
+        removeSkillButton.style.fontWeight = "bold";
+        removeSkillButton.style.cursor = "pointer";
+        removeSkillButton.onclick = () => {
+            skillInfo.remove();
+            this.skillsList[skillName].trackerReference = null;
+        };
+        buttonDiv.appendChild(removeSkillButton);
+
+        // Add a button to reset the skill tracker
+        let resetSkillButton = document.createElement("button");
+        resetSkillButton.innerText = "[Reset Tracker]";
+        resetSkillButton.style.backgroundColor = "transparent";
+        resetSkillButton.style.border = "none";
+        resetSkillButton.style.color = "white";
+        resetSkillButton.style.fontSize = "0.75em";
+        resetSkillButton.style.fontWeight = "bold";
+        resetSkillButton.style.cursor = "pointer";
+        resetSkillButton.onclick = () => {
+            this.resetCalculator(skillName);
+        };
+        buttonDiv.appendChild(resetSkillButton);
+
+        // Add the skill info to the UI
         this.uiTabBody.appendChild(skillInfo);
 
-        return skillInfo;
+        // Modify the skillInfo to allow named access to the elements
+        const skillTrackerReference = {
+            container: skillInfo,
+            xpGained: xpGained,
+            xpHour: xpHour,
+            xpLeft: xpLeft,
+            actions: actions,
+            progressBar: progressBar,
+            progressBarFill: progressBarFill,
+            progressBarPercent: progressBarPercent,
+            progressBarLevel: progressBarLevel,
+            progressBarNextLevel: progressBarNextLevel,
+            removeSkillButton: removeSkillButton,
+            resetSkillButton: resetSkillButton
+        };
+
+
+        this.skillsList[skillName].trackerReference = skillTrackerReference;
+
+
     }
 
-    updateSkillInfo(skillName: string, skill: any) {
+    updateSkillInfo(skillName, skill: any) {
+        if (skill.trackerReference == null) return;
+
         let skillInfo = skill.trackerReference;
-        skillInfo.innerHTML = `
-            <div class="genlite-xp-calculator-skill-info__name">${skillName}</div>
-            <div class="genlite-xp-calculator-skill-info__avg-xp">${skill.avgActionXP.toFixed(2)}</div>
-            <div class="genlite-xp-calculator-skill-info__actions-to-next">${skill.actionsToNext}</div>
-        `;
+        let piSkill = document.game.PLAYER_INFO.skills[skillName];
+
+        // XP Gained
+        skillInfo.xpGained.innerText = `XP Tracked: ${skill.startXP == 0 ? 0 : ((piSkill.xp - skill.startXP) / 10).toLocaleString("en-US")}`;
+
+        // XP/Hour
+        if (skill.tsStart != 0) {
+            skillInfo.xpHour.innerText = `XP/Hour: ${(Math.round(((piSkill.xp - skill.startXP / (Date.now() - skill.tsStart / 3600000)))) / 10).toLocaleString("en-US")}`;
+        } else {
+            skillInfo.xpHour.innerText = `XP/Hour: 0`;
+        }
+
+        // XP Left
+        skillInfo.xpLeft.innerText = `XP Left: ${piSkill.tnl.toLocaleString("en-US")}`;
+
+        // Actions
+        skillInfo.actions.innerText = `Actions: ${skill.actionsToNext.toLocaleString("en-US")}`;
+
+        // Progress Bar
+        skillInfo.progressBarFill.style.width = `${piSkill.percent}%`;
+
+        // if currently moused over the progress bar, show the time to level instead of the percent
+        if (skillInfo.progressBarFill.style.backgroundColor == "red") {
+            this.log("moused over")
+            this.log(skill.tsStart);
+            if (skill.tsStart != 0) {
+                let xpRate = ((piSkill.xp - skill.startXP / (Date.now() - skill.tsStart / 3600000)) / 10);
+                let ttl = piSkill.tnl / xpRate;
+                skillInfo.progressBarPercent.innerText = ttl.toLocaleString("en-US") + " hours";
+            } else {
+                skillInfo.progressBarPercent.innerText = "Infinite";
+            }
+
+        } else {
+            // Progress Bar Percent
+            skillInfo.progressBarPercent.innerText = `${Math.round(piSkill.percent*10)/10}%`;
+
+            // Progress Bar Current Level
+            skillInfo.progressBarLevel.innerText = `Level ${piSkill.level}`;
+
+            // Progress Bar Next Level
+            skillInfo.progressBarNextLevel.innerText = `Level ${piSkill.level + 1}`;
+        }
     }
 
 
@@ -151,7 +395,6 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         }
         // this section feels ugly and should be cleaned up
         [xp.skill, "total"].forEach(element => {
-            console.log(document.game.PLAYER_INFO.skills[element])
             let skill = this.skillsList[element];
             let avg = skill.avgActionXP;
             avg *= skill.numActions;
@@ -169,9 +412,9 @@ export class GenLiteXpCalculator extends GenLitePlugin {
             }
 
             if (!skill.trackerReference) {
-                skill.trackerReference = this.createSkillInfo("Vitality", skill);
+                this.createSkillInfo(element, skill);
             } else {
-                this.updateSkillInfo("Vitality", skill);
+                this.updateSkillInfo(element, skill);
             }
 
         });
@@ -288,7 +531,8 @@ export class GenLiteXpCalculator extends GenLitePlugin {
             actionsToNext: 0,
             tsStart: 0,
             startXP: 0,
-            gainedXP: 0
+            gainedXP: 0,
+            trackerReference: this.skillsList[skill].trackerReference
         }
         if (skill == "total") {
             delete temp.actionsToNext;
@@ -299,13 +543,20 @@ export class GenLiteXpCalculator extends GenLitePlugin {
             this.totalLevelCalc(event, this);
             document.game.PLAYER_INFO.tracking = false;
             return;
+        } else {
+            let piSkill = document.game.PLAYER_INFO.skills[skill];
+            temp.startXP = piSkill.xp;
+            temp.actionsToNext = piSkill.tnl;
         }
         delete temp.gainedXP;
         this.skillsList[skill] = temp;
 
+        this.updateSkillInfo(skill, this.skillsList[skill]);
 
         if (this.isHookInstalled && document.game.PLAYER_INFO.tracking_skill && document.game.PLAYER_INFO.tracking_skill.group)
             document.game.PLAYER_INFO.updateTooltip();
+
+
     }
 
     resetCalculatorAll(event = null) {
