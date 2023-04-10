@@ -324,17 +324,48 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         let seo = "";
 
         function addSEO(prefix, s) {
+            // exact item name e.g. "H.Q. Iron Component (Sheet)"
+            s = s + ';';
             seo += prefix + s;
-            seo += prefix + s
-                .replace("L.Q.", "LQ")
-                .replace("H.Q.", "HQ")
-                .replace("Bronze Component (", "")
-                .replace("Iron Component (", "")
-                .replace("Steel Component (", "")
-                .replace("Mithril Component (", "");
+
+            // quality aliases e.g. "LQ Iron Bar"
+            seo += prefix + s.replace("L.Q.", "LQ").replace("H.Q.", "HQ");
+
+            // normal quality aliases e.g. "NQ Mithril Dagger"
             if (!s.includes("L.Q.") && !s.includes("H.Q.")) {
                 seo += prefix + "N.Q. " + s;
                 seo += prefix + "NQ " + s;
+            }
+
+            // item without quality
+            seo += prefix + s.replace("L.Q. ", "").replace("H.Q. ", "");
+
+            if (s.includes("Component")) {
+                // component aliases e.g. "H.Q. Sheet"
+                let stripped = s
+                    .replace("Bronze Component (", "")
+                    .replace("Iron Component (", "")
+                    .replace("Steel Component (", "")
+                    .replace("Mithril Component (", "");
+                seo += prefix + stripped;
+
+                // and component quality aliases e.g. "NQ Sheet" and "Sheet"
+                seo += prefix + stripped.replace("L.Q.", "LQ").replace("H.Q.", "HQ");
+                if (!stripped.includes("L.Q.") && !stripped.includes("H.Q.")) {
+                    seo += prefix + "N.Q. " + stripped;
+                    seo += prefix + "NQ " + stripped;
+                }
+                seo += prefix + stripped.replace("L.Q. ", "").replace("H.Q. ", "");
+
+                // again but include metal type e.g. "NQ Bronze Sheet" and "Iron Sheet"
+                stripped = s.replace("Component (", "");
+                seo += prefix + stripped;
+                seo += prefix + stripped.replace("L.Q.", "LQ").replace("H.Q.", "HQ");
+                if (!stripped.includes("L.Q.") && !stripped.includes("H.Q.")) {
+                    seo += prefix + "N.Q. " + stripped;
+                    seo += prefix + "NQ " + stripped;
+                }
+                seo += prefix + stripped.replace("L.Q. ", "").replace("H.Q. ", "");
             }
         }
 
@@ -345,10 +376,10 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
                 nInputs = amt;
             }
 
-            let seoitem = item + ";";
+            let seoitem = item;
             const itemdata = document.game.DATA.items[item];
             if (itemdata && itemdata.name) {
-                seoitem = itemdata.name + ";";
+                seoitem = itemdata.name;
             }
             addSEO("in:", seoitem);
         }
