@@ -90,6 +90,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         }
 
         this.resetCalculatorAll();
+        this.createUITab();
 
         /* if toggle on mid way through we have to run the init code */
         if (state) {
@@ -99,9 +100,6 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         } else {
             // Destroy the timer
             clearInterval(this.updateTimer);
-
-            // Remove all the skill info
-            this.uiTabBody.innerHTML = "";
         }
     }
 
