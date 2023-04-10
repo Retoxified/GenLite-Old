@@ -58,12 +58,7 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
 
     createCSS() {
         const style = document.createElement('style');
-        // chrome is dumb so we need to specify this scrollbar thing
         style.innerHTML = `
-            .genlite-recipes-container *::-webkit-scrollbar-track {
-                background-color: transparent;
-            }
-
             .genlite-recipes-container {
                 display: flex;
                 flex-direction: column;
@@ -92,7 +87,6 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
                 display: flex;
                 column-gap: 0.5em;
                 padding: 0.25em;
-                overflow-x: scroll;
             }
 
             .genlite-recipes-arrow {

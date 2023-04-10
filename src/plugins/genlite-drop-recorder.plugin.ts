@@ -130,7 +130,7 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
                 display: flex;
                 column-gap: 0.5em;
                 padding: 0.25em;
-                overflow-x: scroll;
+                overflow-x: hidden;
                 align-items: center;
             }
 
@@ -138,7 +138,7 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
                 display: flex;
                 column-gap: 0.5em;
                 padding: 0.25em;
-                overflow-x: scroll;
+                overflow-x: hidden;
             }
 
             .genlite-drops-arrow {
