@@ -385,8 +385,12 @@ export class GenLiteXpCalculator extends GenLitePlugin {
             this.log("moused over")
             this.log(skill.tsStart);
             if (skill.tsStart != 0) {
-                let xpRate = ((piSkill.xp - skill.startXP / (Date.now() - skill.tsStart / 3600000)) / 10);
-                let ttl = piSkill.tnl / xpRate;
+                let xpRate = 0;
+                let timeDiff = Date.now() - skill.tsStart;
+                if (skill.tsStart != 0) {
+                    xpRate = Math.round((piSkill.xp - skill.startXP) / (timeDiff / 3600000)) / 10;
+                }
+                let ttl = Math.round(piSkill.tnl / xpRate) / 10;
                 skillInfo.progressBarPercent.innerText = ttl.toLocaleString("en-US") + " hours";
             } else {
                 skillInfo.progressBarPercent.innerText = "Infinite";
