@@ -65,12 +65,6 @@ if (genliteModifiedDate == null || genliteModifiedDate == undefined) {
     genliteLastModified = new Date(genliteModifiedDate)
 }
 
-console.log("GenLite Last-Modified header is " + genliteLastModified);
-console.log("GenFanad Last-Modified header is " + genfanadLastModified);
-console.log("GenLite Update Timestamp is " + genliteUpdateTimestampDate);
-console.log("GenFanad Update Timestamp is " + genfanadUpdateTimestampDate);
-
-
 // Genfanad Client is always updated
 let genfanadJS = localStorage.getItem('GenFanad.Client');
 if (genfanadLastModified > genfanadUpdateTimestampDate) {
