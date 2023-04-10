@@ -59,6 +59,8 @@ export class GenLiteXpCalculator extends GenLitePlugin {
     uiTab: HTMLElement = null;
     uiTabBody: HTMLElement = null;
 
+    updateTimer: any = null;
+
 
 
     async init() {
@@ -69,6 +71,16 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         document.genlite.ui.registerPlugin("XP Calculator", null, this.handlePluginState.bind(this));
         this.createUITab();
         this.resetCalculatorAll();
+
+        // Create a Timer that will update the Skill Info every 5 seconds
+        this.updateTimer = setInterval(this.updateUITrackingInformation.bind(this), 5000);
+    }
+
+    updateUITrackingInformation() {
+        // Call the update function for every skill
+        for (let skillName in this.skillsList) {
+            this.updateSkillInfo(skillName);
+        }
     }
 
     handlePluginState(state: boolean): void {
@@ -97,10 +109,12 @@ export class GenLiteXpCalculator extends GenLitePlugin {
     }
 
 
-    createSkillInfo(skillName: string, skill: any) {
+    createSkillInfo(skillName: string) {
         if (skillName === "total") {
             return;
         };
+
+        let skill = this.skillsList[skillName];
 
         let skillInfo: HTMLElement = document.createElement("div");
         skillInfo.style.padding = "8px";
@@ -163,6 +177,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         skillInfoGroup.style.justifyContent = "space-evenly";
         skillInfoGroup.style.marginBottom = "5px";
         skillInfoContainer.appendChild(skillInfoGroup);
+        
 
         // XP Gained
         let xpGained = document.createElement("span");
@@ -170,8 +185,15 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         skillInfoGroup.appendChild(xpGained);
 
         // XP/Hour
+        let xpRate = 0;
+        let timeDiff = Date.now() - skill.tsStart;
+        if (skill.tsStart != 0) {
+            xpRate = Math.round((piSkill.xp - skill.startXP) / (timeDiff / 3600000)) / 10;
+        }
+        let ttl = Math.round(piSkill.tnl / xpRate) / 10;
+
         let xpHour = document.createElement("span");
-        xpHour.innerText = `XP/Hour: ${(Math.round(((piSkill.xp - skill.startXP / (Date.now() - skill.tsStart / 3600000)))) / 10).toLocaleString("en-US")}`;
+        xpHour.innerText = `XP/Hour: ${xpRate.toLocaleString("en-US")}`;
         skillInfoGroup.appendChild(xpHour);
 
         // The remaining information is shown on a new line
@@ -318,7 +340,8 @@ export class GenLiteXpCalculator extends GenLitePlugin {
 
     }
 
-    updateSkillInfo(skillName, skill: any) {
+    updateSkillInfo(skillName) {
+        let skill = this.skillsList[skillName];
         if (skill.trackerReference == null) return;
 
         let skillInfo = skill.trackerReference;
@@ -327,12 +350,17 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         // XP Gained
         skillInfo.xpGained.innerText = `XP Tracked: ${skill.startXP == 0 ? 0 : ((piSkill.xp - skill.startXP) / 10).toLocaleString("en-US")}`;
 
+
         // XP/Hour
+        let xpRate = 0;
+        let timeDiff = Date.now() - skill.tsStart;
         if (skill.tsStart != 0) {
-            skillInfo.xpHour.innerText = `XP/Hour: ${(Math.round(((piSkill.xp - skill.startXP / (Date.now() - skill.tsStart / 3600000)))) / 10).toLocaleString("en-US")}`;
-        } else {
-            skillInfo.xpHour.innerText = `XP/Hour: 0`;
+            xpRate = Math.round((piSkill.xp - skill.startXP) / (timeDiff / 3600000)) / 10;
         }
+        let ttl = Math.round(piSkill.tnl / xpRate) / 10;
+
+        // XP/Hour
+        skillInfo.xpHour.innerText = `XP/Hour: ${xpRate.toLocaleString("en-US")}`;
 
         // XP Left
         skillInfo.xpLeft.innerText = `XP Left: ${piSkill.tnl.toLocaleString("en-US")}`;
@@ -393,6 +421,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         if (!this.isPluginEnabled) {
             return;
         }
+
         // this section feels ugly and should be cleaned up
         [xp.skill, "total"].forEach(element => {
             let skill = this.skillsList[element];
@@ -412,9 +441,9 @@ export class GenLiteXpCalculator extends GenLitePlugin {
             }
 
             if (!skill.trackerReference) {
-                this.createSkillInfo(element, skill);
+                this.createSkillInfo(element);
             } else {
-                this.updateSkillInfo(element, skill);
+                this.updateSkillInfo(element);
             }
 
         });
@@ -551,7 +580,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         delete temp.gainedXP;
         this.skillsList[skill] = temp;
 
-        this.updateSkillInfo(skill, this.skillsList[skill]);
+        this.updateSkillInfo(skill);
 
         if (this.isHookInstalled && document.game.PLAYER_INFO.tracking_skill && document.game.PLAYER_INFO.tracking_skill.group)
             document.game.PLAYER_INFO.updateTooltip();
