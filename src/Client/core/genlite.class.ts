@@ -38,6 +38,9 @@ export class GenLite {
 
     async init() {
         this.installHookNoProto('PhasedLoadingManager', 'start_phase', this.hookPhased);
+        this.installHookNoProto('WORLDMANAGER', 'loadSegment')
+        this.installHookNoProto('WORLDMANAGER', 'createSegment')
+
         this.installHook('Network', 'logoutOK');
         this.installHook('Network', 'disconnect', this.hookDisconnect)
         this.installHook('Network', 'action');
@@ -55,6 +58,7 @@ export class GenLite {
         this.installHook('Bank', '_addContextOptionsActual')
         this.installHook('Bank', '_addContextOptions')
         this.installHook('Trade', 'handlePacket');
+        this.installHook('Segment', 'load');
 
         // Enhanced Context Menu Hooks
         this.installHook('NPC', 'intersects');
@@ -130,7 +134,7 @@ export class GenLite {
             object[functionName] = function (...args: Array<unknown>) {
                 const returnValue = originalFunction.apply(this, arguments);
 
-                hookFn.apply(self, [hookName, ...args]);
+                hookFn.apply(self, [hookName, ...args, this]);
 
                 return returnValue;
             };
@@ -146,7 +150,7 @@ export class GenLite {
             object[functionName] = function (...args: Array<unknown>) {
                 const returnValue = originalFunction.apply(this, arguments);
 
-                hookFn.apply(self, [hookName, ...args]);
+                hookFn.apply(self, [hookName, ...args, this]);
 
                 return returnValue;
             };

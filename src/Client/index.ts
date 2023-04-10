@@ -161,6 +161,7 @@ let isInitialized = false;
         gameObject('returnsAnItemName', 'Mg');
         gameObject('getStaticPath', 'O');
         gameObject('toDisplayName', 'W_');
+        gameObject('getSegmentStringfromObject', 'kS');
 
         //Constants
         gameObject('SOME_CONST_USED_FOR_BANK', 'P');
