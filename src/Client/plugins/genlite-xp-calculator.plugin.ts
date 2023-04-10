@@ -95,6 +95,13 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         if (state) {
             this.initializeUI();
             this.PlayerInfo_updateSkills();
+            this.updateTimer = setInterval(this.updateUITrackingInformation.bind(this), 5000);
+        } else {
+            // Destroy the timer
+            clearInterval(this.updateTimer);
+
+            // Remove all the skill info
+            this.uiTabBody.innerHTML = "";
         }
     }
 
@@ -181,7 +188,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
 
         // XP Gained
         let xpGained = document.createElement("span");
-        xpGained.innerText = `XP Tracked: ${skill.startXP == 0 ? 0 : ((piSkill.xp - skill.startXP) / 10).toLocaleString("en-US")}`;
+        xpGained.innerText = `XP Tracked: ${skill.startXP == 0 ? 0 : this.prettyPrintNumber(((piSkill.xp - skill.startXP) / 10))}`;
         skillInfoGroup.appendChild(xpGained);
 
         // XP/Hour
@@ -190,10 +197,9 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         if (skill.tsStart != 0) {
             xpRate = Math.round((piSkill.xp - skill.startXP) / (timeDiff / 3600000)) / 10;
         }
-        let ttl = Math.round(piSkill.tnl / xpRate) / 10;
 
         let xpHour = document.createElement("span");
-        xpHour.innerText = `XP/Hour: ${xpRate.toLocaleString("en-US")}`;
+        xpHour.innerText = `XP/Hour: ${this.prettyPrintNumber(xpRate)}`;
         skillInfoGroup.appendChild(xpHour);
 
         // The remaining information is shown on a new line
@@ -206,12 +212,12 @@ export class GenLiteXpCalculator extends GenLitePlugin {
 
         // XP Left
         let xpLeft = document.createElement("span");
-        xpLeft.innerText = `XP Left: ${piSkill.tnl.toLocaleString("en-US")}`;
+        xpLeft.innerText = `XP Left: ${this.prettyPrintNumber(piSkill.tnl)}`;
         skillInfoNewLine.appendChild(xpLeft);
 
         // Actions
         let actions = document.createElement("span");
-        actions.innerText = `Actions: ${skill.actionsToNext.toLocaleString("en-US")}`;
+        actions.innerText = `Actions: ${this.prettyPrintNumber(skill.actionsToNext)}`;
         actions.style.marginLeft = "10px";
         skillInfoNewLine.appendChild(actions);
 
@@ -261,8 +267,12 @@ export class GenLiteXpCalculator extends GenLitePlugin {
             progressBarNextLevel.innerText = '';
             progressBarFill.style.backgroundColor = "red";
             if (this.skillsList[skillName].tsStart != 0) {
-                let xpRate = ((piSkill.xp - skill.startXP / (Date.now() - this.skillsList[skillName].tsStart / 3600000)) / 10);
-                let ttl = piSkill.tnl / xpRate;
+                let xpRate = 0;
+                let timeDiff = Date.now() - skill.tsStart;
+                if (skill.tsStart != 0) {
+                    xpRate = Math.round((piSkill.xp - skill.startXP) / (timeDiff / 3600000)) / 10;
+                }
+                let ttl = Math.round(piSkill.tnl / xpRate) / 10;
                 progressBarPercent.innerText = ttl.toLocaleString("en-US") + " hours";
             }  else {
                 progressBarPercent.innerText = "Infinite";
@@ -348,7 +358,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         let piSkill = document.game.PLAYER_INFO.skills[skillName];
 
         // XP Gained
-        skillInfo.xpGained.innerText = `XP Tracked: ${skill.startXP == 0 ? 0 : ((piSkill.xp - skill.startXP) / 10).toLocaleString("en-US")}`;
+        skillInfo.xpGained.innerText = `XP Tracked: ${skill.startXP == 0 ? 0 : this.prettyPrintNumber(((piSkill.xp - skill.startXP) / 10))}`;
 
 
         // XP/Hour
@@ -357,16 +367,15 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         if (skill.tsStart != 0) {
             xpRate = Math.round((piSkill.xp - skill.startXP) / (timeDiff / 3600000)) / 10;
         }
-        let ttl = Math.round(piSkill.tnl / xpRate) / 10;
 
         // XP/Hour
-        skillInfo.xpHour.innerText = `XP/Hour: ${xpRate.toLocaleString("en-US")}`;
+        skillInfo.xpHour.innerText = `XP/Hour: ${this.prettyPrintNumber(xpRate)}`;
 
         // XP Left
-        skillInfo.xpLeft.innerText = `XP Left: ${piSkill.tnl.toLocaleString("en-US")}`;
+        skillInfo.xpLeft.innerText = `XP Left: ${this.prettyPrintNumber(piSkill.tnl)}`;
 
         // Actions
-        skillInfo.actions.innerText = `Actions: ${skill.actionsToNext.toLocaleString("en-US")}`;
+        skillInfo.actions.innerText = `Actions: ${this.prettyPrintNumber(skill.actionsToNext)}`;
 
         // Progress Bar
         skillInfo.progressBarFill.style.width = `${piSkill.percent}%`;
@@ -592,5 +601,23 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         for (let i in this.skillsList) {
             this.resetCalculator(i, event);
         }
+    }
+
+    prettyPrintNumber(num) {
+        if (!isFinite(num)) {
+            return "∞"
+        }
+
+        // Converts number to 1.2k, 1.2m, 1.2b, etc.
+        if (num < 1000) {
+            return num;
+        }
+        let exp = Math.floor(Math.log(num) / Math.log(1000));
+        let suffix = "kmb"[exp - 1];
+        return (num / Math.pow(1000, exp)).toFixed(1) + suffix;
+    }
+
+    prettyPrintTime(time) {
+        // TODO: implement
     }
 }
