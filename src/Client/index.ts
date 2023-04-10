@@ -39,6 +39,7 @@ import { GenLiteFPSCounter } from "./plugins/genlite-fps.plugin";
 import { GenLiteEnhancedContextMenu } from "./plugins/genlite-enhanced-context-menu.plugin";
 import { GenLiteQuestPlugin } from "./plugins/genlite-quest.plugin";
 import { GenLiteEnhancedBanking } from "./plugins/genlite-enhanced-banking.plugin";
+import { GenLiteTaggingPlugin } from "./plugins/genlite-tagging.plugin";
 
 // TODO: use globals.ts?
 declare global {
@@ -125,6 +126,7 @@ let isInitialized = false;
         gameObject('Inventory', 'Cv');
         gameObject('PhasedLoadingManager', 'gS');
         gameObject('Trade', 'Hv');
+        gameObject('Friends', 'G_');
 
 
         // Objects
@@ -148,6 +150,7 @@ let isInitialized = false;
         gameObject('NPC', 'I_');
         gameObject('TRADE', 'Mw');
         gameObject('NETWORK_CONTAINER', 'mg');
+        gameObject('FRIENDS', 'dw');
 
         /* Special Case Objects */
         /* have to do this here because keyboard is constantly redefined */
@@ -157,6 +160,7 @@ let isInitialized = false;
         //Functions
         gameObject('returnsAnItemName', 'Mg');
         gameObject('getStaticPath', 'O');
+        gameObject('toDisplayName', 'W_');
 
         //Constants
         gameObject('SOME_CONST_USED_FOR_BANK', 'P');
@@ -203,6 +207,7 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteEnhancedContextMenu);
         await genlite.pluginLoader.addPlugin(GenLiteQuestPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteEnhancedBanking);
+        await genlite.pluginLoader.addPlugin(GenLiteTaggingPlugin);
 
         /** post init things */
         // await document['GenLiteDatabasePlugin'].postInit();

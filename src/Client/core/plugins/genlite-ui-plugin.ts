@@ -35,7 +35,15 @@ export class GenLiteUIPlugin extends GenLitePlugin {
     private pluginSettings: Map<string, HTMLElement> = new Map<string, HTMLElement>();
 
     // Plugin Settings (Handled differently than other plugins)
-    private resizeGame: boolean = false;
+    private uiTransition: boolean = false;
+    private resizeCameraView: boolean = true;
+    private transitionSettings: Settings = {
+        "Resize Camera View": {
+            type: 'checkbox',
+            value: true,
+            stateHandler: this.handleResizeCameraViewToggle.bind(this),
+        },
+    };
 
     async init() {
         // Register the plugin
@@ -134,7 +142,7 @@ export class GenLiteUIPlugin extends GenLitePlugin {
         visibilityButton.style.transition = 'transform 0.5s ease-in-out';
         visibilityButton.addEventListener('click', () => {
             if (this.sidePanel.style.right === '-302px') {
-                if (this.resizeGame) {
+                if (this.uiTransition) {
                     document.getElementById('new_ux-minimap-UI-anchor').style.right = '301px';
                     document.getElementById('new_ux-minimap-UI-anchor').style.transition = 'right 0.5s ease-in-out';
                 }
@@ -144,10 +152,10 @@ export class GenLiteUIPlugin extends GenLitePlugin {
                 this.tabContentHeader.style.display = 'flex';
                 this.tabContentHolder.style.display = 'block';
             } else {
-                if (this.resizeGame) {
+                if (this.uiTransition) {
                     document.getElementById('new_ux-minimap-UI-anchor').style.removeProperty('right');
                     document.body.style.removeProperty('transition');
-                    document.body.style.width = `calc(${document.body.style.width} + 302px)`;
+                    document.body.style.removeProperty('width');
                     document.game.GRAPHICS.resize();
                 }
                 this.sidePanel.style.right = '-302px';
@@ -159,7 +167,7 @@ export class GenLiteUIPlugin extends GenLitePlugin {
         // This handles visibility of the Side Panel when it is closed/opened
         this.sidePanel.addEventListener('transitionend', () => {
             if (this.sidePanel.style.right === '-302px') {
-                if (this.resizeGame) {
+                if (this.uiTransition) {
                     document.body.style.removeProperty('width');
                     document.getElementById('new_ux-minimap-UI-anchor').style.removeProperty('transition');
                 }
@@ -168,7 +176,7 @@ export class GenLiteUIPlugin extends GenLitePlugin {
                 this.tabContentHolder.style.display = 'none';
             }
 
-            if (this.sidePanel.style.right === '0px' && this.resizeGame) {
+            if (this.sidePanel.style.right === '0px' && this.uiTransition && this.resizeCameraView) {
                 document.body.style.transition = 'width 0.5s ease-in-out';
                 document.body.style.width = 'calc(100% - 302px)';
             }
@@ -353,7 +361,7 @@ export class GenLiteUIPlugin extends GenLitePlugin {
     async postInit() {
         this._hasInitialized = true;
         this.sidePanel.style.display = 'block';
-        this.registerPlugin("UI Transition", null, this.handlePluginState.bind(this));
+        this.registerPlugin("UI Transition", null, this.handlePluginState.bind(this), this.transitionSettings);
     }
 
     loginOK() {
@@ -382,8 +390,15 @@ export class GenLiteUIPlugin extends GenLitePlugin {
             if (this.sidePanel.style.right === '0px') {
                 document.getElementById('new_ux-minimap-UI-anchor').style.transition = 'right 0.5s';
                 document.getElementById('new_ux-minimap-UI-anchor').style.right = '300px';
-                document.body.style.transition = 'width 0.5s';
-                document.body.style.width = 'calc(100% - 302px)';
+
+                if (this.resizeCameraView) {
+                    document.body.style.transition = 'width 0.5s';
+                    document.body.style.width = 'calc(100% - 302px)';
+                } else {
+                    document.body.style.removeProperty('transition');
+                    document.body.style.removeProperty('width');
+                }
+            } else {
             }
 
         } else {
@@ -395,8 +410,13 @@ export class GenLiteUIPlugin extends GenLitePlugin {
 
         }
 
-        this.resizeGame = state;
+        this.uiTransition = state;
         document.game.GRAPHICS.resize();
+    }
+
+    handleResizeCameraViewToggle(state: boolean) {
+        this.resizeCameraView = state;
+        this.handlePluginState(this.uiTransition);
     }
 
     addTab(icon: string, tabName: string, tabContent: HTMLElement, initiallyVisible: boolean = true) {

@@ -61,6 +61,9 @@ export class GenLite {
         this.installHook('OptimizedScene', 'intersects');
         this.installHook('Inventory', '_getAllContextOptions');
 
+        this.installHook('Friends', 'getContextOptionsFriends');
+        this.installHook('Friends', '_populateFriends');
+
     }
 
     onUIInitialized() {
