@@ -90,7 +90,6 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         }
 
         this.resetCalculatorAll();
-        this.createUITab();
 
         /* if toggle on mid way through we have to run the init code */
         if (state) {
@@ -100,6 +99,17 @@ export class GenLiteXpCalculator extends GenLitePlugin {
         } else {
             // Destroy the timer
             clearInterval(this.updateTimer);
+
+            // Remove all the skill info
+            this.uiTabBody.innerHTML = "";
+
+            // Delete any references to the skill info
+            for (let skillName in this.skillsList) {
+                if (this.skillsList[skillName].trackerReference) {
+                    this.skillsList[skillName].trackerReference.remove();
+                    this.skillsList[skillName].trackerReference = null;
+                }
+            }
         }
     }
 
@@ -451,7 +461,7 @@ export class GenLiteXpCalculator extends GenLitePlugin {
                     skill.startXP = document.game.PLAYER_INFO.skills[element].xp - xp.xp;
             }
 
-            if (!skill.trackerReference) {
+            if (skill.trackerReference == null || skill.trackerReference == undefined) {
                 this.createSkillInfo(element);
             } else {
                 this.updateSkillInfo(element);
