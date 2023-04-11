@@ -10,6 +10,11 @@
 
 import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
+interface PrivateMessage {
+    text: string;
+    sent: boolean;
+}
+
 /*
  * Chat plugin order of operations
  *  - message is received
@@ -205,6 +210,17 @@ export class GenLiteChatPlugin extends GenLitePlugin {
             }
         },
     };
+
+    // privates ui
+    uiTab: HTMLElement = null;
+    settingsMenu: HTMLElement = null; // is this the same as uiTab?
+    searchRow: HTMLElement = null;
+    listContainer: HTMLElement = null;
+    openChat: string = "";
+
+    chatRows: Record<string, HTMLElement> = {};
+    chatUIs: Record<string, HTMLElement> = {};
+    privateLogs: Record<string, PrivateMessage> = {};
     
     customMessagesToIgnore: Set<string> = new Set<string>();
 
@@ -275,6 +291,8 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     }
 
     async postInit() {
+        this.createCSS();
+        this.createUITab();
         document.genlite.ui.registerPlugin("Chat Filtering", null, this.handlePluginState.bind(this), this.pluginSettings);
         if (this.preserveMessages) {
             // I'm just hacking this together until the init order refactor
@@ -282,9 +300,307 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         }
     }
 
+    createCSS() {
+        const style = document.createElement('style');
+        style.innerHTML = `
+
+            .genlite-chat-container {
+                display: flex;
+                flex-direction: column;
+                overflow-x: hidden;
+                color: #ffd593;
+                font-family: acme,times new roman,Times,serif;
+                height: 100%;
+            }
+
+            .genlite-chat-search-row {
+                width: 100%;
+                height: 25px;
+                border-bottom: 1px solid rgb(66, 66, 66);
+                display: flex;
+                align-items: center;
+            }
+
+            .genlite-chat-search {
+                background-color: rgb(42, 40, 40);
+                color: rgb(255, 255, 255);
+                font-size: 16px;
+                border-radius: 0px;
+                padding-left: 10px;
+                padding-right: 10px;
+                box-sizing: border-box;
+                outline: none;
+                width: 100%;
+                border: medium none;
+                margin-left: auto;
+                margin-right: auto
+            }
+
+            .genlite-chats-list {
+                display: flex;
+                flex-direction: column;
+                overflow-y: scroll;
+                height: 100%;
+                padding: 1em;
+                row-gap: 1em;
+            }
+
+            .genlite-chat-row {
+                padding: 1em;
+                display: flex;
+                border-radius: 1em;
+                background-color: rgb(33,33,33);
+                box-shadow: -2px 2px rgb(10, 10, 10), 2px -2px rgb(60, 60, 60);
+                align-items: center;
+                column-gap: 1em;
+                cursor: pointer;
+                position: relative;
+            }
+
+            .genlite-chat-profile {
+                position: relative;
+                width: 64px;
+                height: 64px;
+            }
+
+            .genlite-chat-profile-bg {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-size: 100%;
+                z-index: 2;
+            }
+
+            .genlite-chat-profile-pic {
+                position: absolute;
+                left: 8%;
+                top: 8%;
+                width: 80%;
+                height: 80%;
+                z-index: 1;
+                border-radius: 50%;
+                background-clip: content-box;
+            }
+
+            .genlite-chat-name {
+                color: goldenrod;
+                text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+                font-size: 1em;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            .genlite-chat-badge {
+                height: 1em;
+                width: 1em;
+                border-radius: 50%;
+                border: 2px double white;
+                position: absolute;
+                right: 0.5em;
+                top: 0.5em;
+                visibility: hidden;
+            }
+
+            .genlite-chat-interface {
+                display: none;
+                flex-direction: column;
+                height: 100%;
+                overflow-y: hidden;
+                row-gap: 1em;
+                padding-bottom: 2em;
+                padding-top: 1em;
+            }
+
+            .genlite-chat-title {
+                color: goldenrod;
+                text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+                font-size: 1.5em;
+                text-align: center;
+                padding-left: 1.25em;
+                padding-right: 1.25em;
+                position: relative
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            .genlite-chat-back {
+                position: absolute;
+                color: white;
+                left: 0.25em;
+                top: 0;
+            }
+
+            .genlite-chat-messages-list {
+                padding: 1em;
+                row-gap: 1em;
+                display: flex;
+                flex-direction: column-reverse;
+                overflow-y: scroll;
+                border-bottom: 1px solid rgb(66, 66, 66);
+                border-top: 1px solid rgb(0, 0, 0);
+                flex-grow: 1;
+            }
+
+            .genlite-chat-message {
+                padding: 0.5em;
+                border-radius: 10px;
+                background-color: rgb(33,33,33);
+                width: fit-content;
+                min-width: 45%;
+                max-width: 75%;
+            }
+
+            .genlite-chat-message-sent {
+                padding: 0.5em;
+                border-radius: 10%;
+                background-color: rgb(33,66,66);
+                margin-left: auto;
+                text-align: right;
+            }
+
+            .genlite-chat-input {
+                border: none;
+                padding: 0.25em;
+                background-color: rgb(66,66,66);
+                margin-right: 1em;
+                margin-left: 1em;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    createUITab() {
+        if (this.uiTab) {
+            this.uiTab.remove();
+        }
+
+        this.settingsMenu = <HTMLElement>document.createElement("div");
+        this.settingsMenu.classList.add("genlite-chat-container");
+
+                // search bar
+        this.searchRow = <HTMLElement>document.createElement("div");
+        this.searchRow.classList.add("genlite-chat-search-row");
+        this.settingsMenu.appendChild(this.searchRow);
+
+        let search = <HTMLInputElement>document.createElement("input");
+        this.searchRow.appendChild(search);
+        search.classList.add("genlite-chat-search");
+        search.placeholder = "Search Chats...";
+        search.type = "text";
+
+        search.onfocus = () => {
+            document.game.CHAT.focus_locked = true;
+        }
+
+        search.onblur = () => {
+            document.game.CHAT.focus_locked = false;
+        }
+
+        search.oninput = function (e) {
+            let value = search.value.trim().toLowerCase();
+            // TODO
+        }
+
+        this.listContainer = <HTMLElement>document.createElement("div");
+        this.listContainer.classList.add("genlite-chats-list");
+        this.settingsMenu.appendChild(this.listContainer);
+        this.uiTab = document.genlite.ui.addTab("comments", "Chats", this.settingsMenu, this.isPluginEnabled);
+    }
+
+    uiCreateChat(name: string, messages: Array<PrivateMessage>) {
+        let container = <HTMLElement>document.createElement("div");
+        container.classList.add("genlite-chat-row");
+        this.listContainer.appendChild(container);
+        this.chatRows[name] = container;
+
+        let plugin = this;
+        container.onclick = function(e) {
+            plugin.uiOpenChat(name);
+        }
+
+        let badge = <HTMLElement>document.createElement("div");
+        badge.classList.add("genlite-chat-badge");
+        container.appendChild(badge);
+
+        let profile = <HTMLElement>document.createElement("div");
+        profile.classList.add("genlite-chat-profile");
+        container.appendChild(profile);
+
+        let profileBg = <HTMLElement>document.createElement("div");
+        profileBg.classList.add("genlite-chat-profile-bg");
+        profileBg.style.backgroundImage = "url(" + document.game.getStaticPath("/img/new_ux/player_hud/player_picture_empty.png") + ")";
+        profile.appendChild(profileBg);
+
+        let profilePic = <HTMLImageElement>document.createElement("img");
+        profilePic.classList.add("genlite-chat-profile-pic");
+        profile.appendChild(profilePic);
+
+        let nameDiv = <HTMLElement>document.createElement("div");
+        nameDiv.classList.add("genlite-chat-name");
+        nameDiv.innerText = name;
+        container.appendChild(nameDiv);
+
+        let chatui = <HTMLElement>document.createElement("div");
+        chatui.classList.add("genlite-chat-interface");
+        this.settingsMenu.appendChild(chatui);
+        this.chatUIs[name] = chatui;
+
+        let title = <HTMLElement>document.createElement("div");
+        title.classList.add("genlite-chat-title");
+        title.innerText = name;
+        chatui.appendChild(title);
+
+        let back = <HTMLElement>document.createElement("div");
+        back.classList.add("genlite-chat-back");
+        back.onclick = function() {
+            plugin.uiCloseChat();
+        }
+        back.innerHTML = '<i class="fas fa-arrow-left"></i>';
+        title.appendChild(back);
+
+        let messagesList = <HTMLElement>document.createElement("div");
+        messagesList.classList.add("genlite-chat-messages-list");
+        chatui.appendChild(messagesList);
+
+        for (const m of messages.reverse()) {
+            let mdiv = <HTMLElement>document.createElement("div");
+            mdiv.classList.add("genlite-chat-message");
+            if (m.sent) {
+                mdiv.classList.add("genlite-chat-message-sent");
+            }
+            mdiv.innerText = m.text;
+            messagesList.appendChild(mdiv);
+        }
+
+
+        let input = <HTMLElement>document.createElement("input");
+        input.classList.add("genlite-chat-input");
+        chatui.appendChild(input);
+    }
+
+    uiOpenChat(name: string) {
+        this.chatUIs[name].style.display = 'flex';
+        this.openChat = name;
+        this.searchRow.style.display = 'none';
+        this.listContainer.style.display = 'none';
+    }
+
+    uiCloseChat() {
+        this.searchRow.style.removeProperty('display');
+        this.listContainer.style.removeProperty('display');
+        this.chatUIs[this.openChat].style.removeProperty('display');
+    }
+
     handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
         this.updateState();
+        if (this.uiTab) {
+            this.uiTab.style.display = state ? "flex" : "none";
+        }
     }
 
     public loginOK() {
