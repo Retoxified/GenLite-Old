@@ -86,12 +86,18 @@ class GenLiteMessageBuffer {
 
         if (plugin.condenseMessages) {
             // TODO: optimize a bit
-            for (const existing of self.messages) {
+            // loop through backwards so that we dedupe with most recent instance of a message;
+            for (let i = self.messages.length - 1; i >= 0; i--) {
+                const existing = self.messages[i];
+
                 let es = existing.message.getElementsByClassName('new_ux-message-text');
                 let existingContent = es[0].innerHTML;
 
                 es = existing.message.getElementsByClassName('new_ux-message-user');
                 let existingSpeaker = es.length > 0 ? (es[0] as HTMLElement).innerText : null;
+                if (existingSpeaker) {
+                    existingSpeaker = existingSpeaker.substring(0, existingSpeaker.length - 1); // trim colon
+                }
 
                 if (existingContent === content && existingSpeaker === speaker) {
                     let countElements = existing.message.getElementsByClassName('genlite-message-counter');
