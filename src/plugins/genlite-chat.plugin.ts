@@ -85,6 +85,11 @@ class GenLiteMessageBuffer {
             'new_ux-message-text'
         )[0].innerHTML;
 
+        if (glbuffer.channel === "private") {
+            // TODO: colors will break here, but we shouldn't use innerHTML
+            plugin.uiTrimAndAddMessage(speaker, content);
+        }
+
         if (plugin.preserveMessages) {
             glbuffer.storeMessage(speaker, content, timestamp);
         }
@@ -421,7 +426,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 text-align: center;
                 padding-left: 1.25em;
                 padding-right: 1.25em;
-                position: relative
+                position: relative;
                 text-overflow: ellipsis;
                 overflow: hidden;
                 white-space: nowrap;
@@ -468,6 +473,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 background-color: rgb(66,66,66);
                 margin-right: 1em;
                 margin-left: 1em;
+                display: none;
             }
         `;
         document.head.appendChild(style);
@@ -509,6 +515,34 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         this.listContainer.classList.add("genlite-chats-list");
         this.settingsMenu.appendChild(this.listContainer);
         this.uiTab = document.genlite.ui.addTab("comments", "Chats", this.settingsMenu, this.isPluginEnabled);
+    }
+
+    createTest() {
+        this.uiCreateChat("Wario", [
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "Check out this scrolling" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "Hey! Here is a really long message so you can show off text wrapping in genlite chats." },
+            { sent: true,  text: "Hello :)" },
+            { sent: false, text: "I think you are really cool"},
+            { sent: false, text: "<3" },
+            { sent: true,  text: "I know" },
+        ]);
+        this.uiCreateChat("Red Bean", [
+            { sent: true,  text: "Mr bean" },
+            { sent: true,  text: "How do I get good at forging?" },
+            { sent: false, text: "It's simple."},
+            { sent: false, text: "Eat more beans" },
+            { sent: true,  text: "Okay" },
+        ]);
     }
 
     uiCreateChat(name: string, messages: Array<PrivateMessage>) {
@@ -576,10 +610,24 @@ export class GenLiteChatPlugin extends GenLitePlugin {
             messagesList.appendChild(mdiv);
         }
 
-
-        let input = <HTMLElement>document.createElement("input");
+        let input = <HTMLInputElement>document.createElement("input");
         input.classList.add("genlite-chat-input");
         chatui.appendChild(input);
+        input.onfocus = () => {
+            document.game.CHAT.focus_locked = true;
+        }
+        input.onblur = () => {
+            document.game.CHAT.focus_locked = false;
+        }
+        // TODO: this is currently display:none until we figure out:
+        //       - fetch username (not display name)
+        //       - send message w/o network.action
+        input.onkeyup = (e) => {
+            if (e.key === "Enter") {
+                console.log("Sending to " + name, input.value);
+                input.value = '';
+            }
+        }
     }
 
     uiOpenChat(name: string) {
@@ -593,6 +641,35 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         this.searchRow.style.removeProperty('display');
         this.listContainer.style.removeProperty('display');
         this.chatUIs[this.openChat].style.removeProperty('display');
+    }
+
+    uiAddMessage(name: string, text: string, sent: boolean) {
+        let ui = this.chatUIs[name];
+        if (ui) {
+            let elements = ui.getElementsByClassName("genlite-chat-messages-list");
+            let messagesList = elements[0] as HTMLElement;
+            let mdiv = <HTMLElement>document.createElement("div");
+            mdiv.classList.add("genlite-chat-message");
+            if (sent) {
+                mdiv.classList.add("genlite-chat-message-sent");
+            }
+            mdiv.innerText = text;
+            messagesList.prepend(mdiv);
+        } else {
+            this.uiCreateChat(name, [{text, sent}]);
+        }
+    }
+
+    uiTrimAndAddMessage(speaker, text) {
+        const frHeader = "(PM from ";
+        const toHeader = "(PM to ";
+        if (speaker.includes(frHeader)) {
+            let name = speaker.substring(frHeader.length, speaker.length - 1);
+            this.uiAddMessage(name, text, false);
+        } else if (speaker.includes(toHeader)) {
+            let name = speaker.substring(toHeader.length, speaker.length - 1);
+            this.uiAddMessage(name, text, true);
+        }
     }
 
     handlePluginState(state: boolean): void {
