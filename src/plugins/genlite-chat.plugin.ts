@@ -162,9 +162,6 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteChatPlugin';
     static storageKey = 'IgnoredGameChatMessages';
 
-    // 20 minutes in milliseconds
-    static preserveChatLogDelta = 1200000;
-
     pluginSettings : Settings = {
         // Checkbox Example
         "Condense Messages": {
@@ -216,6 +213,8 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     originalGameMessage: (text: string) => HTMLElement;
     originalAddPrivateMessage: (timestamp, speaker, text, icon, loopback, name) => HTMLElement;
 
+    preserveMinutes = 20;
+
     indexedDBSupported = false;
     bufferHooked: boolean = false;
     buffers: Record<string, GenLiteMessageBuffer> = {};
@@ -241,7 +240,17 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 type: 'checkbox',
                 oldKey: 'GenLite.Chat.PreserveMessages',
                 value: false,
-                stateHandler: this.handlePreserveMessages.bind(this)
+                stateHandler: this.handlePreserveMessages.bind(this),
+                children: {
+                    'Preserve for (Minutes)': {
+                        type: 'range',
+                        value: 20,
+                        min: 10,
+                        max: 2 * 60,
+                        step: 10,
+                        stateHandler: this.handlePreserveMinutes.bind(this),
+                    }
+                }
             };
         } else {
             this.preserveMessages = false;
@@ -277,7 +286,8 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     }
 
     refillChatBox() {
-        this.getRecentMessages(GenLiteChatPlugin.preserveChatLogDelta, (ms) => {
+        let delta = this.preserveMinutes * 60 * 1000; // min to ms
+        this.getRecentMessages(delta, (ms) => {
 
             function getText(dom) {
                 let text = "";
@@ -427,6 +437,10 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     handlePreserveMessages(state: boolean) {
         this.preserveMessages = state;
         this.updateState();
+    }
+
+    handlePreserveMinutes(minutes: number) {
+        this.preserveMinutes = minutes;
     }
 
     updateState() {
