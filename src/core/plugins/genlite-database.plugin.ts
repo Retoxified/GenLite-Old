@@ -22,6 +22,7 @@ export class GenLiteDatabasePlugin extends GenLitePlugin {
     public static version = 2;
 
     public supported = false;
+    public initialized = false;
 
     stores: Array<{callback: DatabaseCallback}> = [];
 
@@ -67,7 +68,11 @@ export class GenLiteDatabasePlugin extends GenLitePlugin {
         }
     }
 
-    request() {
+    request(ignoreInit=false) {
+        if (!ignoreInit && !this.initialized) {
+            console.log("IDB is not yet initialized");
+            return null;
+        }
         if (!this.supported) {
             return null;
         }
@@ -85,11 +90,12 @@ export class GenLiteDatabasePlugin extends GenLitePlugin {
 
     async postInit() {
         this.supported = 'indexedDB' in window;
-        let r = this.request();
+        let r = this.request(true);
         if (r) {
             r.onsuccess = (e) => {
                 // TODO: plugin onopen actions
                 r.result.close();
+                this.initialized = true;
             };
             r.onupgradeneeded = (e: any) => {
                 let db = e.target.result;
