@@ -48,55 +48,45 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
             this.recipeResults = saved.recipe ? saved.recipe : {};
             this.gatherResults = saved.gathering ? saved.gathering : {};
         }
-
-        this.createCSS();
-        this.createUITab();
     }
 
     async postInit() {
+        this.createCSS();
+        this.createUITab();
         document.genlite.ui.registerPlugin("Recipe Recorder", null, this.handlePluginState.bind(this));
     }
 
     createCSS() {
         const style = document.createElement('style');
-        // chrome is dumb so we need to specify this scrollbar thing
         style.innerHTML = `
-            .genlite-recipes-container *::-webkit-scrollbar-track {
-                background-color: transparent;
-            }
-
             .genlite-recipes-container {
                 display: flex;
                 flex-direction: column;
                 overflow-x: hidden;
                 color: #ffd593;
                 font-family: acme,times new roman,Times,serif;
-                row-gap: 1em;
-                padding: 1em;
                 height: 100%;
             }
 
             .genlite-recipes-list {
                 display: flex;
                 flex-direction: column;
-                row-gap: 1em;
                 overflow-y: scroll;
-                height: 80%;
+                height: 100%;
             }
 
             .genlite-recipes-row {
                 display: flex;
                 flex-direction: column;
-                background-color: #0e0c0b;
-                padding: 0.25em;
                 flex-shrink: 0;
+                border-bottom: 1px solid rgb(66, 66, 66);
+                border-top: 1px solid rgb(0, 0, 0);
             }
 
             .genlite-recipes-iconlist {
                 display: flex;
                 column-gap: 0.5em;
                 padding: 0.25em;
-                overflow-x: scroll;
             }
 
             .genlite-recipes-arrow {
@@ -120,6 +110,15 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
             .genlite-recipes-output {
                 display: none;
                 flex-direction: column;
+                padding-left: 1em;
+                background-color: rgb(33, 33, 33);
+                margin-left: 1em;
+                margin-right: 1em;
+                margin-bottom: 1em;
+                border-bottom-left-radius: 1em;
+                padding: 1em;
+                border-bottom-right-radius: 1em;
+                box-shadow: -2px 2px rgb(30,30,30);
             }
 
             .genlite-recipes-output-row {
@@ -128,7 +127,27 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
                 align-items: center;
             }
 
+            .genlite-recipes-search-row {
+                width: 100%;
+                height: 25px;
+                border-bottom: 1px solid rgb(66, 66, 66);
+                display: flex;
+                align-items: center;
+            }
+
             .genlite-recipes-search {
+                background-color: rgb(42, 40, 40);
+                color: rgb(255, 255, 255);
+                font-size: 16px;
+                border-radius: 0px;
+                padding-left: 10px;
+                padding-right: 10px;
+                box-sizing: border-box;
+                outline: none;
+                width: 100%;
+                border: medium none;
+                margin-left: auto;
+                margin-right: auto
             }
         `;
         document.head.appendChild(style);
@@ -143,10 +162,23 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         settingsMenu.classList.add("genlite-recipes-container");
 
         // search bar
+        let searchrow = <HTMLElement>document.createElement("div");
+        searchrow.classList.add("genlite-recipes-search-row");
+        settingsMenu.appendChild(searchrow);
+
         let search = <HTMLInputElement>document.createElement("input");
-        settingsMenu.appendChild(search);
+        searchrow.appendChild(search);
         search.classList.add("genlite-recipes-search");
+        search.placeholder = "Search Recipes...";
         search.type = "text";
+
+        search.onfocus = () => {
+            document.game.CHAT.focus_locked = true;
+        }
+
+        search.onblur = () => {
+            document.game.CHAT.focus_locked = false;
+        }
 
         search.oninput = function (e) {
             let value = search.value.trim().toLowerCase();
@@ -292,17 +324,48 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         let seo = "";
 
         function addSEO(prefix, s) {
+            // exact item name e.g. "H.Q. Iron Component (Sheet)"
+            s = s + ';';
             seo += prefix + s;
-            seo += prefix + s
-                .replace("L.Q.", "LQ")
-                .replace("H.Q.", "HQ")
-                .replace("Bronze Component (", "")
-                .replace("Iron Component (", "")
-                .replace("Steel Component (", "")
-                .replace("Mithril Component (", "");
+
+            // quality aliases e.g. "LQ Iron Bar"
+            seo += prefix + s.replace("L.Q.", "LQ").replace("H.Q.", "HQ");
+
+            // normal quality aliases e.g. "NQ Mithril Dagger"
             if (!s.includes("L.Q.") && !s.includes("H.Q.")) {
                 seo += prefix + "N.Q. " + s;
                 seo += prefix + "NQ " + s;
+            }
+
+            // item without quality
+            seo += prefix + s.replace("L.Q. ", "").replace("H.Q. ", "");
+
+            if (s.includes("Component")) {
+                // component aliases e.g. "H.Q. Sheet"
+                let stripped = s
+                    .replace("Bronze Component (", "")
+                    .replace("Iron Component (", "")
+                    .replace("Steel Component (", "")
+                    .replace("Mithril Component (", "");
+                seo += prefix + stripped;
+
+                // and component quality aliases e.g. "NQ Sheet" and "Sheet"
+                seo += prefix + stripped.replace("L.Q.", "LQ").replace("H.Q.", "HQ");
+                if (!stripped.includes("L.Q.") && !stripped.includes("H.Q.")) {
+                    seo += prefix + "N.Q. " + stripped;
+                    seo += prefix + "NQ " + stripped;
+                }
+                seo += prefix + stripped.replace("L.Q. ", "").replace("H.Q. ", "");
+
+                // again but include metal type e.g. "NQ Bronze Sheet" and "Iron Sheet"
+                stripped = s.replace("Component (", "");
+                seo += prefix + stripped;
+                seo += prefix + stripped.replace("L.Q.", "LQ").replace("H.Q.", "HQ");
+                if (!stripped.includes("L.Q.") && !stripped.includes("H.Q.")) {
+                    seo += prefix + "N.Q. " + stripped;
+                    seo += prefix + "NQ " + stripped;
+                }
+                seo += prefix + stripped.replace("L.Q. ", "").replace("H.Q. ", "");
             }
         }
 
@@ -313,16 +376,16 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
                 nInputs = amt;
             }
 
-            let seoitem = item + ";";
+            let seoitem = item;
             const itemdata = document.game.DATA.items[item];
             if (itemdata && itemdata.name) {
-                seoitem = itemdata.name + ";";
+                seoitem = itemdata.name;
             }
             addSEO("in:", seoitem);
         }
 
         outputBox.innerHTML = '';
-        outputBox.appendChild(document.createTextNode(`${nInputs} tries`));
+        outputBox.appendChild(document.createTextNode(`${nInputs} attempts`));
 
         for (const item in results.output) {
             let orow = <HTMLElement>document.createElement("div");

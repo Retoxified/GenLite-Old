@@ -44,6 +44,10 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
     isPluginEnabled: boolean = false;
     submitItemsToServer: boolean = false;
 
+    uiTab: HTMLElement = null;
+    listContainer: HTMLElement = null;
+    monsterElements: Record<string, HTMLElement> = {};
+
     pluginSettings : Settings = {
         "Send Drops to Wiki": {
             type: "checkbox",
@@ -54,7 +58,6 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
         }
     };
             
-
     async init() {
         document.genlite.registerPlugin(this);
 
@@ -68,11 +71,359 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
 
     async postInit() {
         this.packList = document['GenLiteWikiDataCollectionPlugin'].packList;
+        this.createCSS();
+        this.createUITab();
         document.genlite.ui.registerPlugin("Drop Recorder", "GenLite.DropRecorder.Enable", this.handlePluginState.bind(this), this.pluginSettings);
+    }
+
+    createCSS() {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .genlite-drops-container {
+                display: flex;
+                flex-direction: column;
+                overflow-x: hidden;
+                color: #ffd593;
+                font-family: acme,times new roman,Times,serif;
+                height: 100%;
+            }
+
+            .genlite-drops-search-row {
+                width: 100%;
+                height: 25px;
+                border-bottom: 1px solid rgb(66, 66, 66);
+                display: flex;
+                align-items: center;
+            }
+
+            .genlite-drops-search {
+                background-color: rgb(42, 40, 40);
+                color: rgb(255, 255, 255);
+                font-size: 16px;
+                border-radius: 0px;
+                padding-left: 10px;
+                padding-right: 10px;
+                box-sizing: border-box;
+                outline: none;
+                width: 100%;
+                border: medium none;
+                margin-left: auto;
+                margin-right: auto
+            }
+
+            .genlite-drops-list {
+                display: flex;
+                flex-direction: column;
+                overflow-y: scroll;
+                height: 100%;
+            }
+
+            .genlite-drops-row {
+                display: flex;
+                flex-direction: column;
+                flex-shrink: 0;
+                border-bottom: 1px solid rgb(66, 66, 66);
+                border-top: 1px solid rgb(0, 0, 0);
+            }
+
+            .genlite-drops-header {
+                display: flex;
+                column-gap: 0.5em;
+                padding: 0.25em;
+                overflow-x: hidden;
+                align-items: center;
+            }
+
+            .genlite-drops-iconlist {
+                display: flex;
+                column-gap: 0.5em;
+                padding: 0.25em;
+                overflow-x: hidden;
+            }
+
+            .genlite-drops-arrow {
+                width: 28px;
+                height: 28px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+            }
+
+            .genlite-drops-arrow i {
+                margin: auto;
+            }
+
+            .genlite-drops-title {
+            }
+
+            .genlite-drops-icon {
+                width: 28px;
+                height: 28px;
+                position: relative;
+            }
+
+            .genlite-drops-output {
+                display: none;
+                flex-direction: column;
+                padding-left: 1em;
+                flex-direction: column;
+                background-color: rgb(33, 33, 33);
+                margin-left: 1em;
+                margin-right: 1em;
+                margin-bottom: 1em;
+                border-bottom-left-radius: 1em;
+                padding: 1em;
+                border-bottom-right-radius: 1em;
+                box-shadow: -2px 2px rgb(30,30,30);
+            }
+
+            .genlite-drops-output-row {
+                display: flex;
+                column-gap: 1em;
+                align-items: center;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    createUITab() {
+        if (this.uiTab) {
+            this.uiTab.remove();
+        }
+
+        let settingsMenu = <HTMLElement>document.createElement("div");
+        settingsMenu.classList.add("genlite-drops-container");
+
+        // search bar
+        let searchrow = <HTMLElement>document.createElement("div");
+        searchrow.classList.add("genlite-drops-search-row");
+        settingsMenu.appendChild(searchrow);
+
+        let search = <HTMLInputElement>document.createElement("input");
+        searchrow.appendChild(search);
+        search.classList.add("genlite-drops-search");
+        search.placeholder = "Search Drops...";
+        search.type = "text";
+
+        search.onfocus = () => {
+            document.game.CHAT.focus_locked = true;
+        }
+
+        search.onblur = () => {
+            document.game.CHAT.focus_locked = false;
+        }
+
+        search.oninput = function (e) {
+            let value = search.value.trim().toLowerCase();
+            let values = [];
+            for (const v of value.split(",")) {
+                values.push(v.trim());
+            }
+
+            let rows = document.getElementsByClassName("genlite-drops-row");
+            for (let i = 0; i < rows.length; i++) {
+                let row = rows[i] as HTMLElement;
+                let content = row.innerHTML.toLowerCase();
+                if (value === "") {
+                    row.style.removeProperty("display");
+                    continue;
+                }
+
+                let match = true;
+                for (let v of values) {
+                    let invert = v[0] === "-";
+                    if (invert) {
+                        v = v.substr(1);
+                    }
+
+                    if (!invert && !content.includes(v)) {
+                        match = false;
+                        break;
+                    } else if (invert && content.includes(v)) {
+                        match = false;
+                        break;
+                    }
+                }
+
+                if (match) {
+                    row.style.removeProperty("display");
+                } else {
+                    row.style.display = "none";
+                }
+            }
+        }
+
+        // monster list
+        this.listContainer = <HTMLElement>document.createElement("div");
+        this.listContainer.classList.add("genlite-drops-list");
+        settingsMenu.appendChild(this.listContainer);
+        for (const monsterId in this.dropTable) {
+            this.createMonsterRow(monsterId);
+        }
+
+        this.uiTab = document.genlite.ui.addTab("skull", "Drop Recorder", settingsMenu, this.isPluginEnabled);
+    }
+
+    createMonsterRow(monsterId: string) {
+        const data = this.dropTable[monsterId];
+
+        let row = <HTMLElement>document.createElement("div");
+        row.classList.add("genlite-drops-row");
+        this.listContainer.appendChild(row);
+
+        this.monsterElements[monsterId] = row;
+
+        let header = <HTMLElement>document.createElement("div");
+        header.classList.add("genlite-drops-header");
+        row.appendChild(header);
+
+        let arrow = <HTMLElement>document.createElement("div");
+        arrow.classList.add("genlite-drops-arrow");
+        let i = <HTMLElement>document.createElement("i");
+        i.classList.add("fa-chevron-right");
+        i.classList.add("fas");
+        arrow.appendChild(i);
+        header.appendChild(arrow);
+
+        let title = <HTMLElement>document.createElement("div");
+        title.classList.add("genlite-drops-title");
+        title.innerText = this.getUITitle(data);
+        header.appendChild(title);
+
+        let outputBox = <HTMLElement>document.createElement("div");
+        outputBox.classList.add("genlite-drops-output");
+        row.appendChild(outputBox);
+
+        this.updateOutputBox(outputBox, data);
+
+        arrow.onclick = function (e) {
+            if (i.classList.toggle("fa-chevron-right")) {
+                i.classList.remove("fa-chevron-down");
+                outputBox.style.display = "none";
+            } else {
+                i.classList.add("fa-chevron-down");
+                outputBox.style.display = "flex";
+            }
+        }
+    }
+
+    createIconDiv(item) {
+        let div = <HTMLImageElement>document.createElement("div");
+        div.classList.add("genlite-drops-icon");
+
+        let icon = <HTMLImageElement>document.createElement("img");
+        icon.classList.add("genlite-drops-icon");
+        icon.title = item;
+        div.appendChild(icon);
+
+        const itemdata = document.game.DATA.items[item];
+        if (itemdata) {
+            if (itemdata.name) {
+                icon.title = itemdata.name;
+            }
+
+            if (itemdata.image) {
+                icon.src = document.game.getStaticPath('items/' + itemdata.image);
+            } else if (itemdata.images) {
+                let image = itemdata.images[itemdata.images.length - 1][1];
+                icon.src = document.game.getStaticPath('items/' + image);
+            }
+
+            if (itemdata.border) {
+                let path = `items/placeholders/${ itemdata.border }_border.png`;
+                path = document.game.getStaticPath(path);
+                let qual = <HTMLImageElement>document.createElement("img");
+                qual.classList.add("new_ux-inventory_quality-image");
+                qual.src = path;
+                div.appendChild(qual);
+            }
+        }
+
+        if (!icon.src) {
+            icon.src = document.game.getStaticPath('items/unknown.png');
+        }
+        return div;
+    }
+
+    getUITitle(data) {
+        return `Lv ${data.Monster_Level} ${data.Monster_Name} (${data.Num_Killed} killed)`;
+    }
+
+    updateOutputBox(outputBox: HTMLElement, data) {
+        let seo = `mob:${data.Monster_Name};`;
+
+        function addSEO(prefix, s) {
+            seo += prefix + s;
+            seo += prefix + s
+                .replace("L.Q.", "LQ")
+                .replace("H.Q.", "HQ")
+                .replace("Bronze Component (", "")
+                .replace("Iron Component (", "")
+                .replace("Steel Component (", "")
+                .replace("Mithril Component (", "");
+            if (!s.includes("L.Q.") && !s.includes("H.Q.")) {
+                seo += prefix + "N.Q. " + s;
+                seo += prefix + "NQ " + s;
+            }
+        }
+
+        // update header w/ number killed, blame kkona for this hack
+        let es = outputBox.parentElement.getElementsByClassName('genlite-drops-title');
+        if (es.length) {
+            (es[0] as HTMLElement).innerText = this.getUITitle(data);
+        }
+
+        outputBox.innerHTML = '';
+
+        let sorted = Object.entries(data.drops).sort(([,a],[,b]) => (b as number) - (a as number))
+        for (const entry of sorted) {
+            let item = entry[0];
+
+            let orow = <HTMLElement>document.createElement("div");
+            orow.classList.add("genlite-drops-output-row");
+
+            let icon = this.createIconDiv(item);
+            orow.appendChild(icon);
+
+            let seoitem = item + ";";
+            const itemdata = document.game.DATA.items[item];
+            if (itemdata && itemdata.name) {
+                seoitem = itemdata.name + ";";
+            }
+            addSEO("drop:", seoitem);
+
+            let n = data.drops[item];
+            let pct = (n / data.Num_Killed * 100);
+            pct = Math.round(pct * 100) / 100;
+            orow.appendChild(document.createTextNode(`${n} (${pct}%)`));
+            outputBox.appendChild(orow);
+        }
+
+        let seospan = <HTMLElement>document.createElement("span");
+        seospan.style.display = "none";
+        seospan.innerText = seo;
+        outputBox.appendChild(seospan);
+    }
+
+    updateMonsterRow(monsterId: string) {
+        let row = this.monsterElements[monsterId];
+        if (!row) {
+            this.createMonsterRow(monsterId);
+        } else {
+            let data = this.dropTable[monsterId];
+            let es = row.getElementsByClassName('genlite-drops-output');
+            if (es) {
+                let outputBox = <HTMLElement>es[0];
+                this.updateOutputBox(outputBox, data);
+            }
+        }
     }
 
     handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
+        if (this.uiTab) {
+            this.uiTab.style.display = state ? "flex" : "none";
+        }
     }
 
     handleSubmitToServer(state: boolean) {
@@ -206,5 +557,6 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
             this.dropTable[dropKey].drops[drop.Item_Code] += drop.Item_Quantity;
             localStorage.setItem("genliteDropTable", JSON.stringify(this.dropTable));
         }
+        this.updateMonsterRow(dropKey);
     }
 }
