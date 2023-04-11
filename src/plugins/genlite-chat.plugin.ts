@@ -73,6 +73,7 @@ class GenLiteMessageBuffer {
         if (elements.length === 1) {
             let e = elements[0] as HTMLElement;
             speaker = e.innerText;
+            speaker = speaker.substring(0, speaker.length - 1); // trim colon
         }
 
         let content = message.getElementsByClassName(
@@ -160,6 +161,9 @@ class GenLiteMessageBuffer {
 export class GenLiteChatPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteChatPlugin';
     static storageKey = 'IgnoredGameChatMessages';
+
+    // 20 minutes in milliseconds
+    static preserveChatLogDelta = 1200000;
 
     pluginSettings : Settings = {
         // Checkbox Example
@@ -257,6 +261,10 @@ export class GenLiteChatPlugin extends GenLitePlugin {
 
     async postInit() {
         document.genlite.ui.registerPlugin("Chat Filtering", null, this.handlePluginState.bind(this), this.pluginSettings);
+        if (this.preserveMessages) {
+            // I'm just hacking this together until the init order refactor
+            setTimeout(this.refillChatBox.bind(this), 500);
+        }
     }
 
     handlePluginState(state: boolean): void {
@@ -266,6 +274,77 @@ export class GenLiteChatPlugin extends GenLitePlugin {
 
     public loginOK() {
         this.updateState();
+    }
+
+    refillChatBox() {
+        this.getRecentMessages(GenLiteChatPlugin.preserveChatLogDelta, (ms) => {
+
+            function getText(dom) {
+                let text = "";
+                let elements = dom.getElementsByClassName("new_ux-message-text");
+                if (elements) {
+                    text = (elements[0] as HTMLElement).innerText; // should be innerhtml?
+                }
+                return text;
+            }
+
+            function getSpeaker(dom) {
+                let speaker: string = null;
+                let elements = dom.getElementsByClassName('new_ux-message-user');
+                if (elements.length === 1) {
+                    let e = elements[0] as HTMLElement;
+                    speaker = e.innerText;
+                    speaker = speaker.substring(0, speaker.length - 1); // trim colon
+                }
+                return speaker;
+            }
+
+            // save messages that came in so far
+            let existing_messages: Array<IDBMessage> = [];
+
+            for (const m of document.game.CHAT.filter_buttons["game"].buffer.messages) {
+                existing_messages.push({
+                    channel: "game",
+                    text: getText(m.message),
+                    timestamp: m.timestamp,
+                    speaker: null,
+                });
+            }
+            for (const m of document.game.CHAT.filter_buttons["public"].buffer.messages) {
+                existing_messages.push({
+                    channel: "public",
+                    text: getText(m.message),
+                    timestamp: m.timestamp,
+                    speaker: getSpeaker(m.message),
+                });
+            }
+            for (const m of document.game.CHAT.filter_buttons["private"].buffer.messages) {
+                existing_messages.push({
+                    channel: "private",
+                    text: getText(m.message),
+                    timestamp: m.timestamp,
+                    speaker: getSpeaker(m.message),
+                });
+            }
+
+            // clear chat box
+            document.game.CHAT.clear();
+
+            // temporarily disable preservation so we don't double-store
+            let plugin = document['GenLiteChatPlugin'];
+            let prevValue = plugin.preserveMessages;
+            plugin.preserveMessages = false;
+            for (const m of ms.concat(existing_messages)) {
+                document.game.CHAT.addMessage(
+                    m.channel,
+                    m.timestamp,
+                    m.speaker,
+                    m.text,
+                    false
+                );
+            }
+            plugin.preserveMessages = prevValue;
+        });
     }
 
     handleFilterGameMessages(state: boolean) {
@@ -371,7 +450,6 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         if (this.isPluginEnabled && this.colorPrivateMessages) {
             let plugin = this;
             document.game.CHAT.addPrivateMessage = function (e,speaker,n,i,a,r) {
-                console.log([e, speaker, n, i, a, i]);
                 let dom = plugin.originalAddPrivateMessage.bind(this)(e,speaker,n,i,a,r);
                 plugin.colorPrivateMessage(speaker, dom);
                 return dom;
@@ -482,6 +560,30 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         localStorage.setItem(
             GenLiteChatPlugin.storageKey,
             JSON.stringify(Array.from(s))
+        );
+    }
+
+    getRecentMessages(
+        delta: number,
+        callback: (m: Array<IDBMessage>) => void
+    ) {
+        const endTime = Date.now() - delta;
+        let messages = [];
+        let store = document.genlite.database.storeTx(
+            'chatlog',
+            'readonly',
+            (store) => {
+                store.openCursor(null, 'prev').onsuccess = (e) => {
+                    const cursor = e.target.result;
+                    let message = cursor.value;
+                    if (message.timestamp >= endTime) {
+                        messages.unshift(message);
+                        cursor.continue();
+                    } else {
+                        callback(messages);
+                    }
+                };
+            }
         );
     }
 
