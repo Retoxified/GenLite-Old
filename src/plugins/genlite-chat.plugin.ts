@@ -218,10 +218,11 @@ export class GenLiteChatPlugin extends GenLitePlugin {
 
     // privates ui
     uiTab: HTMLElement = null;
+    uiNotif: HTMLElement = null;
     settingsMenu: HTMLElement = null; // is this the same as uiTab?
     searchRow: HTMLElement = null;
     listContainer: HTMLElement = null;
-    openChat: string = "";
+    openChat: string = null;
 
     chatRows: Record<string, HTMLElement> = {};
     chatUIs: Record<string, HTMLElement> = {};
@@ -308,7 +309,6 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     createCSS() {
         const style = document.createElement('style');
         style.innerHTML = `
-
             .genlite-chat-container {
                 display: flex;
                 flex-direction: column;
@@ -362,6 +362,10 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 position: relative;
             }
 
+            .genlite-chat-row-unread {
+                box-shadow: -2px 2px rgb(0, 127, 127), 2px -2px rgb(0, 255, 255);
+            }
+
             .genlite-chat-profile {
                 position: relative;
                 width: 64px;
@@ -402,11 +406,13 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 height: 1em;
                 width: 1em;
                 border-radius: 50%;
-                border: 2px double white;
+                border: 2px solid white;
+                background-color: lawngreen;
                 position: absolute;
-                right: 0.5em;
-                top: 0.5em;
+                right: 0;
+                top: 0;
                 visibility: hidden;
+                z-index: 3;
             }
 
             .genlite-chat-interface {
@@ -430,6 +436,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 text-overflow: ellipsis;
                 overflow: hidden;
                 white-space: nowrap;
+                flex-shrink: 0;
             }
 
             .genlite-chat-back {
@@ -440,8 +447,8 @@ export class GenLiteChatPlugin extends GenLitePlugin {
             }
 
             .genlite-chat-messages-list {
-                padding: 1em;
-                row-gap: 1em;
+                padding: 0.5em;
+                row-gap: 0.5em;
                 display: flex;
                 flex-direction: column-reverse;
                 overflow-y: scroll;
@@ -464,7 +471,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 border-radius: 10%;
                 background-color: rgb(33,66,66);
                 margin-left: auto;
-                text-align: right;
+                text-align: left;
             }
 
             .genlite-chat-input {
@@ -474,6 +481,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 margin-right: 1em;
                 margin-left: 1em;
                 display: none;
+                flex-shrink: 0;
             }
         `;
         document.head.appendChild(style);
@@ -556,10 +564,6 @@ export class GenLiteChatPlugin extends GenLitePlugin {
             plugin.uiOpenChat(name);
         }
 
-        let badge = <HTMLElement>document.createElement("div");
-        badge.classList.add("genlite-chat-badge");
-        container.appendChild(badge);
-
         let profile = <HTMLElement>document.createElement("div");
         profile.classList.add("genlite-chat-profile");
         container.appendChild(profile);
@@ -572,6 +576,10 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         let profilePic = <HTMLImageElement>document.createElement("img");
         profilePic.classList.add("genlite-chat-profile-pic");
         profile.appendChild(profilePic);
+
+        let badge = <HTMLElement>document.createElement("div");
+        badge.classList.add("genlite-chat-badge");
+        profile.appendChild(badge);
 
         let nameDiv = <HTMLElement>document.createElement("div");
         nameDiv.classList.add("genlite-chat-name");
@@ -631,7 +639,14 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     }
 
     uiOpenChat(name: string) {
-        this.chatUIs[name].style.display = 'flex';
+        if (this.openChat) {
+            this.uiCloseChat();
+        }
+
+        let ui = this.chatUIs[name];
+        ui.style.display = 'flex';
+        this.markAsRead(name);
+
         this.openChat = name;
         this.searchRow.style.display = 'none';
         this.listContainer.style.display = 'none';
@@ -641,6 +656,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         this.searchRow.style.removeProperty('display');
         this.listContainer.style.removeProperty('display');
         this.chatUIs[this.openChat].style.removeProperty('display');
+        this.openChat = null;;
     }
 
     uiAddMessage(name: string, text: string, sent: boolean) {
@@ -658,6 +674,12 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         } else {
             this.uiCreateChat(name, [{text, sent}]);
         }
+
+        if (!sent && name != this.openChat) {
+            let row = this.chatRows[name];
+            row.classList.add("genlite-chat-row-unread");
+            this.uiDisplayNotificationBadge(true);
+        }
     }
 
     uiTrimAndAddMessage(speaker, text) {
@@ -670,6 +692,59 @@ export class GenLiteChatPlugin extends GenLitePlugin {
             let name = speaker.substring(toHeader.length, speaker.length - 1);
             this.uiAddMessage(name, text, true);
         }
+    }
+
+    uiDisplayNotificationBadge(display: boolean) {
+        let tab = document.getElementById('genlite-ui-tab-comments');
+        if (!tab) return;
+
+        let icon = tab.children[0] as HTMLElement;
+        if (display) {
+            icon.style.color = "aqua";
+        } else {
+            icon.style.removeProperty("color");
+        }
+    }
+
+    uiDisplayPlayerOnline(name: string) {
+        let row = this.chatRows[name];
+        if (row) {
+            let eles = row.getElementsByClassName('genlite-chat-badge');
+            if (eles) {
+                let badge = eles[0] as HTMLElement;
+                if (badge) badge.style.visibility = 'visible';
+            }
+        }
+    }
+
+    uiDisplayPlayerOffline(name: string) {
+        let row = this.chatRows[name];
+        if (row) {
+            let eles = row.getElementsByClassName('genlite-chat-badge');
+            if (eles) {
+                let badge = eles[0] as HTMLElement;
+                if (badge) badge.style.removeProperty('visibility');
+            }
+        }
+    }
+
+    markAllAsRead() {
+        for (let name in this.chatRows) {
+            this.chatRows[name].classList.remove('genlite-chat-row-unread');
+        }
+        this.uiDisplayNotificationBadge(false);
+    }
+
+    markAsRead(name: string) {
+        this.chatRows[name].classList.remove('genlite-chat-row-unread');
+        for (const oname in this.chatRows) {
+            let ui = this.chatRows[oname];
+            if (ui.classList.contains('genlite-chat-row-unread')) {
+                return;
+            }
+        }
+        // all are read
+        this.uiDisplayNotificationBadge(false);
     }
 
     handlePluginState(state: boolean): void {
@@ -753,6 +828,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 );
             }
             plugin.preserveMessages = prevValue;
+            plugin.markAllAsRead();
         });
     }
 
@@ -901,6 +977,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
             let sentTo = speaker.substring(pmHeader.length, speaker.length - 1);
             let fromHeader = "(PM from " + sentTo + ")";
             let messages = document.getElementsByClassName("new_ux-private-message");
+            this.markAsRead(sentTo);
             for (let i = 0; i < messages.length; i++) {
                 let message = messages[i] as HTMLElement;
                 let users = message.getElementsByClassName("new_ux-message-user");
