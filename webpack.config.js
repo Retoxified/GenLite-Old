@@ -12,7 +12,7 @@ let readme = fs.readFileSync('./README.md', 'utf8');
 // Version String in README
 // # GenLite 0.1.28 - For GenFanad
 // Look for match on the last set of numbers and increment by 1
-let versionString = readme.match(/# GenLite [0-9.]+ - For GenFanad/)[0];
+let versionString = readme.match(/# GenLite [0-9.]+(-[0-9]+)? - For GenFanad/)[0];
 
 // PACKAGE.version = 0.1.28
 let newVersionString = versionString.replace(/([0-9.]+)/, PACKAGE.version);
