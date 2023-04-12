@@ -40,7 +40,7 @@ Development builds are slightly less minimized and do not increment the genlite 
 
 To build the project for production run:
 Production development results in fully minimized output and increments the version number.
-`npm run build:prod`
+`npm run build:prodbeta`
 
 # IDE & Setup
 If you're using a well known IDE, we suggest [enabling coding assistance](https://blog.jetbrains.com/webstorm/2015/11/node-js-coding-assistance-in-webstorm-11/) for Node.JS.
