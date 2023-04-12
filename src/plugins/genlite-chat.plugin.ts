@@ -226,16 +226,17 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     // privates ui
     uiTab: HTMLElement = null;
     uiNotif: HTMLElement = null;
-    settingsMenu: HTMLElement = null; // is this the same as uiTab?
-    searchRow: HTMLElement = null;
-    listContainer: HTMLElement = null;
-    lastPublicSpeaker: string = null;
-    openChat: string = null;
 
-    chatRows: Record<string, HTMLElement> = {};
+    searchRow: HTMLElement = null;
+    settingsMenu: HTMLElement = null;
+    listContainer: HTMLElement = null;
     chatUIs: Record<string, HTMLElement> = {};
+    chatRows: Record<string, HTMLElement> = {};
+
+    openChat: string = null;
+    lastPublicSpeaker: string = null;
     privateLogs: Record<string, PrivateMessage> = {};
-    
+
     customMessagesToIgnore: Set<string> = new Set<string>();
 
     newPMColor = '#00FFFF';
@@ -552,34 +553,6 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         publicChat.classList.add("genlite-chat-row-public");
     }
 
-    createTest() {
-        this.uiCreateChat("Wario", [
-            { sent: false, text: "hey" },
-            { sent: false, text: "hey" },
-            { sent: false, text: "Check out this scrolling" },
-            { sent: false, text: "hey" },
-            { sent: false, text: "hey" },
-            { sent: false, text: "hey" },
-            { sent: false, text: "hey" },
-            { sent: false, text: "hey" },
-            { sent: false, text: "hey" },
-            { sent: false, text: "hey" },
-            { sent: false, text: "hey" },
-            { sent: false, text: "Hey! Here is a really long message so you can show off text wrapping in genlite chats." },
-            { sent: true,  text: "Hello :)" },
-            { sent: false, text: "I think you are really cool"},
-            { sent: false, text: "<3" },
-            { sent: true,  text: "I know" },
-        ]);
-        this.uiCreateChat("Red Bean", [
-            { sent: true,  text: "Mr bean" },
-            { sent: true,  text: "How do I get good at forging?" },
-            { sent: false, text: "It's simple."},
-            { sent: false, text: "Eat more beans" },
-            { sent: true,  text: "Okay" },
-        ]);
-    }
-
     uiCreateChat(name: string, messages: Array<PrivateMessage>) {
         let container = <HTMLElement>document.createElement("div");
         container.classList.add("genlite-chat-row");
@@ -604,6 +577,8 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         profilePic.classList.add("genlite-chat-profile-pic");
         profile.appendChild(profilePic);
 
+        this.uiUpdateProfilePic(name, profilePic);
+
         let badge = <HTMLElement>document.createElement("div");
         badge.classList.add("genlite-chat-badge");
         profile.appendChild(badge);
@@ -616,6 +591,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         let chatui = <HTMLElement>document.createElement("div");
         chatui.classList.add("genlite-chat-interface");
         this.settingsMenu.appendChild(chatui);
+        (chatui as any).profilePic = profilePic;
         this.chatUIs[name] = chatui;
 
         let title = <HTMLElement>document.createElement("div");
@@ -699,6 +675,10 @@ export class GenLiteChatPlugin extends GenLitePlugin {
             }
             mdiv.innerText = text;
             messagesList.prepend(mdiv);
+
+            if (!(ui as any).profilePic.src) {
+                this.uiUpdateProfilePic(name, (ui as any).profilePic);
+            }
         } else {
             this.uiCreateChat(name, [{text, sent}]);
         }
@@ -734,7 +714,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
 
         let nick = document.game.PLAYER.character.nickname;
         if (nick === speaker) {
-            self.lastPublicSpeaker = null;
+            this.lastPublicSpeaker = null;
             mdiv.classList.add("genlite-chat-message-sent");
         } else if (speaker != this.lastPublicSpeaker) {
             let speakerDiv = <HTMLElement>document.createElement("div");
@@ -783,6 +763,15 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 let badge = eles[0] as HTMLElement;
                 if (badge) badge.style.removeProperty('visibility');
             }
+        }
+    }
+
+    uiUpdateProfilePic(name: string, image: HTMLImageElement) {
+        let camera = document['GenLiteCameraPlugin'];
+        if (camera) {
+            camera.getPlayerPicture(name, (data) => {
+                image.src = data;
+            });
         }
     }
 
