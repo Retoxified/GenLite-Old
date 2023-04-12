@@ -82,7 +82,7 @@ jobs:
           ACTIONS_STEP_DEBUG: true
           GITHUB_TOKEN: ${{ secrets.BUILD_TOKEN }}
         with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
+          upload_url: ${{ steps.create_beta.outputs.upload_url }}
           asset_path: dist/genlite.user.js
           asset_name: genlite.user.js
           asset_content_type: application/text
