@@ -8,6 +8,13 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
+interface IDBMessage {
+    channel: string;
+    timestamp: number;
+    speaker: string;
+    text: string;
+}
+
 interface Message {
     message: HTMLElement;
     timestamp: string;

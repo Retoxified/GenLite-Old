@@ -127,6 +127,7 @@ let isInitialized = false;
         gameObject('PhasedLoadingManager', 'gS');
         gameObject('Trade', 'Hv');
         gameObject('Friends', 'G_');
+        gameObject('PlayerHUD', 'zv');
 
 
         // Objects
@@ -147,6 +148,7 @@ let isInitialized = false;
         gameObject('SETTINGS', 'bw');
         gameObject('THREE', 'e');
         gameObject('PLAYER_INFO', 'fw');
+        gameObject('PLAYER_HUD', '_w');
         gameObject('NPC', 'I_');
         gameObject('TRADE', 'Mw');
         gameObject('NETWORK_CONTAINER', 'mg');
