@@ -10,6 +10,11 @@
 
 import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
+interface PrivateMessage {
+    text: string;
+    sent: boolean;
+}
+
 /*
  * Chat plugin order of operations
  *  - message is received
@@ -73,11 +78,17 @@ class GenLiteMessageBuffer {
         if (elements.length === 1) {
             let e = elements[0] as HTMLElement;
             speaker = e.innerText;
+            speaker = speaker.substring(0, speaker.length - 1); // trim colon
         }
 
         let content = message.getElementsByClassName(
             'new_ux-message-text'
         )[0].innerHTML;
+
+        if (glbuffer.channel === "private") {
+            // TODO: colors will break here, but we shouldn't use innerHTML
+            plugin.uiTrimAndAddMessage(speaker, content);
+        }
 
         if (plugin.preserveMessages) {
             glbuffer.storeMessage(speaker, content, timestamp);
@@ -85,12 +96,18 @@ class GenLiteMessageBuffer {
 
         if (plugin.condenseMessages) {
             // TODO: optimize a bit
-            for (const existing of self.messages) {
+            // loop through backwards so that we dedupe with most recent instance of a message;
+            for (let i = self.messages.length - 1; i >= 0; i--) {
+                const existing = self.messages[i];
+
                 let es = existing.message.getElementsByClassName('new_ux-message-text');
                 let existingContent = es[0].innerHTML;
 
                 es = existing.message.getElementsByClassName('new_ux-message-user');
                 let existingSpeaker = es.length > 0 ? (es[0] as HTMLElement).innerText : null;
+                if (existingSpeaker) {
+                    existingSpeaker = existingSpeaker.substring(0, existingSpeaker.length - 1); // trim colon
+                }
 
                 if (existingContent === content && existingSpeaker === speaker) {
                     let countElements = existing.message.getElementsByClassName('genlite-message-counter');
@@ -138,6 +155,9 @@ class GenLiteMessageBuffer {
         text: string,
         timestamp: string,
     ) {
+        // don't preserve game messages
+        if (this.channel === "game") return;
+
         document.genlite.database.storeTx(
             'chatlog',
             'readwrite',
@@ -172,15 +192,55 @@ export class GenLiteChatPlugin extends GenLitePlugin {
             value: false,
             stateHandler: this.handleFilterGameMessages.bind(this)
         },
-
+        "Color Private Messages": {
+            type: 'checkbox',
+            value: true,
+            stateHandler: this.handleColorPrivateMessages.bind(this),
+            children: {
+                "Read Message Color": {
+                    type: "color",
+                    value: "#ADD8E6",
+                    stateHandler: this.handleReadColorChange.bind(this),
+                },
+                "Unread Message Color": {
+                    type: "color",
+                    value: "#00FFFF",
+                    stateHandler: this.handleUnreadColorChange.bind(this),
+                },
+                "Sent Message Color": {
+                    type: "color",
+                    value: "#D0D04B",
+                    stateHandler: this.handleSentColorChange.bind(this),
+                }
+            }
+        },
     };
+
+    // privates ui
+    uiTab: HTMLElement = null;
+    settingsMenu: HTMLElement = null; // is this the same as uiTab?
+    searchRow: HTMLElement = null;
+    listContainer: HTMLElement = null;
+    openChat: string = "";
+
+    chatRows: Record<string, HTMLElement> = {};
+    chatUIs: Record<string, HTMLElement> = {};
+    privateLogs: Record<string, PrivateMessage> = {};
     
     customMessagesToIgnore: Set<string> = new Set<string>();
+
+    newPMColor = '#00FFFF';
+    oldPMColor = '#ADD8E6';
+    sentPMColor = '#D0D04B';
+    colorPrivateMessages: boolean = false;
 
     filterGameMessages: boolean = false;
     preserveMessages: boolean = false;
     condenseMessages: boolean = false;
-    originalGameMessage: (text: string) => void;
+    originalGameMessage: (text: string) => HTMLElement;
+    originalAddPrivateMessage: (timestamp, speaker, text, icon, loopback, name) => HTMLElement;
+
+    preserveMinutes = 20;
 
     indexedDBSupported = false;
     bufferHooked: boolean = false;
@@ -191,6 +251,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     async init() {
         document.genlite.registerPlugin(this);
         this.originalGameMessage = document.game.CHAT.addGameMessage;
+        this.originalAddPrivateMessage = document.game.CHAT.addPrivateMessage;
 
         document.genlite.database.add((db) => {
             let store = db.createObjectStore('chatlog', {
@@ -206,7 +267,17 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 type: 'checkbox',
                 oldKey: 'GenLite.Chat.PreserveMessages',
                 value: false,
-                stateHandler: this.handlePreserveMessages.bind(this)
+                stateHandler: this.handlePreserveMessages.bind(this),
+                children: {
+                    'Preserve for (Minutes)': {
+                        type: 'range',
+                        value: 20,
+                        min: 10,
+                        max: 2 * 60,
+                        step: 10,
+                        stateHandler: this.handlePreserveMinutes.bind(this),
+                    }
+                }
             };
         } else {
             this.preserveMessages = false;
@@ -225,21 +296,536 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     }
 
     async postInit() {
+        this.createCSS();
+        this.createUITab();
         document.genlite.ui.registerPlugin("Chat Filtering", null, this.handlePluginState.bind(this), this.pluginSettings);
+        if (this.preserveMessages) {
+            // I'm just hacking this together until the init order refactor
+            setTimeout(this.refillChatBox.bind(this), 500);
+        }
+    }
+
+    createCSS() {
+        const style = document.createElement('style');
+        style.innerHTML = `
+
+            .genlite-chat-container {
+                display: flex;
+                flex-direction: column;
+                overflow-x: hidden;
+                color: #ffd593;
+                font-family: acme,times new roman,Times,serif;
+                height: 100%;
+            }
+
+            .genlite-chat-search-row {
+                width: 100%;
+                height: 25px;
+                border-bottom: 1px solid rgb(66, 66, 66);
+                display: flex;
+                align-items: center;
+            }
+
+            .genlite-chat-search {
+                background-color: rgb(42, 40, 40);
+                color: rgb(255, 255, 255);
+                font-size: 16px;
+                border-radius: 0px;
+                padding-left: 10px;
+                padding-right: 10px;
+                box-sizing: border-box;
+                outline: none;
+                width: 100%;
+                border: medium none;
+                margin-left: auto;
+                margin-right: auto
+            }
+
+            .genlite-chats-list {
+                display: flex;
+                flex-direction: column;
+                overflow-y: scroll;
+                height: 100%;
+                padding: 1em;
+                row-gap: 1em;
+            }
+
+            .genlite-chat-row {
+                padding: 1em;
+                display: flex;
+                border-radius: 1em;
+                background-color: rgb(33,33,33);
+                box-shadow: -2px 2px rgb(10, 10, 10), 2px -2px rgb(60, 60, 60);
+                align-items: center;
+                column-gap: 1em;
+                cursor: pointer;
+                position: relative;
+            }
+
+            .genlite-chat-profile {
+                position: relative;
+                width: 64px;
+                height: 64px;
+            }
+
+            .genlite-chat-profile-bg {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-size: 100%;
+                z-index: 2;
+            }
+
+            .genlite-chat-profile-pic {
+                position: absolute;
+                left: 8%;
+                top: 8%;
+                width: 80%;
+                height: 80%;
+                z-index: 1;
+                border-radius: 50%;
+                background-clip: content-box;
+            }
+
+            .genlite-chat-name {
+                color: goldenrod;
+                text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+                font-size: 1em;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            .genlite-chat-badge {
+                height: 1em;
+                width: 1em;
+                border-radius: 50%;
+                border: 2px double white;
+                position: absolute;
+                right: 0.5em;
+                top: 0.5em;
+                visibility: hidden;
+            }
+
+            .genlite-chat-interface {
+                display: none;
+                flex-direction: column;
+                height: 100%;
+                overflow-y: hidden;
+                row-gap: 1em;
+                padding-bottom: 2em;
+                padding-top: 1em;
+            }
+
+            .genlite-chat-title {
+                color: goldenrod;
+                text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+                font-size: 1.5em;
+                text-align: center;
+                padding-left: 1.25em;
+                padding-right: 1.25em;
+                position: relative;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            .genlite-chat-back {
+                position: absolute;
+                color: white;
+                left: 0.25em;
+                top: 0;
+            }
+
+            .genlite-chat-messages-list {
+                padding: 1em;
+                row-gap: 1em;
+                display: flex;
+                flex-direction: column-reverse;
+                overflow-y: scroll;
+                border-bottom: 1px solid rgb(66, 66, 66);
+                border-top: 1px solid rgb(0, 0, 0);
+                flex-grow: 1;
+            }
+
+            .genlite-chat-message {
+                padding: 0.5em;
+                border-radius: 10px;
+                background-color: rgb(33,33,33);
+                width: fit-content;
+                min-width: 45%;
+                max-width: 75%;
+            }
+
+            .genlite-chat-message-sent {
+                padding: 0.5em;
+                border-radius: 10%;
+                background-color: rgb(33,66,66);
+                margin-left: auto;
+                text-align: right;
+            }
+
+            .genlite-chat-input {
+                border: none;
+                padding: 0.25em;
+                background-color: rgb(66,66,66);
+                margin-right: 1em;
+                margin-left: 1em;
+                display: none;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    createUITab() {
+        if (this.uiTab) {
+            this.uiTab.remove();
+        }
+
+        this.settingsMenu = <HTMLElement>document.createElement("div");
+        this.settingsMenu.classList.add("genlite-chat-container");
+
+                // search bar
+        this.searchRow = <HTMLElement>document.createElement("div");
+        this.searchRow.classList.add("genlite-chat-search-row");
+        this.settingsMenu.appendChild(this.searchRow);
+
+        let search = <HTMLInputElement>document.createElement("input");
+        this.searchRow.appendChild(search);
+        search.classList.add("genlite-chat-search");
+        search.placeholder = "Search Chats...";
+        search.type = "text";
+
+        search.onfocus = () => {
+            document.game.CHAT.focus_locked = true;
+        }
+
+        search.onblur = () => {
+            document.game.CHAT.focus_locked = false;
+        }
+
+        search.oninput = function (e) {
+            let value = search.value.trim().toLowerCase();
+            // TODO
+        }
+
+        this.listContainer = <HTMLElement>document.createElement("div");
+        this.listContainer.classList.add("genlite-chats-list");
+        this.settingsMenu.appendChild(this.listContainer);
+        this.uiTab = document.genlite.ui.addTab("comments", "Chats", this.settingsMenu, this.isPluginEnabled);
+    }
+
+    createTest() {
+        this.uiCreateChat("Wario", [
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "Check out this scrolling" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "hey" },
+            { sent: false, text: "Hey! Here is a really long message so you can show off text wrapping in genlite chats." },
+            { sent: true,  text: "Hello :)" },
+            { sent: false, text: "I think you are really cool"},
+            { sent: false, text: "<3" },
+            { sent: true,  text: "I know" },
+        ]);
+        this.uiCreateChat("Red Bean", [
+            { sent: true,  text: "Mr bean" },
+            { sent: true,  text: "How do I get good at forging?" },
+            { sent: false, text: "It's simple."},
+            { sent: false, text: "Eat more beans" },
+            { sent: true,  text: "Okay" },
+        ]);
+    }
+
+    uiCreateChat(name: string, messages: Array<PrivateMessage>) {
+        let container = <HTMLElement>document.createElement("div");
+        container.classList.add("genlite-chat-row");
+        this.listContainer.appendChild(container);
+        this.chatRows[name] = container;
+
+        let plugin = this;
+        container.onclick = function(e) {
+            plugin.uiOpenChat(name);
+        }
+
+        let badge = <HTMLElement>document.createElement("div");
+        badge.classList.add("genlite-chat-badge");
+        container.appendChild(badge);
+
+        let profile = <HTMLElement>document.createElement("div");
+        profile.classList.add("genlite-chat-profile");
+        container.appendChild(profile);
+
+        let profileBg = <HTMLElement>document.createElement("div");
+        profileBg.classList.add("genlite-chat-profile-bg");
+        profileBg.style.backgroundImage = "url(" + document.game.getStaticPath("/img/new_ux/player_hud/player_picture_empty.png") + ")";
+        profile.appendChild(profileBg);
+
+        let profilePic = <HTMLImageElement>document.createElement("img");
+        profilePic.classList.add("genlite-chat-profile-pic");
+        profile.appendChild(profilePic);
+
+        let nameDiv = <HTMLElement>document.createElement("div");
+        nameDiv.classList.add("genlite-chat-name");
+        nameDiv.innerText = name;
+        container.appendChild(nameDiv);
+
+        let chatui = <HTMLElement>document.createElement("div");
+        chatui.classList.add("genlite-chat-interface");
+        this.settingsMenu.appendChild(chatui);
+        this.chatUIs[name] = chatui;
+
+        let title = <HTMLElement>document.createElement("div");
+        title.classList.add("genlite-chat-title");
+        title.innerText = name;
+        chatui.appendChild(title);
+
+        let back = <HTMLElement>document.createElement("div");
+        back.classList.add("genlite-chat-back");
+        back.onclick = function() {
+            plugin.uiCloseChat();
+        }
+        back.innerHTML = '<i class="fas fa-arrow-left"></i>';
+        title.appendChild(back);
+
+        let messagesList = <HTMLElement>document.createElement("div");
+        messagesList.classList.add("genlite-chat-messages-list");
+        chatui.appendChild(messagesList);
+
+        for (const m of messages.reverse()) {
+            let mdiv = <HTMLElement>document.createElement("div");
+            mdiv.classList.add("genlite-chat-message");
+            if (m.sent) {
+                mdiv.classList.add("genlite-chat-message-sent");
+            }
+            mdiv.innerText = m.text;
+            messagesList.appendChild(mdiv);
+        }
+
+        let input = <HTMLInputElement>document.createElement("input");
+        input.classList.add("genlite-chat-input");
+        chatui.appendChild(input);
+        input.onfocus = () => {
+            document.game.CHAT.focus_locked = true;
+        }
+        input.onblur = () => {
+            document.game.CHAT.focus_locked = false;
+        }
+        // TODO: this is currently display:none until we figure out:
+        //       - fetch username (not display name)
+        //       - send message w/o network.action
+        input.onkeyup = (e) => {
+            if (e.key === "Enter") {
+                console.log("Sending to " + name, input.value);
+                input.value = '';
+            }
+        }
+    }
+
+    uiOpenChat(name: string) {
+        this.chatUIs[name].style.display = 'flex';
+        this.openChat = name;
+        this.searchRow.style.display = 'none';
+        this.listContainer.style.display = 'none';
+    }
+
+    uiCloseChat() {
+        this.searchRow.style.removeProperty('display');
+        this.listContainer.style.removeProperty('display');
+        this.chatUIs[this.openChat].style.removeProperty('display');
+    }
+
+    uiAddMessage(name: string, text: string, sent: boolean) {
+        let ui = this.chatUIs[name];
+        if (ui) {
+            let elements = ui.getElementsByClassName("genlite-chat-messages-list");
+            let messagesList = elements[0] as HTMLElement;
+            let mdiv = <HTMLElement>document.createElement("div");
+            mdiv.classList.add("genlite-chat-message");
+            if (sent) {
+                mdiv.classList.add("genlite-chat-message-sent");
+            }
+            mdiv.innerText = text;
+            messagesList.prepend(mdiv);
+        } else {
+            this.uiCreateChat(name, [{text, sent}]);
+        }
+    }
+
+    uiTrimAndAddMessage(speaker, text) {
+        const frHeader = "(PM from ";
+        const toHeader = "(PM to ";
+        if (speaker.includes(frHeader)) {
+            let name = speaker.substring(frHeader.length, speaker.length - 1);
+            this.uiAddMessage(name, text, false);
+        } else if (speaker.includes(toHeader)) {
+            let name = speaker.substring(toHeader.length, speaker.length - 1);
+            this.uiAddMessage(name, text, true);
+        }
     }
 
     handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
         this.updateState();
+        if (this.uiTab) {
+            this.uiTab.style.display = state ? "flex" : "none";
+        }
     }
 
     public loginOK() {
         this.updateState();
     }
 
+    refillChatBox() {
+        let delta = this.preserveMinutes * 60 * 1000; // min to ms
+        this.getRecentMessages(delta, (ms) => {
+
+            function getText(dom) {
+                let text = "";
+                let elements = dom.getElementsByClassName("new_ux-message-text");
+                if (elements) {
+                    text = (elements[0] as HTMLElement).innerText; // should be innerhtml?
+                }
+                return text;
+            }
+
+            function getSpeaker(dom) {
+                let speaker: string = null;
+                let elements = dom.getElementsByClassName('new_ux-message-user');
+                if (elements.length === 1) {
+                    let e = elements[0] as HTMLElement;
+                    speaker = e.innerText;
+                    speaker = speaker.substring(0, speaker.length - 1); // trim colon
+                }
+                return speaker;
+            }
+
+            // save messages that came in so far
+            let existing_messages: Array<IDBMessage> = [];
+
+            for (const m of document.game.CHAT.filter_buttons["game"].buffer.messages) {
+                existing_messages.push({
+                    channel: "game",
+                    text: getText(m.message),
+                    timestamp: m.timestamp,
+                    speaker: null,
+                });
+            }
+            for (const m of document.game.CHAT.filter_buttons["public"].buffer.messages) {
+                existing_messages.push({
+                    channel: "public",
+                    text: getText(m.message),
+                    timestamp: m.timestamp,
+                    speaker: getSpeaker(m.message),
+                });
+            }
+            for (const m of document.game.CHAT.filter_buttons["private"].buffer.messages) {
+                existing_messages.push({
+                    channel: "private",
+                    text: getText(m.message),
+                    timestamp: m.timestamp,
+                    speaker: getSpeaker(m.message),
+                });
+            }
+
+            // clear chat box
+            document.game.CHAT.clear();
+
+            // temporarily disable preservation so we don't double-store
+            let plugin = document['GenLiteChatPlugin'];
+            let prevValue = plugin.preserveMessages;
+            plugin.preserveMessages = false;
+            for (const m of ms.concat(existing_messages)) {
+                document.game.CHAT.addMessage(
+                    m.channel,
+                    m.timestamp,
+                    m.speaker,
+                    m.text,
+                    false
+                );
+            }
+            plugin.preserveMessages = prevValue;
+        });
+    }
+
     handleFilterGameMessages(state: boolean) {
         this.filterGameMessages = state;
         this.updateState();
+    }
+
+    handleColorPrivateMessages(state: boolean) {
+        this.colorPrivateMessages = state;
+
+        let messages = document.getElementsByClassName("new_ux-private-message");
+        for (let i = 0; i < messages.length; i++) {
+            let message = messages[i] as HTMLElement;
+            let users = message.getElementsByClassName("new_ux-message-user");
+            if (users.length) {
+                let name = (users[0] as HTMLElement).innerText;
+                if (name.includes("(PM from ")) {
+                    // we don't know if it's been read, so default to yes
+                    if (state) message.style.color = this.oldPMColor;
+                    else message.style.removeProperty("color");
+                } else if (name.includes("(PM to ")) {
+                    if (state) message.style.color = this.sentPMColor;
+                    else message.style.removeProperty("color");
+                }
+            }
+        }
+    }
+
+    handleReadColorChange(color: string) {
+        const prevColor = this.oldPMColor;
+        const fromHeader = "(PM from ";
+        this.oldPMColor = color;
+
+        let messages = document.getElementsByClassName("new_ux-private-message");
+        for (let i = 0; i < messages.length; i++) {
+            let message = messages[i] as HTMLElement;
+            let users = message.getElementsByClassName("new_ux-message-user");
+            if (users.length && (users[0] as HTMLElement).innerText.includes(fromHeader)) {
+                if (message.style.color === prevColor) {
+                    message.style.color = this.oldPMColor;
+                }
+            }
+        }
+    }
+
+    handleUnreadColorChange(color: string) {
+        const prevColor = this.newPMColor;
+        const fromHeader = "(PM from ";
+        this.newPMColor = color;
+        let messages = document.getElementsByClassName("new_ux-private-message");
+        for (let i = 0; i < messages.length; i++) {
+            let message = messages[i] as HTMLElement;
+            let users = message.getElementsByClassName("new_ux-message-user");
+            if (users.length && (users[0] as HTMLElement).innerText.includes(fromHeader)) {
+                if (message.style.color === prevColor) {
+                    message.style.color = this.newPMColor;
+                }
+            }
+        }
+    }
+
+    handleSentColorChange(color: string) {
+        this.sentPMColor = color;
+        const toHeader = "(PM to ";
+        let messages = document.getElementsByClassName("new_ux-private-message");
+        for (let i = 0; i < messages.length; i++) {
+            let message = messages[i] as HTMLElement;
+            let users = message.getElementsByClassName("new_ux-message-user");
+            if (users.length && (users[0] as HTMLElement).innerText.includes(toHeader)) {
+                message.style.color = this.sentPMColor;
+            }
+        }
     }
 
     handleCondenseMessages(state: boolean) {
@@ -252,9 +838,14 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         this.updateState();
     }
 
+    handlePreserveMinutes(minutes: number) {
+        this.preserveMinutes = minutes;
+    }
+
     updateState() {
-        if (this.isPluginEnabled && (this.condenseMessages || this.preserveMessages)) {
+        if (this.isPluginEnabled) {
             this.hookBuffer();
+
         } else {
             this.unhookBuffer();
         }
@@ -268,6 +859,18 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         } else {
             document.game.CHAT.addGameMessage = this.originalGameMessage;
         }
+
+        if (this.isPluginEnabled && this.colorPrivateMessages) {
+            let plugin = this;
+            document.game.CHAT.addPrivateMessage = function (e,speaker,n,i,a,r) {
+                let dom = plugin.originalAddPrivateMessage.bind(this)(e,speaker,n,i,a,r);
+                plugin.colorPrivateMessage(speaker, dom);
+                return dom;
+            };
+        } else {
+            document.game.CHAT.addPrivateMessage = this.originalAddPrivateMessage;
+        }
+
     }
 
     hookBuffer() {
@@ -288,6 +891,26 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 this.buffers[channel].unhook();
             }
             this.bufferHooked = false;
+        }
+    }
+
+    colorPrivateMessage(speaker, dom: HTMLElement) {
+        const pmHeader = "(PM to ";
+        if (speaker.includes(pmHeader)) {
+            dom.style.color = this.sentPMColor;
+            let sentTo = speaker.substring(pmHeader.length, speaker.length - 1);
+            let fromHeader = "(PM from " + sentTo + ")";
+            let messages = document.getElementsByClassName("new_ux-private-message");
+            for (let i = 0; i < messages.length; i++) {
+                let message = messages[i] as HTMLElement;
+                let users = message.getElementsByClassName("new_ux-message-user");
+                if (users.length && (users[0] as HTMLElement).innerText.includes(fromHeader)) {
+                    message.style.color = this.oldPMColor;
+                }
+            }
+        } else {
+            // for received messages, recolor
+            dom.style.color = this.newPMColor;
         }
     }
 
@@ -350,6 +973,30 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         localStorage.setItem(
             GenLiteChatPlugin.storageKey,
             JSON.stringify(Array.from(s))
+        );
+    }
+
+    getRecentMessages(
+        delta: number,
+        callback: (m: Array<IDBMessage>) => void
+    ) {
+        const endTime = Date.now() - delta;
+        let messages = [];
+        let store = document.genlite.database.storeTx(
+            'chatlog',
+            'readonly',
+            (store) => {
+                store.openCursor(null, 'prev').onsuccess = (e) => {
+                    const cursor = e.target.result;
+                    let message = cursor.value;
+                    if (message.timestamp >= endTime) {
+                        messages.unshift(message);
+                        cursor.continue();
+                    } else {
+                        callback(messages);
+                    }
+                };
+            }
         );
     }
 
