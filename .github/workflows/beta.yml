@@ -28,7 +28,7 @@ jobs:
         working-directory: ./
         run: |
           npm install
-          npm run build:prod
+          npm run build:prodbeta
       
       - name: Update Main Branch Versions
         uses: stefanzweifel/git-auto-commit-action@v4
