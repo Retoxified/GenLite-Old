@@ -88,6 +88,8 @@ class GenLiteMessageBuffer {
         if (glbuffer.channel === "private") {
             // TODO: colors will break here, but we shouldn't use innerHTML
             plugin.uiTrimAndAddMessage(speaker, content);
+        } else if (glbuffer.channel === "public") {
+            plugin.uiAddPublicMessage(speaker, content);
         }
 
         if (plugin.preserveMessages) {
@@ -214,6 +216,11 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 }
             }
         },
+        "Mark Public Chat As Read": {
+            type: 'checkbox',
+            value: false,
+            stateHandler: this.handleMarkPublicRead.bind(this)
+        },
     };
 
     // privates ui
@@ -222,6 +229,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     settingsMenu: HTMLElement = null; // is this the same as uiTab?
     searchRow: HTMLElement = null;
     listContainer: HTMLElement = null;
+    lastPublicSpeaker: string = null;
     openChat: string = null;
 
     chatRows: Record<string, HTMLElement> = {};
@@ -240,6 +248,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     condenseMessages: boolean = false;
     originalGameMessage: (text: string) => HTMLElement;
     originalAddPrivateMessage: (timestamp, speaker, text, icon, loopback, name) => HTMLElement;
+    markPublicRead: boolean = false;
 
     preserveMinutes = 20;
 
@@ -350,6 +359,15 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 row-gap: 1em;
             }
 
+            .genlite-chat-row-public {
+                justify-content:center;
+                background-color: rgb(44,44,44);
+            }
+
+            .genlite-chat-row-public .genlite-chat-profile {
+                display: none;
+            }
+
             .genlite-chat-row {
                 padding: 1em;
                 display: flex;
@@ -457,9 +475,15 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 flex-grow: 1;
             }
 
+            .genlite-chat-message-author {
+                color: white;
+                font-size: 0.8em;
+                transform: translateY(0.5em);
+            }
+
             .genlite-chat-message {
                 padding: 0.5em;
-                border-radius: 10px;
+                border-radius: 5px;
                 background-color: rgb(33,33,33);
                 width: fit-content;
                 min-width: 45%;
@@ -468,7 +492,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
 
             .genlite-chat-message-sent {
                 padding: 0.5em;
-                border-radius: 10%;
+                border-radius: 5px;
                 background-color: rgb(33,66,66);
                 margin-left: auto;
                 text-align: left;
@@ -523,6 +547,9 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         this.listContainer.classList.add("genlite-chats-list");
         this.settingsMenu.appendChild(this.listContainer);
         this.uiTab = document.genlite.ui.addTab("comments", "Chats", this.settingsMenu, this.isPluginEnabled);
+
+        let publicChat = this.uiCreateChat("~public~", []);
+        publicChat.classList.add("genlite-chat-row-public");
     }
 
     createTest() {
@@ -636,6 +663,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 input.value = '';
             }
         }
+        return container;
     }
 
     uiOpenChat(name: string) {
@@ -691,6 +719,37 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         } else if (speaker.includes(toHeader)) {
             let name = speaker.substring(toHeader.length, speaker.length - 1);
             this.uiAddMessage(name, text, true);
+        }
+    }
+
+    uiAddPublicMessage(speaker, text) {
+        // TODO: public is initialized too late for preserved chat
+        let ui = this.chatUIs["~public~"];
+        if (!ui) return;
+
+        let elements = ui.getElementsByClassName("genlite-chat-messages-list");
+        let messagesList = elements[0] as HTMLElement;
+        let mdiv = <HTMLElement>document.createElement("div");
+        mdiv.classList.add("genlite-chat-message");
+        mdiv.innerText = text;
+
+        let nick = document.game.PLAYER.character.nickname;
+        if (nick === speaker) {
+            self.lastPublicSpeaker = null;
+            mdiv.classList.add("genlite-chat-message-sent");
+        } else if (speaker != this.lastPublicSpeaker) {
+            let speakerDiv = <HTMLElement>document.createElement("div");
+            speakerDiv.classList.add("genlite-chat-message-author");
+            speakerDiv.innerText = speaker;
+            messagesList.prepend(speakerDiv);
+            this.lastPublicSpeaker = speaker;
+        }
+
+        messagesList.prepend(mdiv);
+
+        if (!this.markPublicRead && nick !== speaker && this.openChat !== "~public~") {
+            this.chatRows["~public~"].classList.add("genlite-chat-row-unread");
+            this.uiDisplayNotificationBadge(true);
         }
     }
 
@@ -916,6 +975,10 @@ export class GenLiteChatPlugin extends GenLitePlugin {
 
     handlePreserveMinutes(minutes: number) {
         this.preserveMinutes = minutes;
+    }
+
+    handleMarkPublicRead(state: boolean) {
+        this.markPublicRead = state;
     }
 
     updateState() {
