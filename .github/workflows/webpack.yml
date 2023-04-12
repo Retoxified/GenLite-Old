@@ -70,7 +70,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BUILD_TOKEN }}
         with:
-          tag_name: ${{ steps.get_version.outputs.version }}
           release_name: Beta ${{ steps.get_version.outputs.version }}
           body: Beta of version ${{ steps.get_version.outputs.version }}
           draft: false
