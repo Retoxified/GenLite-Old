@@ -723,7 +723,6 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     }
 
     uiAddPublicMessage(speaker, text) {
-        // TODO: public is initialized too late for preserved chat
         let ui = this.chatUIs["~public~"];
         if (!ui) return;
 
