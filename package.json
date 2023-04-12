@@ -2,8 +2,8 @@
   "name": "genlite",
   "version": "0.2.34",
   "scripts": {
-    "build:nopatch": "npx webpack --mode production",
-    "build:prod": "npm version patch --no-git-tag-version --force && npx webpack --mode production",
+    "build:prod": "npx webpack --mode production",
+    "build:patch": "npm version patch --no-git-tag-version --force && npx webpack --mode production",
     "build:dev": "npx webpack --mode development",
     "docs": "jsdoc -r ./src/"
   },
