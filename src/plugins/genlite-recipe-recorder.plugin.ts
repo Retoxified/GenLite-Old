@@ -280,13 +280,7 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
             delete plugin.recipeResults[recipeName];
         };
 
-        let nInputs = Infinity;
         for (const item in result.input) {
-            let amt = result.input[item];
-            if (amt < nInputs) {
-                nInputs = amt;
-            }
-
             let icon = this.createIconDiv(item);
             icons.appendChild(icon);
         }
@@ -296,7 +290,7 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         outputBox.classList.add("genlite-recipes-output");
         row.appendChild(outputBox);
 
-        this.updateOutputBox(outputBox, result);
+        this.updateOutputBox(outputBox, recipeName, result);
 
         arrow.onclick = function (e) {
             if (i.classList.toggle("fa-chevron-right")) {
@@ -347,7 +341,7 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         return div;
     }
 
-    updateOutputBox(outputBox: HTMLElement, results) {
+    updateOutputBox(outputBox: HTMLElement, recipeName, results) {
         let seo = "";
 
         function addSEO(prefix, s) {
@@ -399,6 +393,17 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         let nInputs = Infinity;
         for (const item in results.input) {
             let amt = results.input[item];
+            let index = recipeName.indexOf(item);
+            if (index != -1) {
+                let remaining = recipeName.substring(index + item.length);
+                let sep = remaining.indexOf("__");
+                if (sep == -1) {
+                    sep = remaining.length;
+                }
+                let count = parseInt(remaining.substring(0, sep));
+                amt /= count;
+            }
+
             if (amt < nInputs) {
                 nInputs = amt;
             }
@@ -450,7 +455,7 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
             let es = row.getElementsByClassName('genlite-recipes-output');
             if (es) {
                 let outputBox = <HTMLElement>es[0];
-                this.updateOutputBox(outputBox, results);
+                this.updateOutputBox(outputBox, recipeName, results);
             }
         }
     }
