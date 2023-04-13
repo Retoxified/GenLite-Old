@@ -13,6 +13,8 @@
 
 import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
+type SortType = 'kills'|'kills-inv'|'alpha'|'alpha-inv';
+
 export class GenLiteDropRecorderPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteDropRecorderPlugin';
 
@@ -47,6 +49,9 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
     uiTab: HTMLElement = null;
     listContainer: HTMLElement = null;
     monsterElements: Record<string, HTMLElement> = {};
+    sortMethod : SortType = 'kills';
+    sortOrder : Array<SortType> = ['kills', 'alpha'];
+    sortIcon : HTMLElement = null;
 
     pluginSettings : Settings = {
         "Send Drops to Wiki": {
@@ -109,6 +114,13 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
                 border: medium none;
                 margin-left: auto;
                 margin-right: auto
+            }
+
+            .genlite-drops-sort-icon {
+                height: 100%;
+                padding-right: 0.5em;
+                color: white;
+                cursor: pointer;
             }
 
             .genlite-drops-list {
@@ -205,6 +217,16 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
         search.placeholder = "Search Drops...";
         search.type = "text";
 
+        let iconDiv = <HTMLElement>document.createElement("div");
+        iconDiv.classList.add("genlite-drops-sort-icon");
+        iconDiv.innerHTML = '<i class="fas fa-arrow-down-9-1"></i>';
+        searchrow.appendChild(iconDiv);
+        this.sortIcon = iconDiv;
+
+        iconDiv.onclick = (e) => {
+            document['GenLiteDropRecorderPlugin'].changeSort();
+        }
+
         search.onfocus = () => {
             document.game.CHAT.focus_locked = true;
         }
@@ -257,11 +279,72 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
         this.listContainer = <HTMLElement>document.createElement("div");
         this.listContainer.classList.add("genlite-drops-list");
         settingsMenu.appendChild(this.listContainer);
-        for (const monsterId in this.dropTable) {
-            this.createMonsterRow(monsterId);
-        }
+        this.refreshDropsUI();
 
         this.uiTab = document.genlite.ui.addTab("skull", "Drop Recorder", settingsMenu, this.isPluginEnabled);
+    }
+
+    changeSort() {
+        let i = (this.sortOrder.indexOf(this.sortMethod) + 1) % this.sortOrder.length;
+        this.sortMethod = this.sortOrder[i];
+        let div = this.sortIcon;
+        switch (this.sortMethod) {
+            case 'kills':
+                div.innerHTML = '<i class="fas fa-arrow-down-9-1"></i>';
+                break;
+            case 'kills-inv':
+                div.innerHTML = '<i class="fas fa-arrow-up-9-1"></i>';
+                break;
+            case 'alpha':
+                div.innerHTML = '<i class="fas fa-arrow-down-a-z"></i>';
+                break;
+            case 'alpha-inv':
+                div.innerHTML = '<i class="fas fa-arrow-up-z-a"></i>';
+                break;
+        }
+        this.refreshDropsUI();
+    }
+
+    refreshDropsUI() {
+        let entries : any = Object.entries(this.dropTable);
+        let sorted : Array<any> = [];
+        switch (this.sortMethod) {
+            case 'kills':
+                sorted = entries.sort(
+                    ([,a],[,b]) =>
+                    b.Num_Killed - a.Num_Killed
+                );
+                break;
+            case 'kills-inv':
+                sorted = entries.sort(
+                    ([,a],[,b]) =>
+                    a.Num_Killed - b.Num_Killed
+                );
+                break;
+            case 'alpha':
+                sorted = entries.sort(
+                    ([,a],[,b]) =>
+                    a.Monster_Name.localeCompare(b.Monster_Name)
+                );
+                break;
+            case 'alpha-inv':
+                sorted = entries.sort(
+                    ([,a],[,b]) =>
+                    b.Monster_Name.localeCompare(a.Monster_Name)
+                );
+                break;
+        }
+
+        this.listContainer.innerHTML = '';
+        for (const entry of sorted) {
+            const monsterId = entry[0];
+            let row = this.monsterElements[monsterId];
+            if (row) {
+                this.listContainer.appendChild(this.monsterElements[monsterId]);
+            } else {
+                this.createMonsterRow(monsterId);
+            }
+        }
     }
 
     createMonsterRow(monsterId: string) {
