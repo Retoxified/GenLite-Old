@@ -146,6 +146,7 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
                 padding: 0.25em;
                 overflow-x: hidden;
                 align-items: center;
+                position: relative;
             }
 
             .genlite-drops-iconlist {
@@ -174,10 +175,14 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
 
             .genlite-drops-trash {
                 display: none;
+                position: absolute;
+                right: 0;
                 color: red;
                 padding-right: 1em;
-                flex-shrink: 0;
                 cursor: pointer;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 2;
             }
 
             .genlite-drops-icon {
@@ -695,6 +700,7 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
             }
         }
     }
+
     keyUpHandler(event) {
         if (event.key !== "Alt")
             return;
