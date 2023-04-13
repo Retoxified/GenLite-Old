@@ -20,6 +20,7 @@ export class GenLiteEnhancedContextMenu extends GenLitePlugin {
     lookupNPCs: boolean = false;
     lookupObjects: boolean = false;
     lookupItems: boolean = false;
+    photosEnabled: boolean = true;
     betterRockNames: boolean = false;
     rightClickAttack: boolean = false;
 
@@ -60,7 +61,12 @@ export class GenLiteEnhancedContextMenu extends GenLitePlugin {
             oldKey: 'NPCMenuSwapper.rightClickAttack',
             value: this.rightClickAttack,
             stateHandler: this.handleRightClickAttackToggle.bind(this)
-        }
+        },
+        "Right Click Photo": {
+            type: 'checkbox',
+            value: this.photosEnabled,
+            stateHandler: this.handlePhotosEnabledToggle.bind(this)
+        },
     }
 
     async init() {
@@ -94,6 +100,10 @@ export class GenLiteEnhancedContextMenu extends GenLitePlugin {
         this.lookupItems = state;
     }
 
+    handlePhotosEnabledToggle(state: boolean): void {
+        this.photosEnabled = state;
+    }
+
     handleBetterRockNamesToggle(state: boolean): void {
         this.betterRockNames = state;
     }
@@ -108,12 +118,23 @@ export class GenLiteEnhancedContextMenu extends GenLitePlugin {
 
         // Create a Map to store the actions
         let NPCs = new Map();
+        let Players = new Map();
 
+        let iii = 0;
         for (let i = 0; i < list.length; i++) {
             // Get the action object
             let actionObject = list[i].object;
 
-            if (actionObject.type === "player") continue;
+            if (actionObject.type === "player") {
+                if (Players.has(actionObject)) {
+                    // Push the action to the existing array
+                    Players.get(actionObject).push(list[i]);
+                } else {
+                    // Create a new array and push the action
+                    Players.set(actionObject, [list[i]]);
+                }
+                continue;
+            }
 
             // See if the object is already in the set
             if (NPCs.has(actionObject)) {
@@ -139,13 +160,30 @@ export class GenLiteEnhancedContextMenu extends GenLitePlugin {
                         // Take the name of the NPC remove any spaces
                         window.open(this.wikiBaseURL + cleanName, '_blank');
                     }
-                })
+                });
             }
 
             if (key.info.attackable) {
                 // Find the list element with the attack action attached to key
                 let attackAction = list.find((action) => action.text === "Attack" && action.object === key);
                 attackAction.priority = (!this.rightClickAttack && key.levelDifference <= 10 && !document.game.PLAYER.character.combat) ? 2 : -2;
+            }
+        });
+
+        Players.forEach((value, key) => {
+            if (this.photosEnabled && (!value.find((action) => action.text === "Take Photo of"))) {
+                list.push({
+                    object: key,
+                    distance: value[0].distance,
+                    priority: -4,
+                    text: "Take Photo of",
+                    action: () => {
+                        let chatplugin = document['GenLiteChatPlugin'];
+                        if (chatplugin) {
+                            chatplugin.uiFetchNewProfilePic(key.nickname, null);
+                        }
+                    }
+                });
             }
         });
     }

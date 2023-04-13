@@ -246,6 +246,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
 
     filterGameMessages: boolean = false;
     preserveMessages: boolean = false;
+    cacheProfilePics: boolean = false;
     condenseMessages: boolean = false;
     originalGameMessage: (text: string) => HTMLElement;
     originalAddPrivateMessage: (timestamp, speaker, text, icon, loopback, name) => HTMLElement;
@@ -265,11 +266,18 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         this.originalAddPrivateMessage = document.game.CHAT.addPrivateMessage;
 
         document.genlite.database.add((db) => {
+            if (db.objectStoreNames.contains('chatlog')) return;
             let store = db.createObjectStore('chatlog', {
                 keyPath: 'key',
                 autoIncrement: true
             });
             store.createIndex('indexKey', 'key', {unique: true});
+        });
+        document.genlite.database.add((db) => {
+            if (db.objectStoreNames.contains('profiles')) return;
+            let store = db.createObjectStore('profiles', {
+                keyPath: 'name',
+            });
         });
 
         this.indexedDBSupported = 'indexedDB' in window;
@@ -288,7 +296,12 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                         step: 10,
                         stateHandler: this.handlePreserveMinutes.bind(this),
                     }
-                }
+                },
+            };
+            this.pluginSettings['Cache Profile Pics'] = {
+                type: 'checkbox',
+                value: true,
+                stateHandler: this.handleCacheProfilePics.bind(this),
             };
         } else {
             this.preserveMessages = false;
@@ -370,9 +383,9 @@ export class GenLiteChatPlugin extends GenLitePlugin {
             }
 
             .genlite-chat-row {
-                padding: 1em;
+                padding: 0.5em;
                 display: flex;
-                border-radius: 1em;
+                border-radius: 10px;
                 background-color: rgb(33,33,33);
                 box-shadow: -2px 2px rgb(10, 10, 10), 2px -2px rgb(60, 60, 60);
                 align-items: center;
@@ -382,7 +395,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
             }
 
             .genlite-chat-row-unread {
-                box-shadow: -2px 2px rgb(0, 127, 127), 2px -2px rgb(0, 255, 255);
+                box-shadow:  2px -2px rgb(0, 255, 255), -2px 2px rgb(0, 127, 127), -2px -2px rgb(0, 200, 200), 2px 2px rgb(0, 200, 200)
             }
 
             .genlite-chat-profile {
@@ -766,11 +779,64 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         }
     }
 
+    // checks cache before fetching new
     uiUpdateProfilePic(name: string, image: HTMLImageElement) {
+        if (image === null) {
+            let ui = this.chatUIs[name];
+            if (!ui) return;
+            image = (ui as any).profilePic;
+        }
+
+        if (!this.cacheProfilePics) {
+            this.uiFetchNewProfilePic(name, image);
+            return;
+        }
+
+        let plugin = this;
+        document.genlite.database.storeTx(
+            'profiles',
+            'readonly',
+            (store) => {
+                let request = store.get(name);
+                request.onsuccess = (e) => {
+                    let record = request.result;
+                    if (record && record.image) {
+                        image.src = record.image;
+                    } else {
+                        plugin.uiFetchNewProfilePic(name, image);
+                    }
+                };
+            }
+        );
+    }
+
+    uiFetchNewProfilePic(name: string, image: HTMLImageElement) {
+        if (image === null) {
+            let ui = this.chatUIs[name];
+            if (ui) {
+                image = (ui as any).profilePic;
+            }
+        }
+
         let camera = document['GenLiteCameraPlugin'];
         if (camera) {
+            let plugin = this;
             camera.getPlayerPicture(name, (data) => {
-                image.src = data;
+                if (image) {
+                    image.src = data;
+                }
+                if (plugin.cacheProfilePics) {
+                    document.genlite.database.storeTx(
+                        'profiles',
+                        'readwrite',
+                        (store) => {
+                            store.put({
+                                name: name,
+                                image: data,
+                            });
+                        }
+                    );
+                }
             });
         }
     }
@@ -959,6 +1025,10 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     handlePreserveMessages(state: boolean) {
         this.preserveMessages = state;
         this.updateState();
+    }
+
+    handleCacheProfilePics(state: boolean) {
+        this.cacheProfilePics = state;
     }
 
     handlePreserveMinutes(minutes: number) {
