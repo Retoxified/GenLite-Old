@@ -19,7 +19,7 @@ type StoreCallback = (db: IDBObjectStore) => void;
 export class GenLiteDatabasePlugin extends GenLitePlugin {
     public static pluginName = 'GenLiteDatabasePlugin';
     public static dbName = 'GenLiteDatabase';
-    public static version = 2;
+    public static version = 4;
 
     public supported = false;
     public initialized = false;
@@ -100,7 +100,11 @@ export class GenLiteDatabasePlugin extends GenLitePlugin {
             r.onupgradeneeded = (e: any) => {
                 let db = e.target.result;
                 for (const store of this.stores) {
-                    store.callback(db);
+                    try {
+                        store.callback(db);
+                    } catch (err) {
+                        this.error('creating store: ', err);
+                    }
                 }
             };
         }

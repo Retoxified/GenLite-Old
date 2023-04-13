@@ -13,6 +13,8 @@
 
 import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
+type SortType = 'kills'|'kills-inv'|'alpha'|'alpha-inv';
+
 export class GenLiteDropRecorderPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteDropRecorderPlugin';
 
@@ -47,6 +49,9 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
     uiTab: HTMLElement = null;
     listContainer: HTMLElement = null;
     monsterElements: Record<string, HTMLElement> = {};
+    sortMethod : SortType = 'kills';
+    sortOrder : Array<SortType> = ['kills', 'alpha'];
+    sortIcon : HTMLElement = null;
 
     pluginSettings : Settings = {
         "Send Drops to Wiki": {
@@ -60,6 +65,8 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
             
     async init() {
         document.genlite.registerPlugin(this);
+        window.addEventListener('keydown', this.keyDownHandler.bind(this));
+        window.addEventListener('keyup', this.keyUpHandler.bind(this));
 
         let dropTableString = localStorage.getItem("genliteDropTable");
         if (dropTableString == null) {
@@ -111,6 +118,13 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
                 margin-right: auto
             }
 
+            .genlite-drops-sort-icon {
+                height: 100%;
+                padding-right: 0.5em;
+                color: white;
+                cursor: pointer;
+            }
+
             .genlite-drops-list {
                 display: flex;
                 flex-direction: column;
@@ -132,6 +146,7 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
                 padding: 0.25em;
                 overflow-x: hidden;
                 align-items: center;
+                position: relative;
             }
 
             .genlite-drops-iconlist {
@@ -151,9 +166,23 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
 
             .genlite-drops-arrow i {
                 margin: auto;
+                flex-shrink: 0;
             }
 
             .genlite-drops-title {
+                flex-grow: 1;
+            }
+
+            .genlite-drops-trash {
+                display: none;
+                position: absolute;
+                right: 0;
+                color: red;
+                padding-right: 1em;
+                cursor: pointer;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 2;
             }
 
             .genlite-drops-icon {
@@ -204,6 +233,16 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
         search.classList.add("genlite-drops-search");
         search.placeholder = "Search Drops...";
         search.type = "text";
+
+        let iconDiv = <HTMLElement>document.createElement("div");
+        iconDiv.classList.add("genlite-drops-sort-icon");
+        iconDiv.innerHTML = '<i class="fas fa-arrow-down-9-1"></i>';
+        searchrow.appendChild(iconDiv);
+        this.sortIcon = iconDiv;
+
+        iconDiv.onclick = (e) => {
+            document['GenLiteDropRecorderPlugin'].changeSort();
+        }
 
         search.onfocus = () => {
             document.game.CHAT.focus_locked = true;
@@ -257,11 +296,72 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
         this.listContainer = <HTMLElement>document.createElement("div");
         this.listContainer.classList.add("genlite-drops-list");
         settingsMenu.appendChild(this.listContainer);
-        for (const monsterId in this.dropTable) {
-            this.createMonsterRow(monsterId);
-        }
+        this.refreshDropsUI();
 
         this.uiTab = document.genlite.ui.addTab("skull", "Drop Recorder", settingsMenu, this.isPluginEnabled);
+    }
+
+    changeSort() {
+        let i = (this.sortOrder.indexOf(this.sortMethod) + 1) % this.sortOrder.length;
+        this.sortMethod = this.sortOrder[i];
+        let div = this.sortIcon;
+        switch (this.sortMethod) {
+            case 'kills':
+                div.innerHTML = '<i class="fas fa-arrow-down-9-1"></i>';
+                break;
+            case 'kills-inv':
+                div.innerHTML = '<i class="fas fa-arrow-up-9-1"></i>';
+                break;
+            case 'alpha':
+                div.innerHTML = '<i class="fas fa-arrow-down-a-z"></i>';
+                break;
+            case 'alpha-inv':
+                div.innerHTML = '<i class="fas fa-arrow-up-z-a"></i>';
+                break;
+        }
+        this.refreshDropsUI();
+    }
+
+    refreshDropsUI() {
+        let entries : any = Object.entries(this.dropTable);
+        let sorted : Array<any> = [];
+        switch (this.sortMethod) {
+            case 'kills':
+                sorted = entries.sort(
+                    ([,a],[,b]) =>
+                    b.Num_Killed - a.Num_Killed
+                );
+                break;
+            case 'kills-inv':
+                sorted = entries.sort(
+                    ([,a],[,b]) =>
+                    a.Num_Killed - b.Num_Killed
+                );
+                break;
+            case 'alpha':
+                sorted = entries.sort(
+                    ([,a],[,b]) =>
+                    a.Monster_Name.localeCompare(b.Monster_Name)
+                );
+                break;
+            case 'alpha-inv':
+                sorted = entries.sort(
+                    ([,a],[,b]) =>
+                    b.Monster_Name.localeCompare(a.Monster_Name)
+                );
+                break;
+        }
+
+        this.listContainer.innerHTML = '';
+        for (const entry of sorted) {
+            const monsterId = entry[0];
+            let row = this.monsterElements[monsterId];
+            if (row) {
+                this.listContainer.appendChild(this.monsterElements[monsterId]);
+            } else {
+                this.createMonsterRow(monsterId);
+            }
+        }
     }
 
     createMonsterRow(monsterId: string) {
@@ -289,6 +389,17 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
         title.classList.add("genlite-drops-title");
         title.innerText = this.getUITitle(data);
         header.appendChild(title);
+
+        let trash = <HTMLElement>document.createElement("div");
+        trash.classList.add("genlite-drops-trash");
+        trash.innerHTML = '<i class="fas fa-trash"></i>';
+        header.appendChild(trash);
+        trash.onclick = (e) => {
+            let plugin = document['GenLiteDropRecorderPlugin'];
+            plugin.deleteDropEntry(monsterId);
+            plugin.monsterElements[monsterId].remove();
+            delete plugin.monsterElements[monsterId];
+        };
 
         let outputBox = <HTMLElement>document.createElement("div");
         outputBox.classList.add("genlite-drops-output");
@@ -558,5 +669,47 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
             localStorage.setItem("genliteDropTable", JSON.stringify(this.dropTable));
         }
         this.updateMonsterRow(dropKey);
+    }
+
+    deleteDropEntry(key: string) {
+        let deletedStr = localStorage['genliteDeletedDrops'];
+        if (!deletedStr) {
+            deletedStr = '[]';
+        }
+        let deleted = JSON.parse(deletedStr ? deletedStr : '[]');
+        deleted.push({
+            key: key,
+            time: Date.now(),
+            data: this.dropTable[key],
+        });
+        localStorage.setItem("genliteDeletedDrops", JSON.stringify(deleted));
+        delete this.dropTable[key];
+        localStorage.setItem("genliteDropTable", JSON.stringify(this.dropTable));
+    }
+
+    keyDownHandler(event) {
+        if (event.key !== "Alt")
+            return;
+
+        event.preventDefault();
+        if (!event.repeat) {
+            let eles = document.getElementsByClassName('genlite-drops-trash');
+            for (let i = 0; i < eles.length; i++) {
+                let el = eles[i] as HTMLElement;
+                el.style.display = 'flex';
+            }
+        }
+    }
+
+    keyUpHandler(event) {
+        if (event.key !== "Alt")
+            return;
+
+        event.preventDefault();
+        let eles = document.getElementsByClassName('genlite-drops-trash');
+        for (let i = 0; i < eles.length; i++) {
+            let el = eles[i] as HTMLElement;
+            el.style.removeProperty('display');
+        }
     }
 }

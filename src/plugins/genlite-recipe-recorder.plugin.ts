@@ -38,6 +38,9 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
 
     async init() {
         document.genlite.registerPlugin(this);
+        window.addEventListener('keydown', this.keyDownHandler.bind(this));
+        window.addEventListener('keyup', this.keyUpHandler.bind(this));
+
 
         let dropTableString = localStorage.getItem("GenliteRecipeRecorder")
         if (dropTableString == null) {
@@ -87,6 +90,7 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
                 display: flex;
                 column-gap: 0.5em;
                 padding: 0.25em;
+                position: relative;
             }
 
             .genlite-recipes-arrow {
@@ -105,6 +109,18 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
                 width: 28px;
                 height: 28px;
                 position: relative;
+            }
+
+            .genlite-recipes-trash {
+                display: none;
+                position: absolute;
+                right: 0;
+                color: red;
+                padding-right: 1em;
+                cursor: pointer;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 2;
             }
 
             .genlite-recipes-output {
@@ -253,13 +269,18 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         arrow.appendChild(i);
         icons.appendChild(arrow);
 
-        let nInputs = Infinity;
-        for (const item in result.input) {
-            let amt = result.input[item];
-            if (amt < nInputs) {
-                nInputs = amt;
-            }
+        let trash = <HTMLElement>document.createElement("div");
+        trash.classList.add("genlite-recipes-trash");
+        trash.innerHTML = '<i class="fas fa-trash"></i>';
+        icons.appendChild(trash);
+        trash.onclick = (e) => {
+            let plugin = document['GenLiteRecipeRecorderPlugin'];
+            plugin.deleteRecipe(recipeName);
+            plugin.recipeElements[recipeName].remove();
+            delete plugin.recipeResults[recipeName];
+        };
 
+        for (const item in result.input) {
             let icon = this.createIconDiv(item);
             icons.appendChild(icon);
         }
@@ -269,7 +290,7 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         outputBox.classList.add("genlite-recipes-output");
         row.appendChild(outputBox);
 
-        this.updateOutputBox(outputBox, result);
+        this.updateOutputBox(outputBox, recipeName, result);
 
         arrow.onclick = function (e) {
             if (i.classList.toggle("fa-chevron-right")) {
@@ -320,7 +341,7 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         return div;
     }
 
-    updateOutputBox(outputBox: HTMLElement, results) {
+    updateOutputBox(outputBox: HTMLElement, recipeName, results) {
         let seo = "";
 
         function addSEO(prefix, s) {
@@ -372,6 +393,17 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         let nInputs = Infinity;
         for (const item in results.input) {
             let amt = results.input[item];
+            let index = recipeName.indexOf(item);
+            if (index != -1) {
+                let remaining = recipeName.substring(index + item.length);
+                let sep = remaining.indexOf("__");
+                if (sep == -1) {
+                    sep = remaining.length;
+                }
+                let count = parseInt(remaining.substring(0, sep));
+                amt /= count;
+            }
+
             if (amt < nInputs) {
                 nInputs = amt;
             }
@@ -423,7 +455,7 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
             let es = row.getElementsByClassName('genlite-recipes-output');
             if (es) {
                 let outputBox = <HTMLElement>es[0];
-                this.updateOutputBox(outputBox, results);
+                this.updateOutputBox(outputBox, recipeName, results);
             }
         }
     }
@@ -625,5 +657,46 @@ export class GenLiteRecipeRecorderPlugin extends GenLitePlugin {
         this.recipeResults = {};
         this.gatherResults = {};
         localStorage.removeItem("GenliteRecipeRecorder");
+    }
+
+    deleteRecipe(key: string) {
+        let deletedStr = localStorage['genliteDeletedRecipes'];
+        if (!deletedStr) {
+            deletedStr = '[]';
+        }
+        let deleted = JSON.parse(deletedStr ? deletedStr : '[]');
+        deleted.push({
+            key: key,
+            time: Date.now(),
+            data: this.recipeResults[key],
+        });
+        localStorage.setItem("genliteDeletedRecipes", JSON.stringify(deleted));
+        delete this.recipeResults[key];
+        localStorage.setItem("GenliteRecipeRecorder", JSON.stringify({ recipe: this.recipeResults, gathering: this.gatherResults }));
+    }
+    keyDownHandler(event) {
+        if (event.key !== "Alt")
+            return;
+
+        event.preventDefault();
+        if (!event.repeat) {
+            let eles = document.getElementsByClassName('genlite-recipes-trash');
+            for (let i = 0; i < eles.length; i++) {
+                let el = eles[i] as HTMLElement;
+                el.style.display = 'flex';
+            }
+        }
+    }
+
+    keyUpHandler(event) {
+        if (event.key !== "Alt")
+            return;
+
+        event.preventDefault();
+        let eles = document.getElementsByClassName('genlite-recipes-trash');
+        for (let i = 0; i < eles.length; i++) {
+            let el = eles[i] as HTMLElement;
+            el.style.removeProperty('display');
+        }
     }
 }
