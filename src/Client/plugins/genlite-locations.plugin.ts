@@ -22,25 +22,59 @@ import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
 export class GenLiteLocationsPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteLocationsPlugin'
-    private classifyPoint = require("robust-point-in-polygon")
-    private stylesheetAdded: boolean
-    private locationLabels: boolean
-    private showCoordinates: boolean
-    private compassMap: boolean
-    private mainLocations: object //!!!
-    private dungeonLocations: object //!!!
-    private regionLocations: object//!!! any and objects need typescript type!
-    private locationLabel: HTMLElement
-    private mapIframe: HTMLIFrameElement
-    private popupMap: any //!!!
-    private currentLocationLabel: string
-    private currentLocation: any//!!!
-    private currentSubLocation: string
-    private lastPosition: number[]
-    private mapFocus: boolean
-    private mapZoom: number
-    private mapTranslucent: boolean
-    private translucentScale: number
+    private classifyPoint = require("robust-point-in-polygon") //<<---- I would like to remove library soon given locations will be vanilla soon?
+    private stylesheetAdded: boolean = false;
+    private locationLabels: boolean = false;
+    private showCoordinates: boolean = false;//
+    private compassMap: boolean = false;
+    private mainLocations: object = {};//!!!
+    private dungeonLocations: object = {};//!!!
+    private regionLocations: object = {};//!!! any and objects need typescript type!
+    private locationLabel: HTMLElement;
+    private mapIframe: HTMLIFrameElement;
+    private popupMap: any; //!!!
+    private currentLocationLabel: string;
+    private currentLocation: any;//!!!
+    private currentSubLocation: string;
+    private lastPosition: number[];
+    private mapFocus: boolean;
+    private mapZoom: number;
+    private mapTranslucent: boolean = false;
+    private translucentScale: number = 0.5;
+    private minTranslucentScale: number = 0;
+    private maxTranslucentScale: number = 1;
+
+    pluginSettings: Settings = {
+        "Enable Location Labels": {
+            type: "checkbox",
+            oldKey: "LocationLabels.Enable",
+            value: this.locationLabels,
+            stateHandler: this.handleLocationLabelsEnableDisable.bind(this),
+        },
+        "Enable Coordinates": {
+            type: "checkbox",
+            oldKey: "Coordinates.Enable",
+            value: this.showCoordinates,
+            stateHandler: this.handleShowCoordinatesDisable.bind(this),
+        },
+        "Enable Compass Map": {
+            type: "checkbox",
+            oldKey: "CompassMap.Enable",
+            value: this.compassMap,
+            stateHandler: this.handleCompassMapEnableDisable.bind(this),
+            children: {
+                "Translucent Scale": {
+                    type: "range",
+                    oldKey: "CompassMapTranslucentScale",
+                    value: this.translucentScale,
+                    stateHandler: this.handleCompassMapTranslucentSlider.bind(this),
+                    min: 0,//GenLiteLocationsPlugin.minTranslucentScale,
+                    max: 1,//GenLiteLocationsPlugin.maxTranslucentScale,
+                    step: 0.05,
+                }
+            }
+        },
+    }
 
     private setupLocations(): void {
         this.lastPosition = [0, 0]
@@ -149,25 +183,17 @@ export class GenLiteLocationsPlugin extends GenLitePlugin {
         this.setupUILocationLabel();
         this.setupUIMapIframe();
 
-
-
-        this.locationLabels = document.genlite.settings.add("LocationLabels.Enable", true, "Location Labels", "checkbox", this.handleLocationLabelsEnableDisable, this)
-        this.showCoordinates = document.genlite.settings.add("Coordinates.Enable", true, "Coordinates", "checkbox", this.handleShowCoordinatesDisable, this, undefined, undefined, "LocationLabels.Enable")
-        this.compassMap = document.genlite.settings.add("CompassMap.Enable", true, "Compass Map", "checkbox", this.handleCompassMapEnableDisable, this)
-
-        //Decide how to handle initial setting grab as right now only returns true/false
-        this.translucentScale = 0.5
-        document.genlite.settings.add("CompassMapTranslucentScale", true, "Compass Map Translucent Scale", "range", this.handleCompassMapTranslucentSlider, this, undefined,
-            [['min', '0.01'], ['max', '1'], ['step', '0.01'], ['value', '0.5'], ['class', 'gen-slider']], "CompassMap.Enable");
-
         this.addStylesheet()
         //
+    }
+    async postInit() {
+        document.genlite.ui.registerPlugin("Locations", null, this.handlePluginState.bind(this), this.pluginSettings);
     }
     handlePluginState(state: boolean): void {
         // TODO: Implement
     }
     private handleCompassMapTranslucentSlider(value) {
-        this.translucentScale = value
+        this.translucentScale = value;
         this.addGlobalStylesheet(`
             .map-iframe-translucent {
                     display: block;
@@ -175,12 +201,11 @@ export class GenLiteLocationsPlugin extends GenLitePlugin {
                     opacity: ${this.translucentScale};
                     pointer-events: none;
             }
-        `)//Not the best way to do this.
-
+        `);//Not the best way to do this.
     }
     private handleLocationLabelsEnableDisable(state: boolean): void {
-        this.locationLabels = state
-        this.checkLocationLabels()
+        this.locationLabels = state;
+        this.checkLocationLabels();
     }
     private checkLocationLabels(): void {
         if (this.locationLabels) {
