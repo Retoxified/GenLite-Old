@@ -700,6 +700,9 @@ export class GenLiteChatPlugin extends GenLitePlugin {
             let row = this.chatRows[name];
             row.classList.add("genlite-chat-row-unread");
             this.uiDisplayNotificationBadge(true);
+            // move unread messages to top (but below public)
+            row.remove();
+            this.listContainer.children[0].insertAdjacentElement("afterend", row);
         }
     }
 
@@ -813,6 +816,10 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     uiFetchNewProfilePic(name: string, image: HTMLImageElement) {
         if (image === null) {
             let ui = this.chatUIs[name];
+            if (!ui) {
+                this.uiCreateChat(name, []);
+                ui = this.chatUIs[name];
+            }
             if (ui) {
                 image = (ui as any).profilePic;
             }
