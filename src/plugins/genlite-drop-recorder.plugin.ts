@@ -65,6 +65,8 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
             
     async init() {
         document.genlite.registerPlugin(this);
+        window.addEventListener('keydown', this.keyDownHandler.bind(this));
+        window.addEventListener('keyup', this.keyUpHandler.bind(this));
 
         let dropTableString = localStorage.getItem("genliteDropTable");
         if (dropTableString == null) {
@@ -163,9 +165,19 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
 
             .genlite-drops-arrow i {
                 margin: auto;
+                flex-shrink: 0;
             }
 
             .genlite-drops-title {
+                flex-grow: 1;
+            }
+
+            .genlite-drops-trash {
+                display: none;
+                color: red;
+                padding-right: 1em;
+                flex-shrink: 0;
+                cursor: pointer;
             }
 
             .genlite-drops-icon {
@@ -372,6 +384,17 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
         title.classList.add("genlite-drops-title");
         title.innerText = this.getUITitle(data);
         header.appendChild(title);
+
+        let trash = <HTMLElement>document.createElement("div");
+        trash.classList.add("genlite-drops-trash");
+        trash.innerHTML = '<i class="fas fa-trash"></i>';
+        header.appendChild(trash);
+        trash.onclick = (e) => {
+            let plugin = document['GenLiteDropRecorderPlugin'];
+            plugin.deleteDropEntry(monsterId);
+            plugin.monsterElements[monsterId].remove();
+            delete plugin.monsterElements[monsterId];
+        };
 
         let outputBox = <HTMLElement>document.createElement("div");
         outputBox.classList.add("genlite-drops-output");
@@ -641,5 +664,46 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
             localStorage.setItem("genliteDropTable", JSON.stringify(this.dropTable));
         }
         this.updateMonsterRow(dropKey);
+    }
+
+    deleteDropEntry(key: string) {
+        let deletedStr = localStorage['genliteDeletedDrops'];
+        if (!deletedStr) {
+            deletedStr = '[]';
+        }
+        let deleted = JSON.parse(deletedStr ? deletedStr : '[]');
+        deleted.push({
+            key: key,
+            time: Date.now(),
+            data: this.dropTable[key],
+        });
+        localStorage.setItem("genliteDeletedDrops", JSON.stringify(deleted));
+        delete this.dropTable[key];
+        localStorage.setItem("genliteDropTable", JSON.stringify(this.dropTable));
+    }
+
+    keyDownHandler(event) {
+        if (event.key !== "Alt")
+            return;
+
+        event.preventDefault();
+        if (!event.repeat) {
+            let eles = document.getElementsByClassName('genlite-drops-trash');
+            for (let i = 0; i < eles.length; i++) {
+                let el = eles[i] as HTMLElement;
+                el.style.display = 'flex';
+            }
+        }
+    }
+    keyUpHandler(event) {
+        if (event.key !== "Alt")
+            return;
+
+        event.preventDefault();
+        let eles = document.getElementsByClassName('genlite-drops-trash');
+        for (let i = 0; i < eles.length; i++) {
+            let el = eles[i] as HTMLElement;
+            el.style.removeProperty('display');
+        }
     }
 }
