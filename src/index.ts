@@ -46,6 +46,7 @@ import { GenLiteEnhancedContextMenu } from "./plugins/genlite-enhanced-context-m
 import { GenLiteQuestPlugin } from "./plugins/genlite-quest.plugin";
 import { GenLiteEnhancedBanking } from "./plugins/genlite-enhanced-banking.plugin";
 import { GenLiteTaggingPlugin } from "./plugins/genlite-tagging.plugin";
+import { GenliteSimplifiedChatUiPlugin } from './plugins/genlite-simplified-chat-ui.plugin';
 
 declare const GM_getResourceText: (s: string) => string;
 
@@ -249,6 +250,7 @@ let isInitialized = false;
         await genlite.pluginLoader.addPlugin(GenLiteQuestPlugin);
         await genlite.pluginLoader.addPlugin(GenLiteEnhancedBanking);
         await genlite.pluginLoader.addPlugin(GenLiteTaggingPlugin);
+        await genlite.pluginLoader.addPlugin(GenliteSimplifiedChatUiPlugin);
 
         /** post init things */
         // await document['GenLiteDatabasePlugin'].postInit();
