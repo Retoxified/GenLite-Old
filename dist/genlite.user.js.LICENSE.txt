@@ -1,0 +1,3 @@
+//!!!
+
+//!!! any and objects need typescript type!

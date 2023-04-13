@@ -1,0 +1,23 @@
+{
+  "name": "genlite",
+  "version": "0.2.9",
+  "scripts": {
+    "build:nopatch": "npx webpack --mode production",
+    "build:prod": "npm version patch --no-git-tag-version --force && npx webpack --mode production",
+    "build:dev": "npx webpack --mode development",
+    "docs": "jsdoc -r ./src/"
+  },
+  "dependencies": {
+    "@types/stats.js": "^0.17.0",
+    "robust-point-in-polygon": "^1.0.3",
+    "stats.js": "^0.17.0"
+  },
+  "devDependencies": {
+    "jsdoc": "^4.0.0",
+    "source-map-loader": "^4.0.1",
+    "ts-loader": "^9.4.2",
+    "typescript": "^4.9.4",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
+  }
+}
