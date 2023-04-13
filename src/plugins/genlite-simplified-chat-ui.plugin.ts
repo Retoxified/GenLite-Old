@@ -27,12 +27,13 @@ export class GenliteSimplifiedChatUiPlugin extends GenLitePlugin {
   chatWrapper: HTMLElement;
   chatBox: HTMLElement;
 
-  pointerEventOverrides: Array<HTMLElement>;
+  pointerEventOverrides: Array<HTMLElement> = [];
 
   emptyStyle = '';
   styleAutoEvents = `pointer-events: auto;`;
 
   hasLoadedElements = false;
+  hasLoadedOriginalStyles = false;
 
   pluginSettings: Settings = {
     'Chat Width': {
@@ -69,11 +70,14 @@ export class GenliteSimplifiedChatUiPlugin extends GenLitePlugin {
   }
 
   public stop() {
+    this.loadElements();
+    this.assignOriginalStyles();
     this.disableUI();
   }
 
   public start() {
     this.loadElements();
+    this.assignOriginalStyles();
     this.enableUI();
   }
 
@@ -82,16 +86,9 @@ export class GenliteSimplifiedChatUiPlugin extends GenLitePlugin {
       entry.setAttribute('style', this.styleAutoEvents);
     }
 
-    this.originalStyles['chatBackground'] = this.chatBackground.getAttribute('style');
     this.chatBackground.setAttribute('style', `background: rgba(0,0,0,0.7); clip-path: none; width: ${this.chatWidth}px; pointer-events: none;`);
-
-    this.originalStyles['chatContent'] = this.chatContent.getAttribute('style');
     this.chatContent.setAttribute('style', `width: calc(${this.chatWidth}px - 36px);`);
-
-    this.originalStyles['chatWrapper'] = this.chatWrapper.getAttribute('style');
     this.chatWrapper.setAttribute('style', 'left: 0px; width: calc(100% - 10px);');
-
-    this.originalStyles['chatBox'] = this.chatBox.getAttribute('style');
     this.chatBox.setAttribute('style', 'background: transparent');
   }
 
@@ -149,5 +146,20 @@ export class GenliteSimplifiedChatUiPlugin extends GenLitePlugin {
       this.chatWrapper,
       this.chatBox,
     ];
+
+    this.hasLoadedElements = true;
+  }
+
+  assignOriginalStyles() {
+    if (this.hasLoadedOriginalStyles) {
+      return;
+    }
+
+    this.originalStyles['chatBackground'] = this.chatBackground.getAttribute('style');
+    this.originalStyles['chatContent'] = this.chatContent.getAttribute('style');
+    this.originalStyles['chatWrapper'] = this.chatWrapper.getAttribute('style');
+    this.originalStyles['chatBox'] = this.chatBox.getAttribute('style');
+
+    this.hasLoadedOriginalStyles = true;
   }
 }
