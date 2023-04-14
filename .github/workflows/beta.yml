@@ -24,12 +24,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: set repo owner env
-        run: repoOwner=${{github.repository_owner}} && export repoOwner
-
       - name: Build
         working-directory: ./
         run: |
+          repoOwner=${{github.repository_owner}} && export repoOwner
           npm install
           npm run build:prodbeta
       
