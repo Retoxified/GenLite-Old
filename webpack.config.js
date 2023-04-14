@@ -1,8 +1,12 @@
 const path = require('path');
 const webpack = require('webpack');
 const fs = require('fs');
-const configStuff = require('./configStuff.json');
 const XMLHttpRequest  = require('./node_modules/xmlhttprequest');
+
+let configStuff
+if(process.env.type == "development") {
+  configStuff = require('./configStuff.json');
+}
 
 const TerserPlugin = require("terser-webpack-plugin");
 const PACKAGE = require('../GenLite/package.json');
