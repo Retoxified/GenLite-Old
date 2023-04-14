@@ -128,7 +128,7 @@ module.exports = (env, argv) => {
   if (env.type == 'development'){
     repoOwner = configStuff.repository_owner;
   } else {
-    repoOwner = 'REPO_OWNER_TO_SED';
+    repoOwner = env.repoOwner;
   }
   let githubConfig = {};
   if (env.type == "release") {

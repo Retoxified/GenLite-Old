@@ -24,11 +24,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Update Tampermonkey Banner with Repository Owner
-        run: |
-          sed -i "2s/GenLite/GenLite-${{github.repository_owner}}/" dist/genlite.user.js
-          sed -i "3s/GenLite/GenLite-${{github.repository_owner}}/" dist/genlite.user.js
-          sed -i "s/REPO_OWNER_TO_SED/${{github.repository_owner}}/g" webpack.config.js
+      - name: set repo owner env
+        run: repoOwner=${{github.repository_owner}} && export repoOwner
 
       - name: Build
         working-directory: ./
@@ -42,6 +39,11 @@ jobs:
           commit_message: 'New Beta'
           commit_options: '--no-verify'
           file_pattern: '.' # Change this to the path of the directory containing the files you want to commit
+    
+      - name: Update Tampermonkey Banner with Repository Owner
+        run: |
+          sed -i "2s/GenLite/GenLite-${{github.repository_owner}}/" dist/genlite.user.js
+          sed -i "3s/GenLite/GenLite-${{github.repository_owner}}/" dist/genlite.user.js
       
       - name: Push to Beta Branch
         env:
