@@ -111,3 +111,4 @@ dist/
 
 #local config file
 configStuff.json
+src/Loader/githubConfig.json

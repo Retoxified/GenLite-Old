@@ -1,7 +1,4 @@
-let configStuff
-if (process.env.NODE_ENV === 'development') {
-    configStuff = require('../../configStuff.json');
-}
+let githubConfig = require('./githubConfig')
 
 // Check the Local Storage for GenLite.UpdateTimestamp
 let genliteUpdateTimestamp = localStorage.getItem('GenLite.UpdateTimestamp');
@@ -46,11 +43,7 @@ if (genfanadModifiedDate == null || genfanadModifiedDate == undefined) {
 }
 
 let xhrGenliteModified = new XMLHttpRequest();
-if (process.env.NODE_ENV === 'development') {
-    xhrGenliteModified.open('GET', `https://api.github.com/repos/${configStuff.repository_owner}/GenLite/releases/latest`, false);
-} else {
-    xhrGenliteModified.open('GET', 'https://api.github.com/repos/REPO_OWNER_TO_SED/GenLite/releases/latest', false);
-}
+xhrGenliteModified.open('GET', githubConfig.releasesUrl, false);
 xhrGenliteModified.setRequestHeader("Accept", "application/vnd.github.v3+json")
 xhrGenliteModified.send();
 let genliteAPIRespose = JSON.parse(xhrGenliteModified.responseText);
@@ -245,11 +238,7 @@ if (needsUpdate) {
         okayButton.onclick = (e) => {
             localStorage.setItem('GenLite.UpdateTimestamp', genliteLastModified.toString());
             let xhrGenLiteJS = new XMLHttpRequest();
-            if (process.env.NODE_ENV === 'development') {
-                xhrGenLiteJS.open("GET", `https://raw.githubusercontent.com/${configStuff.repository_owner}/GenLite/release/dist/genliteClient.user.js`);
-            } else {
-                xhrGenLiteJS.open("GET", "https://raw.githubusercontent.com/REPO_OWNER_TO_SED/GenLite/release/dist/genliteClient.user.js");
-            }
+            xhrGenLiteJS.open("GET", githubConfig.distUrl);
             xhrGenLiteJS.onload = function () {
                 if (xhrGenLiteJS.status == 200) {
                     let genliteJS = xhrGenLiteJS.responseText;

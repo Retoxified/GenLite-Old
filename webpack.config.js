@@ -1,6 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
 const fs = require('fs');
+const configStuff = require('./configStuff.json');
+const XMLHttpRequest  = require('./node_modules/xmlhttprequest');
 
 const TerserPlugin = require("terser-webpack-plugin");
 const PACKAGE = require('../GenLite/package.json');
@@ -116,54 +118,76 @@ module.exports = (env, argv) => {
           })
         ]
       });
+  };
+
+  let repoOwner;
+  if (env.type == 'development'){
+    repoOwner = configStuff.repository_owner;
+  } else {
+    repoOwner = 'REPO_OWNER_TO_SED';
   }
+  let githubConfig = {};
+  if (env.type == "release") {
+    githubConfig.releasesUrl = `https://api.github.com/repos/${repoOwner}/GenLite/releases/latest`
+    githubConfig.distUrl = `https://raw.githubusercontent.com/${repoOwner}/GenLite/release/dist/genliteClient.user.js`
+  } else {
+    let release = new XMLHttpRequest.XMLHttpRequest();
+    release.open('GET', `https://api.github.com/repos/${repoOwner}/GenLite/releases`, false);
+    release.setRequestHeader("Accept", "application/vnd.github.v3+json")
+    release.send();
+    let releasesArray = eval(release.responseText);
+    githubConfig.releasesUrl = releasesArray[0].url
+    githubConfig.distUrl = `https://raw.githubusercontent.com/${repoOwner}/GenLite/beta/dist/genliteClient.user.js`
+
+  }
+  fs.writeFileSync('./src/Loader/githubConfig.json', JSON.stringify(githubConfig));
   modules.push(
     {
-    mode: 'production',
-    resolve: {
-      extensions: ['.ts', '.js', '.json']
-    },
-    module: {
-      rules: [
-        // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
-        {
-          test: /\.tsx?$/,
-          loader: 'ts-loader',
-          exclude: /node_modules/,
-        },
-        // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
-        {
-          test: /\.js$/,
-          loader: "source-map-loader"
-        }
-      ]
-    },
-    entry: './src/Loader/index.ts',
-    output: {
-      filename: 'genlite.user.js',
-      path: path.resolve(__dirname, 'dist'),
-    },
-    optimization: {
-      minimize: true,
-      minimizer: [
-        new TerserPlugin({
-          terserOptions: {
-            output: {
-              beautify: false,
-              preamble: METADATA,
-              comments: false
-            },
+      mode: 'production',
+      resolve: {
+        extensions: ['.ts', '.js', '.json']
+      },
+      module: {
+        rules: [
+          // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
+          {
+            test: /\.tsx?$/,
+            loader: 'ts-loader',
+            exclude: /node_modules/,
           },
-          extractComments: true,
+          // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
+          {
+            test: /\.js$/,
+            loader: "source-map-loader"
+          }
+        ]
+      },
+      entry: './src/Loader/',
+      output: {
+        filename: 'genlite.user.js',
+        path: path.resolve(__dirname, 'dist'),
+      },
+      optimization: {
+        minimize: true,
+        minimizer: [
+          new TerserPlugin({
+            terserOptions: {
+              output: {
+                beautify: false,
+                preamble: METADATA,
+                comments: false
+              },
+            },
+            extractComments: true,
+          })
+        ],
+      },
+      plugins: [
+        new webpack.BannerPlugin({
+          raw: true,
+          banner: METADATA
         })
-      ],
-    },
-    plugins: [
-      new webpack.BannerPlugin({
-        raw: true,
-        banner: METADATA
-      })
-    ]
-  });
+      ]
+    });
   return modules;
 };

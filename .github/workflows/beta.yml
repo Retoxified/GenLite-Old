@@ -41,7 +41,7 @@ jobs:
         run: |
           sed -i "2s/GenLite/GenLite-${{github.repository_owner}}/" dist/genlite.user.js
           sed -i "3s/GenLite/GenLite-${{github.repository_owner}}/" dist/genlite.user.js
-          sed -i "s/REPO_OWNER_TO_SED/${{github.repository_owner}}/g" dist/genlite.user.js
+          sed -i "s/REPO_OWNER_TO_SED/${{github.repository_owner}}/g" webpack.config.js
       
       - name: Push to Beta Branch
         env:
