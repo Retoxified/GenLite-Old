@@ -1,12 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const fs = require('fs');
-const XMLHttpRequest  = require('./node_modules/xmlhttprequest');
-
-let configStuff
-if(process.env.type == "development") {
-  configStuff = require('./configStuff.json');
-}
+const XMLHttpRequest = require('./node_modules/xmlhttprequest');
 
 const TerserPlugin = require("terser-webpack-plugin");
 const PACKAGE = require('../GenLite/package.json');
@@ -124,11 +119,15 @@ module.exports = (env, argv) => {
       });
   };
 
+  let configStuff
+  if (env.type == "development") {
+    configStuff = require('./configStuff.json');
+  }
   let repoOwner;
-  if (env.type == 'development'){
+  if (env.type == 'development') {
     repoOwner = configStuff.repository_owner;
   } else {
-    repoOwner = env.repoOwner;
+    repoOwner = process.env.repoOwner;
     console.log("repo owner", repoOwner)
   }
   let githubConfig = {};
