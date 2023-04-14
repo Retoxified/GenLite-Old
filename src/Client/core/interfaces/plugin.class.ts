@@ -36,7 +36,7 @@ export abstract class GenLitePlugin {
     OptimizedScene_intersects?(ray: any, list: any): void;
     Inventory__getAllContextOptions?(itemID, itemActions): void;
     Inventory__getContextOptionsBank?(slotId: number, invBankObject: invBankObject, contextMenu: contextMenu[]): void;
-    WORLDMANAGER_loadSegment?(segmentData: SegmentKey, segmentKey: string, onComplete: ()=>void): void;
+    WORLDMANAGER_loadSegment?(segmentData: SegmentKey, segmentKey: string, onComplete: () => void): void;
     WORLDMANAGER_createSegment?(segmentData: SegmentKey, segmentObjects: object): void;
     Segment_load?(segmentObjects: object, thisSegment: Segment): void;
 
