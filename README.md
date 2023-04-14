@@ -35,7 +35,9 @@ To install Node.JS dependencies from package.json run:
 `npm i`
 
 To build the project for development run:
+
 `npm run build:dev`
+
 Development builds are slightly less minimized and do not increment the genlite version number.
 This outputs two files the Loader (genlite.user.js), and a runable version of the Client (genlite.dev.user.js)
 To use the loader you will need to create a file in the root of the project named configStuff.json with the content
@@ -47,6 +49,7 @@ To use the loader you will need to create a file in the root of the project name
 which will point your loader to your github (or any other fork you put there)
 
 Production runs of github are setup to be only ran though GitHub Actions. They generate a Loader with a userscript banner which will automatically get the correct urls to load the Client from the repo. However if you want to run these commands locally you have to set an env variable.
+
 Bash
 ```bash
 repoOwner = "YOUR_GIT_USER_HERE" && export repoOwner
@@ -56,7 +59,11 @@ Power Shell
 $Env:repoOwner = "YOUR_GIT_USER_HERE"
 ```
 As mentioned though the Loader will not work without the Client in a GitHub Repo, but you can add a user script banner to the Client manually.
+
+Commands:
+
 `npm run build:prodbeta`
+
 `npm run build:prodrelease`
 
 
