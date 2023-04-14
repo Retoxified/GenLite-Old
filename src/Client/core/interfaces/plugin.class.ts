@@ -33,10 +33,12 @@ export abstract class GenLitePlugin {
     Bank__addContextOptions?(itemSlot: number, contextMenu: contextMenu[]): void;
     Trade_handlePacket?(packet: any): void;
     NPC_intersects?(ray: any, list: any): void;
-    OptimizedScene_Intersects?(ray: any, list: any): void;
-    Inventory_Intersects?(e: any, t: any): void;
+    OptimizedScene_intersects?(ray: any, list: any): void;
     Inventory__getAllContextOptions?(itemID, itemActions): void;
     Inventory__getContextOptionsBank?(slotId: number, invBankObject: invBankObject, contextMenu: contextMenu[]): void;
+    WORLDMANAGER_loadSegment?(segmentData: SegmentKey, segmentKey: string, onComplete: () => void): void;
+    WORLDMANAGER_createSegment?(segmentData: SegmentKey, segmentObjects: object): void;
+    Segment_load?(segmentObjects: object, thisSegment: Segment): void;
 
     log(...args): void {
         if (process.env.NODE_ENV === 'production')

@@ -2,8 +2,11 @@
     Copyright (C) 2022-2023 KKonaOG
 /*
     This file is part of GenLite.
+   
     GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
     GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ 
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
@@ -188,7 +191,7 @@ export class GenLiteEnhancedContextMenu extends GenLitePlugin {
         });
     }
 
-    OptimizedScene_Intersects(ray, list) {
+    OptimizedScene_intersects(ray, list) {
         if (!this.isEnabled || list.length === 0) return;
 
         let sceneObjects = new Map();
@@ -294,13 +297,13 @@ export class GenLiteEnhancedContextMenu extends GenLitePlugin {
         });
     }
 
-    Inventory__getAllContextOptions(itemID, itemActions) {
+    Inventory__getAllContextOptions(slotID, itemActions) {
         if (!this.isEnabled || !this.lookupItems) {
-            console.log("Lookup Off")
             return;
         }
 
-
+        if (!document.game.INVENTORY.items[slotID])
+            return;
 
         const objectName = itemActions[0].object.text();
 

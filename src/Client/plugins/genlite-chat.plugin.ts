@@ -3,8 +3,11 @@
 */
 /*
     This file is part of GenLite.
+    
     GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+    
     GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
@@ -180,7 +183,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
     static pluginName = 'GenLiteChatPlugin';
     static storageKey = 'IgnoredGameChatMessages';
 
-    pluginSettings : Settings = {
+    pluginSettings: Settings = {
         // Checkbox Example
         "Condense Messages": {
             type: 'checkbox',
@@ -271,7 +274,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 keyPath: 'key',
                 autoIncrement: true
             });
-            store.createIndex('indexKey', 'key', {unique: true});
+            store.createIndex('indexKey', 'key', { unique: true });
         });
         document.genlite.database.add((db) => {
             if (db.objectStoreNames.contains('profiles')) return;
@@ -533,7 +536,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         this.settingsMenu = <HTMLElement>document.createElement("div");
         this.settingsMenu.classList.add("genlite-chat-container");
 
-                // search bar
+        // search bar
         this.searchRow = <HTMLElement>document.createElement("div");
         this.searchRow.classList.add("genlite-chat-search-row");
         this.settingsMenu.appendChild(this.searchRow);
@@ -573,7 +576,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
         this.chatRows[name] = container;
 
         let plugin = this;
-        container.onclick = function(e) {
+        container.onclick = function (e) {
             plugin.uiOpenChat(name);
         }
 
@@ -614,7 +617,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
 
         let back = <HTMLElement>document.createElement("div");
         back.classList.add("genlite-chat-back");
-        back.onclick = function() {
+        back.onclick = function () {
             plugin.uiCloseChat();
         }
         back.innerHTML = '<i class="fas fa-arrow-left"></i>';
@@ -693,7 +696,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
                 this.uiUpdateProfilePic(name, (ui as any).profilePic);
             }
         } else {
-            this.uiCreateChat(name, [{text, sent}]);
+            this.uiCreateChat(name, [{ text, sent }]);
         }
 
         if (!sent && name != this.openChat) {
@@ -1066,8 +1069,8 @@ export class GenLiteChatPlugin extends GenLitePlugin {
 
         if (this.isPluginEnabled && this.colorPrivateMessages) {
             let plugin = this;
-            document.game.CHAT.addPrivateMessage = function (e,speaker,n,i,a,r) {
-                let dom = plugin.originalAddPrivateMessage.bind(this)(e,speaker,n,i,a,r);
+            document.game.CHAT.addPrivateMessage = function (e, speaker, n, i, a, r) {
+                let dom = plugin.originalAddPrivateMessage.bind(this)(e, speaker, n, i, a, r);
                 plugin.colorPrivateMessage(speaker, dom);
                 return dom;
             };
@@ -1166,7 +1169,7 @@ export class GenLiteChatPlugin extends GenLitePlugin {
 
     loadSavedSettings() {
         let s = localStorage.getItem(GenLiteChatPlugin.storageKey);
-        var c : string[] = JSON.parse(s);
+        var c: string[] = JSON.parse(s);
         if (!c) {
             c = [];
         }

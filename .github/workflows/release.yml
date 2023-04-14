@@ -1,0 +1,84 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [lts/*]
+
+    steps:
+      - name: Checkout Branch
+        uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Build
+        working-directory: ./
+        run: |
+          repoOwner=${{github.repository_owner}} && export repoOwner
+          npm install
+          npm run build:prodrelease
+      
+      - name: Update Main Branch Versions
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'New Release'
+          commit_options: '--no-verify'
+          file_pattern: '.' # Change this to the path of the directory containing the files you want to commit
+    
+      - name: Update Tampermonkey Banner with Repository Owner
+        run: |
+          sed -i "2s/GenLite/GenLite-${{github.repository_owner}}/" dist/genlite.user.js
+          sed -i "3s/GenLite/GenLite-${{github.repository_owner}}/" dist/genlite.user.js
+      
+      - name: Push to Release Branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_TOKEN }}
+        run: |
+          git config user.email "noreply@github.com"
+          git config user.name "GitHub Workflow"
+          # Check if release branch exists
+          if git show-ref --quiet refs/heads/release; then
+            git checkout --orphan release
+          else
+            git checkout -b release
+          fi
+          git add .
+          git add dist -f
+          git commit --allow-empty -m "New Release"
+          git push origin release -f
+          
+      - name: Get version number
+        id: get_version
+        run: echo ::set-output name=version::$(node -p "require('./package.json').version")
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          release_name: Release ${{ steps.get_version.outputs.version }}
+          body: Release of version ${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          ACTIONS_STEP_DEBUG: true
+          GITHUB_TOKEN: ${{ secrets.BUILD_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/genlite.user.js
+          asset_name: genlite.user.js
+          asset_content_type: application/text

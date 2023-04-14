@@ -49,6 +49,8 @@ export class GenLiteCameraPlugin extends GenLitePlugin {
 
     isPluginEnabled = true;
 
+    WORLDMANAGER: WorldManager
+
     pluginSettings: Settings = {
         "Unlock Camera": {
             type: "checkbox",
@@ -131,6 +133,7 @@ export class GenLiteCameraPlugin extends GenLitePlugin {
         document.genlite.registerPlugin(this);
         this.originalCameraMode = document.game.WorldManager.updatePlayerTile;
         this.originalAdvanceToBB = document.game.Segment.prototype.advanceToBB;
+        this.WORLDMANAGER = document.game.WORLDMANAGER;
     }
 
     async postInit() {
@@ -274,6 +277,14 @@ export class GenLiteCameraPlugin extends GenLitePlugin {
         }
     }
 
+    /* some gross hack for a bug i dont quite understand but it seems to work so :shrug: - dpepls */
+    Segment_load(segmentObjects: any, thisSegment: Segment): void {
+        thisSegment.bb.min.x = Math.floor(Math.round(thisSegment.bb.min.x * 100) / 100) - 0.001;
+        thisSegment.bb.min.y = Math.floor(Math.round(thisSegment.bb.min.y * 100) / 100) - 0.001;
+        thisSegment.bb.max.x = Math.ceil(Math.round(thisSegment.bb.max.x * 100) / 100) + 0.001;
+        thisSegment.bb.max.y = Math.ceil(Math.round(thisSegment.bb.max.y * 100) / 100) + 0.001;
+
+    }
     getPlayerPicture(name: string, callback) {
         for (const pid in document.game.GAME.players) {
             let player = document.game.GAME.players[pid];

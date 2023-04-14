@@ -13,7 +13,7 @@
 
 import { GenLitePlugin } from '../core/interfaces/plugin.class';
 
-import Stats from '../../thirdPartyModules/Stats.js/build/stats.module';
+import Stats from '../../../thirdPartyModules/Stats.js/build/stats.module.js';
 
 export class GenLiteFPSCounter extends GenLitePlugin {
     static pluginName = 'GenLiteFPSCounter';
@@ -23,10 +23,9 @@ export class GenLiteFPSCounter extends GenLitePlugin {
     isPluginEnabled: boolean;
     isInit: boolean = false;
     doUpdateFPS: boolean;
+
     async init() {
         document.genlite.registerPlugin(this);
-
-        this.isPluginEnabled = document.genlite.settings.add("FPSCounter.Enable", false, "FPS Counter", "checkbox", this.handlePluginEnableDisable, this);
         this.stats = Stats({
             fps: {
                 fg: '#eb8c39',
@@ -43,30 +42,18 @@ export class GenLiteFPSCounter extends GenLitePlugin {
         });
     }
 
-    handlePluginEnableDisable(state: boolean) {
+    async postInit(): Promise<void> {
+        document.genlite.ui.registerPlugin("FPS Counter", null, this.handlePluginState.bind(this));
+    }
+
+    handlePluginState(state: boolean): void {
         this.isPluginEnabled = state;
         if (state) {
-            this.loginOK();
+            this.stats.dom.style.display = 'block';
             this.initializeUI();
         } else {
             this.Network_logoutOK();
         }
-    }
-    
-    handlePluginState(state: boolean): void {
-        // TODO: Implement
-        // Display Yellow Console Message Stating the plugin needs to implement this
-        console.log(`%c[GenLite] %c${this.constructor.name} %cneeds to implement handlePluginState()`, "color: #ff0", "color: #fff", "color: #f00");
-    }
-
-    /* start tracking fps */
-    loginOK() {
-        if (!this.isPluginEnabled)
-            return;
-
-        this.doUpdateFPS = true;
-        this.stats.dom.style.display = 'block';
-        this.fpsCounter();
     }
 
     /* stop tracking fps */
@@ -81,7 +68,8 @@ export class GenLiteFPSCounter extends GenLitePlugin {
             return;
         if (this.isInit)
             return;
-
+        this.doUpdateFPS = true;
+        this.fpsCounter();
         this.stats.dom.style.display = 'block';
         this.stats.dom.style.position = 'absolute';
         this.stats.dom.style.left = '';

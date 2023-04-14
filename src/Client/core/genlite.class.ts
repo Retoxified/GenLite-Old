@@ -3,11 +3,11 @@
 */
 /*
     This file is part of GenLite.
-
+    
     GenLite is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
+   
     GenLite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
+  
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
@@ -41,6 +41,9 @@ export class GenLite {
 
     async init() {
         this.installHookNoProto('PhasedLoadingManager', 'start_phase', this.hookPhased);
+        this.installHookNoProto('WORLDMANAGER', 'loadSegment')
+        this.installHookNoProto('WORLDMANAGER', 'createSegment')
+
         this.installHook('Network', 'logoutOK');
         this.installHook('Network', 'disconnect', this.hookDisconnect)
         this.installHook('Network', 'action');
@@ -58,6 +61,7 @@ export class GenLite {
         this.installHook('Bank', '_addContextOptionsActual')
         this.installHook('Bank', '_addContextOptions')
         this.installHook('Trade', 'handlePacket');
+        this.installHook('Segment', 'load');
 
         // Enhanced Context Menu Hooks
         this.installHook('NPC', 'intersects');
@@ -133,7 +137,7 @@ export class GenLite {
             object[functionName] = function (...args: Array<unknown>) {
                 const returnValue = originalFunction.apply(this, arguments);
 
-                hookFn.apply(self, [hookName, ...args]);
+                hookFn.apply(self, [hookName, ...args, this]);
 
                 return returnValue;
             };
@@ -149,7 +153,7 @@ export class GenLite {
             object[functionName] = function (...args: Array<unknown>) {
                 const returnValue = originalFunction.apply(this, arguments);
 
-                hookFn.apply(self, [hookName, ...args]);
+                hookFn.apply(self, [hookName, ...args, this]);
 
                 return returnValue;
             };

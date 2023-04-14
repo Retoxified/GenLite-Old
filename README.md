@@ -1,4 +1,4 @@
-# GenLite 0.2.9 - For GenFanad
+# GenLite 0.2.16-2 - For GenFanad
 
 GenLite installation instructions
 1. Install [TamperMonkey(All Browsers)](https://www.tampermonkey.net/) in your browser of choice.
@@ -35,12 +35,37 @@ To install Node.JS dependencies from package.json run:
 `npm i`
 
 To build the project for development run:
-Development builds are slightly less minimized and do not increment the genlite version number.
+
 `npm run build:dev`
 
-To build the project for production run:
-Production development results in fully minimized output and increments the version number.
-`npm run build:prod`
+Development builds are slightly less minimized and do not increment the genlite version number.
+This outputs two files the Loader (genlite.user.js), and a runable version of the Client (genlite.dev.user.js)
+To use the loader you will need to create a file in the root of the project named configStuff.json with the content
+```json
+{
+    "repository_owner": "YOUR_GIT_USER_HERE"
+}
+```
+which will point your loader to your github (or any other fork you put there)
+
+Production runs of github are setup to be only ran though GitHub Actions. They generate a Loader with a userscript banner which will automatically get the correct urls to load the Client from the repo. However if you want to run these commands locally you have to set an env variable.
+
+Bash
+```bash
+repoOwner = "YOUR_GIT_USER_HERE" && export repoOwner
+```
+Power Shell
+```ps1
+$Env:repoOwner = "YOUR_GIT_USER_HERE"
+```
+As mentioned though the Loader will not work without the Client in a GitHub Repo, but you can add a user script banner to the Client manually.
+
+Commands:
+
+`npm run build:prodbeta`
+
+`npm run build:prodrelease`
+
 
 # IDE & Setup
 If you're using a well known IDE, we suggest [enabling coding assistance](https://blog.jetbrains.com/webstorm/2015/11/node-js-coding-assistance-in-webstorm-11/) for Node.JS.
