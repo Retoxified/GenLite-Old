@@ -128,7 +128,6 @@ module.exports = (env, argv) => {
     repoOwner = configStuff.repository_owner;
   } else {
     repoOwner = process.env.repoOwner;
-    console.log("repo owner", repoOwner)
   }
   let githubConfig = {};
   if (env.type == "release") {

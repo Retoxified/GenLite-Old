@@ -23,6 +23,7 @@ jobs:
       - name: Build
         working-directory: ./
         run: |
+          repoOwner=${{github.repository_owner}} && export repoOwner
           npm install
           npm run build:prodrelease
       
@@ -37,7 +38,6 @@ jobs:
         run: |
           sed -i "2s/GenLite/GenLite-${{github.repository_owner}}/" dist/genlite.user.js
           sed -i "3s/GenLite/GenLite-${{github.repository_owner}}/" dist/genlite.user.js
-          sed -i "s/REPO_OWNER_TO_SED/${{github.repository_owner}}/g" webpack.config.js
       
       - name: Push to Release Branch
         env:
