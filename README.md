@@ -16,7 +16,8 @@ The main file to run as a UserScript can be found in the "dist" folder.
 
 The file "userscript-banner.txt" can be edited with new version numbers and other userscript specific metadata.
 
-This repository contains submodules, as such when cloning normally `git clone https://github.com/GenLite-Org/GenLite.git` will need to be followed by `git submodule init` and `git submodule update`. 
+This repository contains submodules as such, when cloning normally `git clone https://github.com/GenLite-Org/GenLite.git` will need to be followed by `git submodule init` and `git submodule update`. 
+
 Alternatively you can make the initial clone with `git clone --recurse-submodules https://github.com/GenLite-Org/GenLite.git` to automatically pull in the submodules.
 
 # Documentation
