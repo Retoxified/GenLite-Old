@@ -1,0 +1,3 @@
+[submodule "thirdPartyModules/Stats.js"]
+	path = thirdPartyModules/Stats.js
+	url = https://github.com/GenLite-Org/stats.js.git
