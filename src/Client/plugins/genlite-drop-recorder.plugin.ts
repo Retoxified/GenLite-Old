@@ -74,6 +74,10 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
         } else {
             this.dropTable = JSON.parse(dropTableString);
         }
+        for(let key in this.dropTable){
+            if(this.dropTable[key].location)
+                delete (this.dropTable[key].location);
+        }
     }
 
     async postInit() {
@@ -652,15 +656,17 @@ export class GenLiteDropRecorderPlugin extends GenLitePlugin {
             this.dropTable[dropKey].Monster_Name = this.monsterData.Monster_Name;
             this.dropTable[dropKey].Monster_Level = this.monsterData.Monster_Level;
             this.dropTable[dropKey].Num_Killed = 0;
-            this.dropTable[dropKey].location = [];
+            //this.dropTable[dropKey].location = [];
             this.dropTable[dropKey].drops = {};
         }
         this.dropTable[dropKey].Num_Killed++;
+        /*
         this.dropTable[dropKey].location.push({
             layer: this.monsterData.layer,
             x: this.monsterData.x,
             y: this.monsterData.y
         });
+        */
         for (let i in this.monsterData.Drops) {
             let drop = this.monsterData.Drops[i]
             if (this.dropTable[dropKey].drops[drop.Item_Code] === undefined)
