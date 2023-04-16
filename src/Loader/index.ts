@@ -61,7 +61,7 @@ let distUrl;
 if (githubConfig.type == "release") {
     releasesUrl = `https://api.github.com/repos/${githubConfig.repoOwner}/GenLite/releases/latest`
     distUrl = `https://raw.githubusercontent.com/${githubConfig.repoOwner}/GenLite/release/dist/genliteClient.user.js`
-  } else {
+} else {
     /* for pre release grab the lastest version either release or prerelease */
     let release = new XMLHttpRequest();
     release.open('GET', `https://api.github.com/repos/${githubConfig.repoOwner}/GenLite/releases`, false);
@@ -70,7 +70,7 @@ if (githubConfig.type == "release") {
     let releasesArray = eval(release.responseText);
     releasesUrl = releasesArray[0].url
     distUrl = `https://raw.githubusercontent.com/${githubConfig.repoOwner}/GenLite/beta/dist/genliteClient.user.js`
-  }
+}
 
 let xhrGenliteModified = new XMLHttpRequest();
 xhrGenliteModified.open('GET', releasesUrl, false);
