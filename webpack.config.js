@@ -142,19 +142,8 @@ module.exports = (env, argv) => {
     repoOwner = process.env.repoOwner;
   }
   let githubConfig = {};
-  if (env.type == "release") {
-    githubConfig.releasesUrl = `https://api.github.com/repos/${repoOwner}/GenLite/releases/latest`
-    githubConfig.distUrl = `https://raw.githubusercontent.com/${repoOwner}/GenLite/release/dist/genliteClient.user.js`
-  } else {
-    let release = new XMLHttpRequest.XMLHttpRequest();
-    release.open('GET', `https://api.github.com/repos/${repoOwner}/GenLite/releases`, false);
-    release.setRequestHeader("Accept", "application/vnd.github.v3+json")
-    release.send();
-    let releasesArray = eval(release.responseText);
-    githubConfig.releasesUrl = releasesArray[0].url
-    githubConfig.distUrl = `https://raw.githubusercontent.com/${repoOwner}/GenLite/beta/dist/genliteClient.user.js`
-
-  }
+  githubConfig.type = env.type;
+  githubConfig.repoOwner = repoOwner;
   fs.writeFileSync('./src/Loader/githubConfig.json', JSON.stringify(githubConfig));
   modules.push(
     {
