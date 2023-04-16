@@ -73,7 +73,7 @@ if (githubConfig.type == "release") {
   }
 
 let xhrGenliteModified = new XMLHttpRequest();
-xhrGenliteModified.open('GET', githubConfig.releasesUrl, false);
+xhrGenliteModified.open('GET', releasesUrl, false);
 xhrGenliteModified.setRequestHeader("Accept", "application/vnd.github.v3+json")
 xhrGenliteModified.send();
 let genliteAPIRespose = JSON.parse(xhrGenliteModified.responseText);
@@ -268,7 +268,7 @@ if (needsUpdate) {
         okayButton.onclick = (e) => {
             localStorage.setItem('GenLite.UpdateTimestamp', genliteLastModified.toString());
             let xhrGenLiteJS = new XMLHttpRequest();
-            xhrGenLiteJS.open("GET", githubConfig.distUrl);
+            xhrGenLiteJS.open("GET", distUrl);
             xhrGenLiteJS.onload = function () {
                 if (xhrGenLiteJS.status == 200) {
                     let genliteJS = xhrGenLiteJS.responseText;
