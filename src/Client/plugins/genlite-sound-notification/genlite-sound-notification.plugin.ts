@@ -11,7 +11,8 @@
     You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {GenLitePlugin} from '../core/interfaces/plugin.class';
+import {GenLitePlugin} from '../../core/interfaces/plugin.class';
+import { BoostDepletion } from './BoostDepletion.class';
 
 export class GenLiteSoundNotification extends GenLitePlugin {
     static pluginName = 'GenLiteSoundNotification';
@@ -31,10 +32,12 @@ export class GenLiteSoundNotification extends GenLitePlugin {
     genliteSFXPlayer;
     playerInUse;
 
+    boostDepletion: BoostDepletion = new BoostDepletion();
+
 
     // Plugin Settings
     pluginSettings : Settings = {
-        "Low Health Sound": {
+        "Low Health": {
             type: "checkbox",
             oldKey: "GenLite.LowHealthSound.Enable",
             value: this.doHealthCheck,
@@ -50,7 +53,12 @@ export class GenLiteSoundNotification extends GenLitePlugin {
                 }
             }
         },
-        "Inventory Space Sound": {
+        "Boost Depletion": {
+            type: "checkbox",
+            value: this.doHealthCheck,
+            stateHandler: this.handleDoBoostDepletionCheck.bind(this),
+        },
+        "Inventory Space": {
             type: "checkbox",
             oldKey: "GenLite.InvCheck.Enable",
             value: this.doInvCheck,
@@ -99,6 +107,7 @@ export class GenLiteSoundNotification extends GenLitePlugin {
         if (this.overrideVolume)
             this.playerInUse = this.genliteSFXPlayer;
 
+        this.boostDepletion.init();
     }
 
     async postInit() {
@@ -109,6 +118,14 @@ export class GenLiteSoundNotification extends GenLitePlugin {
         // TODO: Implement
         // Display Yellow Console Message Stating the plugin needs to implement this
         console.log(`%c[GenLite] %c${this.constructor.name} %cneeds to implement handlePluginState()`, "color: #ff0", "color: #fff", "color: #f00");
+    }
+
+    handleDoBoostDepletionCheck(state: boolean) {
+      if (state) {
+        this.boostDepletion.enable();
+      } else {
+        this.boostDepletion.disable();
+      }
     }
 
     handleDoHealthCheck(state: boolean) {

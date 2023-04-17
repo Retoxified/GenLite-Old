@@ -33,7 +33,7 @@ import { GenLiteMenuScaler } from "./plugins/genlite-menu-scaler.plugin";
 import { GenLiteMusicPlugin } from "./plugins/genlite-music.plugin";
 import { GenLiteLocationsPlugin } from "./plugins/genlite-locations.plugin";
 import { GenLiteItemTooltips } from "./plugins/genlite-item-tooltips.plugin";
-import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification.plugin";
+import { GenLiteSoundNotification } from "./plugins/genlite-sound-notification/genlite-sound-notification.plugin";
 import { GenLiteGeneralChatCommands } from "./plugins/genlite-generalchatcommand.plugin";
 import { GenLiteUIPlugin } from "./core/plugins/genlite-ui-plugin";
 import { GenLitePlayerToolsPlugin } from "./plugins/genlite-playertools.plugin";
